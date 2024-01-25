@@ -291,8 +291,8 @@ internal class Utils
 		}
 		try
 		{
-			OpenByViewerName(settings.SourceViewerTool, text, sourceInfo.Line, true);
-         }
+			OpenByViewerName(settings.SourceViewerTool, text, sourceInfo.Line, false);
+        }
 		catch (Exception ex)
 		{
 			MessageBox.Show("ERORR: " + ex.Message);

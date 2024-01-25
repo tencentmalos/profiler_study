@@ -4,7 +4,7 @@
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>True</UseWindowsForms>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
@@ -18,22 +18,10 @@
     <StartupObject>FramePro.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\docker\docker.csproj" />
+    <ProjectReference Include="..\Editor\Editor.csproj" />
     <ProjectReference Include="..\FrameProCore\FrameProCore.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Docker">
-      <HintPath>..\dependency\docker.dll</HintPath>
-    </Reference>
-    <Reference Include="Editor">
-      <HintPath>..\dependency\Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="HDataGrid">
-      <HintPath>..\dependency\HDataGrid.dll</HintPath>
-    </Reference>
-    <Reference Include="SCLCoreCLR">
-      <HintPath>..\dependency\SCLCoreCLR.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Core" />
+    <ProjectReference Include="..\HDataGrid\HDataGrid.csproj" />
+    <ProjectReference Include="..\SCLCoreCLR\SCLCoreCLR.csproj" />
   </ItemGroup>
 </Project>

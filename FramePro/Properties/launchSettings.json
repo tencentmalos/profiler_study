@@ -2,7 +2,6 @@
   "profiles": {
     "FramePro": {
       "commandName": "Project",
-      "workingDirectory": "D:\\reverse\\FramePro1_10_17",
       "nativeDebugging": true
     }
   }

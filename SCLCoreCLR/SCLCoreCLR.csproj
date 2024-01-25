@@ -4,7 +4,7 @@
     <AssemblyName>SCLCoreCLR</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <UseWindowsForms>True</UseWindowsForms>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
@@ -13,8 +13,4 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup />
-  <ItemGroup>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
 </Project>

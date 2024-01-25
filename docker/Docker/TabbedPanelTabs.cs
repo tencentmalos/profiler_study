@@ -42,9 +42,9 @@ internal class TabbedPanelTabs : Control
 
 	private bool m_DraggingTab;
 
-	private ContextMenu m_ContextMenu = new ContextMenu();
+	private ContextMenuStrip m_ContextMenu = new ContextMenuStrip();
 
-	private MenuItem m_CloseTabMenuItem = new MenuItem("Close");
+	private ToolStripMenuItem m_CloseTabMenuItem = new ToolStripMenuItem("Close");
 
 	private Tab m_ContextMenuTab;
 
@@ -73,7 +73,7 @@ internal class TabbedPanelTabs : Control
 
 	private void IniitaliseContextMenu()
 	{
-		m_ContextMenu.MenuItems.Add(m_CloseTabMenuItem);
+		m_ContextMenu.Items.Add(m_CloseTabMenuItem);
 		m_CloseTabMenuItem.Click += CloseMenuItemClick;
 	}
 

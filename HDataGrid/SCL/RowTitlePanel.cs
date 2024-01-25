@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+////using System.Windows.Controls;
+
 
 namespace SCL;
 
@@ -26,11 +28,11 @@ internal class RowTitlePanel : Control
 
 	private bool m_CanAddRemoveRows;
 
-	private ContextMenu m_ContextMenu = new ContextMenu();
+	private ContextMenuStrip m_ContextMenu = new ContextMenuStrip();
 
-	private MenuItem m_InsertMenuItem = new MenuItem("Insert Row");
+	private ToolStripMenuItem m_InsertMenuItem = new ToolStripMenuItem("Insert Row");
 
-	private MenuItem m_DeleteMenuItem = new MenuItem("Delete Row");
+	private ToolStripMenuItem m_DeleteMenuItem = new ToolStripMenuItem("Delete Row");
 
 	private Row m_FirstSelRow;
 
@@ -102,8 +104,8 @@ internal class RowTitlePanel : Control
 	{
 		m_RootRow = root_row;
 		DoubleBuffered = true;
-		m_ContextMenu.MenuItems.Add(m_InsertMenuItem);
-		m_ContextMenu.MenuItems.Add(m_DeleteMenuItem);
+		m_ContextMenu.Items.Add(m_InsertMenuItem);
+		m_ContextMenu.Items.Add(m_DeleteMenuItem);
 		m_InsertMenuItem.Click += InsertMenuItemClick;
 		m_DeleteMenuItem.Click += DeleteMenuItemClick;
 	}
