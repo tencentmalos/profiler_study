@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>FrameProCore</AssemblyName>
+    <AssemblyName>ProfilerStudyCore</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <TargetFramework>net8.0-windows</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
@@ -11,7 +11,7 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <ProjectReference Include="..\SCLCoreCLR\SCLCoreCLR.csproj" />
+    <ProjectReference Include="..\SCLCoreCLR\CoreUtils.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />

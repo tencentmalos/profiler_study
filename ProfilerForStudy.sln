@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FramePro", "FramePro\FramePro.csproj", "{FAA31A2B-B1E6-40FA-9C6B-DAD7EC0A671E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerStudy", "FramePro\ProfilerStudy.csproj", "{FAA31A2B-B1E6-40FA-9C6B-DAD7EC0A671E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrameProCore", "FrameProCore\FrameProCore.csproj", "{AF5CB95D-FDAA-41A8-A0D0-12B992E93B41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerStudyCore", "FrameProCore\ProfilerStudyCore.csproj", "{AF5CB95D-FDAA-41A8-A0D0-12B992E93B41}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HDataGrid", "HDataGrid\HDataGrid.csproj", "{E1FE43F7-157F-48DC-B444-09F9E0BAAE3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CanvasDataGrid", "HDataGrid\CanvasDataGrid.csproj", "{E1FE43F7-157F-48DC-B444-09F9E0BAAE3C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "docker", "docker\docker.csproj", "{580E9CA3-43EC-4068-901A-6870DEAEAA22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Docker", "docker\Docker.csproj", "{580E9CA3-43EC-4068-901A-6870DEAEAA22}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLCoreCLR", "SCLCoreCLR\SCLCoreCLR.csproj", "{BB6ED4C8-8221-4CD4-9DA5-0294AEACAB1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreUtils", "SCLCoreCLR\CoreUtils.csproj", "{BB6ED4C8-8221-4CD4-9DA5-0294AEACAB1E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor", "Editor\Editor.csproj", "{0352EADB-58AA-4818-BC08-BD5693B723E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerCanvas", "Editor\ProfilerCanvas.csproj", "{0352EADB-58AA-4818-BC08-BD5693B723E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

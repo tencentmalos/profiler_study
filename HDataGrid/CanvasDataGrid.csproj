@@ -1,7 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <AssemblyName>Editor</AssemblyName>
+    <AssemblyName>CanvasDataGrid</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <UseWindowsForms>True</UseWindowsForms>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -11,11 +10,5 @@
     <LangVersion>11.0</LangVersion>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup>
-    <RootNamespace />
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HDataGrid\HDataGrid.csproj" />
-    <ProjectReference Include="..\SCLCoreCLR\SCLCoreCLR.csproj" />
-  </ItemGroup>
+  <PropertyGroup />
 </Project>

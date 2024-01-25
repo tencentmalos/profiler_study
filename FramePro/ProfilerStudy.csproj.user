@@ -86,9 +86,6 @@
     <Compile Update="FramePro\MainSessionView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="FramePro\N10xLinkForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Update="FramePro\NoContextSwitchesWarningDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -142,9 +139,6 @@
     </Compile>
     <Compile Update="FramePro\SettingsDialog.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="FramePro\StartupPage.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="FramePro\ThreadFilterForm.cs">
       <SubType>Form</SubType>

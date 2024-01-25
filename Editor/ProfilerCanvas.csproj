@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <AssemblyName>SCLCoreCLR</AssemblyName>
+    <AssemblyName>ProfilerCanvas</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <UseWindowsForms>True</UseWindowsForms>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -11,6 +11,11 @@
     <LangVersion>11.0</LangVersion>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup />
-  <ItemGroup />
+  <PropertyGroup>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HDataGrid\CanvasDataGrid.csproj" />
+    <ProjectReference Include="..\SCLCoreCLR\CoreUtils.csproj" />
+  </ItemGroup>
 </Project>

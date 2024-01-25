@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <AssemblyName>FramePro</AssemblyName>
+    <AssemblyName>ProfilerStudy</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>True</UseWindowsForms>
@@ -18,10 +18,16 @@
     <StartupObject>FramePro.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\docker\docker.csproj" />
-    <ProjectReference Include="..\Editor\Editor.csproj" />
-    <ProjectReference Include="..\FrameProCore\FrameProCore.csproj" />
-    <ProjectReference Include="..\HDataGrid\HDataGrid.csproj" />
-    <ProjectReference Include="..\SCLCoreCLR\SCLCoreCLR.csproj" />
+    <Content Include="app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\docker\Docker.csproj" />
+    <ProjectReference Include="..\Editor\ProfilerCanvas.csproj" />
+    <ProjectReference Include="..\FrameProCore\ProfilerStudyCore.csproj" />
+    <ProjectReference Include="..\HDataGrid\CanvasDataGrid.csproj" />
+    <ProjectReference Include="..\SCLCoreCLR\CoreUtils.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>

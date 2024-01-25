@@ -98,8 +98,6 @@ internal class MainForm : Form
 
 	private Process m_RecordingPlayerProcess;
 
-	private StartupPage m_StartupPage;
-
 	private bool m_OutputWindowVisible = true;
 
 	private List<string> m_OutputWindowLines = new List<string>();
@@ -380,10 +378,6 @@ internal class MainForm : Form
 		m_OnCustomStatColourChangedTimer.Tick += OnCustomStatColourChangedTick;
 		m_OnCustomStatColourChangedTimer.Interval = 500;
 		m_FindControl.RecalculateAnchorstoGetAroundDPIBugs();
-		if (m_Settings.ShowStartupPage)
-		{
-			ShowStartupPage();
-		}
 		if (file_to_open != null)
 		{
 			m_FileToOpenOnStartup = file_to_open;
@@ -571,12 +565,6 @@ internal class MainForm : Form
 		////		m_UpdateThreadJob.Run();
 		////	}
 		////}
-		if (DateTime.Now >= new DateTime(2023, 3, 25) && !m_Settings.Shown10xLinkForm)
-		{
-			new N10xLinkForm().ShowDialog(this);
-			m_Settings.Shown10xLinkForm = true;
-			m_Settings.Write();
-		}
 	}
 
 	////private void NotifyNewVersion()
@@ -664,7 +652,7 @@ internal class MainForm : Form
 
 	private void UpdateTitle()
 	{
-		Text = "FramePro - 1.10.17 - Ñ§Ï°°æ(Îð´«²¥)";
+		Text = "ProfilerStudy [Do not distribute]";
 	}
 
 	private void InitialiseDockManager()
@@ -707,13 +695,13 @@ internal class MainForm : Form
 				}
 			}
 		}
-		foreach (Control control2 in controls)
-		{
-			if (control2 == m_StartupPage)
-			{
-				m_StartupPage = null;
-			}
-		}
+		////foreach (Control control2 in controls)
+		////{
+		////	if (control2 == m_StartupPage)
+		////	{
+		////		m_StartupPage = null;
+		////	}
+		////}
 	}
 
 	private void ActiveControlChanged(Control control)
@@ -976,7 +964,7 @@ internal class MainForm : Form
 	{
 		if (ActiveSession == null || !ActiveSession.ProcessingPackets || new WaitForProcessingCompleteForm(ActiveSession, can_ignore: false).ShowDialog(this) != DialogResult.Cancel)
 		{
-			CloseStartupPage();
+			////CloseStartupPage();
 			Connect(cap_receive_speed: false);
 		}
 	}
@@ -1223,7 +1211,6 @@ internal class MainForm : Form
 		{
 			return false;
 		}
-		CloseStartupPage();
 		try
 		{
 			if (File.Exists(filename))
@@ -2105,29 +2092,6 @@ internal class MainForm : Form
 		ShowHelp();
 	}
 
-	private void ShowStartupPage()
-	{
-		if (m_StartupPage != null)
-		{
-			m_DockManager.SetActiveControl(m_StartupPage);
-			return;
-		}
-		m_StartupPage = new StartupPage(m_Settings.RecentFiles, m_Settings.ShowStartupPage);
-		m_StartupPage.LaunchDemo += LaunchDemo;
-		m_StartupPage.StartupPageOpenFile += OpenRecentFile;
-		m_StartupPage.ShowStartupPageToggled += ShowStartupPageCheckBoxToggled;
-		m_DockManager.AddMdiChild(m_StartupPage);
-	}
-
-	private void CloseStartupPage()
-	{
-		if (m_StartupPage != null)
-		{
-			m_DockManager.CloseControl(m_StartupPage);
-			m_StartupPage = null;
-		}
-	}
-
 	private void ShowStartupPageCheckBoxToggled(bool show_startup_page)
 	{
 		m_Settings.ShowStartupPage = show_startup_page;
@@ -2149,11 +2113,6 @@ internal class MainForm : Form
 			m_Settings.Connections = connections;
 			m_Settings.Write();
 		}
-	}
-
-	private void ShowStartupPageMenuItemClicked(object sender, EventArgs e)
-	{
-		ShowStartupPage();
 	}
 
 	public void CloneSession(long start_time, long end_time)
@@ -2461,605 +2420,867 @@ internal class MainForm : Form
 		}
 	}
 
-	private void InitializeComponent()
-	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.MainForm));
-		this.panel1 = new System.Windows.Forms.Panel();
-		this.m_GotoMaxFrameButton = new FramePro.FrameProButton();
-		this.m_CallstackButton = new FramePro.FrameProButton();
-		this.m_DataGridViewButton = new FramePro.ViewButton();
-		this.m_CustomStatsGraphButton = new FramePro.ViewButton();
-		this.m_ScopeColourModeButton = new FramePro.FrameProButton();
-		this.m_GotoNextSpikeButton = new FramePro.FrameProButton();
-		this.m_GotoPrevSpikeButton = new FramePro.FrameProButton();
-		this.m_InfoViewButton = new FramePro.ViewButton();
-		this.m_FindControl = new FramePro.FindControl();
-		this.m_ConnectButton = new FramePro.FrameProButton();
-		this.m_CoresViewButton = new FramePro.ViewButton();
-		this.m_ScopeViewButton = new FramePro.ViewButton();
-		this.m_FramesViewButton = new FramePro.ViewButton();
-		this.m_ConditionalScopeTimeSlider = new FramePro.ConditionalScopeTimeSlider();
-		this.m_GotoEndButton = new FramePro.FrameProButton();
-		this.m_TrackEndButton = new FramePro.FrameProButton();
-		this.m_GotoStartButton = new FramePro.FrameProButton();
-		this.m_ConnectSettingsButton = new FramePro.FrameProButton();
-		this.m_DisconnectButton = new FramePro.FrameProButton();
-		this.m_MainPanel = new System.Windows.Forms.Panel();
-		this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_SaveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_SaveAsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.closeAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
-		this.m_ExportToCSVMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ExportFrameGraphToCSVMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-		this.m_RecentFilesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-		this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ThreadsViewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_CoresViewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ScopesViewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-		this.m_ViewSettingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_InfoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_FrameGraphMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ScopeGraphMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ThreadsViewCoreViewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_CustomStatsGraphMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.colouringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ColourByThreadMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ColourByScopeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
-		this.m_OutputWindowMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.connectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_NewConnectionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ConnectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_DisconnectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-		this.findToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-		this.m_CreateSessionFromSelectionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-		this.androidToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.recordContextSwitchesAndroidToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.loadContextSwitchFileAndroidToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
-		this.settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-		this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-		this.enterProductKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.checkForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-		this.demoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.launchFrameProGameSimulatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.playbackDumpFileInRealtimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.showStartupPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
-		this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-		this.m_OutputWindowPanel = new System.Windows.Forms.Panel();
-		this.m_OutputTextBox = new System.Windows.Forms.TextBox();
-		this.m_OutputWindowSplitter = new System.Windows.Forms.Splitter();
-		this.panel1.SuspendLayout();
-		this.menuStrip1.SuspendLayout();
-		this.m_OutputWindowPanel.SuspendLayout();
-		base.SuspendLayout();
-		this.panel1.Controls.Add(this.m_GotoMaxFrameButton);
-		this.panel1.Controls.Add(this.m_CallstackButton);
-		this.panel1.Controls.Add(this.m_DataGridViewButton);
-		this.panel1.Controls.Add(this.m_CustomStatsGraphButton);
-		this.panel1.Controls.Add(this.m_ScopeColourModeButton);
-		this.panel1.Controls.Add(this.m_GotoNextSpikeButton);
-		this.panel1.Controls.Add(this.m_GotoPrevSpikeButton);
-		this.panel1.Controls.Add(this.m_InfoViewButton);
-		this.panel1.Controls.Add(this.m_FindControl);
-		this.panel1.Controls.Add(this.m_ConnectButton);
-		this.panel1.Controls.Add(this.m_CoresViewButton);
-		this.panel1.Controls.Add(this.m_ScopeViewButton);
-		this.panel1.Controls.Add(this.m_FramesViewButton);
-		this.panel1.Controls.Add(this.m_ConditionalScopeTimeSlider);
-		this.panel1.Controls.Add(this.m_GotoEndButton);
-		this.panel1.Controls.Add(this.m_TrackEndButton);
-		this.panel1.Controls.Add(this.m_GotoStartButton);
-		this.panel1.Controls.Add(this.m_ConnectSettingsButton);
-		this.panel1.Controls.Add(this.m_DisconnectButton);
-		this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-		this.panel1.Location = new System.Drawing.Point(0, 24);
-		this.panel1.Name = "panel1";
-		this.panel1.Size = new System.Drawing.Size(1691, 65);
-		this.panel1.TabIndex = 6;
-		this.m_GotoMaxFrameButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_GotoMaxFrameButton.ButtonText = "Max";
-		this.m_GotoMaxFrameButton.DisabledImage = FramePro.Properties.Resources.GotoMaxFrame_disabled;
-		this.m_GotoMaxFrameButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_GotoMaxFrameButton.HighlightEnabled = true;
-		this.m_GotoMaxFrameButton.Image = FramePro.Properties.Resources.GotoMaxFrame;
-		this.m_GotoMaxFrameButton.Location = new System.Drawing.Point(824, 0);
-		this.m_GotoMaxFrameButton.Name = "m_GotoMaxFrameButton";
-		this.m_GotoMaxFrameButton.Size = new System.Drawing.Size(40, 65);
-		this.m_GotoMaxFrameButton.TabIndex = 28;
-		this.m_GotoMaxFrameButton.TabStop = false;
-		this.m_GotoMaxFrameButton.UseImageAsText = false;
-		this.m_GotoMaxFrameButton.Click += new System.EventHandler(GotoMaxFrameButtonClicked);
-		this.m_CallstackButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_CallstackButton.ButtonText = "Callstacks";
-		this.m_CallstackButton.DisabledImage = FramePro.Properties.Resources.CallstackButton_disabled;
-		this.m_CallstackButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_CallstackButton.HighlightEnabled = true;
-		this.m_CallstackButton.Image = FramePro.Properties.Resources.CallstackButton;
-		this.m_CallstackButton.Location = new System.Drawing.Point(1590, 0);
-		this.m_CallstackButton.Name = "m_CallstackButton";
-		this.m_CallstackButton.Size = new System.Drawing.Size(65, 65);
-		this.m_CallstackButton.TabIndex = 27;
-		this.m_CallstackButton.TabStop = false;
-		this.m_CallstackButton.UseImageAsText = false;
-		this.m_CallstackButton.Click += new System.EventHandler(OnCallstacksButtonClicked);
-		this.m_DataGridViewButton.ButtonText = "Details";
-		this.m_DataGridViewButton.Checked = false;
-		this.m_DataGridViewButton.DisabledImage = FramePro.Properties.Resources.DataGridViewButton_disabled;
-		this.m_DataGridViewButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_DataGridViewButton.Image = FramePro.Properties.Resources.DataGridViewButton;
-		this.m_DataGridViewButton.Location = new System.Drawing.Point(686, 0);
-		this.m_DataGridViewButton.Name = "m_DataGridViewButton";
-		this.m_DataGridViewButton.Size = new System.Drawing.Size(65, 65);
-		this.m_DataGridViewButton.TabIndex = 26;
-		this.m_DataGridViewButton.CheckedChanged += new FramePro.ViewButtonCheckedChangedHandler(DataGridViewButtonCheckedChanged);
-		this.m_CustomStatsGraphButton.ButtonText = "Custom Stats";
-		this.m_CustomStatsGraphButton.Checked = false;
-		this.m_CustomStatsGraphButton.DisabledImage = FramePro.Properties.Resources.CustomStatGraphDisabled;
-		this.m_CustomStatsGraphButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_CustomStatsGraphButton.Image = FramePro.Properties.Resources.CustomStatGraph;
-		this.m_CustomStatsGraphButton.Location = new System.Drawing.Point(615, 0);
-		this.m_CustomStatsGraphButton.Name = "m_CustomStatsGraphButton";
-		this.m_CustomStatsGraphButton.Size = new System.Drawing.Size(65, 65);
-		this.m_CustomStatsGraphButton.TabIndex = 25;
-		this.m_CustomStatsGraphButton.CheckedChanged += new FramePro.ViewButtonCheckedChangedHandler(CustomStatsGraphButtonCheckChanged);
-		this.m_ScopeColourModeButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_ScopeColourModeButton.ButtonText = "Colour Mode";
-		this.m_ScopeColourModeButton.DisabledImage = FramePro.Properties.Resources.DisabledColourModeButton;
-		this.m_ScopeColourModeButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_ScopeColourModeButton.HighlightEnabled = true;
-		this.m_ScopeColourModeButton.Image = FramePro.Properties.Resources.ThreadColourModeButton;
-		this.m_ScopeColourModeButton.Location = new System.Drawing.Point(1305, 0);
-		this.m_ScopeColourModeButton.Name = "m_ScopeColourModeButton";
-		this.m_ScopeColourModeButton.Size = new System.Drawing.Size(65, 65);
-		this.m_ScopeColourModeButton.TabIndex = 24;
-		this.m_ScopeColourModeButton.TabStop = false;
-		this.m_ScopeColourModeButton.UseImageAsText = false;
-		this.m_ScopeColourModeButton.Click += new System.EventHandler(ScopeColourModeButtonClicked);
-		this.m_GotoNextSpikeButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_GotoNextSpikeButton.ButtonText = "Next";
-		this.m_GotoNextSpikeButton.DisabledImage = FramePro.Properties.Resources.GotoNextSpikeButton_disabled;
-		this.m_GotoNextSpikeButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_GotoNextSpikeButton.HighlightEnabled = true;
-		this.m_GotoNextSpikeButton.Image = FramePro.Properties.Resources.GotoNextSpikeButton;
-		this.m_GotoNextSpikeButton.Location = new System.Drawing.Point(870, 0);
-		this.m_GotoNextSpikeButton.Name = "m_GotoNextSpikeButton";
-		this.m_GotoNextSpikeButton.Size = new System.Drawing.Size(40, 65);
-		this.m_GotoNextSpikeButton.TabIndex = 23;
-		this.m_GotoNextSpikeButton.TabStop = false;
-		this.m_GotoNextSpikeButton.UseImageAsText = false;
-		this.m_GotoNextSpikeButton.Click += new System.EventHandler(GotoNextSpikeButtonClicked);
-		this.m_GotoPrevSpikeButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_GotoPrevSpikeButton.ButtonText = "Prev";
-		this.m_GotoPrevSpikeButton.DisabledImage = FramePro.Properties.Resources.GotoPrevSpikeButton_disabled;
-		this.m_GotoPrevSpikeButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_GotoPrevSpikeButton.HighlightEnabled = true;
-		this.m_GotoPrevSpikeButton.Image = FramePro.Properties.Resources.GotoPrevSpikeButton;
-		this.m_GotoPrevSpikeButton.Location = new System.Drawing.Point(778, 0);
-		this.m_GotoPrevSpikeButton.Name = "m_GotoPrevSpikeButton";
-		this.m_GotoPrevSpikeButton.Size = new System.Drawing.Size(40, 65);
-		this.m_GotoPrevSpikeButton.TabIndex = 22;
-		this.m_GotoPrevSpikeButton.TabStop = false;
-		this.m_GotoPrevSpikeButton.UseImageAsText = false;
-		this.m_GotoPrevSpikeButton.Click += new System.EventHandler(GotoPrevSpikeButtonClicked);
-		this.m_InfoViewButton.ButtonText = "Info";
-		this.m_InfoViewButton.Checked = false;
-		this.m_InfoViewButton.DisabledImage = FramePro.Properties.Resources.InfoViewButton_disabled1;
-		this.m_InfoViewButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_InfoViewButton.Image = FramePro.Properties.Resources.InfoViewButton1;
-		this.m_InfoViewButton.Location = new System.Drawing.Point(331, 0);
-		this.m_InfoViewButton.Name = "m_InfoViewButton";
-		this.m_InfoViewButton.Size = new System.Drawing.Size(65, 65);
-		this.m_InfoViewButton.TabIndex = 21;
-		this.m_InfoViewButton.CheckedChanged += new FramePro.ViewButtonCheckedChangedHandler(InfoViewCheckedChanged);
-		this.m_FindControl.Location = new System.Drawing.Point(936, 0);
-		this.m_FindControl.Margin = new System.Windows.Forms.Padding(4);
-		this.m_FindControl.Name = "m_FindControl";
-		this.m_FindControl.Size = new System.Drawing.Size(343, 65);
-		this.m_FindControl.TabIndex = 12;
-		this.m_FindControl.TabStop = false;
-		this.m_FindControl.FindControlTextChanged += new FramePro.FindControlTextChangedHandler(FindControlTextChanged);
-		this.m_FindControl.FindControlGotoPrev += new FramePro.FindControlGotoPrevHandler(FindControlGotoPrev);
-		this.m_FindControl.FindControlGotoNext += new FramePro.FindControlGotoNextHandler(FindControlGotoNext);
-		this.m_ConnectButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_ConnectButton.ButtonText = "Connect";
-		this.m_ConnectButton.DisabledImage = FramePro.Properties.Resources.ConnectButton_disabled;
-		this.m_ConnectButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_ConnectButton.HighlightEnabled = true;
-		this.m_ConnectButton.Image = FramePro.Properties.Resources.ConnectButton;
-		this.m_ConnectButton.Location = new System.Drawing.Point(0, 0);
-		this.m_ConnectButton.Name = "m_ConnectButton";
-		this.m_ConnectButton.Size = new System.Drawing.Size(65, 65);
-		this.m_ConnectButton.TabIndex = 0;
-		this.m_ConnectButton.TabStop = false;
-		this.m_ConnectButton.UseImageAsText = false;
-		this.m_ConnectButton.Click += new System.EventHandler(ConnectButtonClick);
-		this.m_CoresViewButton.ButtonText = "Cores";
-		this.m_CoresViewButton.Checked = false;
-		this.m_CoresViewButton.DisabledImage = FramePro.Properties.Resources.CoreViewButton_disabled;
-		this.m_CoresViewButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_CoresViewButton.Image = FramePro.Properties.Resources.CoreViewButton1;
-		this.m_CoresViewButton.Location = new System.Drawing.Point(544, 0);
-		this.m_CoresViewButton.Name = "m_CoresViewButton";
-		this.m_CoresViewButton.Size = new System.Drawing.Size(65, 65);
-		this.m_CoresViewButton.TabIndex = 20;
-		this.m_CoresViewButton.CheckedChanged += new FramePro.ViewButtonCheckedChangedHandler(CoresViewButtonCheckedChanged);
-		this.m_ScopeViewButton.ButtonText = "Scope";
-		this.m_ScopeViewButton.Checked = false;
-		this.m_ScopeViewButton.DisabledImage = FramePro.Properties.Resources.TimeSpanGraphViewButton_disabled;
-		this.m_ScopeViewButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_ScopeViewButton.Image = FramePro.Properties.Resources.TimeSpanGraphViewButton1;
-		this.m_ScopeViewButton.Location = new System.Drawing.Point(473, 0);
-		this.m_ScopeViewButton.Name = "m_ScopeViewButton";
-		this.m_ScopeViewButton.Size = new System.Drawing.Size(65, 65);
-		this.m_ScopeViewButton.TabIndex = 18;
-		this.m_ScopeViewButton.CheckedChanged += new FramePro.ViewButtonCheckedChangedHandler(ScopesViewButtonCheckedChanged);
-		this.m_FramesViewButton.ButtonText = "Frames";
-		this.m_FramesViewButton.Checked = false;
-		this.m_FramesViewButton.DisabledImage = FramePro.Properties.Resources.FrameGraphViewButton_disabled;
-		this.m_FramesViewButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_FramesViewButton.Image = FramePro.Properties.Resources.FrameGraphViewButton;
-		this.m_FramesViewButton.Location = new System.Drawing.Point(402, 0);
-		this.m_FramesViewButton.Name = "m_FramesViewButton";
-		this.m_FramesViewButton.Size = new System.Drawing.Size(65, 65);
-		this.m_FramesViewButton.TabIndex = 17;
-		this.m_FramesViewButton.CheckedChanged += new FramePro.ViewButtonCheckedChangedHandler(FramesButtonCheckedChanged);
-		this.m_ConditionalScopeTimeSlider.Location = new System.Drawing.Point(1388, 0);
-		this.m_ConditionalScopeTimeSlider.Margin = new System.Windows.Forms.Padding(4);
-		this.m_ConditionalScopeTimeSlider.Name = "m_ConditionalScopeTimeSlider";
-		this.m_ConditionalScopeTimeSlider.Size = new System.Drawing.Size(195, 65);
-		this.m_ConditionalScopeTimeSlider.TabIndex = 10;
-		this.m_ConditionalScopeTimeSlider.TabStop = false;
-		this.m_ConditionalScopeTimeSlider.ValueChanged += new FramePro.ConditionalSliderChangedHandler(ConditionalSliderValueChanged);
-		this.m_GotoEndButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_GotoEndButton.ButtonText = "End";
-		this.m_GotoEndButton.DisabledImage = FramePro.Properties.Resources.GotoEndButton_disabled;
-		this.m_GotoEndButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_GotoEndButton.HighlightEnabled = true;
-		this.m_GotoEndButton.Image = (System.Drawing.Image)resources.GetObject("m_GotoEndButton.Image");
-		this.m_GotoEndButton.Location = new System.Drawing.Point(278, 0);
-		this.m_GotoEndButton.Name = "m_GotoEndButton";
-		this.m_GotoEndButton.Size = new System.Drawing.Size(40, 65);
-		this.m_GotoEndButton.TabIndex = 9;
-		this.m_GotoEndButton.TabStop = false;
-		this.m_GotoEndButton.UseImageAsText = false;
-		this.m_GotoEndButton.Click += new System.EventHandler(GotoEndButtonClicked);
-		this.m_TrackEndButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_TrackEndButton.ButtonText = "Track";
-		this.m_TrackEndButton.DisabledImage = FramePro.Properties.Resources.PlayButton_disabled;
-		this.m_TrackEndButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_TrackEndButton.HighlightEnabled = true;
-		this.m_TrackEndButton.Image = (System.Drawing.Image)resources.GetObject("m_TrackEndButton.Image");
-		this.m_TrackEndButton.Location = new System.Drawing.Point(232, 0);
-		this.m_TrackEndButton.Name = "m_TrackEndButton";
-		this.m_TrackEndButton.Size = new System.Drawing.Size(40, 65);
-		this.m_TrackEndButton.TabIndex = 8;
-		this.m_TrackEndButton.TabStop = false;
-		this.m_TrackEndButton.UseImageAsText = false;
-		this.m_TrackEndButton.Click += new System.EventHandler(PlayPauseButtonClicked);
-		this.m_GotoStartButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_GotoStartButton.ButtonText = "Start";
-		this.m_GotoStartButton.DisabledImage = FramePro.Properties.Resources.GotoStartButton_disabled;
-		this.m_GotoStartButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_GotoStartButton.HighlightEnabled = true;
-		this.m_GotoStartButton.Image = (System.Drawing.Image)resources.GetObject("m_GotoStartButton.Image");
-		this.m_GotoStartButton.Location = new System.Drawing.Point(186, 0);
-		this.m_GotoStartButton.Name = "m_GotoStartButton";
-		this.m_GotoStartButton.Size = new System.Drawing.Size(40, 65);
-		this.m_GotoStartButton.TabIndex = 6;
-		this.m_GotoStartButton.TabStop = false;
-		this.m_GotoStartButton.UseImageAsText = false;
-		this.m_GotoStartButton.Click += new System.EventHandler(HomeButtonClicked);
-		this.m_ConnectSettingsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_ConnectSettingsButton.ButtonText = "";
-		this.m_ConnectSettingsButton.DisabledImage = null;
-		this.m_ConnectSettingsButton.HighlightEnabled = true;
-		this.m_ConnectSettingsButton.Image = FramePro.Properties.Resources.ConnectSettingsButton;
-		this.m_ConnectSettingsButton.Location = new System.Drawing.Point(65, 0);
-		this.m_ConnectSettingsButton.Name = "m_ConnectSettingsButton";
-		this.m_ConnectSettingsButton.Size = new System.Drawing.Size(17, 65);
-		this.m_ConnectSettingsButton.TabIndex = 5;
-		this.m_ConnectSettingsButton.TabStop = false;
-		this.m_ConnectSettingsButton.UseImageAsText = true;
-		this.m_ConnectSettingsButton.Click += new System.EventHandler(ConnectSettingsButtonClicked);
-		this.m_DisconnectButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		this.m_DisconnectButton.ButtonText = "Disconnect";
-		this.m_DisconnectButton.DisabledImage = FramePro.Properties.Resources.DisconnectButton_disabled;
-		this.m_DisconnectButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_DisconnectButton.HighlightEnabled = true;
-		this.m_DisconnectButton.Image = FramePro.Properties.Resources.DisconnectButton1;
-		this.m_DisconnectButton.Location = new System.Drawing.Point(88, 0);
-		this.m_DisconnectButton.Name = "m_DisconnectButton";
-		this.m_DisconnectButton.Size = new System.Drawing.Size(65, 65);
-		this.m_DisconnectButton.TabIndex = 4;
-		this.m_DisconnectButton.TabStop = false;
-		this.m_DisconnectButton.UseImageAsText = false;
-		this.m_DisconnectButton.Click += new System.EventHandler(DisconnectButtonPressed);
-		this.m_MainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-		this.m_MainPanel.Location = new System.Drawing.Point(0, 89);
-		this.m_MainPanel.Name = "m_MainPanel";
-		this.m_MainPanel.Size = new System.Drawing.Size(1691, 663);
-		this.m_MainPanel.TabIndex = 7;
-		this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[12]
-		{
-			this.openToolStripMenuItem, this.m_SaveMenuItem, this.m_SaveAsMenuItem, this.closeToolStripMenuItem, this.closeAllToolStripMenuItem, this.toolStripSeparator9, this.m_ExportToCSVMenuItem, this.m_ExportFrameGraphToCSVMenuItem, this.toolStripSeparator2, this.m_RecentFilesMenuItem,
-			this.toolStripSeparator4, this.exitToolStripMenuItem
-		});
-		this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-		this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
-		this.fileToolStripMenuItem.Text = "File";
-		this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-		this.openToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.O | System.Windows.Forms.Keys.Control;
-		this.openToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.openToolStripMenuItem.Text = "Open";
-		this.openToolStripMenuItem.Click += new System.EventHandler(OpenMenuItem);
-		this.m_SaveMenuItem.Name = "m_SaveMenuItem";
-		this.m_SaveMenuItem.ShortcutKeys = System.Windows.Forms.Keys.S | System.Windows.Forms.Keys.Control;
-		this.m_SaveMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.m_SaveMenuItem.Text = "Save";
-		this.m_SaveMenuItem.Click += new System.EventHandler(SaveMenuItem);
-		this.m_SaveAsMenuItem.Name = "m_SaveAsMenuItem";
-		this.m_SaveAsMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.m_SaveAsMenuItem.Text = "Save As...";
-		this.m_SaveAsMenuItem.Click += new System.EventHandler(SaveAsMenuItemClicked);
-		this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-		this.closeToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.closeToolStripMenuItem.Text = "Close";
-		this.closeToolStripMenuItem.Click += new System.EventHandler(CloseMenuItem);
-		this.closeAllToolStripMenuItem.Name = "closeAllToolStripMenuItem";
-		this.closeAllToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.closeAllToolStripMenuItem.Text = "Close All";
-		this.closeAllToolStripMenuItem.Click += new System.EventHandler(CloseAllMenuItemClicked);
-		this.toolStripSeparator9.Name = "toolStripSeparator9";
-		this.toolStripSeparator9.Size = new System.Drawing.Size(214, 6);
-		this.m_ExportToCSVMenuItem.Name = "m_ExportToCSVMenuItem";
-		this.m_ExportToCSVMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.m_ExportToCSVMenuItem.Text = "Export to CSV";
-		this.m_ExportToCSVMenuItem.Click += new System.EventHandler(ExportToCSVMenuItem);
-		this.m_ExportFrameGraphToCSVMenuItem.Name = "m_ExportFrameGraphToCSVMenuItem";
-		this.m_ExportFrameGraphToCSVMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.m_ExportFrameGraphToCSVMenuItem.Text = "Export Frame Graph to CSV";
-		this.m_ExportFrameGraphToCSVMenuItem.Click += new System.EventHandler(ExportFrameGraphToCSVMenuItemClicked);
-		this.toolStripSeparator2.Name = "toolStripSeparator2";
-		this.toolStripSeparator2.Size = new System.Drawing.Size(214, 6);
-		this.m_RecentFilesMenuItem.Name = "m_RecentFilesMenuItem";
-		this.m_RecentFilesMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.m_RecentFilesMenuItem.Text = "Recent Files";
-		this.toolStripSeparator4.Name = "toolStripSeparator4";
-		this.toolStripSeparator4.Size = new System.Drawing.Size(214, 6);
-		this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-		this.exitToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-		this.exitToolStripMenuItem.Text = "Exit";
-		this.exitToolStripMenuItem.Click += new System.EventHandler(ExitMenuItem);
-		this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[8] { this.m_ThreadsViewMenuItem, this.m_CoresViewMenuItem, this.m_ScopesViewMenuItem, this.toolStripSeparator6, this.m_ViewSettingsMenuItem, this.colouringToolStripMenuItem, this.toolStripSeparator10, this.m_OutputWindowMenuItem });
-		this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-		this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-		this.viewToolStripMenuItem.Text = "View";
-		this.m_ThreadsViewMenuItem.Name = "m_ThreadsViewMenuItem";
-		this.m_ThreadsViewMenuItem.Size = new System.Drawing.Size(162, 22);
-		this.m_ThreadsViewMenuItem.Text = "Threads View";
-		this.m_ThreadsViewMenuItem.Click += new System.EventHandler(ThreadsViewMenuItemClicked);
-		this.m_CoresViewMenuItem.Name = "m_CoresViewMenuItem";
-		this.m_CoresViewMenuItem.Size = new System.Drawing.Size(162, 22);
-		this.m_CoresViewMenuItem.Text = "Cores View";
-		this.m_ScopesViewMenuItem.Name = "m_ScopesViewMenuItem";
-		this.m_ScopesViewMenuItem.Size = new System.Drawing.Size(162, 22);
-		this.m_ScopesViewMenuItem.Text = "Scopes View";
-		this.m_ScopesViewMenuItem.Click += new System.EventHandler(ScopesViewMenuItemClicked);
-		this.toolStripSeparator6.Name = "toolStripSeparator6";
-		this.toolStripSeparator6.Size = new System.Drawing.Size(159, 6);
-		this.m_ViewSettingsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[5] { this.m_InfoMenuItem, this.m_FrameGraphMenuItem, this.m_ScopeGraphMenuItem, this.m_ThreadsViewCoreViewMenuItem, this.m_CustomStatsGraphMenuItem });
-		this.m_ViewSettingsMenuItem.Name = "m_ViewSettingsMenuItem";
-		this.m_ViewSettingsMenuItem.Size = new System.Drawing.Size(162, 22);
-		this.m_ViewSettingsMenuItem.Text = "Threads View";
-		this.m_InfoMenuItem.Checked = true;
-		this.m_InfoMenuItem.CheckOnClick = true;
-		this.m_InfoMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-		this.m_InfoMenuItem.Name = "m_InfoMenuItem";
-		this.m_InfoMenuItem.Size = new System.Drawing.Size(179, 22);
-		this.m_InfoMenuItem.Text = "Info";
-		this.m_InfoMenuItem.Click += new System.EventHandler(InfoMenuItemClicked);
-		this.m_FrameGraphMenuItem.Checked = true;
-		this.m_FrameGraphMenuItem.CheckOnClick = true;
-		this.m_FrameGraphMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-		this.m_FrameGraphMenuItem.Name = "m_FrameGraphMenuItem";
-		this.m_FrameGraphMenuItem.Size = new System.Drawing.Size(179, 22);
-		this.m_FrameGraphMenuItem.Text = "Frame Graph";
-		this.m_FrameGraphMenuItem.Click += new System.EventHandler(FrameGraphMenuItemClicked);
-		this.m_ScopeGraphMenuItem.Checked = true;
-		this.m_ScopeGraphMenuItem.CheckOnClick = true;
-		this.m_ScopeGraphMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-		this.m_ScopeGraphMenuItem.Name = "m_ScopeGraphMenuItem";
-		this.m_ScopeGraphMenuItem.Size = new System.Drawing.Size(179, 22);
-		this.m_ScopeGraphMenuItem.Text = "Scope Graph";
-		this.m_ScopeGraphMenuItem.Click += new System.EventHandler(ScopeGraphMenuItemClicked);
-		this.m_ThreadsViewCoreViewMenuItem.Checked = true;
-		this.m_ThreadsViewCoreViewMenuItem.CheckOnClick = true;
-		this.m_ThreadsViewCoreViewMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-		this.m_ThreadsViewCoreViewMenuItem.Name = "m_ThreadsViewCoreViewMenuItem";
-		this.m_ThreadsViewCoreViewMenuItem.Size = new System.Drawing.Size(179, 22);
-		this.m_ThreadsViewCoreViewMenuItem.Text = "CPU Graph";
-		this.m_ThreadsViewCoreViewMenuItem.Click += new System.EventHandler(CoreViewMenuItemClicked);
-		this.m_CustomStatsGraphMenuItem.Checked = true;
-		this.m_CustomStatsGraphMenuItem.CheckOnClick = true;
-		this.m_CustomStatsGraphMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-		this.m_CustomStatsGraphMenuItem.Name = "m_CustomStatsGraphMenuItem";
-		this.m_CustomStatsGraphMenuItem.Size = new System.Drawing.Size(179, 22);
-		this.m_CustomStatsGraphMenuItem.Text = "Custom Stats Graph";
-		this.m_CustomStatsGraphMenuItem.Click += new System.EventHandler(CustomStatsGraphMenuItemClicked);
-		this.colouringToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[2] { this.m_ColourByThreadMenuItem, this.m_ColourByScopeMenuItem });
-		this.colouringToolStripMenuItem.Name = "colouringToolStripMenuItem";
-		this.colouringToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
-		this.colouringToolStripMenuItem.Text = "Scope Colouring";
-		this.m_ColourByThreadMenuItem.Name = "m_ColourByThreadMenuItem";
-		this.m_ColourByThreadMenuItem.Size = new System.Drawing.Size(165, 22);
-		this.m_ColourByThreadMenuItem.Text = "Colour by Thread";
-		this.m_ColourByScopeMenuItem.Name = "m_ColourByScopeMenuItem";
-		this.m_ColourByScopeMenuItem.Size = new System.Drawing.Size(165, 22);
-		this.m_ColourByScopeMenuItem.Text = "Colour by Scope";
-		this.toolStripSeparator10.Name = "toolStripSeparator10";
-		this.toolStripSeparator10.Size = new System.Drawing.Size(159, 6);
-		this.m_OutputWindowMenuItem.Checked = true;
-		this.m_OutputWindowMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-		this.m_OutputWindowMenuItem.Name = "m_OutputWindowMenuItem";
-		this.m_OutputWindowMenuItem.Size = new System.Drawing.Size(162, 22);
-		this.m_OutputWindowMenuItem.Text = "Output Window";
-		this.m_OutputWindowMenuItem.Click += new System.EventHandler(OutputWindowMenuItem);
-		this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[3] { this.m_NewConnectionMenuItem, this.m_ConnectMenuItem, this.m_DisconnectMenuItem });
-		this.connectionToolStripMenuItem.Name = "connectionToolStripMenuItem";
-		this.connectionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
-		this.connectionToolStripMenuItem.Text = "Connection";
-		this.m_NewConnectionMenuItem.Name = "m_NewConnectionMenuItem";
-		this.m_NewConnectionMenuItem.Size = new System.Drawing.Size(172, 22);
-		this.m_NewConnectionMenuItem.Text = "New Connection...";
-		this.m_NewConnectionMenuItem.Click += new System.EventHandler(NewConnectionMenuItem);
-		this.m_ConnectMenuItem.Name = "m_ConnectMenuItem";
-		this.m_ConnectMenuItem.Size = new System.Drawing.Size(172, 22);
-		this.m_ConnectMenuItem.Text = "Connect...";
-		this.m_ConnectMenuItem.Click += new System.EventHandler(ConnectMenuItemClicked);
-		this.m_DisconnectMenuItem.Name = "m_DisconnectMenuItem";
-		this.m_DisconnectMenuItem.Size = new System.Drawing.Size(172, 22);
-		this.m_DisconnectMenuItem.Text = "Disconnect";
-		this.m_DisconnectMenuItem.Click += new System.EventHandler(DisconnectButtonClicked);
-		this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[8] { this.toolStripSeparator1, this.findToolStripMenuItem1, this.toolStripSeparator5, this.m_CreateSessionFromSelectionMenuItem, this.toolStripSeparator7, this.androidToolStripMenuItem, this.toolStripSeparator11, this.settingsToolStripMenuItem1 });
-		this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-		this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
-		this.toolsToolStripMenuItem.Text = "Tools";
-		this.toolStripSeparator1.Name = "toolStripSeparator1";
-		this.toolStripSeparator1.Size = new System.Drawing.Size(227, 6);
-		this.findToolStripMenuItem1.Name = "findToolStripMenuItem1";
-		this.findToolStripMenuItem1.ShortcutKeys = System.Windows.Forms.Keys.F | System.Windows.Forms.Keys.Control;
-		this.findToolStripMenuItem1.Size = new System.Drawing.Size(230, 22);
-		this.findToolStripMenuItem1.Text = "Find";
-		this.findToolStripMenuItem1.Click += new System.EventHandler(FindMenuItemClicked);
-		this.toolStripSeparator5.Name = "toolStripSeparator5";
-		this.toolStripSeparator5.Size = new System.Drawing.Size(227, 6);
-		this.m_CreateSessionFromSelectionMenuItem.Name = "m_CreateSessionFromSelectionMenuItem";
-		this.m_CreateSessionFromSelectionMenuItem.Size = new System.Drawing.Size(230, 22);
-		this.m_CreateSessionFromSelectionMenuItem.Text = "Create Session from Selection";
-		this.m_CreateSessionFromSelectionMenuItem.Click += new System.EventHandler(CreateSessionFromSelectionMenuItemClicked);
-		this.toolStripSeparator7.Name = "toolStripSeparator7";
-		this.toolStripSeparator7.Size = new System.Drawing.Size(227, 6);
-		this.androidToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[2] { this.recordContextSwitchesAndroidToolStripMenuItem, this.loadContextSwitchFileAndroidToolStripMenuItem });
-		this.androidToolStripMenuItem.Name = "androidToolStripMenuItem";
-		this.androidToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
-		this.androidToolStripMenuItem.Text = "Android";
-		this.recordContextSwitchesAndroidToolStripMenuItem.Name = "recordContextSwitchesAndroidToolStripMenuItem";
-		this.recordContextSwitchesAndroidToolStripMenuItem.Size = new System.Drawing.Size(258, 22);
-		this.recordContextSwitchesAndroidToolStripMenuItem.Text = "Start Recording Context Switches...";
-		this.recordContextSwitchesAndroidToolStripMenuItem.Click += new System.EventHandler(RecordContextSwitchesAndroidMenuItemClicked);
-		this.loadContextSwitchFileAndroidToolStripMenuItem.Name = "loadContextSwitchFileAndroidToolStripMenuItem";
-		this.loadContextSwitchFileAndroidToolStripMenuItem.Size = new System.Drawing.Size(258, 22);
-		this.loadContextSwitchFileAndroidToolStripMenuItem.Text = "Load Context Switch File";
-		this.loadContextSwitchFileAndroidToolStripMenuItem.Click += new System.EventHandler(LoadContextSwitchFileAndroid);
-		this.toolStripSeparator11.Name = "toolStripSeparator11";
-		this.toolStripSeparator11.Size = new System.Drawing.Size(227, 6);
-		this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-		this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(230, 22);
-		this.settingsToolStripMenuItem1.Text = "Settings";
-		this.settingsToolStripMenuItem1.Click += new System.EventHandler(SettingsMenuItemClicked);
-		this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[8] { this.helpToolStripMenuItem1, this.enterProductKeyToolStripMenuItem, this.checkForUpdatesToolStripMenuItem, this.toolStripSeparator3, this.demoToolStripMenuItem, this.showStartupPageToolStripMenuItem, this.toolStripSeparator8, this.aboutToolStripMenuItem });
-		this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-		this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-		this.helpToolStripMenuItem.Text = "Help";
-		this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-		this.helpToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-		this.helpToolStripMenuItem1.Text = "View Help";
-		this.helpToolStripMenuItem1.Click += new System.EventHandler(HelpMenuItemClicked);
-		this.enterProductKeyToolStripMenuItem.Name = "enterProductKeyToolStripMenuItem";
-		this.enterProductKeyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-		this.enterProductKeyToolStripMenuItem.Text = "Registration...";
-		this.enterProductKeyToolStripMenuItem.Click += new System.EventHandler(RegistrationMenuItemClicked);
-		this.checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
-		this.checkForUpdatesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-		this.checkForUpdatesToolStripMenuItem.Text = "Check for Updates";
-		this.checkForUpdatesToolStripMenuItem.Click += new System.EventHandler(CheckForUpdatesMenuItemClicked);
-		this.toolStripSeparator3.Name = "toolStripSeparator3";
-		this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
-		this.demoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[2] { this.launchFrameProGameSimulatorToolStripMenuItem, this.playbackDumpFileInRealtimeToolStripMenuItem });
-		this.demoToolStripMenuItem.Name = "demoToolStripMenuItem";
-		this.demoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-		this.demoToolStripMenuItem.Text = "Demo";
-		this.launchFrameProGameSimulatorToolStripMenuItem.Name = "launchFrameProGameSimulatorToolStripMenuItem";
-		this.launchFrameProGameSimulatorToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
-		this.launchFrameProGameSimulatorToolStripMenuItem.Text = "Launch FramePro Game Simulator";
-		this.launchFrameProGameSimulatorToolStripMenuItem.Click += new System.EventHandler(LaunchGameSimulatorMenuItem);
-		this.playbackDumpFileInRealtimeToolStripMenuItem.Name = "playbackDumpFileInRealtimeToolStripMenuItem";
-		this.playbackDumpFileInRealtimeToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
-		this.playbackDumpFileInRealtimeToolStripMenuItem.Text = "Playback Recording File...";
-		this.playbackDumpFileInRealtimeToolStripMenuItem.Click += new System.EventHandler(PlaybackRecordingFileInRealtime);
-		this.showStartupPageToolStripMenuItem.Name = "showStartupPageToolStripMenuItem";
-		this.showStartupPageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-		this.showStartupPageToolStripMenuItem.Text = "Show Startup Page";
-		this.showStartupPageToolStripMenuItem.Click += new System.EventHandler(ShowStartupPageMenuItemClicked);
-		this.toolStripSeparator8.Name = "toolStripSeparator8";
-		this.toolStripSeparator8.Size = new System.Drawing.Size(177, 6);
-		this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-		this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-		this.aboutToolStripMenuItem.Text = "About";
-		this.aboutToolStripMenuItem.Click += new System.EventHandler(AboutButtonClicked);
-		this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[5] { this.fileToolStripMenuItem, this.viewToolStripMenuItem, this.connectionToolStripMenuItem, this.toolsToolStripMenuItem, this.helpToolStripMenuItem });
-		this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-		this.menuStrip1.Name = "menuStrip1";
-		this.menuStrip1.Size = new System.Drawing.Size(1691, 24);
-		this.menuStrip1.TabIndex = 3;
-		this.menuStrip1.Text = "menuStrip1";
-		this.m_OutputWindowPanel.Controls.Add(this.m_OutputTextBox);
-		this.m_OutputWindowPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-		this.m_OutputWindowPanel.Location = new System.Drawing.Point(0, 755);
-		this.m_OutputWindowPanel.Name = "m_OutputWindowPanel";
-		this.m_OutputWindowPanel.Size = new System.Drawing.Size(1691, 200);
-		this.m_OutputWindowPanel.TabIndex = 8;
-		this.m_OutputTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-		this.m_OutputTextBox.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_OutputTextBox.Location = new System.Drawing.Point(0, 0);
-		this.m_OutputTextBox.Multiline = true;
-		this.m_OutputTextBox.Name = "m_OutputTextBox";
-		this.m_OutputTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-		this.m_OutputTextBox.Size = new System.Drawing.Size(1691, 107);
-		this.m_OutputTextBox.TabIndex = 0;
-		this.m_OutputTextBox.Resize += new System.EventHandler(OutputWindowResize);
-		this.m_OutputWindowSplitter.Dock = System.Windows.Forms.DockStyle.Bottom;
-		this.m_OutputWindowSplitter.Location = new System.Drawing.Point(0, 752);
-		this.m_OutputWindowSplitter.Name = "m_OutputWindowSplitter";
-		this.m_OutputWindowSplitter.Size = new System.Drawing.Size(1691, 3);
-		this.m_OutputWindowSplitter.TabIndex = 9;
-		this.m_OutputWindowSplitter.TabStop = false;
-		this.AllowDrop = true;
-		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
-		base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-		base.ClientSize = new System.Drawing.Size(1691, 862);
-		base.Controls.Add(this.m_MainPanel);
-		base.Controls.Add(this.m_OutputWindowSplitter);
-		base.Controls.Add(this.m_OutputWindowPanel);
-		base.Controls.Add(this.panel1);
-		base.Controls.Add(this.menuStrip1);
-		base.Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
-		base.MainMenuStrip = this.menuStrip1;
-		base.Name = "MainForm";
-		this.Text = "FramePro";
-		base.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-		this.panel1.ResumeLayout(false);
-		this.menuStrip1.ResumeLayout(false);
-		this.menuStrip1.PerformLayout();
-		this.m_OutputWindowPanel.ResumeLayout(false);
-		this.m_OutputWindowPanel.PerformLayout();
-		base.ResumeLayout(false);
-		base.PerformLayout();
-	}
+    private void InitializeComponent()
+    {
+        ComponentResourceManager resources = new ComponentResourceManager(typeof(MainForm));
+        panel1 = new Panel();
+        m_GotoMaxFrameButton = new FrameProButton();
+        m_CallstackButton = new FrameProButton();
+        m_DataGridViewButton = new ViewButton();
+        m_CustomStatsGraphButton = new ViewButton();
+        m_ScopeColourModeButton = new FrameProButton();
+        m_GotoNextSpikeButton = new FrameProButton();
+        m_GotoPrevSpikeButton = new FrameProButton();
+        m_InfoViewButton = new ViewButton();
+        m_FindControl = new FindControl();
+        m_ConnectButton = new FrameProButton();
+        m_CoresViewButton = new ViewButton();
+        m_ScopeViewButton = new ViewButton();
+        m_FramesViewButton = new ViewButton();
+        m_ConditionalScopeTimeSlider = new ConditionalScopeTimeSlider();
+        m_GotoEndButton = new FrameProButton();
+        m_TrackEndButton = new FrameProButton();
+        m_GotoStartButton = new FrameProButton();
+        m_ConnectSettingsButton = new FrameProButton();
+        m_DisconnectButton = new FrameProButton();
+        m_MainPanel = new Panel();
+        fileToolStripMenuItem = new ToolStripMenuItem();
+        openToolStripMenuItem = new ToolStripMenuItem();
+        m_SaveMenuItem = new ToolStripMenuItem();
+        m_SaveAsMenuItem = new ToolStripMenuItem();
+        closeToolStripMenuItem = new ToolStripMenuItem();
+        closeAllToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator9 = new ToolStripSeparator();
+        m_ExportToCSVMenuItem = new ToolStripMenuItem();
+        m_ExportFrameGraphToCSVMenuItem = new ToolStripMenuItem();
+        toolStripSeparator2 = new ToolStripSeparator();
+        m_RecentFilesMenuItem = new ToolStripMenuItem();
+        toolStripSeparator4 = new ToolStripSeparator();
+        exitToolStripMenuItem = new ToolStripMenuItem();
+        viewToolStripMenuItem = new ToolStripMenuItem();
+        m_ThreadsViewMenuItem = new ToolStripMenuItem();
+        m_CoresViewMenuItem = new ToolStripMenuItem();
+        m_ScopesViewMenuItem = new ToolStripMenuItem();
+        toolStripSeparator6 = new ToolStripSeparator();
+        m_ViewSettingsMenuItem = new ToolStripMenuItem();
+        m_InfoMenuItem = new ToolStripMenuItem();
+        m_FrameGraphMenuItem = new ToolStripMenuItem();
+        m_ScopeGraphMenuItem = new ToolStripMenuItem();
+        m_ThreadsViewCoreViewMenuItem = new ToolStripMenuItem();
+        m_CustomStatsGraphMenuItem = new ToolStripMenuItem();
+        colouringToolStripMenuItem = new ToolStripMenuItem();
+        m_ColourByThreadMenuItem = new ToolStripMenuItem();
+        m_ColourByScopeMenuItem = new ToolStripMenuItem();
+        toolStripSeparator10 = new ToolStripSeparator();
+        m_OutputWindowMenuItem = new ToolStripMenuItem();
+        connectionToolStripMenuItem = new ToolStripMenuItem();
+        m_NewConnectionMenuItem = new ToolStripMenuItem();
+        m_ConnectMenuItem = new ToolStripMenuItem();
+        m_DisconnectMenuItem = new ToolStripMenuItem();
+        toolsToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator1 = new ToolStripSeparator();
+        findToolStripMenuItem1 = new ToolStripMenuItem();
+        toolStripSeparator5 = new ToolStripSeparator();
+        m_CreateSessionFromSelectionMenuItem = new ToolStripMenuItem();
+        toolStripSeparator7 = new ToolStripSeparator();
+        androidToolStripMenuItem = new ToolStripMenuItem();
+        recordContextSwitchesAndroidToolStripMenuItem = new ToolStripMenuItem();
+        loadContextSwitchFileAndroidToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator11 = new ToolStripSeparator();
+        settingsToolStripMenuItem1 = new ToolStripMenuItem();
+        helpToolStripMenuItem = new ToolStripMenuItem();
+        helpToolStripMenuItem1 = new ToolStripMenuItem();
+        enterProductKeyToolStripMenuItem = new ToolStripMenuItem();
+        checkForUpdatesToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator3 = new ToolStripSeparator();
+        demoToolStripMenuItem = new ToolStripMenuItem();
+        launchFrameProGameSimulatorToolStripMenuItem = new ToolStripMenuItem();
+        playbackDumpFileInRealtimeToolStripMenuItem = new ToolStripMenuItem();
+        showStartupPageToolStripMenuItem = new ToolStripMenuItem();
+        toolStripSeparator8 = new ToolStripSeparator();
+        aboutToolStripMenuItem = new ToolStripMenuItem();
+        menuStrip1 = new MenuStrip();
+        m_OutputWindowPanel = new Panel();
+        m_OutputTextBox = new TextBox();
+        m_OutputWindowSplitter = new Splitter();
+        panel1.SuspendLayout();
+        menuStrip1.SuspendLayout();
+        m_OutputWindowPanel.SuspendLayout();
+        SuspendLayout();
+        // 
+        // panel1
+        // 
+        panel1.Controls.Add(m_GotoMaxFrameButton);
+        panel1.Controls.Add(m_CallstackButton);
+        panel1.Controls.Add(m_DataGridViewButton);
+        panel1.Controls.Add(m_CustomStatsGraphButton);
+        panel1.Controls.Add(m_ScopeColourModeButton);
+        panel1.Controls.Add(m_GotoNextSpikeButton);
+        panel1.Controls.Add(m_GotoPrevSpikeButton);
+        panel1.Controls.Add(m_InfoViewButton);
+        panel1.Controls.Add(m_FindControl);
+        panel1.Controls.Add(m_ConnectButton);
+        panel1.Controls.Add(m_CoresViewButton);
+        panel1.Controls.Add(m_ScopeViewButton);
+        panel1.Controls.Add(m_FramesViewButton);
+        panel1.Controls.Add(m_ConditionalScopeTimeSlider);
+        panel1.Controls.Add(m_GotoEndButton);
+        panel1.Controls.Add(m_TrackEndButton);
+        panel1.Controls.Add(m_GotoStartButton);
+        panel1.Controls.Add(m_ConnectSettingsButton);
+        panel1.Controls.Add(m_DisconnectButton);
+        panel1.Dock = DockStyle.Top;
+        panel1.Location = new Point(0, 36);
+        panel1.Margin = new Padding(6);
+        panel1.Name = "panel1";
+        panel1.Size = new Size(3100, 120);
+        panel1.TabIndex = 6;
+        // 
+        // m_GotoMaxFrameButton
+        // 
+        m_GotoMaxFrameButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_GotoMaxFrameButton.ButtonText = "Max";
+        m_GotoMaxFrameButton.DisabledImage = (Image)resources.GetObject("m_GotoMaxFrameButton.DisabledImage");
+        m_GotoMaxFrameButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_GotoMaxFrameButton.HighlightEnabled = true;
+        m_GotoMaxFrameButton.Image = (Image)resources.GetObject("m_GotoMaxFrameButton.Image");
+        m_GotoMaxFrameButton.Location = new Point(1511, 0);
+        m_GotoMaxFrameButton.Margin = new Padding(6);
+        m_GotoMaxFrameButton.Name = "m_GotoMaxFrameButton";
+        m_GotoMaxFrameButton.Size = new Size(73, 120);
+        m_GotoMaxFrameButton.TabIndex = 28;
+        m_GotoMaxFrameButton.TabStop = false;
+        m_GotoMaxFrameButton.UseImageAsText = false;
+        m_GotoMaxFrameButton.Click += GotoMaxFrameButtonClicked;
+        // 
+        // m_CallstackButton
+        // 
+        m_CallstackButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_CallstackButton.ButtonText = "Callstacks";
+        m_CallstackButton.DisabledImage = (Image)resources.GetObject("m_CallstackButton.DisabledImage");
+        m_CallstackButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_CallstackButton.HighlightEnabled = true;
+        m_CallstackButton.Image = (Image)resources.GetObject("m_CallstackButton.Image");
+        m_CallstackButton.Location = new Point(2915, 0);
+        m_CallstackButton.Margin = new Padding(6);
+        m_CallstackButton.Name = "m_CallstackButton";
+        m_CallstackButton.Size = new Size(119, 120);
+        m_CallstackButton.TabIndex = 27;
+        m_CallstackButton.TabStop = false;
+        m_CallstackButton.UseImageAsText = false;
+        m_CallstackButton.Click += OnCallstacksButtonClicked;
+        // 
+        // m_DataGridViewButton
+        // 
+        m_DataGridViewButton.ButtonText = "Details";
+        m_DataGridViewButton.Checked = false;
+        m_DataGridViewButton.DisabledImage = (Image)resources.GetObject("m_DataGridViewButton.DisabledImage");
+        m_DataGridViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_DataGridViewButton.Image = (Image)resources.GetObject("m_DataGridViewButton.Image");
+        m_DataGridViewButton.Location = new Point(1258, 0);
+        m_DataGridViewButton.Margin = new Padding(6);
+        m_DataGridViewButton.Name = "m_DataGridViewButton";
+        m_DataGridViewButton.Size = new Size(119, 120);
+        m_DataGridViewButton.TabIndex = 26;
+        m_DataGridViewButton.CheckedChanged += DataGridViewButtonCheckedChanged;
+        // 
+        // m_CustomStatsGraphButton
+        // 
+        m_CustomStatsGraphButton.ButtonText = "Custom Stats";
+        m_CustomStatsGraphButton.Checked = false;
+        m_CustomStatsGraphButton.DisabledImage = (Image)resources.GetObject("m_CustomStatsGraphButton.DisabledImage");
+        m_CustomStatsGraphButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_CustomStatsGraphButton.Image = (Image)resources.GetObject("m_CustomStatsGraphButton.Image");
+        m_CustomStatsGraphButton.Location = new Point(1128, 0);
+        m_CustomStatsGraphButton.Margin = new Padding(6);
+        m_CustomStatsGraphButton.Name = "m_CustomStatsGraphButton";
+        m_CustomStatsGraphButton.Size = new Size(119, 120);
+        m_CustomStatsGraphButton.TabIndex = 25;
+        m_CustomStatsGraphButton.CheckedChanged += CustomStatsGraphButtonCheckChanged;
+        // 
+        // m_ScopeColourModeButton
+        // 
+        m_ScopeColourModeButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_ScopeColourModeButton.ButtonText = "Colour Mode";
+        m_ScopeColourModeButton.DisabledImage = (Image)resources.GetObject("m_ScopeColourModeButton.DisabledImage");
+        m_ScopeColourModeButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_ScopeColourModeButton.HighlightEnabled = true;
+        m_ScopeColourModeButton.Image = (Image)resources.GetObject("m_ScopeColourModeButton.Image");
+        m_ScopeColourModeButton.Location = new Point(2392, 0);
+        m_ScopeColourModeButton.Margin = new Padding(6);
+        m_ScopeColourModeButton.Name = "m_ScopeColourModeButton";
+        m_ScopeColourModeButton.Size = new Size(119, 120);
+        m_ScopeColourModeButton.TabIndex = 24;
+        m_ScopeColourModeButton.TabStop = false;
+        m_ScopeColourModeButton.UseImageAsText = false;
+        m_ScopeColourModeButton.Click += ScopeColourModeButtonClicked;
+        // 
+        // m_GotoNextSpikeButton
+        // 
+        m_GotoNextSpikeButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_GotoNextSpikeButton.ButtonText = "Next";
+        m_GotoNextSpikeButton.DisabledImage = (Image)resources.GetObject("m_GotoNextSpikeButton.DisabledImage");
+        m_GotoNextSpikeButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_GotoNextSpikeButton.HighlightEnabled = true;
+        m_GotoNextSpikeButton.Image = (Image)resources.GetObject("m_GotoNextSpikeButton.Image");
+        m_GotoNextSpikeButton.Location = new Point(1595, 0);
+        m_GotoNextSpikeButton.Margin = new Padding(6);
+        m_GotoNextSpikeButton.Name = "m_GotoNextSpikeButton";
+        m_GotoNextSpikeButton.Size = new Size(73, 120);
+        m_GotoNextSpikeButton.TabIndex = 23;
+        m_GotoNextSpikeButton.TabStop = false;
+        m_GotoNextSpikeButton.UseImageAsText = false;
+        m_GotoNextSpikeButton.Click += GotoNextSpikeButtonClicked;
+        // 
+        // m_GotoPrevSpikeButton
+        // 
+        m_GotoPrevSpikeButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_GotoPrevSpikeButton.ButtonText = "Prev";
+        m_GotoPrevSpikeButton.DisabledImage = (Image)resources.GetObject("m_GotoPrevSpikeButton.DisabledImage");
+        m_GotoPrevSpikeButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_GotoPrevSpikeButton.HighlightEnabled = true;
+        m_GotoPrevSpikeButton.Image = (Image)resources.GetObject("m_GotoPrevSpikeButton.Image");
+        m_GotoPrevSpikeButton.Location = new Point(1426, 0);
+        m_GotoPrevSpikeButton.Margin = new Padding(6);
+        m_GotoPrevSpikeButton.Name = "m_GotoPrevSpikeButton";
+        m_GotoPrevSpikeButton.Size = new Size(73, 120);
+        m_GotoPrevSpikeButton.TabIndex = 22;
+        m_GotoPrevSpikeButton.TabStop = false;
+        m_GotoPrevSpikeButton.UseImageAsText = false;
+        m_GotoPrevSpikeButton.Click += GotoPrevSpikeButtonClicked;
+        // 
+        // m_InfoViewButton
+        // 
+        m_InfoViewButton.ButtonText = "Info";
+        m_InfoViewButton.Checked = false;
+        m_InfoViewButton.DisabledImage = (Image)resources.GetObject("m_InfoViewButton.DisabledImage");
+        m_InfoViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_InfoViewButton.Image = (Image)resources.GetObject("m_InfoViewButton.Image");
+        m_InfoViewButton.Location = new Point(607, 0);
+        m_InfoViewButton.Margin = new Padding(6);
+        m_InfoViewButton.Name = "m_InfoViewButton";
+        m_InfoViewButton.Size = new Size(119, 120);
+        m_InfoViewButton.TabIndex = 21;
+        m_InfoViewButton.CheckedChanged += InfoViewCheckedChanged;
+        // 
+        // m_FindControl
+        // 
+        m_FindControl.Location = new Point(1716, 0);
+        m_FindControl.Margin = new Padding(7);
+        m_FindControl.Name = "m_FindControl";
+        m_FindControl.Size = new Size(629, 120);
+        m_FindControl.TabIndex = 12;
+        m_FindControl.TabStop = false;
+        m_FindControl.FindControlTextChanged += FindControlTextChanged;
+        m_FindControl.FindControlGotoPrev += FindControlGotoPrev;
+        m_FindControl.FindControlGotoNext += FindControlGotoNext;
+        // 
+        // m_ConnectButton
+        // 
+        m_ConnectButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_ConnectButton.ButtonText = "Connect";
+        m_ConnectButton.DisabledImage = (Image)resources.GetObject("m_ConnectButton.DisabledImage");
+        m_ConnectButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_ConnectButton.HighlightEnabled = true;
+        m_ConnectButton.Image = (Image)resources.GetObject("m_ConnectButton.Image");
+        m_ConnectButton.Location = new Point(0, 0);
+        m_ConnectButton.Margin = new Padding(6);
+        m_ConnectButton.Name = "m_ConnectButton";
+        m_ConnectButton.Size = new Size(119, 120);
+        m_ConnectButton.TabIndex = 0;
+        m_ConnectButton.TabStop = false;
+        m_ConnectButton.UseImageAsText = false;
+        m_ConnectButton.Click += ConnectButtonClick;
+        // 
+        // m_CoresViewButton
+        // 
+        m_CoresViewButton.ButtonText = "Cores";
+        m_CoresViewButton.Checked = false;
+        m_CoresViewButton.DisabledImage = (Image)resources.GetObject("m_CoresViewButton.DisabledImage");
+        m_CoresViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_CoresViewButton.Image = (Image)resources.GetObject("m_CoresViewButton.Image");
+        m_CoresViewButton.Location = new Point(997, 0);
+        m_CoresViewButton.Margin = new Padding(6);
+        m_CoresViewButton.Name = "m_CoresViewButton";
+        m_CoresViewButton.Size = new Size(119, 120);
+        m_CoresViewButton.TabIndex = 20;
+        m_CoresViewButton.CheckedChanged += CoresViewButtonCheckedChanged;
+        // 
+        // m_ScopeViewButton
+        // 
+        m_ScopeViewButton.ButtonText = "Scope";
+        m_ScopeViewButton.Checked = false;
+        m_ScopeViewButton.DisabledImage = (Image)resources.GetObject("m_ScopeViewButton.DisabledImage");
+        m_ScopeViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_ScopeViewButton.Image = (Image)resources.GetObject("m_ScopeViewButton.Image");
+        m_ScopeViewButton.Location = new Point(867, 0);
+        m_ScopeViewButton.Margin = new Padding(6);
+        m_ScopeViewButton.Name = "m_ScopeViewButton";
+        m_ScopeViewButton.Size = new Size(119, 120);
+        m_ScopeViewButton.TabIndex = 18;
+        m_ScopeViewButton.CheckedChanged += ScopesViewButtonCheckedChanged;
+        // 
+        // m_FramesViewButton
+        // 
+        m_FramesViewButton.ButtonText = "Frames";
+        m_FramesViewButton.Checked = false;
+        m_FramesViewButton.DisabledImage = (Image)resources.GetObject("m_FramesViewButton.DisabledImage");
+        m_FramesViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_FramesViewButton.Image = (Image)resources.GetObject("m_FramesViewButton.Image");
+        m_FramesViewButton.Location = new Point(737, 0);
+        m_FramesViewButton.Margin = new Padding(6);
+        m_FramesViewButton.Name = "m_FramesViewButton";
+        m_FramesViewButton.Size = new Size(119, 120);
+        m_FramesViewButton.TabIndex = 17;
+        m_FramesViewButton.CheckedChanged += FramesButtonCheckedChanged;
+        // 
+        // m_ConditionalScopeTimeSlider
+        // 
+        m_ConditionalScopeTimeSlider.Location = new Point(2545, 0);
+        m_ConditionalScopeTimeSlider.Margin = new Padding(7);
+        m_ConditionalScopeTimeSlider.Name = "m_ConditionalScopeTimeSlider";
+        m_ConditionalScopeTimeSlider.Size = new Size(358, 120);
+        m_ConditionalScopeTimeSlider.TabIndex = 10;
+        m_ConditionalScopeTimeSlider.TabStop = false;
+        m_ConditionalScopeTimeSlider.ValueChanged += ConditionalSliderValueChanged;
+        // 
+        // m_GotoEndButton
+        // 
+        m_GotoEndButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_GotoEndButton.ButtonText = "End";
+        m_GotoEndButton.DisabledImage = (Image)resources.GetObject("m_GotoEndButton.DisabledImage");
+        m_GotoEndButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_GotoEndButton.HighlightEnabled = true;
+        m_GotoEndButton.Image = (Image)resources.GetObject("m_GotoEndButton.Image");
+        m_GotoEndButton.Location = new Point(510, 0);
+        m_GotoEndButton.Margin = new Padding(6);
+        m_GotoEndButton.Name = "m_GotoEndButton";
+        m_GotoEndButton.Size = new Size(73, 120);
+        m_GotoEndButton.TabIndex = 9;
+        m_GotoEndButton.TabStop = false;
+        m_GotoEndButton.UseImageAsText = false;
+        m_GotoEndButton.Click += GotoEndButtonClicked;
+        // 
+        // m_TrackEndButton
+        // 
+        m_TrackEndButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_TrackEndButton.ButtonText = "Track";
+        m_TrackEndButton.DisabledImage = (Image)resources.GetObject("m_TrackEndButton.DisabledImage");
+        m_TrackEndButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_TrackEndButton.HighlightEnabled = true;
+        m_TrackEndButton.Image = (Image)resources.GetObject("m_TrackEndButton.Image");
+        m_TrackEndButton.Location = new Point(425, 0);
+        m_TrackEndButton.Margin = new Padding(6);
+        m_TrackEndButton.Name = "m_TrackEndButton";
+        m_TrackEndButton.Size = new Size(73, 120);
+        m_TrackEndButton.TabIndex = 8;
+        m_TrackEndButton.TabStop = false;
+        m_TrackEndButton.UseImageAsText = false;
+        m_TrackEndButton.Click += PlayPauseButtonClicked;
+        // 
+        // m_GotoStartButton
+        // 
+        m_GotoStartButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_GotoStartButton.ButtonText = "Start";
+        m_GotoStartButton.DisabledImage = (Image)resources.GetObject("m_GotoStartButton.DisabledImage");
+        m_GotoStartButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_GotoStartButton.HighlightEnabled = true;
+        m_GotoStartButton.Image = (Image)resources.GetObject("m_GotoStartButton.Image");
+        m_GotoStartButton.Location = new Point(341, 0);
+        m_GotoStartButton.Margin = new Padding(6);
+        m_GotoStartButton.Name = "m_GotoStartButton";
+        m_GotoStartButton.Size = new Size(73, 120);
+        m_GotoStartButton.TabIndex = 6;
+        m_GotoStartButton.TabStop = false;
+        m_GotoStartButton.UseImageAsText = false;
+        m_GotoStartButton.Click += HomeButtonClicked;
+        // 
+        // m_ConnectSettingsButton
+        // 
+        m_ConnectSettingsButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_ConnectSettingsButton.ButtonText = "";
+        m_ConnectSettingsButton.DisabledImage = null;
+        m_ConnectSettingsButton.HighlightEnabled = true;
+        m_ConnectSettingsButton.Image = (Image)resources.GetObject("m_ConnectSettingsButton.Image");
+        m_ConnectSettingsButton.Location = new Point(119, 0);
+        m_ConnectSettingsButton.Margin = new Padding(6);
+        m_ConnectSettingsButton.Name = "m_ConnectSettingsButton";
+        m_ConnectSettingsButton.Size = new Size(31, 120);
+        m_ConnectSettingsButton.TabIndex = 5;
+        m_ConnectSettingsButton.TabStop = false;
+        m_ConnectSettingsButton.UseImageAsText = true;
+        m_ConnectSettingsButton.Click += ConnectSettingsButtonClicked;
+        // 
+        // m_DisconnectButton
+        // 
+        m_DisconnectButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_DisconnectButton.ButtonText = "Disconnect";
+        m_DisconnectButton.DisabledImage = (Image)resources.GetObject("m_DisconnectButton.DisabledImage");
+        m_DisconnectButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_DisconnectButton.HighlightEnabled = true;
+        m_DisconnectButton.Image = (Image)resources.GetObject("m_DisconnectButton.Image");
+        m_DisconnectButton.Location = new Point(161, 0);
+        m_DisconnectButton.Margin = new Padding(6);
+        m_DisconnectButton.Name = "m_DisconnectButton";
+        m_DisconnectButton.Size = new Size(119, 120);
+        m_DisconnectButton.TabIndex = 4;
+        m_DisconnectButton.TabStop = false;
+        m_DisconnectButton.UseImageAsText = false;
+        m_DisconnectButton.Click += DisconnectButtonPressed;
+        // 
+        // m_MainPanel
+        // 
+        m_MainPanel.Dock = DockStyle.Fill;
+        m_MainPanel.Location = new Point(0, 156);
+        m_MainPanel.Margin = new Padding(6);
+        m_MainPanel.Name = "m_MainPanel";
+        m_MainPanel.Size = new Size(3100, 1060);
+        m_MainPanel.TabIndex = 7;
+        // 
+        // fileToolStripMenuItem
+        // 
+        fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openToolStripMenuItem, m_SaveMenuItem, m_SaveAsMenuItem, closeToolStripMenuItem, closeAllToolStripMenuItem, toolStripSeparator9, m_ExportToCSVMenuItem, m_ExportFrameGraphToCSVMenuItem, toolStripSeparator2, m_RecentFilesMenuItem, toolStripSeparator4, exitToolStripMenuItem });
+        fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+        fileToolStripMenuItem.Size = new Size(56, 28);
+        fileToolStripMenuItem.Text = "File";
+        // 
+        // openToolStripMenuItem
+        // 
+        openToolStripMenuItem.Name = "openToolStripMenuItem";
+        openToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
+        openToolStripMenuItem.Size = new Size(345, 34);
+        openToolStripMenuItem.Text = "Open";
+        openToolStripMenuItem.Click += OpenMenuItem;
+        // 
+        // m_SaveMenuItem
+        // 
+        m_SaveMenuItem.Name = "m_SaveMenuItem";
+        m_SaveMenuItem.ShortcutKeys = Keys.Control | Keys.S;
+        m_SaveMenuItem.Size = new Size(345, 34);
+        m_SaveMenuItem.Text = "Save";
+        m_SaveMenuItem.Click += SaveMenuItem;
+        // 
+        // m_SaveAsMenuItem
+        // 
+        m_SaveAsMenuItem.Name = "m_SaveAsMenuItem";
+        m_SaveAsMenuItem.Size = new Size(345, 34);
+        m_SaveAsMenuItem.Text = "Save As...";
+        m_SaveAsMenuItem.Click += SaveAsMenuItemClicked;
+        // 
+        // closeToolStripMenuItem
+        // 
+        closeToolStripMenuItem.Name = "closeToolStripMenuItem";
+        closeToolStripMenuItem.Size = new Size(345, 34);
+        closeToolStripMenuItem.Text = "Close";
+        closeToolStripMenuItem.Click += CloseMenuItem;
+        // 
+        // closeAllToolStripMenuItem
+        // 
+        closeAllToolStripMenuItem.Name = "closeAllToolStripMenuItem";
+        closeAllToolStripMenuItem.Size = new Size(345, 34);
+        closeAllToolStripMenuItem.Text = "Close All";
+        closeAllToolStripMenuItem.Click += CloseAllMenuItemClicked;
+        // 
+        // toolStripSeparator9
+        // 
+        toolStripSeparator9.Name = "toolStripSeparator9";
+        toolStripSeparator9.Size = new Size(342, 6);
+        // 
+        // m_ExportToCSVMenuItem
+        // 
+        m_ExportToCSVMenuItem.Name = "m_ExportToCSVMenuItem";
+        m_ExportToCSVMenuItem.Size = new Size(345, 34);
+        m_ExportToCSVMenuItem.Text = "Export to CSV";
+        m_ExportToCSVMenuItem.Click += ExportToCSVMenuItem;
+        // 
+        // m_ExportFrameGraphToCSVMenuItem
+        // 
+        m_ExportFrameGraphToCSVMenuItem.Name = "m_ExportFrameGraphToCSVMenuItem";
+        m_ExportFrameGraphToCSVMenuItem.Size = new Size(345, 34);
+        m_ExportFrameGraphToCSVMenuItem.Text = "Export Frame Graph to CSV";
+        m_ExportFrameGraphToCSVMenuItem.Click += ExportFrameGraphToCSVMenuItemClicked;
+        // 
+        // toolStripSeparator2
+        // 
+        toolStripSeparator2.Name = "toolStripSeparator2";
+        toolStripSeparator2.Size = new Size(342, 6);
+        // 
+        // m_RecentFilesMenuItem
+        // 
+        m_RecentFilesMenuItem.Name = "m_RecentFilesMenuItem";
+        m_RecentFilesMenuItem.Size = new Size(345, 34);
+        m_RecentFilesMenuItem.Text = "Recent Files";
+        // 
+        // toolStripSeparator4
+        // 
+        toolStripSeparator4.Name = "toolStripSeparator4";
+        toolStripSeparator4.Size = new Size(342, 6);
+        // 
+        // exitToolStripMenuItem
+        // 
+        exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+        exitToolStripMenuItem.Size = new Size(345, 34);
+        exitToolStripMenuItem.Text = "Exit";
+        exitToolStripMenuItem.Click += ExitMenuItem;
+        // 
+        // viewToolStripMenuItem
+        // 
+        viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { m_ThreadsViewMenuItem, m_CoresViewMenuItem, m_ScopesViewMenuItem, toolStripSeparator6, m_ViewSettingsMenuItem, colouringToolStripMenuItem, toolStripSeparator10, m_OutputWindowMenuItem });
+        viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+        viewToolStripMenuItem.Size = new Size(67, 28);
+        viewToolStripMenuItem.Text = "View";
+        // 
+        // m_ThreadsViewMenuItem
+        // 
+        m_ThreadsViewMenuItem.Name = "m_ThreadsViewMenuItem";
+        m_ThreadsViewMenuItem.Size = new Size(252, 34);
+        m_ThreadsViewMenuItem.Text = "Threads View";
+        m_ThreadsViewMenuItem.Click += ThreadsViewMenuItemClicked;
+        // 
+        // m_CoresViewMenuItem
+        // 
+        m_CoresViewMenuItem.Name = "m_CoresViewMenuItem";
+        m_CoresViewMenuItem.Size = new Size(252, 34);
+        m_CoresViewMenuItem.Text = "Cores View";
+        // 
+        // m_ScopesViewMenuItem
+        // 
+        m_ScopesViewMenuItem.Name = "m_ScopesViewMenuItem";
+        m_ScopesViewMenuItem.Size = new Size(252, 34);
+        m_ScopesViewMenuItem.Text = "Scopes View";
+        m_ScopesViewMenuItem.Click += ScopesViewMenuItemClicked;
+        // 
+        // toolStripSeparator6
+        // 
+        toolStripSeparator6.Name = "toolStripSeparator6";
+        toolStripSeparator6.Size = new Size(249, 6);
+        // 
+        // m_ViewSettingsMenuItem
+        // 
+        m_ViewSettingsMenuItem.DropDownItems.AddRange(new ToolStripItem[] { m_InfoMenuItem, m_FrameGraphMenuItem, m_ScopeGraphMenuItem, m_ThreadsViewCoreViewMenuItem, m_CustomStatsGraphMenuItem });
+        m_ViewSettingsMenuItem.Name = "m_ViewSettingsMenuItem";
+        m_ViewSettingsMenuItem.Size = new Size(252, 34);
+        m_ViewSettingsMenuItem.Text = "Threads View";
+        // 
+        // m_InfoMenuItem
+        // 
+        m_InfoMenuItem.Checked = true;
+        m_InfoMenuItem.CheckOnClick = true;
+        m_InfoMenuItem.CheckState = CheckState.Checked;
+        m_InfoMenuItem.Name = "m_InfoMenuItem";
+        m_InfoMenuItem.Size = new Size(281, 34);
+        m_InfoMenuItem.Text = "Info";
+        m_InfoMenuItem.Click += InfoMenuItemClicked;
+        // 
+        // m_FrameGraphMenuItem
+        // 
+        m_FrameGraphMenuItem.Checked = true;
+        m_FrameGraphMenuItem.CheckOnClick = true;
+        m_FrameGraphMenuItem.CheckState = CheckState.Checked;
+        m_FrameGraphMenuItem.Name = "m_FrameGraphMenuItem";
+        m_FrameGraphMenuItem.Size = new Size(281, 34);
+        m_FrameGraphMenuItem.Text = "Frame Graph";
+        m_FrameGraphMenuItem.Click += FrameGraphMenuItemClicked;
+        // 
+        // m_ScopeGraphMenuItem
+        // 
+        m_ScopeGraphMenuItem.Checked = true;
+        m_ScopeGraphMenuItem.CheckOnClick = true;
+        m_ScopeGraphMenuItem.CheckState = CheckState.Checked;
+        m_ScopeGraphMenuItem.Name = "m_ScopeGraphMenuItem";
+        m_ScopeGraphMenuItem.Size = new Size(281, 34);
+        m_ScopeGraphMenuItem.Text = "Scope Graph";
+        m_ScopeGraphMenuItem.Click += ScopeGraphMenuItemClicked;
+        // 
+        // m_ThreadsViewCoreViewMenuItem
+        // 
+        m_ThreadsViewCoreViewMenuItem.Checked = true;
+        m_ThreadsViewCoreViewMenuItem.CheckOnClick = true;
+        m_ThreadsViewCoreViewMenuItem.CheckState = CheckState.Checked;
+        m_ThreadsViewCoreViewMenuItem.Name = "m_ThreadsViewCoreViewMenuItem";
+        m_ThreadsViewCoreViewMenuItem.Size = new Size(281, 34);
+        m_ThreadsViewCoreViewMenuItem.Text = "CPU Graph";
+        m_ThreadsViewCoreViewMenuItem.Click += CoreViewMenuItemClicked;
+        // 
+        // m_CustomStatsGraphMenuItem
+        // 
+        m_CustomStatsGraphMenuItem.Checked = true;
+        m_CustomStatsGraphMenuItem.CheckOnClick = true;
+        m_CustomStatsGraphMenuItem.CheckState = CheckState.Checked;
+        m_CustomStatsGraphMenuItem.Name = "m_CustomStatsGraphMenuItem";
+        m_CustomStatsGraphMenuItem.Size = new Size(281, 34);
+        m_CustomStatsGraphMenuItem.Text = "Custom Stats Graph";
+        m_CustomStatsGraphMenuItem.Click += CustomStatsGraphMenuItemClicked;
+        // 
+        // colouringToolStripMenuItem
+        // 
+        colouringToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { m_ColourByThreadMenuItem, m_ColourByScopeMenuItem });
+        colouringToolStripMenuItem.Name = "colouringToolStripMenuItem";
+        colouringToolStripMenuItem.Size = new Size(252, 34);
+        colouringToolStripMenuItem.Text = "Scope Colouring";
+        // 
+        // m_ColourByThreadMenuItem
+        // 
+        m_ColourByThreadMenuItem.Name = "m_ColourByThreadMenuItem";
+        m_ColourByThreadMenuItem.Size = new Size(259, 34);
+        m_ColourByThreadMenuItem.Text = "Colour by Thread";
+        // 
+        // m_ColourByScopeMenuItem
+        // 
+        m_ColourByScopeMenuItem.Name = "m_ColourByScopeMenuItem";
+        m_ColourByScopeMenuItem.Size = new Size(259, 34);
+        m_ColourByScopeMenuItem.Text = "Colour by Scope";
+        // 
+        // toolStripSeparator10
+        // 
+        toolStripSeparator10.Name = "toolStripSeparator10";
+        toolStripSeparator10.Size = new Size(249, 6);
+        // 
+        // m_OutputWindowMenuItem
+        // 
+        m_OutputWindowMenuItem.Checked = true;
+        m_OutputWindowMenuItem.CheckState = CheckState.Checked;
+        m_OutputWindowMenuItem.Name = "m_OutputWindowMenuItem";
+        m_OutputWindowMenuItem.Size = new Size(252, 34);
+        m_OutputWindowMenuItem.Text = "Output Window";
+        m_OutputWindowMenuItem.Click += OutputWindowMenuItem;
+        // 
+        // connectionToolStripMenuItem
+        // 
+        connectionToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { m_NewConnectionMenuItem, m_ConnectMenuItem, m_DisconnectMenuItem });
+        connectionToolStripMenuItem.Name = "connectionToolStripMenuItem";
+        connectionToolStripMenuItem.Size = new Size(124, 28);
+        connectionToolStripMenuItem.Text = "Connection";
+        // 
+        // m_NewConnectionMenuItem
+        // 
+        m_NewConnectionMenuItem.Name = "m_NewConnectionMenuItem";
+        m_NewConnectionMenuItem.Size = new Size(264, 34);
+        m_NewConnectionMenuItem.Text = "New Connection...";
+        m_NewConnectionMenuItem.Click += NewConnectionMenuItem;
+        // 
+        // m_ConnectMenuItem
+        // 
+        m_ConnectMenuItem.Name = "m_ConnectMenuItem";
+        m_ConnectMenuItem.Size = new Size(264, 34);
+        m_ConnectMenuItem.Text = "Connect...";
+        m_ConnectMenuItem.Click += ConnectMenuItemClicked;
+        // 
+        // m_DisconnectMenuItem
+        // 
+        m_DisconnectMenuItem.Name = "m_DisconnectMenuItem";
+        m_DisconnectMenuItem.Size = new Size(264, 34);
+        m_DisconnectMenuItem.Text = "Disconnect";
+        m_DisconnectMenuItem.Click += DisconnectButtonClicked;
+        // 
+        // toolsToolStripMenuItem
+        // 
+        toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { toolStripSeparator1, findToolStripMenuItem1, toolStripSeparator5, m_CreateSessionFromSelectionMenuItem, toolStripSeparator7, androidToolStripMenuItem, toolStripSeparator11, settingsToolStripMenuItem1 });
+        toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+        toolsToolStripMenuItem.Size = new Size(71, 28);
+        toolsToolStripMenuItem.Text = "Tools";
+        // 
+        // toolStripSeparator1
+        // 
+        toolStripSeparator1.Name = "toolStripSeparator1";
+        toolStripSeparator1.Size = new Size(360, 6);
+        // 
+        // findToolStripMenuItem1
+        // 
+        findToolStripMenuItem1.Name = "findToolStripMenuItem1";
+        findToolStripMenuItem1.ShortcutKeys = Keys.Control | Keys.F;
+        findToolStripMenuItem1.Size = new Size(363, 34);
+        findToolStripMenuItem1.Text = "Find";
+        findToolStripMenuItem1.Click += FindMenuItemClicked;
+        // 
+        // toolStripSeparator5
+        // 
+        toolStripSeparator5.Name = "toolStripSeparator5";
+        toolStripSeparator5.Size = new Size(360, 6);
+        // 
+        // m_CreateSessionFromSelectionMenuItem
+        // 
+        m_CreateSessionFromSelectionMenuItem.Name = "m_CreateSessionFromSelectionMenuItem";
+        m_CreateSessionFromSelectionMenuItem.Size = new Size(363, 34);
+        m_CreateSessionFromSelectionMenuItem.Text = "Create Session from Selection";
+        m_CreateSessionFromSelectionMenuItem.Click += CreateSessionFromSelectionMenuItemClicked;
+        // 
+        // toolStripSeparator7
+        // 
+        toolStripSeparator7.Name = "toolStripSeparator7";
+        toolStripSeparator7.Size = new Size(360, 6);
+        // 
+        // androidToolStripMenuItem
+        // 
+        androidToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { recordContextSwitchesAndroidToolStripMenuItem, loadContextSwitchFileAndroidToolStripMenuItem });
+        androidToolStripMenuItem.Name = "androidToolStripMenuItem";
+        androidToolStripMenuItem.Size = new Size(363, 34);
+        androidToolStripMenuItem.Text = "Android";
+        // 
+        // recordContextSwitchesAndroidToolStripMenuItem
+        // 
+        recordContextSwitchesAndroidToolStripMenuItem.Name = "recordContextSwitchesAndroidToolStripMenuItem";
+        recordContextSwitchesAndroidToolStripMenuItem.Size = new Size(408, 34);
+        recordContextSwitchesAndroidToolStripMenuItem.Text = "Start Recording Context Switches...";
+        recordContextSwitchesAndroidToolStripMenuItem.Click += RecordContextSwitchesAndroidMenuItemClicked;
+        // 
+        // loadContextSwitchFileAndroidToolStripMenuItem
+        // 
+        loadContextSwitchFileAndroidToolStripMenuItem.Name = "loadContextSwitchFileAndroidToolStripMenuItem";
+        loadContextSwitchFileAndroidToolStripMenuItem.Size = new Size(408, 34);
+        loadContextSwitchFileAndroidToolStripMenuItem.Text = "Load Context Switch File";
+        loadContextSwitchFileAndroidToolStripMenuItem.Click += LoadContextSwitchFileAndroid;
+        // 
+        // toolStripSeparator11
+        // 
+        toolStripSeparator11.Name = "toolStripSeparator11";
+        toolStripSeparator11.Size = new Size(360, 6);
+        // 
+        // settingsToolStripMenuItem1
+        // 
+        settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
+        settingsToolStripMenuItem1.Size = new Size(363, 34);
+        settingsToolStripMenuItem1.Text = "Settings";
+        settingsToolStripMenuItem1.Click += SettingsMenuItemClicked;
+        // 
+        // helpToolStripMenuItem
+        // 
+        helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { helpToolStripMenuItem1, enterProductKeyToolStripMenuItem, checkForUpdatesToolStripMenuItem, toolStripSeparator3, demoToolStripMenuItem, showStartupPageToolStripMenuItem, toolStripSeparator8, aboutToolStripMenuItem });
+        helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+        helpToolStripMenuItem.Size = new Size(67, 28);
+        helpToolStripMenuItem.Text = "Help";
+        // 
+        // helpToolStripMenuItem1
+        // 
+        helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
+        helpToolStripMenuItem1.Size = new Size(268, 34);
+        helpToolStripMenuItem1.Text = "View Help";
+        helpToolStripMenuItem1.Click += HelpMenuItemClicked;
+        // 
+        // enterProductKeyToolStripMenuItem
+        // 
+        enterProductKeyToolStripMenuItem.Name = "enterProductKeyToolStripMenuItem";
+        enterProductKeyToolStripMenuItem.Size = new Size(268, 34);
+        enterProductKeyToolStripMenuItem.Text = "Registration...";
+        enterProductKeyToolStripMenuItem.Click += RegistrationMenuItemClicked;
+        // 
+        // checkForUpdatesToolStripMenuItem
+        // 
+        checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
+        checkForUpdatesToolStripMenuItem.Size = new Size(268, 34);
+        checkForUpdatesToolStripMenuItem.Text = "Check for Updates";
+        checkForUpdatesToolStripMenuItem.Click += CheckForUpdatesMenuItemClicked;
+        // 
+        // toolStripSeparator3
+        // 
+        toolStripSeparator3.Name = "toolStripSeparator3";
+        toolStripSeparator3.Size = new Size(265, 6);
+        // 
+        // demoToolStripMenuItem
+        // 
+        demoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { launchFrameProGameSimulatorToolStripMenuItem, playbackDumpFileInRealtimeToolStripMenuItem });
+        demoToolStripMenuItem.Name = "demoToolStripMenuItem";
+        demoToolStripMenuItem.Size = new Size(268, 34);
+        demoToolStripMenuItem.Text = "Demo";
+        // 
+        // launchFrameProGameSimulatorToolStripMenuItem
+        // 
+        launchFrameProGameSimulatorToolStripMenuItem.Name = "launchFrameProGameSimulatorToolStripMenuItem";
+        launchFrameProGameSimulatorToolStripMenuItem.Size = new Size(402, 34);
+        launchFrameProGameSimulatorToolStripMenuItem.Text = "Launch FramePro Game Simulator";
+        launchFrameProGameSimulatorToolStripMenuItem.Click += LaunchGameSimulatorMenuItem;
+        // 
+        // playbackDumpFileInRealtimeToolStripMenuItem
+        // 
+        playbackDumpFileInRealtimeToolStripMenuItem.Name = "playbackDumpFileInRealtimeToolStripMenuItem";
+        playbackDumpFileInRealtimeToolStripMenuItem.Size = new Size(402, 34);
+        playbackDumpFileInRealtimeToolStripMenuItem.Text = "Playback Recording File...";
+        playbackDumpFileInRealtimeToolStripMenuItem.Click += PlaybackRecordingFileInRealtime;
+        // 
+        // showStartupPageToolStripMenuItem
+        // 
+        showStartupPageToolStripMenuItem.Name = "showStartupPageToolStripMenuItem";
+        showStartupPageToolStripMenuItem.Size = new Size(268, 34);
+        // 
+        // toolStripSeparator8
+        // 
+        toolStripSeparator8.Name = "toolStripSeparator8";
+        toolStripSeparator8.Size = new Size(265, 6);
+        // 
+        // aboutToolStripMenuItem
+        // 
+        aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+        aboutToolStripMenuItem.Size = new Size(268, 34);
+        aboutToolStripMenuItem.Text = "About";
+        aboutToolStripMenuItem.Click += AboutButtonClicked;
+        // 
+        // menuStrip1
+        // 
+        menuStrip1.ImageScalingSize = new Size(24, 24);
+        menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, viewToolStripMenuItem, connectionToolStripMenuItem, toolsToolStripMenuItem, helpToolStripMenuItem });
+        menuStrip1.Location = new Point(0, 0);
+        menuStrip1.Name = "menuStrip1";
+        menuStrip1.Padding = new Padding(11, 4, 0, 4);
+        menuStrip1.Size = new Size(3100, 36);
+        menuStrip1.TabIndex = 3;
+        menuStrip1.Text = "menuStrip1";
+        // 
+        // m_OutputWindowPanel
+        // 
+        m_OutputWindowPanel.Controls.Add(m_OutputTextBox);
+        m_OutputWindowPanel.Dock = DockStyle.Bottom;
+        m_OutputWindowPanel.Location = new Point(0, 1222);
+        m_OutputWindowPanel.Margin = new Padding(6);
+        m_OutputWindowPanel.Name = "m_OutputWindowPanel";
+        m_OutputWindowPanel.Size = new Size(3100, 369);
+        m_OutputWindowPanel.TabIndex = 8;
+        // 
+        // m_OutputTextBox
+        // 
+        m_OutputTextBox.Dock = DockStyle.Fill;
+        m_OutputTextBox.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_OutputTextBox.Location = new Point(0, 0);
+        m_OutputTextBox.Margin = new Padding(6);
+        m_OutputTextBox.Multiline = true;
+        m_OutputTextBox.Name = "m_OutputTextBox";
+        m_OutputTextBox.ScrollBars = ScrollBars.Both;
+        m_OutputTextBox.Size = new Size(3100, 369);
+        m_OutputTextBox.TabIndex = 0;
+        m_OutputTextBox.Resize += OutputWindowResize;
+        // 
+        // m_OutputWindowSplitter
+        // 
+        m_OutputWindowSplitter.Dock = DockStyle.Bottom;
+        m_OutputWindowSplitter.Location = new Point(0, 1216);
+        m_OutputWindowSplitter.Margin = new Padding(6);
+        m_OutputWindowSplitter.Name = "m_OutputWindowSplitter";
+        m_OutputWindowSplitter.Size = new Size(3100, 6);
+        m_OutputWindowSplitter.TabIndex = 9;
+        m_OutputWindowSplitter.TabStop = false;
+        // 
+        // MainForm
+        // 
+        AllowDrop = true;
+        AutoScaleDimensions = new SizeF(11F, 24F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(3100, 1591);
+        Controls.Add(m_MainPanel);
+        Controls.Add(m_OutputWindowSplitter);
+        Controls.Add(m_OutputWindowPanel);
+        Controls.Add(panel1);
+        Controls.Add(menuStrip1);
+        Icon = (Icon)resources.GetObject("$this.Icon");
+        MainMenuStrip = menuStrip1;
+        Margin = new Padding(6);
+        Name = "MainForm";
+        Text = "ProfilerStudy";
+        WindowState = FormWindowState.Maximized;
+        panel1.ResumeLayout(false);
+        menuStrip1.ResumeLayout(false);
+        menuStrip1.PerformLayout();
+        m_OutputWindowPanel.ResumeLayout(false);
+        m_OutputWindowPanel.PerformLayout();
+        ResumeLayout(false);
+        PerformLayout();
+    }
 }

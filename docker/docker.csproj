@@ -15,6 +15,6 @@
     <RootNamespace />
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SCLCoreCLR\SCLCoreCLR.csproj" />
+    <ProjectReference Include="..\SCLCoreCLR\CoreUtils.csproj" />
   </ItemGroup>
 </Project>
