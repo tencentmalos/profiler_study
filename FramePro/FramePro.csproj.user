@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Update="FramePro\AboutDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\AndroidContextSwitchRecordingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\AutoUpdate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\CheckButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ConditionalScopeTimeSlider.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ConnectSettingsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\ContextSwitchErrorBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\CoreGraph.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\CoreGraphPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\CorePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\CoresView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\CustomStatSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\CustomStatsGraph.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\CustomStatsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\FindControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\FrameGraphPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\FrameGraphYAxis.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\FrameInfoPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\FrameProButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\GetAndroidSDKPathForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\HoverBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\InfoPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\LeftBackPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="FramePro\LineGraph.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\LineGraphWindow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\LogView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\MainSessionView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\N10xLinkForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\NoContextSwitchesWarningDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\NotShowingContextSwitchesMessageBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\PacketBufferTimeCell.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ProgressBar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\RecordingAndroidContextSwitchesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\RecordingDataForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\SaveChangesDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\SaveOnExitDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\ScopeDataGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ScopesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ScrollPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="FramePro\SessionInfoDataGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\SessionScrollBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\SessionScrollBarPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\SessionView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\SessionViewTabButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\SessionViewTabsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\SettingsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\StartupPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ThreadFilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\ThreadRowPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ThreadsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ThreadTimeSpanGraph.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\Timeline.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\TimeSpanGraph.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\TimeSpanGraphView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\VerticalLabelPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\ViewButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FramePro\WaitForProcessingCompleteForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FramePro\XAxisDropDownListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

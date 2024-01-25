@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Update="SCL\BoolControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SCL\CellsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="SCL\ColumnTitlePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SCL\DBPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SCL\DragNodesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="SCL\DropDownListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SCL\EnumControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SCL\HDataGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="SCL\RowTitlePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SCL\ScrollPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="SCL\StringControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SCL\TreeNode.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

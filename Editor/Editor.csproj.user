@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Update="Editor\Button.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\ColourControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\ColourEditControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\ColourFControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\ColourFEditControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\ColourSlider.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\DropDownListBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Editor\DropDownTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\HVColourPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\MultiLineTextBoxControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\MultiLineTextBoxEditControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\PaletteControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\PaletteControlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Editor\PropertiesDataGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\RenderableMainform.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Editor\SVColourPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Editor\TextBoxControlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
