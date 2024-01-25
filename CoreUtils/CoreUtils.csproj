@@ -4,8 +4,9 @@
     <AssemblyName>CoreUtils</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <UseWindowsForms>True</UseWindowsForms>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>11.0</LangVersion>

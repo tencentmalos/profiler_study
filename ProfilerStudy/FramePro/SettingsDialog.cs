@@ -275,7 +275,7 @@ internal class SettingsDialog : Form
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.Location = new System.Drawing.Point(710, 997);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
@@ -288,7 +288,7 @@ internal class SettingsDialog : Form
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button2.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button2.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button2.Location = new System.Drawing.Point(588, 997);
             this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
@@ -303,7 +303,7 @@ internal class SettingsDialog : Form
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.m_ConnectionsDataGrid);
-            this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox1.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(18, 40);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
@@ -335,7 +335,7 @@ internal class SettingsDialog : Form
             this.m_ConnectionsDataGrid.DrawColumnLines = true;
             this.m_ConnectionsDataGrid.DrawLastColumnLine = false;
             this.m_ConnectionsDataGrid.DrawRowLines = false;
-            this.m_ConnectionsDataGrid.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_ConnectionsDataGrid.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_ConnectionsDataGrid.HighlightedRowBoxColour = System.Drawing.Color.Blue;
             this.m_ConnectionsDataGrid.HighlightedRowBoxVisible = false;
             this.m_ConnectionsDataGrid.HighlightRow = false;
@@ -369,7 +369,7 @@ internal class SettingsDialog : Form
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.m_TargetFrameTimeMS);
             this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox2.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox2.Location = new System.Drawing.Point(18, 228);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
@@ -381,7 +381,7 @@ internal class SettingsDialog : Form
             // 
             // m_TargetFrameTimeMS
             // 
-            this.m_TargetFrameTimeMS.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_TargetFrameTimeMS.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_TargetFrameTimeMS.Location = new System.Drawing.Point(246, 48);
             this.m_TargetFrameTimeMS.Margin = new System.Windows.Forms.Padding(4);
             this.m_TargetFrameTimeMS.Name = "m_TargetFrameTimeMS";
@@ -391,7 +391,7 @@ internal class SettingsDialog : Form
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(60, 53);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
@@ -446,7 +446,7 @@ internal class SettingsDialog : Form
             // m_DisableInteractiveSessionsforLocalProfiles
             // 
             this.m_DisableInteractiveSessionsforLocalProfiles.AutoSize = true;
-            this.m_DisableInteractiveSessionsforLocalProfiles.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_DisableInteractiveSessionsforLocalProfiles.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_DisableInteractiveSessionsforLocalProfiles.Location = new System.Drawing.Point(64, 104);
             this.m_DisableInteractiveSessionsforLocalProfiles.Margin = new System.Windows.Forms.Padding(4);
             this.m_DisableInteractiveSessionsforLocalProfiles.Name = "m_DisableInteractiveSessionsforLocalProfiles";
@@ -459,7 +459,7 @@ internal class SettingsDialog : Form
             // m_ShowContextSwitchWarningDialogCheckBox
             // 
             this.m_ShowContextSwitchWarningDialogCheckBox.AutoSize = true;
-            this.m_ShowContextSwitchWarningDialogCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_ShowContextSwitchWarningDialogCheckBox.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_ShowContextSwitchWarningDialogCheckBox.Location = new System.Drawing.Point(64, 72);
             this.m_ShowContextSwitchWarningDialogCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.m_ShowContextSwitchWarningDialogCheckBox.Name = "m_ShowContextSwitchWarningDialogCheckBox";
@@ -471,7 +471,7 @@ internal class SettingsDialog : Form
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.Location = new System.Drawing.Point(424, 180);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(196, 20);
@@ -480,7 +480,7 @@ internal class SettingsDialog : Form
             // 
             // m_FrameProThreadAffinityTextBox
             // 
-            this.m_FrameProThreadAffinityTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_FrameProThreadAffinityTextBox.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_FrameProThreadAffinityTextBox.Location = new System.Drawing.Point(632, 176);
             this.m_FrameProThreadAffinityTextBox.Name = "m_FrameProThreadAffinityTextBox";
             this.m_FrameProThreadAffinityTextBox.Size = new System.Drawing.Size(158, 26);
@@ -489,7 +489,7 @@ internal class SettingsDialog : Form
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(51, 212);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(167, 20);
@@ -498,7 +498,7 @@ internal class SettingsDialog : Form
             // 
             // m_ThreadScopeHeightTextBox
             // 
-            this.m_ThreadScopeHeightTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_ThreadScopeHeightTextBox.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_ThreadScopeHeightTextBox.Location = new System.Drawing.Point(230, 208);
             this.m_ThreadScopeHeightTextBox.Name = "m_ThreadScopeHeightTextBox";
             this.m_ThreadScopeHeightTextBox.Size = new System.Drawing.Size(112, 26);
@@ -507,7 +507,7 @@ internal class SettingsDialog : Form
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(60, 180);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(161, 20);
@@ -516,7 +516,7 @@ internal class SettingsDialog : Form
             // 
             // m_MaxVisibleThreadsTextBox
             // 
-            this.m_MaxVisibleThreadsTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_MaxVisibleThreadsTextBox.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_MaxVisibleThreadsTextBox.Location = new System.Drawing.Point(230, 176);
             this.m_MaxVisibleThreadsTextBox.Name = "m_MaxVisibleThreadsTextBox";
             this.m_MaxVisibleThreadsTextBox.Size = new System.Drawing.Size(112, 26);
@@ -525,7 +525,7 @@ internal class SettingsDialog : Form
             // m_SaveOnExitCheckBox
             // 
             this.m_SaveOnExitCheckBox.AutoSize = true;
-            this.m_SaveOnExitCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_SaveOnExitCheckBox.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_SaveOnExitCheckBox.Location = new System.Drawing.Point(64, 40);
             this.m_SaveOnExitCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.m_SaveOnExitCheckBox.Name = "m_SaveOnExitCheckBox";
@@ -556,7 +556,7 @@ internal class SettingsDialog : Form
             this.m_SymbolPathsDataGrid.DrawColumnLines = true;
             this.m_SymbolPathsDataGrid.DrawLastColumnLine = false;
             this.m_SymbolPathsDataGrid.DrawRowLines = false;
-            this.m_SymbolPathsDataGrid.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_SymbolPathsDataGrid.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_SymbolPathsDataGrid.HighlightedRowBoxColour = System.Drawing.Color.Blue;
             this.m_SymbolPathsDataGrid.HighlightedRowBoxVisible = false;
             this.m_SymbolPathsDataGrid.HighlightRow = false;
@@ -589,7 +589,7 @@ internal class SettingsDialog : Form
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.Controls.Add(this.m_SymbolPathsDataGrid);
-            this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox4.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox4.Location = new System.Drawing.Point(18, 346);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox4.Name = "groupBox4";
@@ -604,7 +604,7 @@ internal class SettingsDialog : Form
             this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.Controls.Add(this.m_SourceRootPathsDataGrid);
-            this.groupBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox5.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox5.Location = new System.Drawing.Point(18, 543);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox5.Name = "groupBox5";
@@ -636,7 +636,7 @@ internal class SettingsDialog : Form
             this.m_SourceRootPathsDataGrid.DrawColumnLines = true;
             this.m_SourceRootPathsDataGrid.DrawLastColumnLine = false;
             this.m_SourceRootPathsDataGrid.DrawRowLines = false;
-            this.m_SourceRootPathsDataGrid.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_SourceRootPathsDataGrid.Font = new System.Drawing.Font("Monaco", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_SourceRootPathsDataGrid.HighlightedRowBoxColour = System.Drawing.Color.Blue;
             this.m_SourceRootPathsDataGrid.HighlightedRowBoxVisible = false;
             this.m_SourceRootPathsDataGrid.HighlightRow = false;

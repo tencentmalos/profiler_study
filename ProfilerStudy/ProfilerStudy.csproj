@@ -4,8 +4,9 @@
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>True</UseWindowsForms>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>11.0</LangVersion>
@@ -21,13 +22,18 @@
     <Content Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CanvasDataGrid\CanvasDataGrid.csproj" />
+    <ProjectReference Include="..\CoreUtils\CoreUtils.csproj" />
     <ProjectReference Include="..\docker\Docker.csproj" />
-    <ProjectReference Include="..\Editor\ProfilerCanvas.csproj" />
-    <ProjectReference Include="..\FrameProCore\ProfilerStudyCore.csproj" />
-    <ProjectReference Include="..\HDataGrid\CanvasDataGrid.csproj" />
-    <ProjectReference Include="..\SCLCoreCLR\CoreUtils.csproj" />
+    <ProjectReference Include="..\ProfilerCanvas\ProfilerCanvas.csproj" />
+    <ProjectReference Include="..\ProfilerStudyCore\ProfilerStudyCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="VisualStudioOpenFileAndLine.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
