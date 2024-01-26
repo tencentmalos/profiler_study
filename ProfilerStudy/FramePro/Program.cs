@@ -19,7 +19,9 @@ internal static class Program
 	private static void Main()
 	{
 		//"en-US"
-		Application.CurrentCulture = new System.Globalization.CultureInfo("zh-CN", false);
+		// Application.CurrentCulture = new System.Globalization.CultureInfo("zh-CN", false);
+		
+		System.Windows.Forms.Clipboard.SetText("Can not paste from host mac!");
 
 		Settings settings = new Settings();
 		string[] commandLineArgs = Environment.GetCommandLineArgs();
@@ -64,20 +66,17 @@ internal static class Program
 
 
 		var mainForm = new MainForm(settings, text);
-		bool isMainFormClosed = false;
-		mainForm.FormClosed += (object sender, FormClosedEventArgs e) => {
-			isMainFormClosed = true;
-		};
-		mainForm.Show();
-		while (!isMainFormClosed)
-		{
-			Application.DoEvents();
-		}
+		// bool isMainFormClosed = false;
+		// mainForm.FormClosed += (object sender, FormClosedEventArgs e) => {
+		// 	isMainFormClosed = true;
+		// };
+		// mainForm.Show();
+		// while (!isMainFormClosed)
+		// {
+		// 	Application.DoEvents();
+		// }
 
-        ////Application.Run();
-		////SymLib.Destoy();
-		////FrameProCore.Registrar.Destroy();
-		////FrameProCore.Registrar.ClearGlobalMemory();
+        Application.Run(mainForm);
 	}
 
 
