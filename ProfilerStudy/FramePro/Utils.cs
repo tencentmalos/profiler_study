@@ -191,17 +191,17 @@ internal class Utils
 			if(PlatformTool.IsRunOnWine())
 			{
 				string path = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
-				path = System.IO.Path.Combine(path, "open_source.sh");
+				path = System.IO.Path.Combine(path, "open_source_vscode.sh");
 
-                //process.StartInfo.FileName = path;
-                //process.StartInfo.Arguments = $"{path}  \"{fileName}\" {lineNumber}";
+                process.StartInfo.FileName = path;
+                process.StartInfo.Arguments = $"\"{fileName}\" {lineNumber}";
                 
-                process.StartInfo.FileName = "start";
-
-                path = path.Replace("Z:", "");
-                path = path.Replace("\\", "/");
-                //process.StartInfo.Arguments = $"\"{path}\"  \"{fileName}\" {lineNumber}";
-                process.StartInfo.Arguments = $"/exec /bin/bash \"{path}\"  \"{fileName}\" {lineNumber}";
+                // process.StartInfo.FileName = "start";
+                //
+                // path = path.Replace("Z:", "");
+                // path = path.Replace("\\", "/");
+                // //process.StartInfo.Arguments = $"\"{path}\"  \"{fileName}\" {lineNumber}";
+                // process.StartInfo.Arguments = $"/exec /bin/bash \"{path}\"  \"{fileName}\" {lineNumber}";
 			}
 			else
 			{

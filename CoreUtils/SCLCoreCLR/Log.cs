@@ -35,7 +35,7 @@ public class Log
 			{
 				try
 				{
-					m_Stream = new StreamWriter(path, append: true);
+					m_Stream = new StreamWriter(path, append: false);
 				}
 				catch (Exception)
 				{
