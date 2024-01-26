@@ -1,3 +1,4 @@
+using SCLCoreCLR;
 using System;
 using System.Runtime.InteropServices;
 
@@ -26,23 +27,31 @@ namespace FramePro
         [DllImport("ntdll.dll", SetLastError = true)]
         static extern IntPtr wine_get_version();
 
+        static bool mIsReadWineVersion = false;
+        static IntPtr mWineVersion = IntPtr.Zero;
+        static bool mIsRunOnWine = false;
+
         public static bool IsRunOnWine()
         {
-            try
+            if(!mIsReadWineVersion)
             {
-                // 在Wine环境中，这个调用会成功，并返回Wine版本字符串的指针。
-                // 在真正的Windows环境中，这个调用会抛出异常。
-                IntPtr versionPtr = wine_get_version();
+                try
+                {
+                    // 在Wine环境中，这个调用会成功，并返回Wine版本字符串的指针。
+                    // 在真正的Windows环境中，这个调用会抛出异常。
+                    mWineVersion = wine_get_version();
+                    Log.WriteLine($"Now run on wine, wine version is:{mWineVersion.ToString()}");
+                    mIsRunOnWine = true;
+                }
+                catch
+                {
+                    mIsRunOnWine = false;
+                }
 
-                return true;
+                mIsReadWineVersion = true;
             }
-            catch
-            {
-                // 如果抛出异常，我们可以假定它不是Wine环境。
-                return false;
-            }
 
-
+            return mIsRunOnWine;
             ////string winePrefix = Environment.GetEnvironmentVariable("WINEPREFIX");
             ////return !string.IsNullOrEmpty(winePrefix);
         }

@@ -44,7 +44,7 @@ internal class TimeSpanGraphView : UserControl
 
 	private IContainer components;
 
-	private VerticalLabelPanel verticalLabelPanel4;
+	private VerticalLabelPanel verticalLabelPanelScope;
 
 	private LeftBackPanel leftBackPanel2;
 
@@ -445,7 +445,7 @@ internal class TimeSpanGraphView : UserControl
 		this.m_SelectedScopeDropDownButton = new System.Windows.Forms.Button();
 		this.panel1 = new System.Windows.Forms.Panel();
 		this.button3 = new System.Windows.Forms.Button();
-		this.verticalLabelPanel4 = new FramePro.VerticalLabelPanel();
+		this.verticalLabelPanelScope = new FramePro.VerticalLabelPanel();
 		this.m_TopPanel.SuspendLayout();
 		this.leftBackPanel2.SuspendLayout();
 		this.panel2.SuspendLayout();
@@ -627,21 +627,21 @@ internal class TimeSpanGraphView : UserControl
 		this.button3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 		this.button3.UseVisualStyleBackColor = false;
 		this.button3.Click += new System.EventHandler(SelectedScopeButtonClick);
-		this.verticalLabelPanel4.BackColor = System.Drawing.Color.FromArgb(222, 222, 222);
-		this.verticalLabelPanel4.Dock = System.Windows.Forms.DockStyle.Left;
-		this.verticalLabelPanel4.Font = new System.Drawing.Font("Monaco", 9.75f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.verticalLabelPanel4.Location = new System.Drawing.Point(0, 0);
-		this.verticalLabelPanel4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-		this.verticalLabelPanel4.Name = "verticalLabelPanel4";
-		this.verticalLabelPanel4.PanelText = "Scope";
-		this.verticalLabelPanel4.Size = new System.Drawing.Size(23, 157);
-		this.verticalLabelPanel4.TabIndex = 10;
+		this.verticalLabelPanelScope.BackColor = System.Drawing.Color.FromArgb(222, 222, 222);
+		this.verticalLabelPanelScope.Dock = System.Windows.Forms.DockStyle.Left;
+		this.verticalLabelPanelScope.Font = new System.Drawing.Font("Monaco", 9.75f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+		this.verticalLabelPanelScope.Location = new System.Drawing.Point(0, 0);
+		this.verticalLabelPanelScope.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+		this.verticalLabelPanelScope.Name = "verticalLabelPanelScope";
+		this.verticalLabelPanelScope.PanelText = "Scope";
+		this.verticalLabelPanelScope.Size = new System.Drawing.Size(23, 157);
+		this.verticalLabelPanelScope.TabIndex = 10;
 		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
 		base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		base.Controls.Add(this.m_GraphPanel);
 		base.Controls.Add(this.m_TopPanel);
 		base.Controls.Add(this.leftBackPanel2);
-		base.Controls.Add(this.verticalLabelPanel4);
+		base.Controls.Add(this.verticalLabelPanelScope);
 		base.Name = "TimeSpanGraphView";
 		base.Size = new System.Drawing.Size(1037, 157);
 		this.m_TopPanel.ResumeLayout(false);
@@ -652,5 +652,10 @@ internal class TimeSpanGraphView : UserControl
 		this.panel3.PerformLayout();
 		this.top.ResumeLayout(false);
 		base.ResumeLayout(false);
+
+		if (PlatformTool.IsRunOnWine())
+		{
+			this.verticalLabelPanelScope.PanelText = "S";
+		}
 	}
 }
