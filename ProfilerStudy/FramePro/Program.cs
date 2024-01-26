@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
+using SCL;
 ////using PureDev.PureDevRegCLR;
 ////using Registration;
 using SCLCoreCLR;
@@ -12,12 +13,13 @@ namespace FramePro;
 internal static class Program
 {
 	private static string m_PreMainFormLog = "";
-	private static SCL.Cell mTestCell;
+	private static SCL.Cell mTestCell = new Cell();
 
 	[STAThread]
 	private static void Main()
 	{
-		mTestCell = new SCL.Cell();
+		//"en-US"
+		Application.CurrentCulture = new System.Globalization.CultureInfo("zh-CN", false);
 
 		Settings settings = new Settings();
 		string[] commandLineArgs = Environment.GetCommandLineArgs();

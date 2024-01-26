@@ -193,9 +193,16 @@ internal class Utils
 				string path = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
 				path = System.IO.Path.Combine(path, "open_source.sh");
 
-                process.StartInfo.FileName = path;
-                process.StartInfo.Arguments = $"\"{fileName}\" {lineNumber}";
-            }
+                //process.StartInfo.FileName = path;
+                //process.StartInfo.Arguments = $"{path}  \"{fileName}\" {lineNumber}";
+                
+                process.StartInfo.FileName = "start";
+
+                path = path.Replace("Z:", "");
+                path = path.Replace("\\", "/");
+                //process.StartInfo.Arguments = $"\"{path}\"  \"{fileName}\" {lineNumber}";
+                process.StartInfo.Arguments = $"/exec /bin/bash \"{path}\"  \"{fileName}\" {lineNumber}";
+			}
 			else
 			{
                 process.StartInfo.FileName = "cmd.exe";
@@ -216,6 +223,7 @@ internal class Utils
         }
         catch (Exception ex)
         {
+	        Log.WriteLine($"ERROR: {ex.ToString()}");
             MessageBox.Show("ERORR: " + ex.Message);
         }
     }

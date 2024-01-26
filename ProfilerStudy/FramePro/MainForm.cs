@@ -1848,6 +1848,11 @@ internal class MainForm : Form
 
 	private void NotifyUnsavedSessions(ref bool cancel)
 	{
+		if (PlatformTool.IsRunOnWine())
+		{
+			return;
+		}
+		
 		if (!HasUnsavedSessions || !m_Settings.SaveChangedQuery)
 		{
 			return;
@@ -1954,7 +1959,7 @@ internal class MainForm : Form
         ////{
         ////	MessageBox.Show("Error requesting current version number\n\nPlease visit www.puredevsoftware.com", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
         ////}
-        MessageBox.Show("Ñ§Ï°°æ½ö¹©ÑÐ¾¿, ²»ÄÜÉý¼¶!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+        MessageBox.Show("Ñ§Ï°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
     }
 
 	private ViewT GetView<ViewT>(Session session) where ViewT : SessionView
@@ -2055,6 +2060,8 @@ internal class MainForm : Form
 			return;
 		}
 		OpenFileDialog openFileDialog = new OpenFileDialog();
+		openFileDialog.InitialDirectory = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+		openFileDialog.RestoreDirectory = true;
 		openFileDialog.Filter = "Files (*.framepro_recording)|*.framepro_recording|All files (*.*)|*.*";
 		openFileDialog.FilterIndex = 0;
 		if (openFileDialog.ShowDialog(this) == DialogResult.OK)
