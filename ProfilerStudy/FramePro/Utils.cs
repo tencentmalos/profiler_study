@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Windows.Forms;
@@ -264,6 +265,52 @@ internal class Utils
         }
     }
 
+	private static bool FindRightPathBySourceRoot(string sourceRoot, List<string> pathArray, out string findFileName)
+	{
+		for(int i = 0; i < pathArray.Count - 2; i++)
+		{
+			string[] newPathArray = new string[pathArray.Count - i];
+			pathArray.CopyTo(i, newPathArray, 0,(int)(pathArray.Count - i));
+			string needPath = StringUtil.GetCombinedString(newPathArray.ToList(), "/");
+
+			string testPath = Path.Combine(sourceRoot, needPath);
+
+			if(File.Exists(testPath))
+			{
+				findFileName = testPath;
+				return true;
+			}
+		}
+		findFileName = "";
+		return false;
+	}
+
+	public static bool TryToGetRightLocalPath(Settings settings, string orgPath, out string rightPath)
+	{
+		rightPath = "";
+
+		if(File.Exists(orgPath))
+		{
+			rightPath = orgPath;
+			return true;
+		}
+
+        string text = orgPath.Replace("\\", "/");
+        var pathArray = text.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
+
+        string findFileName = "";
+        foreach (string sourceRoot in settings.SourceRoots)
+        {
+            if (FindRightPathBySourceRoot(sourceRoot, pathArray.ToList(), out findFileName))
+            {
+                rightPath = findFileName;
+                return true;
+            }
+        }
+
+
+		return false;
+    }
 
 
     public static void JumpToSourceCode(int time_span_info_id, Session session, Settings settings)
@@ -277,31 +324,16 @@ internal class Utils
 		{
 			return;
 		}
-		string text = sourceInfo.Filename;
-		if (!Path.IsPathRooted(text))
+
+		string rightPath;
+		if (!TryToGetRightLocalPath(settings, sourceInfo.Filename, out rightPath))
 		{
-			foreach (string sourceRoot in settings.SourceRoots)
-			{
-				string fullPath = Path.GetFullPath(Path.Combine(sourceRoot, text));
-				if (File.Exists(fullPath))
-				{
-					text = fullPath;
-					break;
-				}
-			}
-			if (!File.Exists(text))
-			{
-				text = BrowseForPath(text, settings);
-			}
-		}
-		if (!File.Exists(text))
-		{
-			MessageBox.Show("Unable to find file " + text, "ProfilerStudy Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			MessageBox.Show("Unable to find file " + sourceInfo.Filename, "ProfilerStudy Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 			return;
 		}
 		try
 		{
-			OpenByViewerName(settings.SourceViewerTool, text, sourceInfo.Line, false);
+			OpenByViewerName(settings.SourceViewerTool, rightPath, sourceInfo.Line, false);
         }
 		catch (Exception ex)
 		{

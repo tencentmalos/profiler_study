@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using SCL;
 using SCLCoreCLR;
+using static System.Collections.Specialized.BitVector32;
 
 namespace FramePro;
 
@@ -114,8 +116,9 @@ internal class ScopeDataGrid : UserControl
 	private Panel m_DataGridPanel;
 
 	private Button button1;
-
-	private Button button2;
+    private TextBox txtSourcePath;
+    private Label lblLine;
+    private Button button2;
 
 	public TimeSpan TimeSpan
 	{
@@ -130,13 +133,34 @@ internal class ScopeDataGrid : UserControl
 				m_TimeSpan = value;
 				UpdateCallstackDataGrid();
 				UpdateDataGrid();
-				m_ScopeNameTextBox.Text = ((m_TimeSpan != null) ? m_Session.GetTimerName(m_Session.GetTimeSpanInfo(m_TimeSpan.TimeSpanInfoId).Name) : "");
-			}
-		}
-	}
-
-	public ScopeDataGrid()
-	{
+				if(m_TimeSpan != null) 
+				{
+					var spanInfo = m_Session.GetTimeSpanInfo(m_TimeSpan.TimeSpanInfoId);
+                    m_ScopeNameTextBox.Text = m_Session.GetTimerName(spanInfo.Name);
+                    SourceInfoStruct sourceInfo = m_Session.GetSourceInfo(spanInfo.SourceInfo);
+					lblLine.Text = $"line:{sourceInfo.Line}";
+					string rightPath;
+					if( Utils.TryToGetRightLocalPath(m_Settings, sourceInfo.Filename, out rightPath) )
+					{
+						txtSourcePath.Text = rightPath;
+                    }
+					else
+					{
+						txtSourcePath.Text = sourceInfo.Filename;
+					}
+                }
+				else
+				{
+					m_ScopeNameTextBox.Text = "";
+					lblLine.Text = "line:??";
+					txtSourcePath.Text = "???";
+                }
+				
+            }
+        }
+    }
+    public ScopeDataGrid()
+    {
 		InitializeComponent();
 		m_DPIScale = MainForm.DPIScale;
 		InitialiseCallstackDataGrid();
@@ -460,6 +484,8 @@ internal class ScopeDataGrid : UserControl
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.m_CallstackPanel = new System.Windows.Forms.Panel();
             this.m_TopPanel = new System.Windows.Forms.Panel();
+            this.lblLine = new System.Windows.Forms.Label();
+            this.txtSourcePath = new System.Windows.Forms.TextBox();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.m_DataGridPanel = new System.Windows.Forms.Panel();
@@ -496,7 +522,7 @@ internal class ScopeDataGrid : UserControl
             this.m_DataGrid.HorizontalTextOffset = 4;
             this.m_DataGrid.LightRowColour = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
             this.m_DataGrid.Location = new System.Drawing.Point(0, 0);
-            this.m_DataGrid.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.m_DataGrid.Margin = new System.Windows.Forms.Padding(6);
             this.m_DataGrid.MoveCellsEnabled = false;
             this.m_DataGrid.Name = "m_DataGrid";
             this.m_DataGrid.PadEmptyRows = true;
@@ -510,7 +536,7 @@ internal class ScopeDataGrid : UserControl
             this.m_DataGrid.SelectedRowColour = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(210)))), ((int)(((byte)(255)))));
             this.m_DataGrid.SelectNextCellAfterEdit = true;
             this.m_DataGrid.ShowSelectBox = true;
-            this.m_DataGrid.Size = new System.Drawing.Size(452, 772);
+            this.m_DataGrid.Size = new System.Drawing.Size(452, 732);
             this.m_DataGrid.SlideDrag = false;
             this.m_DataGrid.TabIndex = 0;
             this.m_DataGrid.WindowColour = System.Drawing.SystemColors.Window;
@@ -531,7 +557,7 @@ internal class ScopeDataGrid : UserControl
             | System.Windows.Forms.AnchorStyles.Right)));
             this.m_ScopeNameTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_ScopeNameTextBox.Location = new System.Drawing.Point(84, 25);
-            this.m_ScopeNameTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_ScopeNameTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.m_ScopeNameTextBox.Name = "m_ScopeNameTextBox";
             this.m_ScopeNameTextBox.ReadOnly = true;
             this.m_ScopeNameTextBox.Size = new System.Drawing.Size(308, 26);
@@ -543,7 +569,7 @@ internal class ScopeDataGrid : UserControl
             this.m_TimeUnitsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.m_TimeUnitsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_TimeUnitsButton.Location = new System.Drawing.Point(307, 62);
-            this.m_TimeUnitsButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_TimeUnitsButton.Margin = new System.Windows.Forms.Padding(4);
             this.m_TimeUnitsButton.Name = "m_TimeUnitsButton";
             this.m_TimeUnitsButton.Size = new System.Drawing.Size(141, 32);
             this.m_TimeUnitsButton.TabIndex = 7;
@@ -591,7 +617,7 @@ internal class ScopeDataGrid : UserControl
             this.m_CallstackDataGrid.HorizontalTextOffset = 4;
             this.m_CallstackDataGrid.LightRowColour = System.Drawing.Color.WhiteSmoke;
             this.m_CallstackDataGrid.Location = new System.Drawing.Point(0, 0);
-            this.m_CallstackDataGrid.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.m_CallstackDataGrid.Margin = new System.Windows.Forms.Padding(6);
             this.m_CallstackDataGrid.MoveCellsEnabled = false;
             this.m_CallstackDataGrid.Name = "m_CallstackDataGrid";
             this.m_CallstackDataGrid.PadEmptyRows = true;
@@ -614,7 +640,7 @@ internal class ScopeDataGrid : UserControl
             // 
             this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.splitter1.Location = new System.Drawing.Point(0, 881);
-            this.splitter1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitter1.Margin = new System.Windows.Forms.Padding(4);
             this.splitter1.Name = "splitter1";
             this.splitter1.Size = new System.Drawing.Size(452, 4);
             this.splitter1.TabIndex = 10;
@@ -625,13 +651,15 @@ internal class ScopeDataGrid : UserControl
             this.m_CallstackPanel.Controls.Add(this.m_CallstackDataGrid);
             this.m_CallstackPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.m_CallstackPanel.Location = new System.Drawing.Point(0, 885);
-            this.m_CallstackPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_CallstackPanel.Margin = new System.Windows.Forms.Padding(4);
             this.m_CallstackPanel.Name = "m_CallstackPanel";
             this.m_CallstackPanel.Size = new System.Drawing.Size(452, 310);
             this.m_CallstackPanel.TabIndex = 11;
             // 
             // m_TopPanel
             // 
+            this.m_TopPanel.Controls.Add(this.lblLine);
+            this.m_TopPanel.Controls.Add(this.txtSourcePath);
             this.m_TopPanel.Controls.Add(this.button2);
             this.m_TopPanel.Controls.Add(this.button1);
             this.m_TopPanel.Controls.Add(this.m_ScopeNameTextBox);
@@ -640,10 +668,29 @@ internal class ScopeDataGrid : UserControl
             this.m_TopPanel.Controls.Add(this.label1);
             this.m_TopPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.m_TopPanel.Location = new System.Drawing.Point(0, 0);
-            this.m_TopPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_TopPanel.Margin = new System.Windows.Forms.Padding(4);
             this.m_TopPanel.Name = "m_TopPanel";
-            this.m_TopPanel.Size = new System.Drawing.Size(452, 109);
+            this.m_TopPanel.Size = new System.Drawing.Size(452, 149);
             this.m_TopPanel.TabIndex = 12;
+            // 
+            // lblLine
+            // 
+            this.lblLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblLine.AutoSize = true;
+            this.lblLine.Location = new System.Drawing.Point(330, 104);
+            this.lblLine.Name = "lblLine";
+            this.lblLine.Size = new System.Drawing.Size(62, 18);
+            this.lblLine.TabIndex = 12;
+            this.lblLine.Text = "line:?";
+            // 
+            // txtSourcePath
+            // 
+            this.txtSourcePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtSourcePath.Location = new System.Drawing.Point(4, 101);
+            this.txtSourcePath.Name = "txtSourcePath";
+            this.txtSourcePath.Size = new System.Drawing.Size(319, 28);
+            this.txtSourcePath.TabIndex = 11;
             // 
             // button2
             // 
@@ -651,7 +698,7 @@ internal class ScopeDataGrid : UserControl
             this.button2.FlatAppearance.BorderSize = 0;
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button2.Location = new System.Drawing.Point(410, 4);
-            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(38, 35);
             this.button2.TabIndex = 10;
@@ -664,11 +711,11 @@ internal class ScopeDataGrid : UserControl
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.Location = new System.Drawing.Point(4, 62);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(160, 32);
             this.button1.TabIndex = 9;
-            this.button1.Text = "Go to Source";
+            this.button1.Text = "Go To Source";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.JumpToSourceButtonClicked);
             // 
@@ -676,10 +723,10 @@ internal class ScopeDataGrid : UserControl
             // 
             this.m_DataGridPanel.Controls.Add(this.m_DataGrid);
             this.m_DataGridPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.m_DataGridPanel.Location = new System.Drawing.Point(0, 109);
-            this.m_DataGridPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_DataGridPanel.Location = new System.Drawing.Point(0, 149);
+            this.m_DataGridPanel.Margin = new System.Windows.Forms.Padding(4);
             this.m_DataGridPanel.Name = "m_DataGridPanel";
-            this.m_DataGridPanel.Size = new System.Drawing.Size(452, 772);
+            this.m_DataGridPanel.Size = new System.Drawing.Size(452, 732);
             this.m_DataGridPanel.TabIndex = 13;
             // 
             // ScopeDataGrid
@@ -690,7 +737,7 @@ internal class ScopeDataGrid : UserControl
             this.Controls.Add(this.m_TopPanel);
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.m_CallstackPanel);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ScopeDataGrid";
             this.Size = new System.Drawing.Size(452, 1195);
             this.m_CallstackPanel.ResumeLayout(false);
