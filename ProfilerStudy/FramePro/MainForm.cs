@@ -102,7 +102,7 @@ internal class MainForm : Form
 
 	private List<string> m_OutputWindowLines = new List<string>();
 
-	private const string m_ContextSwitchFileExt = ".framepro_context_switch";
+	private const string m_ContextSwitchFileExt = ".profiler_context_switch";
 
 	private const int m_OnScopeColourChangedInterval = 500;
 
@@ -1011,10 +1011,10 @@ internal class MainForm : Form
 	{
 		if (session.Connected)
 		{
-			MessageBox.Show("Please disconnect before saving", "FramePro", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			MessageBox.Show("Please disconnect before saving", "ProfilerStudy", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 			return false;
 		}
-		if ((!Path.IsPathRooted(session.SessionFilename) || session.SessionFilename.ToLower().Trim().EndsWith("framepro_recording")) && !AskUserForSaveFilename())
+		if ((!Path.IsPathRooted(session.SessionFilename) || session.SessionFilename.ToLower().Trim().EndsWith("profiler_recording")) && !AskUserForSaveFilename())
 		{
 			return false;
 		}
@@ -1043,7 +1043,7 @@ internal class MainForm : Form
 		}
 		if (context.Cancel)
 		{
-			if (MessageBox.Show("Discard unprocessed packets?", "FramePro", MessageBoxButtons.YesNo) == DialogResult.Yes)
+			if (MessageBox.Show("Discard unprocessed packets?", "ProfilerStudy", MessageBoxButtons.YesNo) == DialogResult.Yes)
 			{
 				session.ForceStopProcessingPackets();
 				session.WaitforProcessingToFinish(-1);
@@ -1058,12 +1058,12 @@ internal class MainForm : Form
 	{
 		SaveFileDialog saveFileDialog = new SaveFileDialog();
 		string text = ActiveSession.SessionFilename;
-		if (text != null && text.ToLower().Trim().EndsWith(".framepro_recording"))
+		if (text != null && text.ToLower().Trim().EndsWith(".profiler_recording"))
 		{
-			text = text.Substring(0, text.Length - ".framepro_recording".Length);
+			text = text.Substring(0, text.Length - ".profiler_recording".Length);
 		}
 		saveFileDialog.FileName = text;
-		saveFileDialog.Filter = "Files (*.framepro)|*.framepro|All files (*.*)|*.*";
+		saveFileDialog.Filter = "Files (*.profiler)|*.profiler|All files (*.*)|*.*";
 		saveFileDialog.FilterIndex = 0;
 		if (saveFileDialog.ShowDialog(this) != DialogResult.OK)
 		{
@@ -1190,12 +1190,12 @@ internal class MainForm : Form
 
 	private void SessionShowError(string error)
 	{
-		MessageBox.Show(error, "FramePro Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+		MessageBox.Show(error, "ProfilerStudy Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 	}
 
 	private void SessionShowwarning(string warning)
 	{
-		MessageBox.Show(warning, "FramePro warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+		MessageBox.Show(warning, "ProfilerStudy warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 	}
 
 	private void SessionClosed(Session session)
@@ -1236,7 +1236,7 @@ internal class MainForm : Form
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show("Error reading file: " + filename + "\n" + ex.Message, "FramePro Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+			MessageBox.Show("Error reading file: " + filename + "\n" + ex.Message, "ProfilerStudy Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 		}
 		return false;
 	}
@@ -1259,7 +1259,7 @@ internal class MainForm : Form
 			{
 				error = "unknown error";
 			}
-			MessageBox.Show("Failed to read file.\n" + error, "FramePro Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+			MessageBox.Show("Failed to read file.\n" + error, "ProfilerStudy Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 		}
 		return num;
 	}
@@ -1303,7 +1303,7 @@ internal class MainForm : Form
 			}
 			else
 			{
-				MessageBox.Show("Error writing file " + ActiveSession.Filename + "\n" + writeThreadContext.m_Error, "FramePro Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+				MessageBox.Show("Error writing file " + ActiveSession.Filename + "\n" + writeThreadContext.m_Error, "ProfilerStudy Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 			}
 		}
 	}
@@ -1320,7 +1320,7 @@ internal class MainForm : Form
 	private void OpenMenuItem(object sender, EventArgs e)
 	{
 		OpenFileDialog openFileDialog = new OpenFileDialog();
-		openFileDialog.Filter = "Files (*.framepro;*.framepro_recording)|*.framepro;*.framepro_recording|All files (*.*)|*.*";
+		openFileDialog.Filter = "Files (*.profiler;*.profiler_recording)|*.profiler;*.profiler_recording|All files (*.*)|*.*";
 		openFileDialog.FilterIndex = 0;
 		if (openFileDialog.ShowDialog(this) == DialogResult.OK)
 		{
@@ -1347,7 +1347,7 @@ internal class MainForm : Form
 		UpdateButtonAndMenuItemStates();
 		if (ActiveSession != null && !ActiveSession.Recorded && ActiveSession.DisconnectReason == DisconnectReason.BadVersion)
 		{
-			MessageBox.Show(string.Concat(string.Concat("Incorrect FramePro.cpp version: " + ActiveSession.ReceivedFrameProLibVersion + "\n", "Expected version: ", Session.FrameProLibVersion.ToString(), "\n"), "Please update FramePro to connect to this app."), "FramePro Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+			MessageBox.Show(string.Concat(string.Concat("Incorrect FramePro.cpp version: " + ActiveSession.ReceivedFrameProLibVersion + "\n", "Expected version: ", Session.FrameProLibVersion.ToString(), "\n"), "Please update ProfilerStudy to connect to this app."), "FramePro Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 		}
 	}
 
@@ -1906,7 +1906,7 @@ internal class MainForm : Form
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show("Unable to write to file " + saveFileDialog.FileName + "\n" + ex.Message, "FramePro Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			MessageBox.Show("Unable to write to file " + saveFileDialog.FileName + "\n" + ex.Message, "ProfilerStudy Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 		}
 	}
 
@@ -2034,7 +2034,7 @@ internal class MainForm : Form
 		{
 			LogLine(ex.Message);
 		}
-		ProcessStartInfo processStartInfo = new ProcessStartInfo("FramePro_GameSimulator.exe");
+		ProcessStartInfo processStartInfo = new ProcessStartInfo("Profiler_GameSimulator.exe");
 		processStartInfo.Verb = "runas";
 		processStartInfo.WindowStyle = ProcessWindowStyle.Minimized;
 		m_GameSimulatorProcess = new Process();
@@ -2045,7 +2045,7 @@ internal class MainForm : Form
 		}
 		catch (Exception ex2)
 		{
-			MessageBox.Show("Failed to launch game simulator. " + ex2.Message, "FramePro Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			MessageBox.Show("Failed to launch game simulator. " + ex2.Message, "ProfilerStudy Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 			LogLine(ex2.Message);
 			return false;
 		}
@@ -2062,7 +2062,7 @@ internal class MainForm : Form
 		OpenFileDialog openFileDialog = new OpenFileDialog();
 		openFileDialog.InitialDirectory = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
 		openFileDialog.RestoreDirectory = true;
-		openFileDialog.Filter = "Files (*.framepro_recording)|*.framepro_recording|All files (*.*)|*.*";
+		openFileDialog.Filter = "Files (*.profiler_recording)|*.profiler_recording|All files (*.*)|*.*";
 		openFileDialog.FilterIndex = 0;
 		if (openFileDialog.ShowDialog(this) == DialogResult.OK)
 		{
@@ -2073,7 +2073,7 @@ internal class MainForm : Form
 	private void LaunchRecordingPlayer(string playback_filename)
 	{
 		m_RecordingPlayerProcess = new Process();
-		m_RecordingPlayerProcess.StartInfo.FileName = "FramePro_RecordingPlayer.exe";
+		m_RecordingPlayerProcess.StartInfo.FileName = "Profiler_RecordingPlayer.exe";
 		m_RecordingPlayerProcess.StartInfo.Arguments = playback_filename;
 		m_RecordingPlayerProcess.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
 		m_RecordingPlayerProcess.Start();
@@ -2082,22 +2082,22 @@ internal class MainForm : Form
 		Connect();
 	}
 
-	public static void ShowHelp()
-	{
-		ShowHelp(null);
-	}
+	////public static void ShowHelp()
+	////{
+	////	ShowHelp(null);
+	////}
 
-	public static void ShowHelp(string page)
-	{
-		string text = ((!string.IsNullOrEmpty(page)) ? ("::/" + page) : "");
-		string text2 = Path.Combine(Environment.CurrentDirectory, "FramePro.chm");
-		Process.Start("hh.exe", text2 + text);
-	}
+	////public static void ShowHelp(string page)
+	////{
+	////	string text = ((!string.IsNullOrEmpty(page)) ? ("::/" + page) : "");
+	////	string text2 = Path.Combine(Environment.CurrentDirectory, "FramePro.chm");
+	////	Process.Start("hh.exe", text2 + text);
+	////}
 
-	private void HelpMenuItemClicked(object sender, EventArgs e)
-	{
-		ShowHelp();
-	}
+	////private void HelpMenuItemClicked(object sender, EventArgs e)
+	////{
+	////	ShowHelp();
+	////}
 
 	private void ShowStartupPageCheckBoxToggled(bool show_startup_page)
 	{
@@ -2145,7 +2145,7 @@ internal class MainForm : Form
 		}
 		else
 		{
-			MessageBox.Show("Error cloning session: " + cloneThreadContext.m_Error, "FramePro ERROR", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+			MessageBox.Show("Error cloning session: " + cloneThreadContext.m_Error, "ProfilerStudy ERROR", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 			CloseSessionView(cloneThreadContext.m_NewSession);
 		}
 	}
@@ -2165,7 +2165,7 @@ internal class MainForm : Form
 		}
 		else
 		{
-			MessageBox.Show("Please select frames in the graph view from which to create a new session", "FramePro", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+			MessageBox.Show("Please select frames in the graph view from which to create a new session", "ProfilerStudy", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
 		}
 	}
 
@@ -2316,7 +2316,7 @@ internal class MainForm : Form
 		}
 		Utils.ExecuteProcess(text + " shell \"echo 0 > /d/tracing/tracing_on\"", out result);
 		SaveFileDialog saveFileDialog = new SaveFileDialog();
-		saveFileDialog.Filter = "Files (*.framepro_context_switch)|*.framepro_context_switch|All files (*.*)|*.*";
+		saveFileDialog.Filter = "Files (*.profiler_context_switch)|*.profiler_context_switch|All files (*.*)|*.*";
 		saveFileDialog.FilterIndex = 0;
 		if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
 		{
@@ -2361,7 +2361,7 @@ internal class MainForm : Form
 			return false;
 		}
 		OpenFileDialog openFileDialog = new OpenFileDialog();
-		openFileDialog.Filter = "Files (*.framepro_context_switch)|*.framepro_context_switch| All files (*.*)|*.*";
+		openFileDialog.Filter = "Files (*.profiler_context_switch)|*.profiler_context_switch| All files (*.*)|*.*";
 		openFileDialog.FilterIndex = 0;
 		if (openFileDialog.ShowDialog(this) == DialogResult.OK && File.Exists(openFileDialog.FileName))
 		{
@@ -2405,7 +2405,7 @@ internal class MainForm : Form
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show("Unable to write to file " + saveFileDialog.FileName + "\n" + ex.Message, "FramePro Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			MessageBox.Show("Unable to write to file " + saveFileDialog.FileName + "\n" + ex.Message, "ProfilerStudy Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 		}
 	}
 
@@ -3156,13 +3156,13 @@ internal class MainForm : Form
         helpToolStripMenuItem.Name = "helpToolStripMenuItem";
         helpToolStripMenuItem.Size = new Size(67, 28);
         helpToolStripMenuItem.Text = "Help";
-        // 
-        // helpToolStripMenuItem1
-        // 
-        helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-        helpToolStripMenuItem1.Size = new Size(268, 34);
-        helpToolStripMenuItem1.Text = "View Help";
-        helpToolStripMenuItem1.Click += HelpMenuItemClicked;
+        ////// 
+        ////// helpToolStripMenuItem1
+        ////// 
+        ////helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
+        ////helpToolStripMenuItem1.Size = new Size(268, 34);
+        ////helpToolStripMenuItem1.Text = "View Help";
+        ////helpToolStripMenuItem1.Click += HelpMenuItemClicked;
         // 
         // enterProductKeyToolStripMenuItem
         // 

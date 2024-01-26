@@ -698,7 +698,7 @@ public class Session : IDisposable
 		string text = date.Day.ToString("00") + "_" + date.Month.ToString("00") + "_" + date.Year.ToString("####");
 		System.TimeSpan timeOfDay = DateTime.Now.TimeOfDay;
 		string text2 = timeOfDay.Hours.ToString("00") + "_" + timeOfDay.Minutes.ToString("00") + "_" + timeOfDay.Seconds.ToString("00");
-		return text + "+" + text2 + ".framepro";
+		return text + "+" + text2 + ".profiler";
 	}
 
 	public void Dispose()
@@ -3346,7 +3346,7 @@ public class Session : IDisposable
 
 	public bool IsRecordingFile(string filename)
 	{
-		if (Path.GetExtension(filename).ToLower() == ".framepro_recording" || Path.GetExtension(filename).ToLower() == ".framepro_dump")
+		if (Path.GetExtension(filename).ToLower() == ".profiler_recording" || Path.GetExtension(filename).ToLower() == ".profiler_dump")
 		{
 			return true;
 		}

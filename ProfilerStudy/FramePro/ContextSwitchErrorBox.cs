@@ -109,7 +109,7 @@ public class ContextSwitchErrorBox : Form
 		base.Name = "ContextSwitchErrorBox";
 		base.ShowInTaskbar = false;
 		base.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-		this.Text = "FramePro - Warning";
+		this.Text = "ProfilerStudy - Warning";
 		((System.ComponentModel.ISupportInitialize)this.pictureBox1).EndInit();
 		base.ResumeLayout(false);
 		base.PerformLayout();

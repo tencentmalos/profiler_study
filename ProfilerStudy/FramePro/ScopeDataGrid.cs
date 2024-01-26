@@ -449,202 +449,255 @@ internal class ScopeDataGrid : UserControl
 
 	private void InitializeComponent()
 	{
-		SCL.RowCollection rows = new SCL.RowCollection();
-		SCL.RowCollection rows2 = new SCL.RowCollection();
-		this.m_DataGrid = new SCL.HDataGrid();
-		this.label3 = new System.Windows.Forms.Label();
-		this.m_ScopeNameTextBox = new System.Windows.Forms.TextBox();
-		this.m_TimeUnitsButton = new System.Windows.Forms.Button();
-		this.label1 = new System.Windows.Forms.Label();
-		this.m_CallstackDataGrid = new SCL.HDataGrid();
-		this.splitter1 = new System.Windows.Forms.Splitter();
-		this.m_CallstackPanel = new System.Windows.Forms.Panel();
-		this.m_TopPanel = new System.Windows.Forms.Panel();
-		this.button2 = new System.Windows.Forms.Button();
-		this.button1 = new System.Windows.Forms.Button();
-		this.m_DataGridPanel = new System.Windows.Forms.Panel();
-		this.m_CallstackPanel.SuspendLayout();
-		this.m_TopPanel.SuspendLayout();
-		this.m_DataGridPanel.SuspendLayout();
-		base.SuspendLayout();
-		this.m_DataGrid.AddEmptyRow = false;
-		this.m_DataGrid.AlternateRowColours = true;
-		this.m_DataGrid.BackColor = System.Drawing.SystemColors.AppWorkspace;
-		this.m_DataGrid.CanAddRemoveRows = true;
-		this.m_DataGrid.CanRenameCell = true;
-		this.m_DataGrid.CanResizeColumnTitleBar = false;
-		this.m_DataGrid.CanResizeRows = false;
-		this.m_DataGrid.CanResizeRowTitleBar = false;
-		this.m_DataGrid.CanShowHideColumns = true;
-		this.m_DataGrid.CanSortByColumn = true;
-		this.m_DataGrid.ClearSelectionOnMouseLeave = false;
-		this.m_DataGrid.ColumnTitlePanelVisible = true;
-		this.m_DataGrid.DarkRowColour = System.Drawing.Color.FromArgb(230, 230, 230);
-		this.m_DataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-		this.m_DataGrid.DrawColumnLines = true;
-		this.m_DataGrid.DrawLastColumnLine = false;
-		this.m_DataGrid.DrawRowLines = false;
-		this.m_DataGrid.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_DataGrid.HighlightedRowBoxColour = System.Drawing.Color.Blue;
-		this.m_DataGrid.HighlightedRowBoxVisible = false;
-		this.m_DataGrid.HighlightRow = false;
-		this.m_DataGrid.HighlightRowColour = System.Drawing.Color.FromArgb(225, 225, 255);
-		this.m_DataGrid.HighlightSelectedRow = false;
-		this.m_DataGrid.HorizontalTextOffset = 4;
-		this.m_DataGrid.LightRowColour = System.Drawing.Color.FromArgb(235, 235, 235);
-		this.m_DataGrid.Location = new System.Drawing.Point(0, 0);
-		this.m_DataGrid.MoveCellsEnabled = false;
-		this.m_DataGrid.Name = "m_DataGrid";
-		this.m_DataGrid.PadEmptyRows = true;
-		this.m_DataGrid.ReadOnly = true;
-		this.m_DataGrid.RowHeightPadding = 3;
-		this.m_DataGrid.Rows = rows;
-		this.m_DataGrid.RowTitelPanelVisible = true;
-		this.m_DataGrid.ScrollColumnsHorz = false;
-		this.m_DataGrid.SelectByRow = false;
-		this.m_DataGrid.SelectedCellColour = System.Drawing.Color.FromArgb(188, 180, 250);
-		this.m_DataGrid.SelectedRowColour = System.Drawing.Color.FromArgb(210, 210, 255);
-		this.m_DataGrid.SelectNextCellAfterEdit = true;
-		this.m_DataGrid.ShowSelectBox = true;
-		this.m_DataGrid.Size = new System.Drawing.Size(301, 557);
-		this.m_DataGrid.SlideDrag = false;
-		this.m_DataGrid.TabIndex = 0;
-		this.m_DataGrid.WindowColour = System.Drawing.SystemColors.Window;
-		this.label3.AutoSize = true;
-		this.label3.Location = new System.Drawing.Point(12, 21);
-		this.label3.Name = "label3";
-		this.label3.Size = new System.Drawing.Size(38, 13);
-		this.label3.TabIndex = 5;
-		this.label3.Text = "Scope";
-		this.m_ScopeNameTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-		this.m_ScopeNameTextBox.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_ScopeNameTextBox.Location = new System.Drawing.Point(56, 18);
-		this.m_ScopeNameTextBox.Name = "m_ScopeNameTextBox";
-		this.m_ScopeNameTextBox.ReadOnly = true;
-		this.m_ScopeNameTextBox.Size = new System.Drawing.Size(207, 22);
-		this.m_ScopeNameTextBox.TabIndex = 6;
-		this.m_TimeUnitsButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-		this.m_TimeUnitsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		this.m_TimeUnitsButton.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_TimeUnitsButton.Location = new System.Drawing.Point(169, 44);
-		this.m_TimeUnitsButton.Name = "m_TimeUnitsButton";
-		this.m_TimeUnitsButton.Size = new System.Drawing.Size(94, 23);
-		this.m_TimeUnitsButton.TabIndex = 7;
-		this.m_TimeUnitsButton.Text = "Microseconds";
-		this.m_TimeUnitsButton.UseVisualStyleBackColor = true;
-		this.m_TimeUnitsButton.Click += new System.EventHandler(TimeUnitsButtonPressed);
-		this.label1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-		this.label1.AutoSize = true;
-		this.label1.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.label1.Location = new System.Drawing.Point(102, 49);
-		this.label1.Name = "label1";
-		this.label1.Size = new System.Drawing.Size(61, 13);
-		this.label1.TabIndex = 8;
-		this.label1.Text = "Time Units";
-		this.m_CallstackDataGrid.AddEmptyRow = false;
-		this.m_CallstackDataGrid.AlternateRowColours = true;
-		this.m_CallstackDataGrid.BackColor = System.Drawing.SystemColors.AppWorkspace;
-		this.m_CallstackDataGrid.CanAddRemoveRows = true;
-		this.m_CallstackDataGrid.CanRenameCell = true;
-		this.m_CallstackDataGrid.CanResizeColumnTitleBar = false;
-		this.m_CallstackDataGrid.CanResizeRows = false;
-		this.m_CallstackDataGrid.CanResizeRowTitleBar = false;
-		this.m_CallstackDataGrid.CanShowHideColumns = true;
-		this.m_CallstackDataGrid.CanSortByColumn = true;
-		this.m_CallstackDataGrid.ClearSelectionOnMouseLeave = false;
-		this.m_CallstackDataGrid.ColumnTitlePanelVisible = true;
-		this.m_CallstackDataGrid.DarkRowColour = System.Drawing.Color.WhiteSmoke;
-		this.m_CallstackDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-		this.m_CallstackDataGrid.DrawColumnLines = true;
-		this.m_CallstackDataGrid.DrawLastColumnLine = false;
-		this.m_CallstackDataGrid.DrawRowLines = false;
-		this.m_CallstackDataGrid.Font = new System.Drawing.Font("Consolas", 9f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.m_CallstackDataGrid.HighlightedRowBoxColour = System.Drawing.Color.Blue;
-		this.m_CallstackDataGrid.HighlightedRowBoxVisible = false;
-		this.m_CallstackDataGrid.HighlightRow = true;
-		this.m_CallstackDataGrid.HighlightRowColour = System.Drawing.Color.White;
-		this.m_CallstackDataGrid.HighlightSelectedRow = true;
-		this.m_CallstackDataGrid.HorizontalTextOffset = 4;
-		this.m_CallstackDataGrid.LightRowColour = System.Drawing.Color.WhiteSmoke;
-		this.m_CallstackDataGrid.Location = new System.Drawing.Point(0, 0);
-		this.m_CallstackDataGrid.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-		this.m_CallstackDataGrid.MoveCellsEnabled = false;
-		this.m_CallstackDataGrid.Name = "m_CallstackDataGrid";
-		this.m_CallstackDataGrid.PadEmptyRows = true;
-		this.m_CallstackDataGrid.ReadOnly = true;
-		this.m_CallstackDataGrid.RowHeightPadding = 3;
-		this.m_CallstackDataGrid.Rows = rows2;
-		this.m_CallstackDataGrid.RowTitelPanelVisible = false;
-		this.m_CallstackDataGrid.ScrollColumnsHorz = false;
-		this.m_CallstackDataGrid.SelectByRow = false;
-		this.m_CallstackDataGrid.SelectedCellColour = System.Drawing.Color.FromArgb(235, 235, 235);
-		this.m_CallstackDataGrid.SelectedRowColour = System.Drawing.Color.FromArgb(241, 241, 241);
-		this.m_CallstackDataGrid.SelectNextCellAfterEdit = true;
-		this.m_CallstackDataGrid.ShowSelectBox = false;
-		this.m_CallstackDataGrid.Size = new System.Drawing.Size(301, 224);
-		this.m_CallstackDataGrid.SlideDrag = false;
-		this.m_CallstackDataGrid.TabIndex = 9;
-		this.m_CallstackDataGrid.WindowColour = System.Drawing.SystemColors.Window;
-		this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
-		this.splitter1.Location = new System.Drawing.Point(0, 636);
-		this.splitter1.Name = "splitter1";
-		this.splitter1.Size = new System.Drawing.Size(301, 3);
-		this.splitter1.TabIndex = 10;
-		this.splitter1.TabStop = false;
-		this.m_CallstackPanel.Controls.Add(this.m_CallstackDataGrid);
-		this.m_CallstackPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-		this.m_CallstackPanel.Location = new System.Drawing.Point(0, 639);
-		this.m_CallstackPanel.Name = "m_CallstackPanel";
-		this.m_CallstackPanel.Size = new System.Drawing.Size(301, 224);
-		this.m_CallstackPanel.TabIndex = 11;
-		this.m_TopPanel.Controls.Add(this.button2);
-		this.m_TopPanel.Controls.Add(this.button1);
-		this.m_TopPanel.Controls.Add(this.m_ScopeNameTextBox);
-		this.m_TopPanel.Controls.Add(this.label3);
-		this.m_TopPanel.Controls.Add(this.m_TimeUnitsButton);
-		this.m_TopPanel.Controls.Add(this.label1);
-		this.m_TopPanel.Dock = System.Windows.Forms.DockStyle.Top;
-		this.m_TopPanel.Location = new System.Drawing.Point(0, 0);
-		this.m_TopPanel.Name = "m_TopPanel";
-		this.m_TopPanel.Size = new System.Drawing.Size(301, 79);
-		this.m_TopPanel.TabIndex = 12;
-		this.button2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-		this.button2.FlatAppearance.BorderSize = 0;
-		this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		this.button2.Location = new System.Drawing.Point(273, 3);
-		this.button2.Name = "button2";
-		this.button2.Size = new System.Drawing.Size(25, 25);
-		this.button2.TabIndex = 10;
-		this.button2.Text = "X";
-		this.button2.UseVisualStyleBackColor = true;
-		this.button2.Click += new System.EventHandler(CloseButtonClicked);
-		this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		this.button1.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		this.button1.Location = new System.Drawing.Point(56, 44);
-		this.button1.Name = "button1";
-		this.button1.Size = new System.Drawing.Size(85, 23);
-		this.button1.TabIndex = 9;
-		this.button1.Text = "Go to Source";
-		this.button1.UseVisualStyleBackColor = true;
-		this.button1.Click += new System.EventHandler(JumpToSourceButtonClicked);
-		this.m_DataGridPanel.Controls.Add(this.m_DataGrid);
-		this.m_DataGridPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-		this.m_DataGridPanel.Location = new System.Drawing.Point(0, 79);
-		this.m_DataGridPanel.Name = "m_DataGridPanel";
-		this.m_DataGridPanel.Size = new System.Drawing.Size(301, 557);
-		this.m_DataGridPanel.TabIndex = 13;
-		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
-		base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-		base.Controls.Add(this.m_DataGridPanel);
-		base.Controls.Add(this.m_TopPanel);
-		base.Controls.Add(this.splitter1);
-		base.Controls.Add(this.m_CallstackPanel);
-		base.Name = "ScopeDataGrid";
-		base.Size = new System.Drawing.Size(301, 863);
-		this.m_CallstackPanel.ResumeLayout(false);
-		this.m_TopPanel.ResumeLayout(false);
-		this.m_TopPanel.PerformLayout();
-		this.m_DataGridPanel.ResumeLayout(false);
-		base.ResumeLayout(false);
+            SCL.RowCollection rowCollection3 = new SCL.RowCollection();
+            SCL.RowCollection rowCollection4 = new SCL.RowCollection();
+            this.m_DataGrid = new SCL.HDataGrid();
+            this.label3 = new System.Windows.Forms.Label();
+            this.m_ScopeNameTextBox = new System.Windows.Forms.TextBox();
+            this.m_TimeUnitsButton = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.m_CallstackDataGrid = new SCL.HDataGrid();
+            this.splitter1 = new System.Windows.Forms.Splitter();
+            this.m_CallstackPanel = new System.Windows.Forms.Panel();
+            this.m_TopPanel = new System.Windows.Forms.Panel();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.m_DataGridPanel = new System.Windows.Forms.Panel();
+            this.m_CallstackPanel.SuspendLayout();
+            this.m_TopPanel.SuspendLayout();
+            this.m_DataGridPanel.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // m_DataGrid
+            // 
+            this.m_DataGrid.AddEmptyRow = false;
+            this.m_DataGrid.AlternateRowColours = true;
+            this.m_DataGrid.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.m_DataGrid.CanAddRemoveRows = true;
+            this.m_DataGrid.CanRenameCell = true;
+            this.m_DataGrid.CanResizeColumnTitleBar = false;
+            this.m_DataGrid.CanResizeRows = false;
+            this.m_DataGrid.CanResizeRowTitleBar = false;
+            this.m_DataGrid.CanShowHideColumns = true;
+            this.m_DataGrid.CanSortByColumn = true;
+            this.m_DataGrid.ClearSelectionOnMouseLeave = false;
+            this.m_DataGrid.ColumnTitlePanelVisible = true;
+            this.m_DataGrid.DarkRowColour = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.m_DataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_DataGrid.DrawColumnLines = true;
+            this.m_DataGrid.DrawLastColumnLine = false;
+            this.m_DataGrid.DrawRowLines = false;
+            this.m_DataGrid.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_DataGrid.HighlightedRowBoxColour = System.Drawing.Color.Blue;
+            this.m_DataGrid.HighlightedRowBoxVisible = false;
+            this.m_DataGrid.HighlightRow = false;
+            this.m_DataGrid.HighlightRowColour = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(225)))), ((int)(((byte)(255)))));
+            this.m_DataGrid.HighlightSelectedRow = false;
+            this.m_DataGrid.HorizontalTextOffset = 4;
+            this.m_DataGrid.LightRowColour = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
+            this.m_DataGrid.Location = new System.Drawing.Point(0, 0);
+            this.m_DataGrid.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.m_DataGrid.MoveCellsEnabled = false;
+            this.m_DataGrid.Name = "m_DataGrid";
+            this.m_DataGrid.PadEmptyRows = true;
+            this.m_DataGrid.ReadOnly = true;
+            this.m_DataGrid.RowHeightPadding = 3;
+            this.m_DataGrid.Rows = rowCollection3;
+            this.m_DataGrid.RowTitelPanelVisible = true;
+            this.m_DataGrid.ScrollColumnsHorz = false;
+            this.m_DataGrid.SelectByRow = false;
+            this.m_DataGrid.SelectedCellColour = System.Drawing.Color.FromArgb(((int)(((byte)(188)))), ((int)(((byte)(180)))), ((int)(((byte)(250)))));
+            this.m_DataGrid.SelectedRowColour = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(210)))), ((int)(((byte)(255)))));
+            this.m_DataGrid.SelectNextCellAfterEdit = true;
+            this.m_DataGrid.ShowSelectBox = true;
+            this.m_DataGrid.Size = new System.Drawing.Size(452, 772);
+            this.m_DataGrid.SlideDrag = false;
+            this.m_DataGrid.TabIndex = 0;
+            this.m_DataGrid.WindowColour = System.Drawing.SystemColors.Window;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(18, 29);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(53, 18);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "Scope";
+            // 
+            // m_ScopeNameTextBox
+            // 
+            this.m_ScopeNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_ScopeNameTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_ScopeNameTextBox.Location = new System.Drawing.Point(84, 25);
+            this.m_ScopeNameTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_ScopeNameTextBox.Name = "m_ScopeNameTextBox";
+            this.m_ScopeNameTextBox.ReadOnly = true;
+            this.m_ScopeNameTextBox.Size = new System.Drawing.Size(308, 26);
+            this.m_ScopeNameTextBox.TabIndex = 6;
+            // 
+            // m_TimeUnitsButton
+            // 
+            this.m_TimeUnitsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_TimeUnitsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.m_TimeUnitsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_TimeUnitsButton.Location = new System.Drawing.Point(307, 62);
+            this.m_TimeUnitsButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_TimeUnitsButton.Name = "m_TimeUnitsButton";
+            this.m_TimeUnitsButton.Size = new System.Drawing.Size(141, 32);
+            this.m_TimeUnitsButton.TabIndex = 7;
+            this.m_TimeUnitsButton.Text = "Microseconds";
+            this.m_TimeUnitsButton.UseVisualStyleBackColor = true;
+            this.m_TimeUnitsButton.Click += new System.EventHandler(this.TimeUnitsButtonPressed);
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(209, 68);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(90, 20);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Time Units";
+            // 
+            // m_CallstackDataGrid
+            // 
+            this.m_CallstackDataGrid.AddEmptyRow = false;
+            this.m_CallstackDataGrid.AlternateRowColours = true;
+            this.m_CallstackDataGrid.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.m_CallstackDataGrid.CanAddRemoveRows = true;
+            this.m_CallstackDataGrid.CanRenameCell = true;
+            this.m_CallstackDataGrid.CanResizeColumnTitleBar = false;
+            this.m_CallstackDataGrid.CanResizeRows = false;
+            this.m_CallstackDataGrid.CanResizeRowTitleBar = false;
+            this.m_CallstackDataGrid.CanShowHideColumns = true;
+            this.m_CallstackDataGrid.CanSortByColumn = true;
+            this.m_CallstackDataGrid.ClearSelectionOnMouseLeave = false;
+            this.m_CallstackDataGrid.ColumnTitlePanelVisible = true;
+            this.m_CallstackDataGrid.DarkRowColour = System.Drawing.Color.WhiteSmoke;
+            this.m_CallstackDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_CallstackDataGrid.DrawColumnLines = true;
+            this.m_CallstackDataGrid.DrawLastColumnLine = false;
+            this.m_CallstackDataGrid.DrawRowLines = false;
+            this.m_CallstackDataGrid.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_CallstackDataGrid.HighlightedRowBoxColour = System.Drawing.Color.Blue;
+            this.m_CallstackDataGrid.HighlightedRowBoxVisible = false;
+            this.m_CallstackDataGrid.HighlightRow = true;
+            this.m_CallstackDataGrid.HighlightRowColour = System.Drawing.Color.White;
+            this.m_CallstackDataGrid.HighlightSelectedRow = true;
+            this.m_CallstackDataGrid.HorizontalTextOffset = 4;
+            this.m_CallstackDataGrid.LightRowColour = System.Drawing.Color.WhiteSmoke;
+            this.m_CallstackDataGrid.Location = new System.Drawing.Point(0, 0);
+            this.m_CallstackDataGrid.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.m_CallstackDataGrid.MoveCellsEnabled = false;
+            this.m_CallstackDataGrid.Name = "m_CallstackDataGrid";
+            this.m_CallstackDataGrid.PadEmptyRows = true;
+            this.m_CallstackDataGrid.ReadOnly = true;
+            this.m_CallstackDataGrid.RowHeightPadding = 3;
+            this.m_CallstackDataGrid.Rows = rowCollection4;
+            this.m_CallstackDataGrid.RowTitelPanelVisible = false;
+            this.m_CallstackDataGrid.ScrollColumnsHorz = false;
+            this.m_CallstackDataGrid.SelectByRow = false;
+            this.m_CallstackDataGrid.SelectedCellColour = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
+            this.m_CallstackDataGrid.SelectedRowColour = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(241)))), ((int)(((byte)(241)))));
+            this.m_CallstackDataGrid.SelectNextCellAfterEdit = true;
+            this.m_CallstackDataGrid.ShowSelectBox = false;
+            this.m_CallstackDataGrid.Size = new System.Drawing.Size(452, 310);
+            this.m_CallstackDataGrid.SlideDrag = false;
+            this.m_CallstackDataGrid.TabIndex = 9;
+            this.m_CallstackDataGrid.WindowColour = System.Drawing.SystemColors.Window;
+            // 
+            // splitter1
+            // 
+            this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.splitter1.Location = new System.Drawing.Point(0, 881);
+            this.splitter1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(452, 4);
+            this.splitter1.TabIndex = 10;
+            this.splitter1.TabStop = false;
+            // 
+            // m_CallstackPanel
+            // 
+            this.m_CallstackPanel.Controls.Add(this.m_CallstackDataGrid);
+            this.m_CallstackPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.m_CallstackPanel.Location = new System.Drawing.Point(0, 885);
+            this.m_CallstackPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_CallstackPanel.Name = "m_CallstackPanel";
+            this.m_CallstackPanel.Size = new System.Drawing.Size(452, 310);
+            this.m_CallstackPanel.TabIndex = 11;
+            // 
+            // m_TopPanel
+            // 
+            this.m_TopPanel.Controls.Add(this.button2);
+            this.m_TopPanel.Controls.Add(this.button1);
+            this.m_TopPanel.Controls.Add(this.m_ScopeNameTextBox);
+            this.m_TopPanel.Controls.Add(this.label3);
+            this.m_TopPanel.Controls.Add(this.m_TimeUnitsButton);
+            this.m_TopPanel.Controls.Add(this.label1);
+            this.m_TopPanel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.m_TopPanel.Location = new System.Drawing.Point(0, 0);
+            this.m_TopPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_TopPanel.Name = "m_TopPanel";
+            this.m_TopPanel.Size = new System.Drawing.Size(452, 109);
+            this.m_TopPanel.TabIndex = 12;
+            // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.FlatAppearance.BorderSize = 0;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Location = new System.Drawing.Point(410, 4);
+            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(38, 35);
+            this.button2.TabIndex = 10;
+            this.button2.Text = "X";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.CloseButtonClicked);
+            // 
+            // button1
+            // 
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.Location = new System.Drawing.Point(4, 62);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(160, 32);
+            this.button1.TabIndex = 9;
+            this.button1.Text = "Go to Source";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.JumpToSourceButtonClicked);
+            // 
+            // m_DataGridPanel
+            // 
+            this.m_DataGridPanel.Controls.Add(this.m_DataGrid);
+            this.m_DataGridPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_DataGridPanel.Location = new System.Drawing.Point(0, 109);
+            this.m_DataGridPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.m_DataGridPanel.Name = "m_DataGridPanel";
+            this.m_DataGridPanel.Size = new System.Drawing.Size(452, 772);
+            this.m_DataGridPanel.TabIndex = 13;
+            // 
+            // ScopeDataGrid
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.m_DataGridPanel);
+            this.Controls.Add(this.m_TopPanel);
+            this.Controls.Add(this.splitter1);
+            this.Controls.Add(this.m_CallstackPanel);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Name = "ScopeDataGrid";
+            this.Size = new System.Drawing.Size(452, 1195);
+            this.m_CallstackPanel.ResumeLayout(false);
+            this.m_TopPanel.ResumeLayout(false);
+            this.m_TopPanel.PerformLayout();
+            this.m_DataGridPanel.ResumeLayout(false);
+            this.ResumeLayout(false);
+
 	}
 }

@@ -95,7 +95,7 @@ internal class RecordingDataForm : Form
 		base.Name = "RecordingDataForm";
 		base.ShowInTaskbar = false;
 		base.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-		this.Text = "FramePro Recording";
+		this.Text = "ProfilerStudy Recording";
 		base.ResumeLayout(false);
 		base.PerformLayout();
 	}

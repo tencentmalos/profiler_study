@@ -139,7 +139,7 @@ internal class FrameProButton : UserControl
 	private void InitializeComponent()
 	{
 		base.SuspendLayout();
-		base.Name = "FrameProButton";
+		base.Name = "ProfilerStudyButton";
 		base.ResumeLayout(false);
 	}
 }

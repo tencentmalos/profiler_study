@@ -564,7 +564,7 @@ internal class ThreadsView : SessionView
 			m_ShownTooManyThreadsWarning = true;
 			string message = "WARNING: Too many threads! Only showing first " + m_Settings.CoreSettings.MaxVisibleThreads + " threads";
 			MainForm.Inst.LogLine(message);
-			MessageBox.Show(message, "FramePro WARNING", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			MessageBox.Show(message, "ProfilerStudy WARNING", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 		}
 	}
 

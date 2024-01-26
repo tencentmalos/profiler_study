@@ -152,7 +152,7 @@ public class ProgressBar : Form
 		base.Name = "ProgressBar";
 		base.ShowInTaskbar = false;
 		base.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-		this.Text = "FramePro";
+		this.Text = "ProfilerStudy";
 		base.UseWaitCursor = true;
 		base.ResumeLayout(false);
 	}

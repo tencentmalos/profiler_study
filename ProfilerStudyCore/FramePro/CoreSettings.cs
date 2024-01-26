@@ -16,7 +16,7 @@ public class CoreSettings : ISettings
     //Environment.GetFolderPath(  Environment.SpecialFolder.ApplicationData)
     private static string m_UserLocalFolder = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + "\\cache\\";
 
-	private static string m_Path = m_UserLocalFolder + "FramePro.settings";
+	private static string m_Path = m_UserLocalFolder + "ProfilerStudy.settings";
 
 	private List<Connection> m_Connections = new List<Connection>();
 

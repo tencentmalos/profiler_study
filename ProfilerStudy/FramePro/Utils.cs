@@ -243,7 +243,7 @@ internal class Utils
             else
             {
                 process.StartInfo.FileName = "cmd.exe";
-                process.StartInfo.Arguments = $"/C clion --line {lineNumber} \"{fileName}\"";
+                process.StartInfo.Arguments = $"/C clion64.exe --line {lineNumber} \"{fileName}\"";
             }
             
 
@@ -296,7 +296,7 @@ internal class Utils
 		}
 		if (!File.Exists(text))
 		{
-			MessageBox.Show("Unable to find file " + text, "FramePro Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			MessageBox.Show("Unable to find file " + text, "ProfilerStudy Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 			return;
 		}
 		try

@@ -104,7 +104,7 @@ public class AutoUpdate : Form
 		base.MinimizeBox = false;
 		base.Name = "AutoUpdate";
 		base.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-		this.Text = "FramePro Update";
+		this.Text = "ProfilerStudy Update";
 		base.ResumeLayout(false);
 		base.PerformLayout();
 	}

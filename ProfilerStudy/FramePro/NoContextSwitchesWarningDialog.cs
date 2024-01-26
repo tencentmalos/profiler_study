@@ -74,7 +74,7 @@ public class NoContextSwitchesWarningDialog : Form
 		base.Name = "NoContextSwitchesWarningDialog";
 		base.ShowInTaskbar = false;
 		base.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-		this.Text = "FramePro";
+		this.Text = "ProfilerStudy";
 		base.ResumeLayout(false);
 		base.PerformLayout();
 	}

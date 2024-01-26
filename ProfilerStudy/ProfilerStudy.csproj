@@ -33,6 +33,12 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Profiler_GameSimulator.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Profiler_RecordingPlayer.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="VisualStudioOpenFileAndLine.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

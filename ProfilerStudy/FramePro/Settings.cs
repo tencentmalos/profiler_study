@@ -906,7 +906,7 @@ internal class Settings : ISettings
 		}
 		XmlReadStream xmlReadStream = new XmlReadStream();
 		xmlReadStream.Load(CoreSettings.Path);
-		if (xmlReadStream.StartElement("FramePro"))
+		if (xmlReadStream.StartElement("ProfilerStudy"))
 		{
 			m_CoreSettings.Read(xmlReadStream);
 			if (xmlReadStream.StartElement("Connection"))
@@ -1009,7 +1009,7 @@ internal class Settings : ISettings
 				xmlReadStream.Read("CustomStatsSortedColumnIncreasing", ref m_CustomStatsSortedColumnIncreasing);
 				xmlReadStream.Read("ThreadScopeHeight", ref m_ThreadScopeHeight);
 				xmlReadStream.Read("SourceRoots", ref m_SourceRoots);
-				xmlReadStream.Read("FrameProThreadAffinity", ref m_FrameProThreadAffinity);
+				xmlReadStream.Read("ProfilerStudyThreadAffinity", ref m_FrameProThreadAffinity);
 				xmlReadStream.Read("ThreadIdMode", ref m_ThreadIdMode);
 				string viewerTool = "";
 				xmlReadStream.Read("SourceViewerTool", ref viewerTool);
@@ -1029,7 +1029,7 @@ internal class Settings : ISettings
 			Directory.CreateDirectory(directoryName);
 		}
 		XmlWriteStream xmlWriteStream = new XmlWriteStream();
-		xmlWriteStream.StartElement("FramePro");
+		xmlWriteStream.StartElement("ProfilerStudy");
 		m_CoreSettings.Write(xmlWriteStream);
 		xmlWriteStream.StartElement("Connection");
 		xmlWriteStream.Write("FirstConnect", m_FirstConnect);
@@ -1110,7 +1110,7 @@ internal class Settings : ISettings
 		xmlWriteStream.Write("CustomStatsSortedColumnIncreasing", m_CustomStatsSortedColumnIncreasing);
 		xmlWriteStream.Write("ThreadScopeHeight", m_ThreadScopeHeight);
 		xmlWriteStream.Write("SourceRoots", m_SourceRoots);
-		xmlWriteStream.Write("FrameProThreadAffinity", m_FrameProThreadAffinity);
+		xmlWriteStream.Write("ProfilerStudyThreadAffinity", m_FrameProThreadAffinity);
 		xmlWriteStream.Write("ThreadIdMode", m_ThreadIdMode);
         xmlWriteStream.Write("SourceViewerTool", SourceViewerTool);
         xmlWriteStream.EndElement();

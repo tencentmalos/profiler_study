@@ -15,25 +15,25 @@ public class FrameProCore
 
 	private const int m_MaxLogSize = 1048576;
 
-	private static string m_Manufacturer = "PureDevSoftware";
+	private static string m_Manufacturer = "???";
 
-	private static string m_ProductName = "FramePro";
+	private static string m_ProductName = "ProfilerStudy";
 
-	private static string m_WebsiteAddr = "http://www.puredevsoftware.com/registration/";
+	private static string m_WebsiteAddr = "???";
 
 	private const string m_MachineIdDatabase = "framepro_machine_id";
 
 	private const string m_RegistrationDatabase = "framepro_registration";
 
-	private const string m_PurchaseWebsite = "https://www.puredevsoftware.com";
+	private const string m_PurchaseWebsite = "???";
 
-	private const string m_UpdateWebsite = "https://www.puredevsoftware.com/framepro/update.php";
+	private const string m_UpdateWebsite = "???";
 
-	private const string m_RegisterWebsite = "https://www.puredevsoftware.com/Register_v2.htm";
+	private const string m_RegisterWebsite = "???";
 
-	private const string m_UnregisterWebsite = "https://www.puredevsoftware.com/Unregister.htm";
+	private const string m_UnregisterWebsite = "???";
 
-	private const string m_PureDevRegPhpScriptsWebsite = "https://www.puredevsoftware.com/puredevreg/v2/";
+	private const string m_PureDevRegPhpScriptsWebsite = "???";
 
 	private const string m_LocalServerPort = "8429";
 

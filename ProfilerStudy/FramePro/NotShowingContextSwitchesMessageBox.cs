@@ -80,7 +80,7 @@ internal class NotShowingContextSwitchesMessageBox : UserControl
 		this.m_LinkLabel.Size = new System.Drawing.Size(509, 13);
 		this.m_LinkLabel.TabIndex = 0;
 		this.m_LinkLabel.TabStop = true;
-		this.m_LinkLabel.Text = "FramePro is not tracking context switches.    Load context switch file    Find out more          Dismiss\r\n";
+		this.m_LinkLabel.Text = "ProfilerStudy is not tracking context switches.    Load context switch file    Find out more          Dismiss\r\n";
 		this.m_LinkLabel.VisitedLinkColor = System.Drawing.Color.Yellow;
 		this.m_LinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(LinkClicked);
 		this.pictureBox1.Image = FramePro.Properties.Resources.info;

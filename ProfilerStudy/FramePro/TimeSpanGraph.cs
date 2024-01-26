@@ -1724,7 +1724,7 @@ internal class TimeSpanGraph : UserControl
 		}
 		else
 		{
-			MessageBox.Show("Could not find any scopes", "FramePro", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+			MessageBox.Show("Could not find any scopes", "ProfilerStudy", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
 		}
 	}
 
@@ -1750,7 +1750,7 @@ internal class TimeSpanGraph : UserControl
 		}
 		else
 		{
-			MessageBox.Show("Could not find any scopes", "FramePro", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+			MessageBox.Show("Could not find any scopes", "ProfilerStudy", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
 		}
 	}
 
