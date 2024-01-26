@@ -192,16 +192,15 @@ internal class Utils
 			{
 				string path = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
 				path = System.IO.Path.Combine(path, "open_source_vscode.sh");
-
+				
                 process.StartInfo.FileName = path;
                 process.StartInfo.Arguments = $"\"{fileName}\" {lineNumber}";
                 
-                // process.StartInfo.FileName = "start";
-                //
-                // path = path.Replace("Z:", "");
-                // path = path.Replace("\\", "/");
-                // //process.StartInfo.Arguments = $"\"{path}\"  \"{fileName}\" {lineNumber}";
-                // process.StartInfo.Arguments = $"/exec /bin/bash \"{path}\"  \"{fileName}\" {lineNumber}";
+                //path = path.Replace("Z:", "");
+                //path = path.Replace("\\", "/");
+                //process.StartInfo.Arguments = $"\"{path}\"  \"{fileName}\" {lineNumber}";
+                //process.StartInfo.Arguments = $"/unix \"{path}\"  \"{fileName}\" {lineNumber}";
+                //process.StartInfo.Arguments = $"cmd /c echo \"Hello\"";
 			}
 			else
 			{
@@ -224,7 +223,7 @@ internal class Utils
         catch (Exception ex)
         {
 	        Log.WriteLine($"ERROR: {ex.ToString()}");
-            MessageBox.Show("ERORR: " + ex.Message);
+            MessageBox.Show($"ERORR: {ex.ToString()}");
         }
     }
 
@@ -235,8 +234,11 @@ internal class Utils
             Process process = new Process();
             if (PlatformTool.IsRunOnWine())
             {
-                process.StartInfo.FileName = "/bin/bash";
-                process.StartInfo.Arguments = $"clion --line {lineNumber} \"{fileName}\"";
+	            string path = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+	            path = System.IO.Path.Combine(path, "open_source_clion.sh");
+				
+	            process.StartInfo.FileName = path;
+	            process.StartInfo.Arguments = $"\"{fileName}\" {lineNumber}";
             }
             else
             {
