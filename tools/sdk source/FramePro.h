@@ -41,6 +41,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 	#define FRAMEPRO_FRAME_START()															FramePro::FrameStart()
 	#define FRAMEPRO_SHUTDOWN()																FramePro::Shutdown()
 	#define FRAMEPRO_SET_PORT(port)															FramePro::SetPort(port)
+	#define FRAMEPRO_SET_SOCKET_ENDPOINT(endpoint)												FramePro::SetSocketEndpoint(endpoint)
 	#define FRAMEPRO_SESSION_INFO(name, value)												FramePro::SendSessionInfo(name, value)
 	#define FRAMEPRO_SET_ALLOCATOR(p_allocator)												FramePro::SetAllocator(p_allocator)
 	#define FRAMEPRO_SET_THREAD_NAME(name)													FramePro::SetThreadName(name)
@@ -127,6 +128,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 	#define FRAMEPRO_FRAME_START()															((void)0)
 	#define FRAMEPRO_SHUTDOWN()																((void)0)
 	#define FRAMEPRO_SET_PORT(port)															((void)0)
+	#define FRAMEPRO_SET_SOCKET_ENDPOINT(endpoint)												((void)0)
 	#define FRAMEPRO_SESSION_INFO(name, id)													((void)0)
 	#define FRAMEPRO_SET_ALLOCATOR(p_allocator)												((void)0)
 	#define FRAMEPRO_SET_THREAD_NAME(name)													((void)0)
@@ -1624,6 +1626,8 @@ namespace FramePro
 	FRAMEPRO_API void Shutdown();
 
 	FRAMEPRO_API void SetPort(int port);
+
+	FRAMEPRO_API void SetSocketEndpoint(const char* p_endpoint);
 
 	FRAMEPRO_API void DebugBreak();
 

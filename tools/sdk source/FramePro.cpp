@@ -3347,6 +3347,8 @@ namespace FramePro
 		void RemoveFrameProTLS(FrameProTLS* p_framepro_tls);
 
 		void SetPort(int port);
+
+		void SetSocketEndpoint(const char* p_endpoint);
 		
 		void SetAllocator(Allocator* p_allocator);
 
@@ -3502,7 +3504,7 @@ namespace FramePro
 
 		mutable CriticalSection m_CriticalSection;
 
-		char m_Port[8];
+		char m_Port[128];
 
 		CheckedAllocator m_Allocator;
 		Allocator* mp_CreatedAllocator;
@@ -4532,6 +4534,12 @@ void FramePro::SetPort(int port)
 }
 
 //------------------------------------------------------------------------
+void FramePro::SetSocketEndpoint(const char* p_endpoint)
+{
+	GetFrameProSession().SetSocketEndpoint(p_endpoint);
+}
+
+//------------------------------------------------------------------------
 void FramePro::SendSessionInfo(const char* p_name, const char* p_value)
 {
 	GetFrameProSession().SendSessionInfo(p_name, p_value);
@@ -5170,6 +5178,20 @@ namespace FramePro
 	}
 
 	//------------------------------------------------------------------------
+	void FrameProSession::SetSocketEndpoint(const char* p_endpoint)
+	{
+		if(!p_endpoint || !*p_endpoint)
+			return;
+
+		size_t length = strlen(p_endpoint);
+		if(length >= sizeof(m_Port))
+			length = sizeof(m_Port) - 1;
+
+		memcpy(m_Port, p_endpoint, length);
+		m_Port[length] = 0;
+	}
+
+	//------------------------------------------------------------------------
 	void FrameProSession::SetAllocator(Allocator* p_allocator)
 	{
 		if(m_Allocator.HasAllocator())
@@ -5753,7 +5775,7 @@ namespace FramePro
 
 		if(!bind_result)
 		{
-			DebugWrite("FramePro ERROR: Failed to bind port. This usually means that another process is already running with FramePro enabled.\n");
+			DebugWrite("FramePro ERROR: Failed to bind listen endpoint. This usually means that another process is already running with FramePro enabled.\n");
 			return;
 		}
 
@@ -9513,8 +9535,10 @@ namespace FramePro
 	#include <inttypes.h>
 
 	#if FRAMEPRO_SOCKETS_ENABLED
+		#include <stddef.h>
 		#include <sys/socket.h>
 		#include <netinet/in.h>
+		#include <sys/un.h>
 	#endif
 
 	//------------------------------------------------------------------------
@@ -9809,6 +9833,68 @@ namespace FramePro
 			{
 				#if FRAMEPRO_SOCKETS_ENABLED
 					int& socket = GetOSSocket(p_os_socket_mem);
+
+					const char* p_abstract_prefix = "localabstract:";
+					const char* p_filesystem_prefix = "localfilesystem:";
+					const size_t abstract_prefix_length = strlen(p_abstract_prefix);
+					const size_t filesystem_prefix_length = strlen(p_filesystem_prefix);
+					const bool is_abstract_socket = strncmp(p_port, p_abstract_prefix, abstract_prefix_length) == 0 || p_port[0] == '@';
+					const bool is_filesystem_socket = strncmp(p_port, p_filesystem_prefix, filesystem_prefix_length) == 0;
+					if(is_abstract_socket || is_filesystem_socket)
+					{
+						socket = ::socket(AF_UNIX, SOCK_STREAM, 0);
+
+						if (socket == g_InvalidSocketId)
+						{
+							HandleSocketError();
+							return false;
+						}
+
+						sockaddr_un sa;
+						memset(&sa, 0, sizeof(sa));
+						sa.sun_family = AF_UNIX;
+
+						socklen_t socket_length = static_cast<socklen_t>(offsetof(sockaddr_un, sun_path));
+						if(is_abstract_socket)
+						{
+							const char* p_name = p_port[0] == '@' ? p_port + 1 : p_port + abstract_prefix_length;
+							size_t name_length = strlen(p_name);
+							if(name_length == 0 || name_length >= sizeof(sa.sun_path))
+							{
+								DisconnectSocket(p_os_socket_mem, true);
+								return false;
+							}
+
+							sa.sun_path[0] = 0;
+							memcpy(sa.sun_path + 1, p_name, name_length);
+							socket_length += static_cast<socklen_t>(name_length + 1);
+						}
+						else
+						{
+							const char* p_path = p_port + filesystem_prefix_length;
+							size_t path_length = strlen(p_path);
+							if(path_length == 0 || path_length >= sizeof(sa.sun_path))
+							{
+								DisconnectSocket(p_os_socket_mem, true);
+								return false;
+							}
+
+							memcpy(sa.sun_path, p_path, path_length + 1);
+							unlink(p_path);
+							socket_length += static_cast<socklen_t>(path_length + 1);
+						}
+
+						int result = ::bind(socket, (const sockaddr*)(&sa), socket_length);
+
+						if (result == g_SocketErrorId)
+						{
+							HandleSocketError();
+							DisconnectSocket(p_os_socket_mem, true);
+							return false;
+						}
+
+						return true;
+					}
 
 					socket = ::socket(
 						AF_INET,

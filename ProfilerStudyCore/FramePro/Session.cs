@@ -68,7 +68,13 @@ public class Session : IDisposable
 
 	private TcpClient m_TcpCllient;
 
+	private int m_AdbForwardedPort;
+
+	private string m_AdbForwardTarget;
+
 	private volatile bool m_Connected;
+
+	public string LastConnectionError { get; private set; }
 
 	private volatile int m_ConnectTime;
 
@@ -4282,6 +4288,121 @@ public class Session : IDisposable
 		return true;
 	}
 
+	public bool ConnectToAndroid(string adbEndpoint)
+	{
+		LastConnectionError = null;
+		string connectHost = "127.0.0.1";
+		int connectPort = 0;
+		LogLine("Connect To Android endpoint: " + adbEndpoint);
+		if (!PrepareAdbForward(adbEndpoint, ref connectHost, ref connectPort))
+		{
+			return false;
+		}
+		return ConnectToTcp(connectHost, connectPort, "Android", interactive: true, recordContextSwitches: false);
+	}
+
+	private bool ConnectToTcp(string connectHost, int connectPort, string connectionName, bool interactive, bool recordContextSwitches)
+	{
+		LastConnectionError = null;
+		m_TcpCllient = new TcpClient();
+		LogLine("Connect settings: name=" + connectionName + ", ip=" + connectHost + ", port=" + connectPort);
+
+		m_IP = connectHost;
+		Log.WriteLine("Connect: IP: " + m_IP);
+		LogLine("TCP connect begin: " + connectHost + ":" + connectPort);
+		string text = m_IP.Trim().ToLower();
+		m_IsLocalIP = text == "localhost" || text == "127.0.0.1";
+		IAsyncResult asyncResult = m_TcpCllient.BeginConnect(connectHost, connectPort, null, null);
+		Log.WriteLine("m_TcpCllient.BeginConnect result: " + asyncResult);
+		m_Interactive = interactive;
+		Log.WriteLine("m_Interactive: " + m_Interactive);
+		m_StartRecordingContextSwitches = recordContextSwitches;
+		Log.WriteLine("m_StartRecordingContextSwitches: " + m_StartRecordingContextSwitches);
+		Log.WriteLine("Waiting " + 5000 + " for connection...");
+		asyncResult.AsyncWaitHandle.WaitOne(5000);
+		Log.WriteLine("m_TcpCllient.Connected: " + m_TcpCllient.Connected);
+		if (!m_TcpCllient.Connected)
+		{
+			SetLastConnectionError("TCP connect timed out or failed: " + connectHost + ":" + connectPort);
+			RemoveAdbForward();
+			return false;
+		}
+		LogLine("TCP connected: " + connectHost + ":" + connectPort);
+		Log.WriteLine("Connected!");
+		m_Connected = true;
+		m_ConnectTime = Environment.TickCount;
+		Log.WriteLine("m_ConnectTime: " + m_ConnectTime);
+		m_ReceiveThread = new Thread(ReceiveThreadMain);
+		m_ReceiveThread.Name = "ReceiveThread";
+		m_ReceiveThread.Priority = ThreadPriority.Highest;
+		Log.WriteLine("m_ReceiveThread.Start");
+		StartProcessEventsThread(ProcessingPacketsMode.Connection);
+		Log.WriteLine("StartProcessEventsThread");
+		m_SendThread = new Thread(SendThreadMain);
+		m_SendThread.Name = "SendThread";
+		m_SendThread.Start();
+		Log.WriteLine("m_SendThread.Start");
+		return true;
+	}
+
+	private bool PrepareAdbForward(string target, ref string connectHost, ref int connectPort)
+	{
+		target = (target ?? "").Trim();
+		LogLine("ADB endpoint check: " + target);
+		if (!AdbSocketDiscovery.IsAdbSocketEndpoint(target))
+		{
+			SetLastConnectionError("Invalid Android FramePro endpoint: " + target);
+			return false;
+		}
+
+		RemoveAdbForward();
+		int localPort = AdbSocketDiscovery.AllocateLocalTcpPort();
+		string adb = AdbSocketDiscovery.ResolveAdbExecutable();
+		LogLine("ADB executable: " + adb);
+		LogLine("ADB forward command: " + adb + " forward tcp:" + localPort + " " + target);
+		FramePro.AdbResult forwardResult = AdbSocketDiscovery.RunAdb(adb, new[] { "forward", "tcp:" + localPort, target });
+		LogLine("ADB forward exit=" + forwardResult.ExitCode + ", output=" + AdbSocketDiscovery.NormalizeCommandOutput(forwardResult.Output));
+		if (!forwardResult.Success)
+		{
+			SetLastConnectionError("ADB forward failed for " + target + ": " + forwardResult.Output);
+			return false;
+		}
+
+		FramePro.AdbResult listResult = AdbSocketDiscovery.RunAdb(adb, new[] { "forward", "--list" });
+		LogLine("ADB forward --list exit=" + listResult.ExitCode + ", output=" + AdbSocketDiscovery.NormalizeCommandOutput(listResult.Output));
+		string expected = "tcp:" + localPort + " " + target;
+		if (!listResult.Output.Contains(expected))
+		{
+			LogLine("WARNING: adb forward --list does not contain expected mapping: " + expected);
+		}
+
+		m_AdbForwardedPort = localPort;
+		m_AdbForwardTarget = target;
+		connectHost = "127.0.0.1";
+		connectPort = localPort;
+		LogLine("ADB forward ready: tcp:" + localPort + " -> " + target);
+		return true;
+	}
+
+	private void RemoveAdbForward()
+	{
+		if (m_AdbForwardedPort == 0)
+		{
+			return;
+		}
+
+		FramePro.AdbResult result = AdbSocketDiscovery.RunAdb(AdbSocketDiscovery.ResolveAdbExecutable(), new[] { "forward", "--remove", "tcp:" + m_AdbForwardedPort });
+		LogLine("ADB forward removed: tcp:" + m_AdbForwardedPort + " -> " + m_AdbForwardTarget + ", exit=" + result.ExitCode + ", output=" + AdbSocketDiscovery.NormalizeCommandOutput(result.Output));
+		m_AdbForwardedPort = 0;
+		m_AdbForwardTarget = null;
+	}
+
+	private void SetLastConnectionError(string message)
+	{
+		LastConnectionError = message;
+		LogLine("Connect failed: " + message);
+	}
+
 	public void StartReceiving()
 	{
 		m_ReceiveThread.Start();
@@ -4295,6 +4416,7 @@ public class Session : IDisposable
 			m_TcpCllient.Close();
 			m_TcpCllient = null;
 		}
+		RemoveAdbForward();
 		m_SendEvent.Set();
 		m_SendPacketQueue.Clear();
 	}

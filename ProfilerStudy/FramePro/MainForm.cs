@@ -122,6 +122,8 @@ internal class MainForm : Form
 
 	private FrameProButton m_ConnectButton;
 
+	private FrameProButton m_ConnectAndroidButton;
+
 	private FrameProButton m_DisconnectButton;
 
 	private Panel panel1;
@@ -821,10 +823,58 @@ internal class MainForm : Form
 		Connect();
 	}
 
+	private void ConnectAndroidButtonClick(object sender, EventArgs e)
+	{
+		DisableCallstackRecording();
+		ConnectToAndroid();
+	}
+
+	private void ConnectToAndroid()
+	{
+		if (ActiveSession != null && ActiveSession.ProcessingPackets && new WaitForProcessingCompleteForm(ActiveSession, can_ignore: false).ShowDialog(this) == DialogResult.Cancel)
+		{
+			return;
+		}
+
+		using (AndroidConnectDialog dialog = new AndroidConnectDialog())
+		{
+			if (dialog.ShowDialog(this) != DialogResult.OK)
+			{
+				return;
+			}
+			ConnectToAndroid(dialog.SelectedEndpoint);
+		}
+	}
+
+	private void ConnectToAndroid(string endpoint)
+	{
+		LogLine("Connect To Android: CreateSession");
+		Session session = CreateSession();
+		LogLine("Connect To Android: session.ConnectToAndroid...");
+		if (session.ConnectToAndroid(endpoint))
+		{
+			LogLine("Connect To Android: Session Connected!");
+			CreateSessionView(session);
+			session.StartReceiving();
+		}
+		else
+		{
+			string error = session.LastConnectionError;
+			session.Close();
+			string message = "Failed to connect to Android.";
+			if (!string.IsNullOrEmpty(error))
+			{
+				message += "\n\n" + error;
+			}
+			MessageBox.Show(message, "ProfilerStudy", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+		}
+	}
+
 	private void UpdateButtonAndMenuItemStates()
 	{
 		bool flag = ActiveSession != null && ActiveSession.Connected;
 		m_ConnectButton.Enabled = !flag;
+		m_ConnectAndroidButton.Enabled = !flag;
 		m_ConnectSettingsButton.Enabled = !flag;
 		m_DisconnectButton.Enabled = flag;
 		UpdateSaveMenuItemEnabledState();
@@ -2441,6 +2491,7 @@ internal class MainForm : Form
         m_InfoViewButton = new ViewButton();
         m_FindControl = new FindControl();
         m_ConnectButton = new FrameProButton();
+        m_ConnectAndroidButton = new FrameProButton();
         m_CoresViewButton = new ViewButton();
         m_ScopeViewButton = new ViewButton();
         m_FramesViewButton = new ViewButton();
@@ -2527,6 +2578,7 @@ internal class MainForm : Form
         panel1.Controls.Add(m_InfoViewButton);
         panel1.Controls.Add(m_FindControl);
         panel1.Controls.Add(m_ConnectButton);
+        panel1.Controls.Add(m_ConnectAndroidButton);
         panel1.Controls.Add(m_CoresViewButton);
         panel1.Controls.Add(m_ScopeViewButton);
         panel1.Controls.Add(m_FramesViewButton);
@@ -2551,7 +2603,7 @@ internal class MainForm : Form
         m_GotoMaxFrameButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_GotoMaxFrameButton.HighlightEnabled = true;
         m_GotoMaxFrameButton.Image = (Image)resources.GetObject("m_GotoMaxFrameButton.Image");
-        m_GotoMaxFrameButton.Location = new Point(1511, 0);
+        m_GotoMaxFrameButton.Location = new Point(1641, 0);
         m_GotoMaxFrameButton.Margin = new Padding(6);
         m_GotoMaxFrameButton.Name = "m_GotoMaxFrameButton";
         m_GotoMaxFrameButton.Size = new Size(73, 120);
@@ -2568,7 +2620,7 @@ internal class MainForm : Form
         m_CallstackButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_CallstackButton.HighlightEnabled = true;
         m_CallstackButton.Image = (Image)resources.GetObject("m_CallstackButton.Image");
-        m_CallstackButton.Location = new Point(2915, 0);
+        m_CallstackButton.Location = new Point(3045, 0);
         m_CallstackButton.Margin = new Padding(6);
         m_CallstackButton.Name = "m_CallstackButton";
         m_CallstackButton.Size = new Size(119, 120);
@@ -2584,7 +2636,7 @@ internal class MainForm : Form
         m_DataGridViewButton.DisabledImage = (Image)resources.GetObject("m_DataGridViewButton.DisabledImage");
         m_DataGridViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_DataGridViewButton.Image = (Image)resources.GetObject("m_DataGridViewButton.Image");
-        m_DataGridViewButton.Location = new Point(1258, 0);
+        m_DataGridViewButton.Location = new Point(1388, 0);
         m_DataGridViewButton.Margin = new Padding(6);
         m_DataGridViewButton.Name = "m_DataGridViewButton";
         m_DataGridViewButton.Size = new Size(119, 120);
@@ -2598,7 +2650,7 @@ internal class MainForm : Form
         m_CustomStatsGraphButton.DisabledImage = (Image)resources.GetObject("m_CustomStatsGraphButton.DisabledImage");
         m_CustomStatsGraphButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_CustomStatsGraphButton.Image = (Image)resources.GetObject("m_CustomStatsGraphButton.Image");
-        m_CustomStatsGraphButton.Location = new Point(1128, 0);
+        m_CustomStatsGraphButton.Location = new Point(1258, 0);
         m_CustomStatsGraphButton.Margin = new Padding(6);
         m_CustomStatsGraphButton.Name = "m_CustomStatsGraphButton";
         m_CustomStatsGraphButton.Size = new Size(119, 120);
@@ -2613,7 +2665,7 @@ internal class MainForm : Form
         m_ScopeColourModeButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_ScopeColourModeButton.HighlightEnabled = true;
         m_ScopeColourModeButton.Image = (Image)resources.GetObject("m_ScopeColourModeButton.Image");
-        m_ScopeColourModeButton.Location = new Point(2392, 0);
+        m_ScopeColourModeButton.Location = new Point(2522, 0);
         m_ScopeColourModeButton.Margin = new Padding(6);
         m_ScopeColourModeButton.Name = "m_ScopeColourModeButton";
         m_ScopeColourModeButton.Size = new Size(119, 120);
@@ -2630,7 +2682,7 @@ internal class MainForm : Form
         m_GotoNextSpikeButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_GotoNextSpikeButton.HighlightEnabled = true;
         m_GotoNextSpikeButton.Image = (Image)resources.GetObject("m_GotoNextSpikeButton.Image");
-        m_GotoNextSpikeButton.Location = new Point(1595, 0);
+        m_GotoNextSpikeButton.Location = new Point(1725, 0);
         m_GotoNextSpikeButton.Margin = new Padding(6);
         m_GotoNextSpikeButton.Name = "m_GotoNextSpikeButton";
         m_GotoNextSpikeButton.Size = new Size(73, 120);
@@ -2647,7 +2699,7 @@ internal class MainForm : Form
         m_GotoPrevSpikeButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_GotoPrevSpikeButton.HighlightEnabled = true;
         m_GotoPrevSpikeButton.Image = (Image)resources.GetObject("m_GotoPrevSpikeButton.Image");
-        m_GotoPrevSpikeButton.Location = new Point(1426, 0);
+        m_GotoPrevSpikeButton.Location = new Point(1556, 0);
         m_GotoPrevSpikeButton.Margin = new Padding(6);
         m_GotoPrevSpikeButton.Name = "m_GotoPrevSpikeButton";
         m_GotoPrevSpikeButton.Size = new Size(73, 120);
@@ -2663,7 +2715,7 @@ internal class MainForm : Form
         m_InfoViewButton.DisabledImage = (Image)resources.GetObject("m_InfoViewButton.DisabledImage");
         m_InfoViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_InfoViewButton.Image = (Image)resources.GetObject("m_InfoViewButton.Image");
-        m_InfoViewButton.Location = new Point(607, 0);
+        m_InfoViewButton.Location = new Point(737, 0);
         m_InfoViewButton.Margin = new Padding(6);
         m_InfoViewButton.Name = "m_InfoViewButton";
         m_InfoViewButton.Size = new Size(119, 120);
@@ -2672,7 +2724,7 @@ internal class MainForm : Form
         // 
         // m_FindControl
         // 
-        m_FindControl.Location = new Point(1716, 0);
+        m_FindControl.Location = new Point(1846, 0);
         m_FindControl.Margin = new Padding(7);
         m_FindControl.Name = "m_FindControl";
         m_FindControl.Size = new Size(629, 120);
@@ -2698,15 +2750,32 @@ internal class MainForm : Form
         m_ConnectButton.TabStop = false;
         m_ConnectButton.UseImageAsText = false;
         m_ConnectButton.Click += ConnectButtonClick;
-        // 
+        //
+        // m_ConnectAndroidButton
+        //
+        m_ConnectAndroidButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        m_ConnectAndroidButton.ButtonText = "Android";
+        m_ConnectAndroidButton.DisabledImage = (Image)resources.GetObject("m_ConnectButton.DisabledImage");
+        m_ConnectAndroidButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        m_ConnectAndroidButton.HighlightEnabled = true;
+        m_ConnectAndroidButton.Image = (Image)resources.GetObject("m_ConnectButton.Image");
+        m_ConnectAndroidButton.Location = new Point(161, 0);
+        m_ConnectAndroidButton.Margin = new Padding(6);
+        m_ConnectAndroidButton.Name = "m_ConnectAndroidButton";
+        m_ConnectAndroidButton.Size = new Size(119, 120);
+        m_ConnectAndroidButton.TabIndex = 29;
+        m_ConnectAndroidButton.TabStop = false;
+        m_ConnectAndroidButton.UseImageAsText = false;
+        m_ConnectAndroidButton.Click += ConnectAndroidButtonClick;
+        //
         // m_CoresViewButton
-        // 
+        //
         m_CoresViewButton.ButtonText = "Cores";
         m_CoresViewButton.Checked = false;
         m_CoresViewButton.DisabledImage = (Image)resources.GetObject("m_CoresViewButton.DisabledImage");
         m_CoresViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_CoresViewButton.Image = (Image)resources.GetObject("m_CoresViewButton.Image");
-        m_CoresViewButton.Location = new Point(997, 0);
+        m_CoresViewButton.Location = new Point(1127, 0);
         m_CoresViewButton.Margin = new Padding(6);
         m_CoresViewButton.Name = "m_CoresViewButton";
         m_CoresViewButton.Size = new Size(119, 120);
@@ -2720,7 +2789,7 @@ internal class MainForm : Form
         m_ScopeViewButton.DisabledImage = (Image)resources.GetObject("m_ScopeViewButton.DisabledImage");
         m_ScopeViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_ScopeViewButton.Image = (Image)resources.GetObject("m_ScopeViewButton.Image");
-        m_ScopeViewButton.Location = new Point(867, 0);
+        m_ScopeViewButton.Location = new Point(997, 0);
         m_ScopeViewButton.Margin = new Padding(6);
         m_ScopeViewButton.Name = "m_ScopeViewButton";
         m_ScopeViewButton.Size = new Size(119, 120);
@@ -2734,7 +2803,7 @@ internal class MainForm : Form
         m_FramesViewButton.DisabledImage = (Image)resources.GetObject("m_FramesViewButton.DisabledImage");
         m_FramesViewButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_FramesViewButton.Image = (Image)resources.GetObject("m_FramesViewButton.Image");
-        m_FramesViewButton.Location = new Point(737, 0);
+        m_FramesViewButton.Location = new Point(867, 0);
         m_FramesViewButton.Margin = new Padding(6);
         m_FramesViewButton.Name = "m_FramesViewButton";
         m_FramesViewButton.Size = new Size(119, 120);
@@ -2743,7 +2812,7 @@ internal class MainForm : Form
         // 
         // m_ConditionalScopeTimeSlider
         // 
-        m_ConditionalScopeTimeSlider.Location = new Point(2545, 0);
+        m_ConditionalScopeTimeSlider.Location = new Point(2675, 0);
         m_ConditionalScopeTimeSlider.Margin = new Padding(7);
         m_ConditionalScopeTimeSlider.Name = "m_ConditionalScopeTimeSlider";
         m_ConditionalScopeTimeSlider.Size = new Size(358, 120);
@@ -2759,7 +2828,7 @@ internal class MainForm : Form
         m_GotoEndButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_GotoEndButton.HighlightEnabled = true;
         m_GotoEndButton.Image = (Image)resources.GetObject("m_GotoEndButton.Image");
-        m_GotoEndButton.Location = new Point(510, 0);
+        m_GotoEndButton.Location = new Point(640, 0);
         m_GotoEndButton.Margin = new Padding(6);
         m_GotoEndButton.Name = "m_GotoEndButton";
         m_GotoEndButton.Size = new Size(73, 120);
@@ -2776,7 +2845,7 @@ internal class MainForm : Form
         m_TrackEndButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_TrackEndButton.HighlightEnabled = true;
         m_TrackEndButton.Image = (Image)resources.GetObject("m_TrackEndButton.Image");
-        m_TrackEndButton.Location = new Point(425, 0);
+        m_TrackEndButton.Location = new Point(555, 0);
         m_TrackEndButton.Margin = new Padding(6);
         m_TrackEndButton.Name = "m_TrackEndButton";
         m_TrackEndButton.Size = new Size(73, 120);
@@ -2793,7 +2862,7 @@ internal class MainForm : Form
         m_GotoStartButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_GotoStartButton.HighlightEnabled = true;
         m_GotoStartButton.Image = (Image)resources.GetObject("m_GotoStartButton.Image");
-        m_GotoStartButton.Location = new Point(341, 0);
+        m_GotoStartButton.Location = new Point(471, 0);
         m_GotoStartButton.Margin = new Padding(6);
         m_GotoStartButton.Name = "m_GotoStartButton";
         m_GotoStartButton.Size = new Size(73, 120);
@@ -2826,7 +2895,7 @@ internal class MainForm : Form
         m_DisconnectButton.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         m_DisconnectButton.HighlightEnabled = true;
         m_DisconnectButton.Image = (Image)resources.GetObject("m_DisconnectButton.Image");
-        m_DisconnectButton.Location = new Point(161, 0);
+        m_DisconnectButton.Location = new Point(291, 0);
         m_DisconnectButton.Margin = new Padding(6);
         m_DisconnectButton.Name = "m_DisconnectButton";
         m_DisconnectButton.Size = new Size(119, 120);
