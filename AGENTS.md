@@ -40,3 +40,5 @@ Pull requests should include a concise description, the affected projects or UI 
 ## Agent-Specific Instructions
 
 Preserve legacy behavior unless the task explicitly calls for a redesign. Avoid broad refactors across UI projects when a targeted change in one module is sufficient. Treat checked-in binary tools as project assets and do not replace them without a clear reason.
+
+After each code change that successfully builds, automatically create a focused git commit for the verified changes before reporting completion. Include the build evidence in the response. Do not include unrelated dirty or untracked files in that commit.
