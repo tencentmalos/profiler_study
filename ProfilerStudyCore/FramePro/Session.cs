@@ -4529,8 +4529,8 @@ public class Session : IDisposable
 				}
 				num += num3;
 			}
-			UpdateTargetFrameTime();
 		}
+		UpdateTargetFrameTime();
 	}
 
 	private void FillWithRandomData(int thread_id, long frame_start_time, long frame_duration, System.Random rand, int max_depth)
@@ -5854,7 +5854,10 @@ public class Session : IDisposable
 		{
 			session.m_LocalProcessNames = new Dictionary<int, string>(m_LocalProcessNames);
 		}
-		session.CalculateSessionStats(0, session.FrameCount);
+		if (session.FrameCount > 0)
+		{
+			session.CalculateSessionStats(0, session.FrameCount - 1);
+		}
 		session.SetIsReady();
 		session.m_FinishedProcessingPacketsEvent.Set();
 		thread_job_context.Progress.Set(100L, 100L);

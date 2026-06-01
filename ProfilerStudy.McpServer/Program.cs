@@ -13,8 +13,13 @@ internal static class Program
 	private static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = int.MaxValue };
 	private static readonly ProfilerMcpTools Tools = new ProfilerMcpTools();
 
-	private static int Main()
+	private static int Main(string[] args)
 	{
+		if (args != null && args.Length == 1 && args[0] == "--self-test")
+		{
+			return ProfilerDiagnosticsSelfTest.Run();
+		}
+
 		Console.InputEncoding = Encoding.UTF8;
 		Console.OutputEncoding = Encoding.UTF8;
 
@@ -168,6 +173,12 @@ internal sealed class ProfilerMcpTools
 							["minimum"] = 1,
 							["maximum"] = 50,
 							["default"] = 10
+						},
+						["keep_session"] = new Dictionary<string, object>
+						{
+							["type"] = "boolean",
+							["default"] = false,
+							["description"] = "Keep the captured session in memory and return a session_id for follow-up queries."
 						}
 					}
 				}
@@ -192,6 +203,75 @@ internal sealed class ProfilerMcpTools
 						}
 					}
 				}
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "load_session_file",
+				["description"] = "Load a profiler file into memory and return a session_id for follow-up analysis tools.",
+				["inputSchema"] = new Dictionary<string, object>
+				{
+					["type"] = "object",
+					["required"] = new ArrayList { "path" },
+					["properties"] = new Dictionary<string, object>
+					{
+						["path"] = new Dictionary<string, object> { ["type"] = "string" },
+						["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 }
+					}
+				}
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "close_session",
+				["description"] = "Close a session previously returned by load_session_file or capture_android_profile keep_session=true.",
+				["inputSchema"] = SessionIdSchema()
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "list_sessions",
+				["description"] = "List profiler sessions currently kept in memory by this MCP server.",
+				["inputSchema"] = new Dictionary<string, object> { ["type"] = "object", ["properties"] = new Dictionary<string, object>() }
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "get_session_summary",
+				["description"] = "Return summary diagnostics for a loaded profiler session.",
+				["inputSchema"] = SessionIdSchema()
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "find_slow_frames",
+				["description"] = "Find slow frames in a loaded session, including cadence and clustering diagnostics.",
+				["inputSchema"] = QuerySchema(includeThreshold: true, includeFrameRange: false)
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "find_scope_hotspots",
+				["description"] = "Find scope hotspots in a loaded session, optionally restricted to a frame range.",
+				["inputSchema"] = QuerySchema(includeThreshold: false, includeFrameRange: true)
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "list_counters",
+				["description"] = "List custom stat counters in a loaded session, optionally filtered by name.",
+				["inputSchema"] = CounterListSchema()
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "query_counter",
+				["description"] = "Return per-frame samples for one custom stat counter over a frame range.",
+				["inputSchema"] = CounterQuerySchema()
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "analyze_frame",
+				["description"] = "Analyze one frame's local scope hotspots and nearby-frame context.",
+				["inputSchema"] = FrameAnalysisSchema()
+			},
+			new Dictionary<string, object>
+			{
+				["name"] = "analyze_time_range",
+				["description"] = "Analyze a frame range with local summary, slow frames, hotspots, and pattern diagnostics.",
+				["inputSchema"] = QuerySchema(includeThreshold: true, includeFrameRange: true)
 			}
 		};
 	}
@@ -207,12 +287,70 @@ internal sealed class ProfilerMcpTools
 					structured = m_AnalysisService.CaptureAndroidProfile(
 						GetString(arguments, "target", "debug"),
 						GetInt(arguments, "duration_seconds", 60, 1, 300),
-						GetInt(arguments, "top", 10, 1, 50));
+						GetInt(arguments, "top", 10, 1, 50),
+						GetBool(arguments, "keep_session", false));
 					break;
 				case "analyze_session_file":
 					structured = m_AnalysisService.AnalyzeSessionFile(
 						GetString(arguments, "path", string.Empty),
 						GetInt(arguments, "top", 10, 1, 50));
+					break;
+				case "load_session_file":
+					structured = m_AnalysisService.LoadSessionFile(
+						GetString(arguments, "path", string.Empty),
+						GetInt(arguments, "top", 10, 1, 50));
+					break;
+				case "close_session":
+					structured = m_AnalysisService.CloseSession(GetString(arguments, "session_id", string.Empty));
+					break;
+				case "list_sessions":
+					structured = m_AnalysisService.ListSessions();
+					break;
+				case "get_session_summary":
+					structured = m_AnalysisService.GetSessionSummary(GetString(arguments, "session_id", string.Empty));
+					break;
+				case "find_slow_frames":
+					structured = m_AnalysisService.FindSlowFrames(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "top", 10, 1, 50),
+						GetDouble(arguments, "threshold_ms", 0.0));
+					break;
+				case "find_scope_hotspots":
+					structured = m_AnalysisService.FindScopeHotspots(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "top", 10, 1, 50),
+						GetInt(arguments, "start_frame", -1, -1, int.MaxValue),
+						GetInt(arguments, "end_frame", -1, -1, int.MaxValue));
+					break;
+				case "list_counters":
+					structured = m_AnalysisService.ListCounters(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "top", 20, 1, 200),
+						GetString(arguments, "filter", string.Empty));
+					break;
+				case "query_counter":
+					structured = m_AnalysisService.QueryCounterSamples(
+						GetString(arguments, "session_id", string.Empty),
+						GetString(arguments, "counter_name", string.Empty),
+						GetInt(arguments, "start_frame", -1, -1, int.MaxValue),
+						GetInt(arguments, "end_frame", -1, -1, int.MaxValue),
+						GetBool(arguments, "accumulated", false),
+						GetInt(arguments, "max_samples", 200, 1, 5000));
+					break;
+				case "analyze_frame":
+					structured = m_AnalysisService.AnalyzeFrame(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "frame_index", 0, 0, int.MaxValue),
+						GetInt(arguments, "top", 10, 1, 50),
+						GetInt(arguments, "neighbor_count", 3, 0, 20));
+					break;
+				case "analyze_time_range":
+					structured = m_AnalysisService.AnalyzeTimeRange(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "start_frame", 0, 0, int.MaxValue),
+						GetInt(arguments, "end_frame", 0, 0, int.MaxValue),
+						GetInt(arguments, "top", 10, 1, 50),
+						GetDouble(arguments, "threshold_ms", 0.0));
 					break;
 				default:
 					throw new InvalidOperationException("Unknown tool: " + name);
@@ -224,7 +362,9 @@ internal sealed class ProfilerMcpTools
 		{
 			return ToolResult(new Dictionary<string, object>
 			{
-				["error"] = ex.Message
+				["error"] = ex.Message,
+				["exceptionType"] = ex.GetType().FullName,
+				["stackTrace"] = ex.StackTrace ?? string.Empty
 			}, isError: true);
 		}
 	}
@@ -271,5 +411,109 @@ internal sealed class ProfilerMcpTools
 			return max;
 		}
 		return value;
+	}
+
+	private static double GetDouble(Dictionary<string, object> values, string key, double defaultValue)
+	{
+		if (values != null && values.TryGetValue(key, out object raw) && raw != null)
+		{
+			return Convert.ToDouble(raw);
+		}
+		return defaultValue;
+	}
+
+	private static bool GetBool(Dictionary<string, object> values, string key, bool defaultValue)
+	{
+		if (values != null && values.TryGetValue(key, out object raw) && raw != null)
+		{
+			return Convert.ToBoolean(raw);
+		}
+		return defaultValue;
+	}
+
+	private static Dictionary<string, object> SessionIdSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> QuerySchema(bool includeThreshold, bool includeFrameRange)
+	{
+		Dictionary<string, object> properties = new Dictionary<string, object>
+		{
+			["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+			["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 }
+		};
+		if (includeThreshold)
+		{
+			properties["threshold_ms"] = new Dictionary<string, object> { ["type"] = "number", ["minimum"] = 0, ["default"] = 0 };
+		}
+		if (includeFrameRange)
+		{
+			properties["start_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 };
+			properties["end_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 };
+		}
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id" },
+			["properties"] = properties
+		};
+	}
+
+	private static Dictionary<string, object> FrameAnalysisSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id", "frame_index" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["frame_index"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 },
+				["neighbor_count"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0, ["maximum"] = 20, ["default"] = 3 }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> CounterListSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 200, ["default"] = 20 },
+				["filter"] = new Dictionary<string, object> { ["type"] = "string", ["description"] = "Case-insensitive substring filter for counter names." }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> CounterQuerySchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id", "counter_name" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["counter_name"] = new Dictionary<string, object> { ["type"] = "string" },
+				["start_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["end_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["accumulated"] = new Dictionary<string, object> { ["type"] = "boolean", ["default"] = false },
+				["max_samples"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 5000, ["default"] = 200 }
+			}
+		};
 	}
 }

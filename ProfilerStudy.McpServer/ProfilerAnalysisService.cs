@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -11,35 +12,92 @@ namespace ProfilerStudy.McpServer;
 
 internal sealed class ProfilerAnalysisService
 {
-	public Dictionary<string, object> CaptureAndroidProfile(string target, int durationSeconds, int top)
+	private sealed class LoadedSession
 	{
+		public string Id;
+		public string Source;
+		public DateTime CreatedUtc;
+		public DateTime LastAccessUtc;
+		public Session Session;
+		public CapturingLog Log;
+	}
+
+	private readonly Dictionary<string, LoadedSession> m_Sessions = new Dictionary<string, LoadedSession>();
+	private readonly object m_SessionsLock = new object();
+	private int m_NextSessionId;
+
+	public Dictionary<string, object> CaptureAndroidProfile(string target, int durationSeconds, int top, bool keepSession)
+	{
+		Stopwatch stopwatch = Stopwatch.StartNew();
 		string endpoint = ResolveAndroidEndpoint(target);
 		CapturingLog log = new CapturingLog();
 		Session session = new Session(new CoreSettings(), log);
+		bool keepAlive = false;
 		try
 		{
+			Stopwatch connectStopwatch = Stopwatch.StartNew();
 			if (!session.ConnectToAndroid(endpoint))
 			{
 				throw new InvalidOperationException(session.LastConnectionError ?? "Android connection failed.");
 			}
+			connectStopwatch.Stop();
 
 			session.StartReceiving();
 			DateTime end = DateTime.UtcNow.AddSeconds(durationSeconds);
+			int pollCount = 0;
 			while (DateTime.UtcNow < end && session.Connected)
 			{
+				pollCount++;
 				Thread.Sleep(250);
 			}
 
+			Stopwatch processingStopwatch = Stopwatch.StartNew();
 			session.Disconnect(DisconnectReason.Requested);
 			session.WaitforProcessingToFinish(10000);
+			processingStopwatch.Stop();
 			Dictionary<string, object> analysis = AnalyzeSession(session, top);
 			analysis["capture"] = new Dictionary<string, object>
 			{
 				["target"] = target,
 				["endpoint"] = endpoint,
 				["durationSeconds"] = durationSeconds,
-				["disconnectReason"] = session.DisconnectReason.ToString()
+				["disconnectReason"] = session.DisconnectReason.ToString(),
+				["keepSession"] = keepSession
 			};
+			analysis["captureTelemetry"] = new Dictionary<string, object>
+			{
+				["connectMs"] = Round(connectStopwatch.Elapsed.TotalMilliseconds),
+				["processingWaitMs"] = Round(processingStopwatch.Elapsed.TotalMilliseconds),
+				["totalToolMs"] = Round(stopwatch.Elapsed.TotalMilliseconds),
+				["pollCount"] = pollCount,
+				["connectedAtEndOfDuration"] = session.Connected
+			};
+			if (keepSession)
+			{
+				string sessionId = AddSession(session, "android:" + target, log);
+				analysis["sessionId"] = sessionId;
+				keepAlive = true;
+			}
+			analysis["logTail"] = log.GetTail(40);
+			return analysis;
+		}
+		finally
+		{
+			if (!keepAlive)
+			{
+				session.Close();
+			}
+		}
+	}
+
+	public Dictionary<string, object> AnalyzeSessionFile(string path, int top)
+	{
+		CapturingLog log = new CapturingLog();
+		Session session = LoadSessionFromFile(path, log);
+		try
+		{
+			Dictionary<string, object> analysis = AnalyzeSession(session, top);
+			analysis["sourceFile"] = Path.GetFullPath(path);
 			analysis["logTail"] = log.GetTail(40);
 			return analysis;
 		}
@@ -49,36 +107,219 @@ internal sealed class ProfilerAnalysisService
 		}
 	}
 
-	public Dictionary<string, object> AnalyzeSessionFile(string path, int top)
+	public Dictionary<string, object> LoadSessionFile(string path, int top)
 	{
-		if (string.IsNullOrWhiteSpace(path))
+		CapturingLog log = new CapturingLog();
+		Session session = LoadSessionFromFile(path, log);
+		string sessionId = AddSession(session, Path.GetFullPath(path), log);
+		Dictionary<string, object> analysis = AnalyzeSession(session, top);
+		analysis["sessionId"] = sessionId;
+		analysis["sourceFile"] = Path.GetFullPath(path);
+		analysis["logTail"] = log.GetTail(40);
+		return analysis;
+	}
+
+	public Dictionary<string, object> CloseSession(string sessionId)
+	{
+		LoadedSession loaded = null;
+		lock (m_SessionsLock)
 		{
-			throw new ArgumentException("path is required.");
+			if (m_Sessions.TryGetValue(sessionId, out loaded))
+			{
+				m_Sessions.Remove(sessionId);
+			}
 		}
-		string fullPath = Path.GetFullPath(path);
-		if (!File.Exists(fullPath))
+		if (loaded == null)
 		{
-			throw new FileNotFoundException("Profiler session file does not exist.", fullPath);
+			throw new ArgumentException("Unknown session_id: " + sessionId);
+		}
+		loaded.Session.Close();
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = sessionId,
+			["closed"] = true
+		};
+	}
+
+	public Dictionary<string, object> ListSessions()
+	{
+		ArrayList sessions = new ArrayList();
+		lock (m_SessionsLock)
+		{
+			foreach (LoadedSession loaded in m_Sessions.Values.OrderBy(s => s.Id))
+			{
+				sessions.Add(new Dictionary<string, object>
+				{
+					["sessionId"] = loaded.Id,
+					["source"] = loaded.Source,
+					["createdUtc"] = loaded.CreatedUtc.ToString("o"),
+					["lastAccessUtc"] = loaded.LastAccessUtc.ToString("o"),
+					["frameCount"] = loaded.Session.FrameCount,
+					["threadCount"] = loaded.Session.ThreadCount
+				});
+			}
+		}
+		return new Dictionary<string, object> { ["sessions"] = sessions };
+	}
+
+	public Dictionary<string, object> GetSessionSummary(string sessionId)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Dictionary<string, object> result = AnalyzeSession(loaded.Session, 10);
+		result["sessionId"] = loaded.Id;
+		result["source"] = loaded.Source;
+		result["logTail"] = loaded.Log.GetTail(40);
+		return result;
+	}
+
+	public Dictionary<string, object> FindSlowFrames(string sessionId, int top, double thresholdMs)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		double tickToMs = TickToMs(loaded.Session);
+		double resolvedThreshold = ResolveThresholdMs(loaded.Session, thresholdMs, tickToMs);
+		List<ProfilerDiagnostics.FrameSample> samples = GetFrameSamples(loaded.Session, tickToMs).ToList();
+		ArrayList slowFrames = GetSlowFrames(loaded.Session, top, tickToMs, resolvedThreshold);
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["thresholdMs"] = Round(resolvedThreshold),
+			["slowFrames"] = slowFrames,
+			["slowFramePattern"] = ProfilerDiagnostics.AnalyzeSlowFramePattern(samples, resolvedThreshold)
+		};
+	}
+
+	public Dictionary<string, object> FindScopeHotspots(string sessionId, int top, int startFrame, int endFrame)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Session session = loaded.Session;
+		NormalizeFrameRange(session, ref startFrame, ref endFrame);
+		double tickToMs = TickToMs(session);
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["range"] = BuildRangeDictionary(session, startFrame, endFrame),
+			["scopeHotspots"] = GetScopeHotspots(session, top, tickToMs, startFrame, endFrame)
+		};
+	}
+
+	public Dictionary<string, object> ListCounters(string sessionId, int top, string filter)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Session session = loaded.Session;
+		IEnumerable<Dictionary<string, object>> counters = GetCounterSummaries(session)
+			.Where(counter => CounterMatchesFilter(counter, filter))
+			.OrderByDescending(counter => Convert.ToInt64(counter["totalCount"]))
+			.Take(top);
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["filter"] = filter ?? string.Empty,
+			["counters"] = ToArrayList(counters)
+		};
+	}
+
+	public Dictionary<string, object> QueryCounterSamples(string sessionId, string counterName, int startFrame, int endFrame, bool accumulated, int maxSamples)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Session session = loaded.Session;
+		if (string.IsNullOrWhiteSpace(counterName))
+		{
+			throw new ArgumentException("counter_name is required.");
+		}
+		long counterId = session.GetCustomStatNameId(counterName);
+		if (counterId < 0)
+		{
+			throw new ArgumentException("Unknown counter_name: " + counterName);
+		}
+		NormalizeFrameRange(session, ref startFrame, ref endFrame);
+
+		List<FrameValue> values = new List<FrameValue>();
+		session.GetCustomStats(startFrame, endFrame, counterId, accumulated, values);
+		ArrayList samples = new ArrayList();
+		int availableCount = values.Count;
+		int count = Math.Min(maxSamples, availableCount);
+		for (int i = 0; i < count; i++)
+		{
+			FrameValue value = values[i];
+			samples.Add(new Dictionary<string, object>
+			{
+				["frameIndex"] = startFrame + i,
+				["frameEndTime"] = value.m_FrameEndTime,
+				["value"] = Round(value.m_Value),
+				["count"] = Round(value.m_Count)
+			});
 		}
 
-		CapturingLog log = new CapturingLog();
-		Session session = new Session(new CoreSettings(), log);
-		try
+		Dictionary<string, object> counter = GetCounterSummaries(session)
+			.FirstOrDefault(summary => Convert.ToString(summary["name"]) == counterName);
+		return new Dictionary<string, object>
 		{
-			string error = string.Empty;
-			if (!session.Read(fullPath, ref error))
-			{
-				throw new InvalidOperationException("Failed to read profiler session: " + error);
-			}
-			Dictionary<string, object> analysis = AnalyzeSession(session, top);
-			analysis["sourceFile"] = fullPath;
-			analysis["logTail"] = log.GetTail(40);
-			return analysis;
-		}
-		finally
+			["sessionId"] = loaded.Id,
+			["counterName"] = counterName,
+			["counter"] = counter ?? new Dictionary<string, object>(),
+			["range"] = BuildRangeDictionary(session, startFrame, endFrame),
+			["accumulated"] = accumulated,
+			["sampleCount"] = samples.Count,
+			["availableSampleCount"] = availableCount,
+			["truncated"] = availableCount > samples.Count,
+			["samples"] = samples
+		};
+	}
+
+	public Dictionary<string, object> AnalyzeFrame(string sessionId, int frameIndex, int top, int neighborCount)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Session session = loaded.Session;
+		if (frameIndex >= session.FrameCount)
 		{
-			session.Close();
+			throw new ArgumentOutOfRangeException("frame_index", "frame_index is outside the session frame range.");
 		}
+
+		double tickToMs = TickToMs(session);
+		Frame frame = session.GetFrame(frameIndex);
+		if (frame == null)
+		{
+			throw new InvalidOperationException("Frame data is missing for frame_index " + frameIndex + ".");
+		}
+		int startNeighbor = Math.Max(0, frameIndex - neighborCount);
+		int endNeighbor = Math.Min(session.FrameCount - 1, frameIndex + neighborCount);
+		Dictionary<string, object> frameRange = BuildRangeDictionary(session, frameIndex, frameIndex);
+		Dictionary<string, object> neighborRange = BuildRangeDictionary(session, startNeighbor, endNeighbor);
+		ArrayList hotspots = GetScopeHotspots(session, top, tickToMs, frameIndex, frameIndex);
+		List<Dictionary<string, object>> hotspotList = hotspots.Cast<Dictionary<string, object>>().ToList();
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["frame"] = FrameToDictionary(frame, tickToMs),
+			["range"] = frameRange,
+			["scopeHotspots"] = hotspots,
+			["neighborRange"] = neighborRange,
+			["neighborSlowFrames"] = GetSlowFrames(session, Math.Min(top, endNeighbor + 1 - startNeighbor), tickToMs, 0.0, startNeighbor, endNeighbor),
+			["diagnostics"] = ProfilerDiagnostics.BuildDiagnostics(Round(frame.Duration * tickToMs), hotspotList)
+		};
+	}
+
+	public Dictionary<string, object> AnalyzeTimeRange(string sessionId, int startFrame, int endFrame, int top, double thresholdMs)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Session session = loaded.Session;
+		NormalizeFrameRange(session, ref startFrame, ref endFrame);
+		Dictionary<string, object> range = BuildRangeDictionary(session, startFrame, endFrame);
+		double tickToMs = TickToMs(session);
+		double resolvedThreshold = ResolveThresholdMs(session, thresholdMs, tickToMs);
+		List<ProfilerDiagnostics.FrameSample> samples = GetFrameSamples(session, tickToMs, startFrame, endFrame).ToList();
+		ArrayList hotspots = GetScopeHotspots(session, top, tickToMs, startFrame, endFrame);
+		double maxFrameMs = samples.Count == 0 ? 0.0 : samples.Max(sample => sample.DurationMs);
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["range"] = range,
+			["summary"] = GetRangeSummary(session, tickToMs, startFrame, endFrame),
+			["slowFrames"] = GetSlowFrames(session, top, tickToMs, resolvedThreshold, startFrame, endFrame),
+			["scopeHotspots"] = hotspots,
+			["slowFramePattern"] = ProfilerDiagnostics.AnalyzeSlowFramePattern(samples, resolvedThreshold),
+			["diagnostics"] = ProfilerDiagnostics.BuildDiagnostics(Round(maxFrameMs), hotspots.Cast<Dictionary<string, object>>())
+		};
 	}
 
 	private static string ResolveAndroidEndpoint(string target)
@@ -96,68 +337,129 @@ internal sealed class ProfilerAnalysisService
 
 	private static Dictionary<string, object> AnalyzeSession(Session session, int top)
 	{
-		double tickToMs = session.TimerFrequency > 0 ? 1000.0 / session.TimerFrequency : 0.0;
-		ArrayList slowFrames = GetSlowFrames(session, top, tickToMs);
+		double tickToMs = TickToMs(session);
+		double thresholdMs = ResolveThresholdMs(session, 0.0, tickToMs);
+		ArrayList slowFrames = GetSlowFrames(session, top, tickToMs, 0.0);
 		ArrayList hotspots = GetScopeHotspots(session, top, tickToMs);
 		ArrayList customStats = GetCustomStats(session, top);
 		ArrayList threads = GetThreads(session, top);
 
 		return new Dictionary<string, object>
 		{
-			["summary"] = new Dictionary<string, object>
-			{
-				["frameCount"] = session.FrameCount,
-				["threadCount"] = session.ThreadCount,
-				["timeSpanCount"] = session.TimeSpanCount,
-				["timerFrequency"] = session.TimerFrequency,
-				["averageFrameMs"] = Round(session.AverageFrameTime * tickToMs),
-				["maxFrameMs"] = Round(session.MaxFrameTime * tickToMs),
-				["maxFrameIndex"] = session.MaxFrameIndex,
-				["framesInBudget"] = session.FramesInBudget,
-				["firstFrameTime"] = session.FirstFrameTime,
-				["lastFrameEndTime"] = session.LastFrameEndTime,
-				["disconnectReason"] = session.DisconnectReason.ToString(),
-				["receivedConnectPacket"] = session.ReceivedConnectPacket,
-				["receivedFrameProLibVersion"] = session.ReceivedFrameProLibVersion
-			},
+			["summary"] = GetSummary(session, tickToMs),
 			["slowFrames"] = slowFrames,
 			["scopeHotspots"] = hotspots,
 			["customStats"] = customStats,
-			["threads"] = threads
+			["threads"] = threads,
+			["slowFramePattern"] = ProfilerDiagnostics.AnalyzeSlowFramePattern(GetFrameSamples(session, tickToMs), thresholdMs),
+			["diagnostics"] = ProfilerDiagnostics.BuildDiagnostics(Round(session.MaxFrameTime * tickToMs), hotspots.Cast<Dictionary<string, object>>())
 		};
 	}
 
-	private static ArrayList GetSlowFrames(Session session, int top, double tickToMs)
+	private static Dictionary<string, object> GetSummary(Session session, double tickToMs)
+	{
+		return new Dictionary<string, object>
+		{
+			["frameCount"] = session.FrameCount,
+			["threadCount"] = session.ThreadCount,
+			["timeSpanCount"] = session.TimeSpanCount,
+			["timerFrequency"] = session.TimerFrequency,
+			["averageFrameMs"] = Round(session.AverageFrameTime * tickToMs),
+			["maxFrameMs"] = Round(session.MaxFrameTime * tickToMs),
+			["maxFrameIndex"] = session.MaxFrameIndex,
+			["framesInBudget"] = session.FramesInBudget,
+			["firstFrameTime"] = session.FirstFrameTime,
+			["lastFrameEndTime"] = session.LastFrameEndTime,
+			["disconnectReason"] = session.DisconnectReason.ToString(),
+			["receivedConnectPacket"] = session.ReceivedConnectPacket,
+			["receivedFrameProLibVersion"] = session.ReceivedFrameProLibVersion
+		};
+	}
+
+	private static Dictionary<string, object> GetRangeSummary(Session session, double tickToMs, int startFrame, int endFrame)
+	{
+		List<Frame> frames = GetFrames(session, startFrame, endFrame).ToList();
+		double averageFrameMs = frames.Count == 0 ? 0.0 : frames.Average(frame => frame.Duration * tickToMs);
+		double maxFrameMs = frames.Count == 0 ? 0.0 : frames.Max(frame => frame.Duration * tickToMs);
+		int maxFrameIndex = frames.Count == 0 ? -1 : frames.OrderByDescending(frame => frame.Duration).First().Index;
+		return new Dictionary<string, object>
+		{
+			["frameCount"] = frames.Count,
+			["threadCount"] = session.ThreadCount,
+			["timeSpanCount"] = session.TimeSpanCount,
+			["timerFrequency"] = session.TimerFrequency,
+			["averageFrameMs"] = Round(averageFrameMs),
+			["maxFrameMs"] = Round(maxFrameMs),
+			["maxFrameIndex"] = maxFrameIndex,
+			["firstFrameTime"] = frames.Count == 0 ? 0L : frames[0].StartTime,
+			["lastFrameEndTime"] = frames.Count == 0 ? 0L : frames[frames.Count - 1].EndTime
+		};
+	}
+
+	private static ArrayList GetSlowFrames(Session session, int top, double tickToMs, double thresholdMs)
+	{
+		return GetSlowFrames(session, top, tickToMs, thresholdMs, 0, session.FrameCount - 1);
+	}
+
+	private static ArrayList GetSlowFrames(Session session, int top, double tickToMs, double thresholdMs, int startFrame, int endFrame)
 	{
 		List<Dictionary<string, object>> frames = new List<Dictionary<string, object>>();
-		for (int i = 0; i < session.FrameCount; i++)
+		for (int i = startFrame; i <= endFrame; i++)
 		{
 			Frame frame = session.GetFrame(i);
-			frames.Add(new Dictionary<string, object>
+			if (frame == null)
 			{
-				["index"] = frame.Index,
-				["durationMs"] = Round(frame.Duration * tickToMs),
-				["startTime"] = frame.StartTime,
-				["endTime"] = frame.EndTime,
-				["timeSpanCount"] = frame.TimeSpanCount,
-				["bytesSent"] = frame.BytesSent
-			});
+				continue;
+			}
+			Dictionary<string, object> value = FrameToDictionary(frame, tickToMs);
+			if (thresholdMs <= 0.0 || Convert.ToDouble(value["durationMs"]) >= thresholdMs)
+			{
+				frames.Add(value);
+			}
 		}
 		return ToArrayList(frames.OrderByDescending(f => Convert.ToDouble(f["durationMs"])).Take(top));
 	}
 
 	private static ArrayList GetScopeHotspots(Session session, int top, double tickToMs)
 	{
+		return GetScopeHotspots(session, top, tickToMs, 0, session.FrameCount - 1);
+	}
+
+	private static ArrayList GetScopeHotspots(Session session, int top, double tickToMs, int startFrame, int endFrame)
+	{
 		List<Dictionary<string, object>> scopes = new List<Dictionary<string, object>>();
-		foreach (ScopeSessionStats stat in session.GetTimeSpanStats())
+		foreach (long scopeId in session.GetTimerNames(string.Empty))
 		{
+			List<FrameTimeSpanStruct> frameStats = new List<FrameTimeSpanStruct>();
+			session.GetTimeSpanFrameTimes(startFrame, endFrame, scopeId, frameStats);
+			long totalTime = 0L;
+			long totalCount = 0L;
+			long maxFrameTime = 0L;
+			long maxFrameCount = 0L;
+			foreach (FrameTimeSpanStruct frameStat in frameStats)
+			{
+				totalTime += frameStat.m_Duration;
+				totalCount += frameStat.m_Count;
+				if (frameStat.m_Duration > maxFrameTime)
+				{
+					maxFrameTime = frameStat.m_Duration;
+				}
+				if (frameStat.m_Count > maxFrameCount)
+				{
+					maxFrameCount = frameStat.m_Count;
+				}
+			}
+			if (totalTime == 0L && totalCount == 0L)
+			{
+				continue;
+			}
 			scopes.Add(new Dictionary<string, object>
 			{
-				["name"] = stat.m_Name,
-				["totalMs"] = Round(stat.m_TotalTime * tickToMs),
-				["totalCount"] = stat.m_TotalCount,
-				["maxMsPerFrame"] = Round(stat.m_MaxTimePerFrame * tickToMs),
-				["maxCountPerFrame"] = stat.m_MaxCountPerFrame
+				["name"] = session.GetTimerName(scopeId),
+				["totalMs"] = Round(totalTime * tickToMs),
+				["totalCount"] = totalCount,
+				["maxMsPerFrame"] = Round(maxFrameTime * tickToMs),
+				["maxCountPerFrame"] = maxFrameCount
 			});
 		}
 		return ToArrayList(scopes.OrderByDescending(s => Convert.ToDouble(s["totalMs"])).Take(top));
@@ -165,21 +467,42 @@ internal sealed class ProfilerAnalysisService
 
 	private static ArrayList GetCustomStats(Session session, int top)
 	{
-		List<Dictionary<string, object>> stats = new List<Dictionary<string, object>>();
+		List<Dictionary<string, object>> stats = GetCounterSummaries(session).ToList();
+		return ToArrayList(stats.OrderByDescending(s => Convert.ToInt64(s["totalCount"])).Take(top));
+	}
+
+	private static IEnumerable<Dictionary<string, object>> GetCounterSummaries(Session session)
+	{
 		foreach (CustomStatSessionData stat in session.GetCustomStats())
 		{
-			stats.Add(new Dictionary<string, object>
+			yield return new Dictionary<string, object>
 			{
 				["name"] = session.GetString(stat.Name),
 				["valueType"] = stat.ValueType.ToString(),
+				["graph"] = session.GetCustomStatGraph(stat.Name),
+				["unit"] = session.GetCustomStatUnit(stat.Name),
 				["totalCount"] = stat.m_TotalCount,
 				["totalValueInt64"] = stat.m_TotalValueInt64,
 				["totalValueDouble"] = Round(stat.m_TotalValueDouble),
+				["minValuePerFrame"] = Round(stat.ValueType == CustomStatValueType.Int64 ? stat.m_MinValuePerFrameInt64 : stat.m_MinValuePerFrameDouble),
+				["maxValuePerFrame"] = Round(stat.ValueType == CustomStatValueType.Int64 ? stat.m_MaxValuePerFrameInt64 : stat.m_MaxValuePerFrameDouble),
+				["minCountPerFrame"] = stat.m_MinCountPerFrame,
 				["maxCountPerFrame"] = stat.m_MaxCountPerFrame,
+				["accTotalValueInt64"] = stat.m_AccTotalValueInt64,
+				["accTotalValueDouble"] = Round(stat.m_AccTotalValueDouble),
 				["firstFrameSeen"] = stat.m_FirstFrameSeen
-			});
+			};
 		}
-		return ToArrayList(stats.OrderByDescending(s => Convert.ToInt64(s["totalCount"])).Take(top));
+	}
+
+	private static bool CounterMatchesFilter(Dictionary<string, object> counter, string filter)
+	{
+		if (string.IsNullOrWhiteSpace(filter))
+		{
+			return true;
+		}
+		string name = Convert.ToString(counter["name"]);
+		return name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;
 	}
 
 	private static ArrayList GetThreads(Session session, int top)
@@ -194,6 +517,199 @@ internal sealed class ProfilerAnalysisService
 			});
 		}
 		return ToArrayList(threads);
+	}
+
+	private static Dictionary<string, object> FrameToDictionary(Frame frame, double tickToMs)
+	{
+		return new Dictionary<string, object>
+		{
+			["index"] = frame.Index,
+			["durationMs"] = Round(frame.Duration * tickToMs),
+			["startTime"] = frame.StartTime,
+			["endTime"] = frame.EndTime,
+			["timeSpanCount"] = frame.TimeSpanCount,
+			["bytesSent"] = frame.BytesSent,
+			["waitForSendCompleteMs"] = Round(frame.WaitForSendCompleteTime * tickToMs),
+			["prevFrameSendMs"] = Round(frame.PrevFrameSendTime * tickToMs)
+		};
+	}
+
+	private static IEnumerable<ProfilerDiagnostics.FrameSample> GetFrameSamples(Session session, double tickToMs)
+	{
+		return GetFrameSamples(session, tickToMs, 0, session.FrameCount - 1);
+	}
+
+	private static IEnumerable<ProfilerDiagnostics.FrameSample> GetFrameSamples(Session session, double tickToMs, int startFrame, int endFrame)
+	{
+		for (int i = startFrame; i <= endFrame; i++)
+		{
+			Frame frame = session.GetFrame(i);
+			if (frame == null)
+			{
+				continue;
+			}
+			yield return new ProfilerDiagnostics.FrameSample(
+				frame.Index,
+				Round(frame.Duration * tickToMs),
+				frame.TimeSpanCount,
+				frame.BytesSent);
+		}
+	}
+
+	private static IEnumerable<Frame> GetFrames(Session session, int startFrame, int endFrame)
+	{
+		for (int i = startFrame; i <= endFrame; i++)
+		{
+			Frame frame = session.GetFrame(i);
+			if (frame != null)
+			{
+				yield return frame;
+			}
+		}
+	}
+
+	private static double ResolveThresholdMs(Session session, double thresholdMs, double tickToMs)
+	{
+		if (thresholdMs > 0.0)
+		{
+			return thresholdMs;
+		}
+		double average = Round(session.AverageFrameTime * tickToMs);
+		return Math.Max(33.333, average * 1.5);
+	}
+
+	private static double TickToMs(Session session)
+	{
+		return session.TimerFrequency > 0 ? 1000.0 / session.TimerFrequency : 0.0;
+	}
+
+	private static Session CreateRangeSession(Session source, int startFrame, int endFrame, out Dictionary<string, object> range)
+	{
+		NormalizeFrameRange(source, ref startFrame, ref endFrame);
+		Frame start = source.GetFrame(startFrame);
+		Frame end = source.GetFrame(endFrame);
+		if (start == null || end == null)
+		{
+			throw new InvalidOperationException("Frame data is missing for the selected range.");
+		}
+		range = BuildRangeDictionary(source, startFrame, endFrame);
+		Session session = new Session(new CoreSettings(), new CapturingLog());
+		string error = string.Empty;
+		ThreadJobContext context = new ThreadJobContext();
+		if (!source.CopyTo(session, start.StartTime, end.EndTime, context, ref error))
+		{
+			session.Close();
+			throw new InvalidOperationException("Failed to copy profiler range: " + error);
+		}
+		return session;
+	}
+
+	private static void NormalizeFrameRange(Session source, ref int startFrame, ref int endFrame)
+	{
+		if (source.FrameCount == 0)
+		{
+			throw new InvalidOperationException("Session has no frames.");
+		}
+		if (startFrame < 0)
+		{
+			startFrame = 0;
+		}
+		if (endFrame < 0 || endFrame >= source.FrameCount)
+		{
+			endFrame = source.FrameCount - 1;
+		}
+		if (startFrame >= source.FrameCount)
+		{
+			throw new ArgumentOutOfRangeException("start_frame", "start_frame is outside the session frame range.");
+		}
+		if (endFrame < startFrame)
+		{
+			throw new ArgumentException("end_frame must be greater than or equal to start_frame.");
+		}
+	}
+
+	private static Dictionary<string, object> BuildRangeDictionary(Session source, int startFrame, int endFrame)
+	{
+		Frame start = source.GetFrame(startFrame);
+		Frame end = source.GetFrame(endFrame);
+		if (start == null || end == null)
+		{
+			throw new InvalidOperationException("Frame data is missing for the selected range.");
+		}
+		return new Dictionary<string, object>
+		{
+			["startFrame"] = startFrame,
+			["endFrame"] = endFrame,
+			["frameCount"] = endFrame + 1 - startFrame,
+			["startTime"] = start.StartTime,
+			["endTime"] = end.EndTime
+		};
+	}
+
+	private static void ValidatePathAllowed(string fullPath)
+	{
+		string root = Path.GetFullPath(Directory.GetCurrentDirectory());
+		string workspace = Path.GetFullPath(@"C:\workspace");
+		if (fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase) ||
+			fullPath.StartsWith(workspace, StringComparison.OrdinalIgnoreCase))
+		{
+			return;
+		}
+		throw new UnauthorizedAccessException("Profiler file path is outside the allowed roots: " + root + " or " + workspace);
+	}
+
+	private static Session LoadSessionFromFile(string path, CapturingLog log)
+	{
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			throw new ArgumentException("path is required.");
+		}
+		string fullPath = Path.GetFullPath(path);
+		ValidatePathAllowed(fullPath);
+		if (!File.Exists(fullPath))
+		{
+			throw new FileNotFoundException("Profiler session file does not exist.", fullPath);
+		}
+
+		Session session = new Session(new CoreSettings(), log);
+		string error = string.Empty;
+		if (!session.Read(fullPath, ref error))
+		{
+			session.Close();
+			throw new InvalidOperationException("Failed to read profiler session: " + error);
+		}
+		return session;
+	}
+
+	private string AddSession(Session session, string source, CapturingLog log)
+	{
+		lock (m_SessionsLock)
+		{
+			string id = "s" + (++m_NextSessionId).ToString();
+			m_Sessions[id] = new LoadedSession
+			{
+				Id = id,
+				Source = source,
+				Session = session,
+				Log = log,
+				CreatedUtc = DateTime.UtcNow,
+				LastAccessUtc = DateTime.UtcNow
+			};
+			return id;
+		}
+	}
+
+	private LoadedSession GetLoadedSession(string sessionId)
+	{
+		lock (m_SessionsLock)
+		{
+			if (m_Sessions.TryGetValue(sessionId, out LoadedSession loaded))
+			{
+				loaded.LastAccessUtc = DateTime.UtcNow;
+				return loaded;
+			}
+		}
+		throw new ArgumentException("Unknown session_id: " + sessionId);
 	}
 
 	private static ArrayList ToArrayList(IEnumerable<Dictionary<string, object>> values)

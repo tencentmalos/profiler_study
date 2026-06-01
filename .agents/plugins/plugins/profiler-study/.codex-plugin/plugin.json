@@ -1,0 +1,32 @@
+{
+  "name": "profiler-study",
+  "version": "0.1.0",
+  "description": "ProfilerStudy FramePro analysis plugin with a local stdio MCP server and profiler-mcp skill.",
+  "author": {
+    "name": "ProfilerStudy"
+  },
+  "license": "MIT",
+  "keywords": [
+    "profiler",
+    "framepro",
+    "mcp",
+    "performance",
+    "windows"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Profiler Study",
+    "shortDescription": "FramePro analysis through MCP",
+    "longDescription": "Analyze ProfilerStudy and FramePro captures from Codex using a local stdio MCP server, with tools for session loading, slow frames, scope hotspots, custom stats, counters, and Android capture diagnostics.",
+    "developerName": "ProfilerStudy",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Analyze a FramePro capture with profiler-study MCP."
+    ],
+    "brandColor": "#2563EB"
+  }
+}
