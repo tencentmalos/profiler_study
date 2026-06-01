@@ -14,7 +14,7 @@ Use the `profiler-study` MCP server as the first choice for ProfilerStudy / Fram
 Before analysis, verify the MCP server is available when tools are visible in the session. If not available, inspect `C:\Users\Admin\.codex\config.toml` and ensure it contains `mcp_servers.profiler-study` pointing at:
 
 ```text
-C:\workspace\profiler_legacy\ProfilerStudy.McpServer\bin\Release\net472\ProfilerStudy.McpServer.exe
+C:\workspace\profiler_legacy\ProfilerStudy.McpServer\bin\Release\net8.0\ProfilerStudy.McpServer.dll
 ```
 
 If the binary is stale or missing, build from `C:\workspace\profiler_legacy`:

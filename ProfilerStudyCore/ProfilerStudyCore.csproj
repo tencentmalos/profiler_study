@@ -2,21 +2,18 @@
   <PropertyGroup>
     <AssemblyName>ProfilerStudyCore</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-    <TargetFramework>net472</TargetFramework>
-    <PlatformTarget>x64</PlatformTarget>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
+    <UseWindowsForms Condition="'$(TargetFramework)' == 'net8.0-windows'">True</UseWindowsForms>
+    <EnableWindowsTargeting Condition="'$(TargetFramework)' == 'net8.0-windows'">true</EnableWindowsTargeting>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net8.0-windows'">7.0</SupportedOSPlatformVersion>
+    <GenerateSupportedOSPlatformAttribute Condition="'$(TargetFramework)' == 'net8.0-windows'">true</GenerateSupportedOSPlatformAttribute>
+    <NoWarn Condition="'$(TargetFramework)' == 'net8.0-windows'">$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>11.0</LangVersion>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup />
   <ItemGroup>
     <ProjectReference Include="..\CoreUtils\CoreUtils.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 </Project>

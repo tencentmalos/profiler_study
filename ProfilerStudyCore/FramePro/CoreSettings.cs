@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using SCLCoreCLR;
+#if WINDOWS
 using System.Windows.Forms;
+#endif
 
 namespace FramePro;
 
@@ -14,7 +16,7 @@ public class CoreSettings : ISettings
 	public delegate void CallstackFiltersChangedHandler();
 
     //Environment.GetFolderPath(  Environment.SpecialFolder.ApplicationData)
-    private static string m_UserLocalFolder = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + "\\cache\\";
+    private static string m_UserLocalFolder = GetDefaultUserLocalFolder();
 
 	private static string m_Path = m_UserLocalFolder + "ProfilerStudy.settings";
 
@@ -369,5 +371,14 @@ public class CoreSettings : ISettings
 	public void SetCustomStatColour(string name, Color colour)
 	{
 		m_CustomStatColours[name] = colour;
+	}
+
+	private static string GetDefaultUserLocalFolder()
+	{
+#if WINDOWS
+		return System.IO.Path.GetDirectoryName(Application.ExecutablePath) + "\\cache\\";
+#else
+		return System.IO.Path.Combine(AppContext.BaseDirectory, "cache") + System.IO.Path.DirectorySeparatorChar;
+#endif
 	}
 }

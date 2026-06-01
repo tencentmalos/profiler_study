@@ -9,7 +9,7 @@
         "-File",
         "scripts/start-profiler-mcp.ps1"
       ],
-      "note": "Builds and launches the ProfilerStudy MCP stdio server from the Git marketplace source. Requires Windows, git for GitHub marketplace installs, and a .NET SDK capable of building net472 projects."
+      "note": "Builds and launches the ProfilerStudy MCP stdio server from the Git marketplace source. Requires Windows PowerShell for this launcher, git for GitHub marketplace installs, and a .NET 8 SDK."
     }
   }
 }

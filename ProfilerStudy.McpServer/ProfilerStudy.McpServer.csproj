@@ -2,16 +2,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>ProfilerStudy.McpServer</AssemblyName>
-    <TargetFramework>net472</TargetFramework>
-    <PlatformTarget>x64</PlatformTarget>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProfilerStudyCore\ProfilerStudyCore.csproj" />
     <ProjectReference Include="..\CoreUtils\CoreUtils.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Web.Extensions" />
   </ItemGroup>
 </Project>

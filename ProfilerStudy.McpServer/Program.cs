@@ -3,14 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Web.Script.Serialization;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using FramePro;
 
 namespace ProfilerStudy.McpServer;
 
 internal static class Program
 {
-	private static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = int.MaxValue };
+	private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+	{
+		Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+	};
 	private static readonly ProfilerMcpTools Tools = new ProfilerMcpTools();
 
 	private static int Main(string[] args)
@@ -40,7 +44,7 @@ internal static class Program
 		object id = null;
 		try
 		{
-			Dictionary<string, object> request = Json.Deserialize<Dictionary<string, object>>(line);
+			Dictionary<string, object> request = DeserializeObject(line);
 			request.TryGetValue("id", out id);
 			string method = GetString(request, "method");
 			if (method == "notifications/initialized")
@@ -114,8 +118,60 @@ internal static class Program
 
 	private static void WriteJson(object value)
 	{
-		Console.Out.WriteLine(Json.Serialize(value));
+		Console.Out.WriteLine(JsonSerializer.Serialize(value, JsonOptions));
 		Console.Out.Flush();
+	}
+
+	private static Dictionary<string, object> DeserializeObject(string json)
+	{
+		using JsonDocument document = JsonDocument.Parse(json);
+		if (ConvertJsonElement(document.RootElement) is Dictionary<string, object> dictionary)
+		{
+			return dictionary;
+		}
+		throw new InvalidOperationException("MCP request must be a JSON object.");
+	}
+
+	private static object ConvertJsonElement(JsonElement element)
+	{
+		switch (element.ValueKind)
+		{
+			case JsonValueKind.Object:
+				Dictionary<string, object> dictionary = new Dictionary<string, object>();
+				foreach (JsonProperty property in element.EnumerateObject())
+				{
+					dictionary[property.Name] = ConvertJsonElement(property.Value);
+				}
+				return dictionary;
+			case JsonValueKind.Array:
+				ArrayList list = new ArrayList();
+				foreach (JsonElement item in element.EnumerateArray())
+				{
+					list.Add(ConvertJsonElement(item));
+				}
+				return list;
+			case JsonValueKind.String:
+				return element.GetString();
+			case JsonValueKind.Number:
+				if (element.TryGetInt32(out int intValue))
+				{
+					return intValue;
+				}
+				if (element.TryGetInt64(out long longValue))
+				{
+					return longValue;
+				}
+				return element.GetDouble();
+			case JsonValueKind.True:
+				return true;
+			case JsonValueKind.False:
+				return false;
+			case JsonValueKind.Null:
+			case JsonValueKind.Undefined:
+				return null;
+			default:
+				throw new InvalidOperationException("Unsupported JSON value kind: " + element.ValueKind);
+		}
 	}
 
 	private static string GetString(Dictionary<string, object> values, string key)

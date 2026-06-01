@@ -648,14 +648,51 @@ internal sealed class ProfilerAnalysisService
 
 	private static void ValidatePathAllowed(string fullPath)
 	{
-		string root = Path.GetFullPath(Directory.GetCurrentDirectory());
-		string workspace = Path.GetFullPath(@"C:\workspace");
-		if (fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase) ||
-			fullPath.StartsWith(workspace, StringComparison.OrdinalIgnoreCase))
+		List<string> allowedRoots = GetAllowedRoots().ToList();
+		foreach (string root in allowedRoots)
 		{
-			return;
+			if (IsPathUnderRoot(fullPath, root))
+			{
+				return;
+			}
 		}
-		throw new UnauthorizedAccessException("Profiler file path is outside the allowed roots: " + root + " or " + workspace);
+		throw new UnauthorizedAccessException("Profiler file path is outside the allowed roots: " + string.Join(", ", allowedRoots));
+	}
+
+	private static IEnumerable<string> GetAllowedRoots()
+	{
+		yield return Path.GetFullPath(Directory.GetCurrentDirectory());
+
+		string configuredRoots = Environment.GetEnvironmentVariable("PROFILER_STUDY_MCP_ALLOWED_ROOTS");
+		if (!string.IsNullOrWhiteSpace(configuredRoots))
+		{
+			foreach (string root in configuredRoots.Split(Path.PathSeparator))
+			{
+				if (!string.IsNullOrWhiteSpace(root))
+				{
+					yield return Path.GetFullPath(root);
+				}
+			}
+		}
+
+		if (OperatingSystem.IsWindows())
+		{
+			yield return Path.GetFullPath(@"C:\workspace");
+		}
+		else if (Directory.Exists("/workspace"))
+		{
+			yield return Path.GetFullPath("/workspace");
+		}
+	}
+
+	private static bool IsPathUnderRoot(string fullPath, string root)
+	{
+		string normalizedPath = Path.GetFullPath(fullPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+		string normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+		StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+		return normalizedPath.Equals(normalizedRoot, comparison) ||
+			normalizedPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, comparison) ||
+			normalizedPath.StartsWith(normalizedRoot + Path.AltDirectorySeparatorChar, comparison);
 	}
 
 	private static Session LoadSessionFromFile(string path, CapturingLog log)
