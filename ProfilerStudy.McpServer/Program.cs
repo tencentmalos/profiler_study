@@ -325,6 +325,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "analyze_frame_detail",
+				["description"] = "Extract hierarchical per-thread flame graph data for one frame for deeper single-frame analysis.",
+				["inputSchema"] = FrameDetailSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "analyze_time_range",
 				["description"] = "Analyze a frame range with local summary, slow frames, hotspots, and pattern diagnostics.",
 				["inputSchema"] = QuerySchema(includeThreshold: true, includeFrameRange: true)
@@ -399,6 +405,14 @@ internal sealed class ProfilerMcpTools
 						GetInt(arguments, "frame_index", 0, 0, int.MaxValue),
 						GetInt(arguments, "top", 10, 1, 50),
 						GetInt(arguments, "neighbor_count", 3, 0, 20));
+					break;
+				case "analyze_frame_detail":
+					structured = m_AnalysisService.AnalyzeFrameDetail(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "frame_index", 0, 0, int.MaxValue),
+						GetInt(arguments, "max_nodes", 200, 1, 2000),
+						GetInt(arguments, "max_depth", 8, 1, 64),
+						GetDouble(arguments, "min_duration_ms", 0.0));
 					break;
 				case "analyze_time_range":
 					structured = m_AnalysisService.AnalyzeTimeRange(
@@ -536,6 +550,43 @@ internal sealed class ProfilerMcpTools
 				["frame_index"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
 				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 },
 				["neighbor_count"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0, ["maximum"] = 20, ["default"] = 3 }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> FrameDetailSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id", "frame_index" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["frame_index"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["max_nodes"] = new Dictionary<string, object>
+				{
+					["type"] = "integer",
+					["minimum"] = 1,
+					["maximum"] = 2000,
+					["default"] = 200,
+					["description"] = "Maximum number of hierarchical flame graph nodes returned across all threads."
+				},
+				["max_depth"] = new Dictionary<string, object>
+				{
+					["type"] = "integer",
+					["minimum"] = 1,
+					["maximum"] = 64,
+					["default"] = 8,
+					["description"] = "Maximum parent/child depth to expand per thread."
+				},
+				["min_duration_ms"] = new Dictionary<string, object>
+				{
+					["type"] = "number",
+					["minimum"] = 0,
+					["default"] = 0,
+					["description"] = "Drop flame graph nodes whose clipped frame-local duration is below this threshold."
+				}
 			}
 		};
 	}

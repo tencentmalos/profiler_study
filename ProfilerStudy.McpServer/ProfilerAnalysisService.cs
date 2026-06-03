@@ -299,6 +299,63 @@ internal sealed class ProfilerAnalysisService
 		};
 	}
 
+	public Dictionary<string, object> AnalyzeFrameDetail(string sessionId, int frameIndex, int maxNodes, int maxDepth, double minDurationMs)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Session session = loaded.Session;
+		if (frameIndex >= session.FrameCount)
+		{
+			throw new ArgumentOutOfRangeException("frame_index", "frame_index is outside the session frame range.");
+		}
+
+		double tickToMs = TickToMs(session);
+		Frame frame = session.GetFrame(frameIndex);
+		if (frame == null)
+		{
+			throw new InvalidOperationException("Frame data is missing for frame_index " + frameIndex + ".");
+		}
+
+		List<Dictionary<string, object>> flatSpans = new List<Dictionary<string, object>>();
+		ArrayList threadFlameGraphs = BuildFrameFlameGraphs(
+			session,
+			frame,
+			tickToMs,
+			maxNodes,
+			maxDepth,
+			Math.Max(0.0, minDurationMs),
+			flatSpans,
+			out int includedNodeCount,
+			out int omittedNodeCount,
+			out int omittedByDepthCount,
+			out int omittedByDurationCount,
+			out bool truncated);
+
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["frame"] = FrameToDictionary(frame, tickToMs),
+			["range"] = BuildRangeDictionary(session, frameIndex, frameIndex),
+			["options"] = new Dictionary<string, object>
+			{
+				["maxNodes"] = maxNodes,
+				["maxDepth"] = maxDepth,
+				["minDurationMs"] = Round(Math.Max(0.0, minDurationMs))
+			},
+			["threadFlameGraphs"] = threadFlameGraphs,
+			["topSpans"] = ToArrayList(flatSpans
+				.OrderByDescending(span => Convert.ToDouble(span["durationMs"]))
+				.Take(Math.Min(maxNodes, 50))),
+			["nodeStats"] = new Dictionary<string, object>
+			{
+				["includedNodeCount"] = includedNodeCount,
+				["omittedNodeCount"] = omittedNodeCount,
+				["omittedByDepthCount"] = omittedByDepthCount,
+				["omittedByDurationCount"] = omittedByDurationCount,
+				["truncated"] = truncated
+			}
+		};
+	}
+
 	public Dictionary<string, object> AnalyzeTimeRange(string sessionId, int startFrame, int endFrame, int top, double thresholdMs)
 	{
 		LoadedSession loaded = GetLoadedSession(sessionId);
@@ -532,6 +589,256 @@ internal sealed class ProfilerAnalysisService
 			["waitForSendCompleteMs"] = Round(frame.WaitForSendCompleteTime * tickToMs),
 			["prevFrameSendMs"] = Round(frame.PrevFrameSendTime * tickToMs)
 		};
+	}
+
+	private static ArrayList BuildFrameFlameGraphs(
+		Session session,
+		Frame frame,
+		double tickToMs,
+		int maxNodes,
+		int maxDepth,
+		double minDurationMs,
+		List<Dictionary<string, object>> flatSpans,
+		out int includedNodeCount,
+		out int omittedNodeCount,
+		out int omittedByDepthCount,
+		out int omittedByDurationCount,
+		out bool truncated)
+	{
+		ArrayList threads = new ArrayList();
+		includedNodeCount = 0;
+		omittedNodeCount = 0;
+		omittedByDepthCount = 0;
+		omittedByDurationCount = 0;
+		truncated = false;
+
+		List<int> threadIds = new List<int>();
+		session.GetThreads(threadIds);
+		foreach (int threadId in threadIds.OrderBy(id => id))
+		{
+			ArrayList roots = new ArrayList();
+			foreach (FramePro.TimeSpan root in EnumerateTopLevelSpansForFrame(session, threadId, frame))
+			{
+				Dictionary<string, object> node = BuildFlameNode(
+					session,
+					root,
+					frame,
+					tickToMs,
+					threadId,
+					0,
+					maxDepth,
+					minDurationMs,
+					maxNodes,
+					flatSpans,
+					ref includedNodeCount,
+					ref omittedNodeCount,
+					ref omittedByDepthCount,
+					ref omittedByDurationCount,
+					ref truncated);
+				if (node != null)
+				{
+					roots.Add(node);
+				}
+				if (truncated)
+				{
+					break;
+				}
+			}
+			if (roots.Count == 0)
+			{
+				continue;
+			}
+			threads.Add(new Dictionary<string, object>
+			{
+				["threadId"] = threadId,
+				["threadName"] = session.GetThreadName(threadId),
+				["roots"] = roots
+			});
+			if (truncated)
+			{
+				break;
+			}
+		}
+		return threads;
+	}
+
+	private static IEnumerable<FramePro.TimeSpan> EnumerateTopLevelSpansForFrame(Session session, int threadId, Frame frame)
+	{
+		FramePro.TimeSpan span = session.GetTimeSpan(threadId, frame.StartTime);
+		if (span == null && frame.Duration > 0)
+		{
+			span = session.GetTimeSpan(threadId, frame.StartTime + 1);
+		}
+		if (span == null)
+		{
+			yield break;
+		}
+
+		while (span.Parent != null && span.Parent.Parent != null)
+		{
+			span = span.Parent;
+		}
+
+		while (span != null && span.StartTime < frame.EndTime)
+		{
+			if (OverlapsFrame(span, frame))
+			{
+				yield return span;
+			}
+			span = span.Next;
+		}
+	}
+
+	private static Dictionary<string, object> BuildFlameNode(
+		Session session,
+		FramePro.TimeSpan span,
+		Frame frame,
+		double tickToMs,
+		int threadId,
+		int depth,
+		int maxDepth,
+		double minDurationMs,
+		int maxNodes,
+		List<Dictionary<string, object>> flatSpans,
+		ref int includedNodeCount,
+		ref int omittedNodeCount,
+		ref int omittedByDepthCount,
+		ref int omittedByDurationCount,
+		ref bool truncated)
+	{
+		if (truncated)
+		{
+			omittedNodeCount += CountOverlappingNodes(span, frame);
+			return null;
+		}
+		if (!OverlapsFrame(span, frame))
+		{
+			return null;
+		}
+		if (depth >= maxDepth)
+		{
+			int omitted = CountOverlappingNodes(span, frame);
+			omittedNodeCount += omitted;
+			omittedByDepthCount += omitted;
+			return null;
+		}
+
+		long clippedStart = Math.Max(span.StartTime, frame.StartTime);
+		long clippedEnd = Math.Min(span.EndTime, frame.EndTime);
+		double durationMs = Round((clippedEnd - clippedStart) * tickToMs);
+		if (durationMs < minDurationMs)
+		{
+			int omitted = CountOverlappingNodes(span, frame);
+			omittedNodeCount += omitted;
+			omittedByDurationCount += omitted;
+			return null;
+		}
+		if (includedNodeCount >= maxNodes)
+		{
+			truncated = true;
+			omittedNodeCount += CountOverlappingNodes(span, frame);
+			return null;
+		}
+
+		includedNodeCount++;
+		ArrayList children = new ArrayList();
+		for (FramePro.TimeSpan child = span.Children; child != null; child = child.Next)
+		{
+			if (!OverlapsFrame(child, frame))
+			{
+				continue;
+			}
+			Dictionary<string, object> childNode = BuildFlameNode(
+				session,
+				child,
+				frame,
+				tickToMs,
+				threadId,
+				depth + 1,
+				maxDepth,
+				minDurationMs,
+				maxNodes,
+				flatSpans,
+				ref includedNodeCount,
+				ref omittedNodeCount,
+				ref omittedByDepthCount,
+				ref omittedByDurationCount,
+				ref truncated);
+			if (childNode != null)
+			{
+				children.Add(childNode);
+			}
+			if (truncated)
+			{
+				break;
+			}
+		}
+
+		TimeSpanInfo info = session.GetTimeSpanInfo(span.TimeSpanInfoId);
+		string name = session.GetTimerName(info.Name);
+		Dictionary<string, object> node = new Dictionary<string, object>
+		{
+			["name"] = name,
+			["threadId"] = threadId,
+			["threadName"] = session.GetThreadName(threadId),
+			["depth"] = depth,
+			["startTime"] = span.StartTime,
+			["endTime"] = span.EndTime,
+			["clippedStartTime"] = clippedStart,
+			["clippedEndTime"] = clippedEnd,
+			["durationMs"] = durationMs,
+			["selfMs"] = Round(Math.Max(0.0, durationMs - GetDirectChildDurationMs(span, frame, tickToMs))),
+			["relativeStartMs"] = Round((clippedStart - frame.StartTime) * tickToMs),
+			["relativeEndMs"] = Round((clippedEnd - frame.StartTime) * tickToMs),
+			["children"] = children
+		};
+		flatSpans.Add(new Dictionary<string, object>
+		{
+			["name"] = name,
+			["threadId"] = threadId,
+			["threadName"] = session.GetThreadName(threadId),
+			["depth"] = depth,
+			["durationMs"] = durationMs,
+			["selfMs"] = node["selfMs"],
+			["relativeStartMs"] = node["relativeStartMs"],
+			["relativeEndMs"] = node["relativeEndMs"]
+		});
+		return node;
+	}
+
+	private static bool OverlapsFrame(FramePro.TimeSpan span, Frame frame)
+	{
+		return span.StartTime < frame.EndTime && span.EndTime > frame.StartTime;
+	}
+
+	private static double GetDirectChildDurationMs(FramePro.TimeSpan span, Frame frame, double tickToMs)
+	{
+		double childDurationMs = 0.0;
+		for (FramePro.TimeSpan child = span.Children; child != null; child = child.Next)
+		{
+			if (!OverlapsFrame(child, frame))
+			{
+				continue;
+			}
+			long clippedStart = Math.Max(child.StartTime, frame.StartTime);
+			long clippedEnd = Math.Min(child.EndTime, frame.EndTime);
+			childDurationMs += (clippedEnd - clippedStart) * tickToMs;
+		}
+		return childDurationMs;
+	}
+
+	private static int CountOverlappingNodes(FramePro.TimeSpan span, Frame frame)
+	{
+		if (span == null || !OverlapsFrame(span, frame))
+		{
+			return 0;
+		}
+		int count = 1;
+		for (FramePro.TimeSpan child = span.Children; child != null; child = child.Next)
+		{
+			count += CountOverlappingNodes(child, frame);
+		}
+		return count;
 	}
 
 	private static IEnumerable<ProfilerDiagnostics.FrameSample> GetFrameSamples(Session session, double tickToMs)

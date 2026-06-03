@@ -18,6 +18,7 @@
 | `find_slow_frames` | `session_id`, `top`, optional `threshold_ms` |
 | `find_scope_hotspots` | `session_id`, `top`, optional `start_frame`, `end_frame` |
 | `analyze_frame` | `session_id`, `frame_index`, `top`, `neighbor_count` |
+| `analyze_frame_detail` | `session_id`, `frame_index`, optional `max_nodes`, `max_depth`, `min_duration_ms` |
 | `analyze_time_range` | `session_id`, `start_frame`, `end_frame`, `top`, optional `threshold_ms` |
 | `list_counters` | `session_id`, optional `top`, `filter` |
 | `query_counter` | `session_id`, `counter_name`, optional `start_frame`, `end_frame`, `accumulated`, `max_samples` |
@@ -40,4 +41,10 @@ Android capture:
 
 ```text
 Capture target=debug for 30 seconds with keep_session=true, then analyze slow frames and the worst frame.
+```
+
+Single-frame detail:
+
+```text
+For session s1 frame 842, call analyze_frame_detail with max_nodes=300 and max_depth=10, then explain the main thread hierarchy and largest self-time gaps.
 ```

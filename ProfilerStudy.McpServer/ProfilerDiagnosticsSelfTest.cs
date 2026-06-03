@@ -53,6 +53,10 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertHasItems(frame["scopeHotspots"], "frame scope hotspots");
 		AssertHasItems(frame["neighborSlowFrames"], "neighbor slow frames");
 
+		Dictionary<string, object> frameDetail = service.AnalyzeFrameDetail(sessionId, 20, 20, 4, 0.0);
+		AssertHasItems(frameDetail["threadFlameGraphs"], "thread flame graphs");
+		AssertHasItems(frameDetail["topSpans"], "top frame detail spans");
+
 		Dictionary<string, object> range = service.AnalyzeTimeRange(sessionId, 18, 24, 10, 0.0);
 		AssertHasItems(range["scopeHotspots"], "range scope hotspots");
 
