@@ -345,6 +345,7 @@ internal sealed class ProfilerAnalysisService
 			["topSpans"] = ToArrayList(flatSpans
 				.OrderByDescending(span => Convert.ToDouble(span["durationMs"]))
 				.Take(Math.Min(maxNodes, 50))),
+			["frameCounters"] = GetFrameCounters(session, frameIndex, 200),
 			["nodeStats"] = new Dictionary<string, object>
 			{
 				["includedNodeCount"] = includedNodeCount,
@@ -354,6 +355,49 @@ internal sealed class ProfilerAnalysisService
 				["truncated"] = truncated
 			}
 		};
+	}
+
+	private static ArrayList GetFrameCounters(Session session, int frameIndex, int maxCounters)
+	{
+		List<Dictionary<string, object>> counters = new List<Dictionary<string, object>>();
+		foreach (CustomStatSessionData stat in session.GetCustomStats())
+		{
+			List<FrameValue> values = new List<FrameValue>();
+			session.GetCustomStats(frameIndex, frameIndex, stat.Name, false, values);
+			if (values.Count == 0)
+			{
+				continue;
+			}
+			FrameValue value = values[0];
+
+			List<FrameValue> accumulatedValues = new List<FrameValue>();
+			session.GetCustomStats(frameIndex, frameIndex, stat.Name, true, accumulatedValues);
+			double accumulatedValue = accumulatedValues.Count == 0 ? 0.0 : accumulatedValues[0].m_Value;
+			double accumulatedCount = accumulatedValues.Count == 0 ? 0.0 : accumulatedValues[0].m_Count;
+			if (value.m_Value == 0.0 && value.m_Count == 0.0 && accumulatedValue == 0.0 && accumulatedCount == 0.0)
+			{
+				continue;
+			}
+
+			counters.Add(new Dictionary<string, object>
+			{
+				["name"] = session.GetString(stat.Name),
+				["valueType"] = stat.ValueType.ToString(),
+				["graph"] = session.GetCustomStatGraph(stat.Name),
+				["unit"] = session.GetCustomStatUnit(stat.Name),
+				["frameIndex"] = frameIndex,
+				["frameEndTime"] = value.m_FrameEndTime,
+				["value"] = Round(value.m_Value),
+				["count"] = Round(value.m_Count),
+				["accumulatedValue"] = Round(accumulatedValue),
+				["accumulatedCount"] = Round(accumulatedCount)
+			});
+		}
+		return ToArrayList(counters
+			.OrderByDescending(counter => Convert.ToDouble(counter["count"]))
+			.ThenByDescending(counter => Math.Abs(Convert.ToDouble(counter["value"])))
+			.ThenBy(counter => Convert.ToString(counter["name"]))
+			.Take(maxCounters));
 	}
 
 	public Dictionary<string, object> AnalyzeTimeRange(string sessionId, int startFrame, int endFrame, int top, double thresholdMs)

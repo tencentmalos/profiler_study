@@ -410,9 +410,9 @@ internal sealed class ProfilerMcpTools
 					structured = m_AnalysisService.AnalyzeFrameDetail(
 						GetString(arguments, "session_id", string.Empty),
 						GetInt(arguments, "frame_index", 0, 0, int.MaxValue),
-						GetInt(arguments, "max_nodes", 200, 1, 2000),
-						GetInt(arguments, "max_depth", 8, 1, 64),
-						GetDouble(arguments, "min_duration_ms", 0.0));
+						GetInt(arguments, "max_nodes", 300, 1, 2000),
+						GetInt(arguments, "max_depth", 12, 1, 64),
+						GetDouble(arguments, "min_duration_ms", 0.01));
 					break;
 				case "analyze_time_range":
 					structured = m_AnalysisService.AnalyzeTimeRange(
@@ -569,7 +569,7 @@ internal sealed class ProfilerMcpTools
 					["type"] = "integer",
 					["minimum"] = 1,
 					["maximum"] = 2000,
-					["default"] = 200,
+					["default"] = 300,
 					["description"] = "Maximum number of hierarchical flame graph nodes returned across all threads."
 				},
 				["max_depth"] = new Dictionary<string, object>
@@ -577,14 +577,14 @@ internal sealed class ProfilerMcpTools
 					["type"] = "integer",
 					["minimum"] = 1,
 					["maximum"] = 64,
-					["default"] = 8,
+					["default"] = 12,
 					["description"] = "Maximum parent/child depth to expand per thread."
 				},
 				["min_duration_ms"] = new Dictionary<string, object>
 				{
 					["type"] = "number",
 					["minimum"] = 0,
-					["default"] = 0,
+					["default"] = 0.01,
 					["description"] = "Drop flame graph nodes whose clipped frame-local duration is below this threshold."
 				}
 			}

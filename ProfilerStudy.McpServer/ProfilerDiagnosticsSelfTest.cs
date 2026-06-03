@@ -56,6 +56,12 @@ internal static class ProfilerDiagnosticsSelfTest
 		Dictionary<string, object> frameDetail = service.AnalyzeFrameDetail(sessionId, 20, 20, 4, 0.0);
 		AssertHasItems(frameDetail["threadFlameGraphs"], "thread flame graphs");
 		AssertHasItems(frameDetail["topSpans"], "top frame detail spans");
+		AssertHasItems(frameDetail["frameCounters"], "frame detail counters");
+		IDictionary frameDetailCounter = ((IList)frameDetail["frameCounters"])[0] as IDictionary;
+		AssertEqual("SelfTestCounter", frameDetailCounter["name"], "frame detail counter name");
+		AssertEqual(12.0, frameDetailCounter["value"], "frame detail counter value");
+
+		AssertFrameDetailDefaults();
 
 		Dictionary<string, object> range = service.AnalyzeTimeRange(sessionId, 18, 24, 10, 0.0);
 		AssertHasItems(range["scopeHotspots"], "range scope hotspots");
@@ -68,6 +74,30 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(counterName, counterSamples["counterName"], "counter name");
 		AssertHasItems(counterSamples["samples"], "counter samples");
 		service.CloseSession(sessionId);
+	}
+
+	private static void AssertFrameDetailDefaults()
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		IDictionary frameDetailTool = null;
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "analyze_frame_detail")
+			{
+				frameDetailTool = tool;
+				break;
+			}
+		}
+		if (frameDetailTool == null)
+		{
+			throw new InvalidOperationException("analyze_frame_detail tool is missing.");
+		}
+		IDictionary inputSchema = frameDetailTool["inputSchema"] as IDictionary;
+		IDictionary properties = inputSchema["properties"] as IDictionary;
+		AssertEqual(300, ((IDictionary)properties["max_nodes"])["default"], "max_nodes default");
+		AssertEqual(12, ((IDictionary)properties["max_depth"])["default"], "max_depth default");
+		AssertEqual(0.01, ((IDictionary)properties["min_duration_ms"])["default"], "min_duration_ms default");
 	}
 
 	private static string AddSession(ProfilerAnalysisService service, Session session)

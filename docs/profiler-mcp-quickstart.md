@@ -178,15 +178,15 @@ public GitHub plugin 安装会使用 `.agents/plugins/plugins/profiler-study/ski
 
 ### `analyze_frame_detail`
 
-抽取单帧的按线程层级火焰图数据，用于深入分析一帧内部的 parent/children 调用结构。`threadFlameGraphs` 是主输出，保留每个线程的根节点和子节点；`topSpans` 只是辅助索引，不代表层级。
+抽取单帧的按线程层级火焰图数据，并返回该帧有样本的 custom stat/counter 值，用于深入分析一帧内部的 parent/children 调用结构和同帧 counter 状态。`threadFlameGraphs` 是主输出，保留每个线程的根节点和子节点；`frameCounters` 是当前帧的 counter 样本；`topSpans` 只是辅助索引，不代表层级。
 
 参数：
 
 - `session_id`: session id
 - `frame_index`: frame index
-- `max_nodes`: 最大返回层级节点数，默认 `200`
-- `max_depth`: 最大展开层级，默认 `8`
-- `min_duration_ms`: 过滤低于该耗时的节点，默认 `0`
+- `max_nodes`: 最大返回层级节点数，默认 `300`
+- `max_depth`: 最大展开层级，默认 `12`
+- `min_duration_ms`: 过滤低于该耗时的节点，默认 `0.01`
 
 ### `analyze_time_range`
 

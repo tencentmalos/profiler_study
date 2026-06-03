@@ -60,6 +60,7 @@ internal static class ProfilerReportFormatter
 		AppendTable(builder, "Custom Stats", result, "customStats", new[] { "name", "valueType", "totalCount", "maxCountPerFrame" });
 		AppendTable(builder, "Counters", result, "counters", new[] { "name", "valueType", "unit", "totalCount", "maxValuePerFrame" });
 		AppendTable(builder, "Counter Samples", result, "samples", new[] { "frameIndex", "frameEndTime", "value", "count" });
+		AppendTable(builder, "Frame Counters", result, "frameCounters", new[] { "name", "unit", "value", "count", "accumulatedValue" });
 		AppendTable(builder, "Top Frame Detail Spans", result, "topSpans", new[] { "name", "threadName", "depth", "durationMs", "selfMs" });
 		AppendTable(builder, "Threads", result, "threads", new[] { "id", "name" });
 		AppendTable(builder, "Sessions", result, "sessions", new[] { "sessionId", "source", "frameCount", "threadCount" });
