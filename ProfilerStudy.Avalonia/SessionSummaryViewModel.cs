@@ -10,6 +10,7 @@ internal sealed class SessionSummaryViewModel : ObservableObject
 	private double m_TargetFrameTimeMs = 33.333;
 	private int m_FirstFrameIndex;
 	private int m_LastFrameIndex;
+	private int m_ThreadCount;
 	private string m_SourceName = "No session loaded";
 
 	public int FrameCount
@@ -84,6 +85,12 @@ internal sealed class SessionSummaryViewModel : ObservableObject
 		set => SetProperty(ref m_SourceName, value);
 	}
 
+	public int ThreadCount
+	{
+		get => m_ThreadCount;
+		set => SetProperty(ref m_ThreadCount, value);
+	}
+
 	public string AverageFrameTimeText => FormatMs(AverageFrameTimeMs);
 
 	public string MaxFrameTimeText => FormatMs(MaxFrameTimeMs);
@@ -91,6 +98,18 @@ internal sealed class SessionSummaryViewModel : ObservableObject
 	public string TargetFrameTimeText => FormatMs(TargetFrameTimeMs);
 
 	public string RangeText => FrameCount == 0 ? string.Empty : $"frames {FirstFrameIndex} - {LastFrameIndex}";
+
+	public void Apply(SessionSummary summary)
+	{
+		FrameCount = summary.FrameCount;
+		AverageFrameTimeMs = summary.AverageFrameTimeMs;
+		MaxFrameTimeMs = summary.MaxFrameTimeMs;
+		TargetFrameTimeMs = summary.TargetFrameTimeMs;
+		FirstFrameIndex = summary.FirstFrameIndex;
+		LastFrameIndex = summary.LastFrameIndex;
+		ThreadCount = summary.ThreadCount;
+		SourceName = summary.SourceName;
+	}
 
 	private static string FormatMs(double value)
 	{

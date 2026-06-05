@@ -18,6 +18,7 @@
         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
           <Button Command="{Binding OpenSessionCommand}" Padding="12,6">Open</Button>
           <Button Command="{Binding LoadSampleCommand}" Padding="12,6">Sample</Button>
+          <Button Command="{Binding ResetTimelineCommand}" Padding="12,6">Reset Zoom</Button>
         </StackPanel>
         <TextBlock Text="{Binding StatusText}" Foreground="#D8DEE9" VerticalAlignment="Center" Margin="16,0,0,0" />
       </DockPanel>
@@ -27,7 +28,7 @@
       <Border Grid.Column="0" Background="#252B33" BorderBrush="#3A424D" BorderThickness="0,0,1,0" Padding="16">
         <StackPanel Spacing="14">
           <TextBlock Text="Session" Foreground="#F2F4F8" FontSize="18" FontWeight="SemiBold" />
-          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
+          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
             <TextBlock Text="Frames" Foreground="#9AA4B2" />
             <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="#F2F4F8" />
             <TextBlock Grid.Row="1" Text="Average" Foreground="#9AA4B2" />
@@ -36,8 +37,10 @@
             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#F2F4F8" />
             <TextBlock Grid.Row="3" Text="Budget" Foreground="#9AA4B2" />
             <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#F2F4F8" />
-            <TextBlock Grid.Row="4" Text="Source" Foreground="#9AA4B2" />
-            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#F2F4F8" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="4" Text="Threads" Foreground="#9AA4B2" />
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="#F2F4F8" />
+            <TextBlock Grid.Row="5" Text="Source" Foreground="#9AA4B2" />
+            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#F2F4F8" TextWrapping="Wrap" />
           </Grid>
         </StackPanel>
       </Border>
@@ -46,9 +49,14 @@
         <StackPanel Orientation="Horizontal" Spacing="18" Margin="0,0,0,12">
           <TextBlock Text="Frame Timeline" Foreground="#F2F4F8" FontSize="20" FontWeight="SemiBold" />
           <TextBlock Text="{Binding Summary.RangeText}" Foreground="#9AA4B2" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding TimelineRangeText}" Foreground="#9AA4B2" VerticalAlignment="Center" />
         </StackPanel>
         <Border Grid.Row="1" Background="#15191F" BorderBrush="#3A424D" BorderThickness="1">
-          <local:FrameTimelineControl Samples="{Binding FrameSamples}" TargetFrameMs="{Binding Summary.TargetFrameTimeMs}" />
+          <local:FrameTimelineControl
+              Samples="{Binding FrameSamples}"
+              TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
+              Selection="{Binding Selection}"
+              Viewport="{Binding Viewport}" />
         </Border>
       </Grid>
     </Grid>

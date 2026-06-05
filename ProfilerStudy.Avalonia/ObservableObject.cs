@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace ProfilerStudy.Avalonia;
 
-internal abstract class ObservableObject : INotifyPropertyChanged
+public abstract class ObservableObject : INotifyPropertyChanged
 {
 	public event PropertyChangedEventHandler PropertyChanged;
 

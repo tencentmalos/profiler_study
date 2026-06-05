@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -9,30 +10,77 @@ namespace ProfilerStudy.Avalonia;
 
 internal sealed class MainWindowViewModel : ObservableObject
 {
-	private readonly SessionPreviewService m_PreviewService = new SessionPreviewService();
+	private readonly SessionLoader m_SessionLoader = new SessionLoader();
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
-	private ObservableCollection<FrameSample> m_FrameSamples = new ObservableCollection<FrameSample>();
+	private readonly RelayCommand m_ResetTimelineCommand;
+	private CancellationTokenSource m_LoadCancellation;
+	private SessionDocument m_CurrentDocument;
+	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
+	private TimelineSelection m_Selection = new TimelineSelection();
+	private TimelineViewport m_Viewport = TimelineViewport.CreateForFrames(0);
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
+	private string m_TimelineRangeText = string.Empty;
+	private bool m_IsLoading;
 
 	public MainWindowViewModel()
 	{
 		Summary = new SessionSummaryViewModel();
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
-		m_LoadSampleCommand = new RelayCommand(_ => LoadSample());
+		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
+		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
+		AttachTimelineState(Selection, Viewport);
 	}
 
 	public RelayCommand OpenSessionCommand => m_OpenSessionCommand;
 
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
 
+	public RelayCommand ResetTimelineCommand => m_ResetTimelineCommand;
+
 	public SessionSummaryViewModel Summary { get; }
 
-	public ObservableCollection<FrameSample> FrameSamples
+	public SessionDocument CurrentDocument
+	{
+		get => m_CurrentDocument;
+		private set
+		{
+			if (SetProperty(ref m_CurrentDocument, value))
+			{
+				m_ResetTimelineCommand.RaiseCanExecuteChanged();
+			}
+		}
+	}
+
+	public IReadOnlyList<FrameSample> FrameSamples
 	{
 		get => m_FrameSamples;
 		private set => SetProperty(ref m_FrameSamples, value);
+	}
+
+	public TimelineSelection Selection
+	{
+		get => m_Selection;
+		private set
+		{
+			if (SetProperty(ref m_Selection, value))
+			{
+				RaisePropertyChanged(nameof(Selection));
+			}
+		}
+	}
+
+	public TimelineViewport Viewport
+	{
+		get => m_Viewport;
+		private set
+		{
+			if (SetProperty(ref m_Viewport, value))
+			{
+				RaisePropertyChanged(nameof(Viewport));
+			}
+		}
 	}
 
 	public string StatusText
@@ -45,6 +93,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_FooterText;
 		private set => SetProperty(ref m_FooterText, value);
+	}
+
+	public string TimelineRangeText
+	{
+		get => m_TimelineRangeText;
+		private set => SetProperty(ref m_TimelineRangeText, value);
+	}
+
+	public bool IsLoading
+	{
+		get => m_IsLoading;
+		private set => SetProperty(ref m_IsLoading, value);
 	}
 
 	private async Task OpenSessionAsync()
@@ -84,8 +144,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 				return;
 			}
 
-			ApplyPreview(m_PreviewService.LoadFile(path));
-			StatusText = "Loaded " + path;
+			await LoadDocumentAsync(() => m_SessionLoader.LoadFileAsync(path, m_LoadCancellation.Token), "Loading " + path);
 		}
 		catch (Exception ex)
 		{
@@ -93,29 +152,114 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 	}
 
-	private void LoadSample()
+	private Task LoadSampleAsync()
 	{
+		return LoadDocumentAsync(() => m_SessionLoader.LoadSampleAsync(m_LoadCancellation.Token), "Loading generated sample data");
+	}
+
+	private async Task LoadDocumentAsync(Func<Task<SessionDocument>> load, string loadingStatus)
+	{
+		m_LoadCancellation?.Cancel();
+		m_LoadCancellation = new CancellationTokenSource();
 		try
 		{
-			ApplyPreview(m_PreviewService.LoadRandomSample());
-			StatusText = "Loaded generated sample data.";
+			IsLoading = true;
+			StatusText = loadingStatus + "...";
+			SessionDocument document = await load();
+			ApplyDocument(document);
+			StatusText = "Loaded " + document.SourcePath;
+		}
+		catch (OperationCanceledException)
+		{
+			StatusText = "Load canceled.";
 		}
 		catch (Exception ex)
 		{
 			StatusText = ex.Message;
 		}
+		finally
+		{
+			IsLoading = false;
+		}
 	}
 
-	private void ApplyPreview(SessionPreview preview)
+	private void ApplyDocument(SessionDocument document)
 	{
-		FrameSamples = preview.FrameSamples;
-		Summary.FrameCount = preview.Summary.FrameCount;
-		Summary.AverageFrameTimeMs = preview.Summary.AverageFrameTimeMs;
-		Summary.MaxFrameTimeMs = preview.Summary.MaxFrameTimeMs;
-		Summary.TargetFrameTimeMs = preview.Summary.TargetFrameTimeMs;
-		Summary.FirstFrameIndex = preview.Summary.FirstFrameIndex;
-		Summary.LastFrameIndex = preview.Summary.LastFrameIndex;
-		Summary.SourceName = preview.SourceName;
-		FooterText = preview.Summary.FrameCount + " frames";
+		DetachTimelineState(Selection, Viewport);
+		CurrentDocument = document;
+		FrameSamples = document.FrameSamples;
+		Summary.Apply(document.Summary);
+		Selection = document.Selection;
+		Viewport = document.Viewport;
+		AttachTimelineState(Selection, Viewport);
+		UpdateTimelineText();
+		UpdateFooterText();
+	}
+
+	private void ResetTimeline()
+	{
+		if (CurrentDocument == null)
+		{
+			return;
+		}
+		CurrentDocument.Viewport.Reset(CurrentDocument.Summary.FrameCount);
+		CurrentDocument.Selection.SelectedFrameIndex = -1;
+		CurrentDocument.Selection.HoveredFrameIndex = -1;
+		CurrentDocument.Selection.SelectedFrameTimeMs = 0.0;
+		CurrentDocument.Selection.HoveredFrameTimeMs = 0.0;
+		UpdateTimelineText();
+		UpdateFooterText();
+	}
+
+	private void AttachTimelineState(TimelineSelection selection, TimelineViewport viewport)
+	{
+		if (selection != null)
+		{
+			selection.PropertyChanged += TimelineStatePropertyChanged;
+		}
+		if (viewport != null)
+		{
+			viewport.PropertyChanged += TimelineStatePropertyChanged;
+		}
+	}
+
+	private void DetachTimelineState(TimelineSelection selection, TimelineViewport viewport)
+	{
+		if (selection != null)
+		{
+			selection.PropertyChanged -= TimelineStatePropertyChanged;
+		}
+		if (viewport != null)
+		{
+			viewport.PropertyChanged -= TimelineStatePropertyChanged;
+		}
+	}
+
+	private void TimelineStatePropertyChanged(object sender, PropertyChangedEventArgs e)
+	{
+		UpdateTimelineText();
+		UpdateFooterText();
+	}
+
+	private void UpdateTimelineText()
+	{
+		TimelineRangeText = Viewport == null ? string.Empty : Viewport.RangeText;
+	}
+
+	private void UpdateFooterText()
+	{
+		if (CurrentDocument == null)
+		{
+			FooterText = "Avalonia + SkiaSharp migration prototype";
+			return;
+		}
+
+		string selectedText = Selection.SelectedFrameIndex >= 0
+			? $"selected frame {Selection.SelectedFrameIndex} ({Selection.SelectedFrameTimeMs:0.###} ms)"
+			: "no frame selected";
+		string hoverText = Selection.HoveredFrameIndex >= 0
+			? $"hover frame {Selection.HoveredFrameIndex} ({Selection.HoveredFrameTimeMs:0.###} ms)"
+			: "hover none";
+		FooterText = $"{CurrentDocument.Summary.FrameCount} frames | {Viewport.RangeText} | {selectedText} | {hoverText}";
 	}
 }
