@@ -4301,7 +4301,7 @@ public class Session : IDisposable
 		return ConnectToTcp(connectHost, connectPort, "Android", interactive: true, recordContextSwitches: false);
 	}
 
-	private bool ConnectToTcp(string connectHost, int connectPort, string connectionName, bool interactive, bool recordContextSwitches)
+	public bool ConnectToTcp(string connectHost, int connectPort, string connectionName, bool interactive, bool recordContextSwitches)
 	{
 		LastConnectionError = null;
 		m_TcpCllient = new TcpClient();

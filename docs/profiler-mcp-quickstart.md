@@ -60,13 +60,18 @@ public GitHub plugin 安装会使用 `.agents/plugins/plugins/profiler-study/ski
 
 ## 可用工具
 
-### `capture_android_profile`
+### `capture_profile`
 
-连接固定 Android FramePro socket，抓取一段时间并返回摘要分析。
+通过 URL 连接 FramePro target，抓取一段时间并返回摘要分析。
+
+支持的 URL：
+
+- `android://{forward_name}`：执行 `adb forward tcp:<local_port> localfilesystem:{forward_name}`，再连接本地转发端口。例如 `android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro`。
+- `pc://{ip}:{port}`：直接通过 TCP 连接 PC target。例如 `pc://127.0.0.1:8428`。
 
 参数：
 
-- `target`: `debug` 或 `release`
+- `url`: target URL
 - `duration_seconds`: 抓取秒数，默认 `60`
 - `top`: 返回慢帧和热点条数，默认 `10`
 - `keep_session`: 是否把本次采集保留在 MCP server 内存中并返回 `sessionId`，默认 `false`
@@ -74,14 +79,31 @@ public GitHub plugin 安装会使用 `.agents/plugins/plugins/profiler-study/ski
 示例请求意图：
 
 ```text
-请调用 profiler-study 的 capture_android_profile，target=debug，duration_seconds=60，然后分析慢帧和热点 scope。
+请调用 profiler-study 的 capture_profile，url=pc://127.0.0.1:8428，duration_seconds=60，然后分析慢帧和热点 scope。
+```
+
+Android 示例：
+
+```text
+请调用 profiler-study 的 capture_profile，url=android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro，duration_seconds=60，然后分析慢帧和热点 scope。
 ```
 
 如果要继续追问某个慢帧，使用 `keep_session=true`：
 
 ```text
-请调用 profiler-study 的 capture_android_profile，target=debug，duration_seconds=30，keep_session=true，然后对最慢帧调用 analyze_frame。
+请调用 profiler-study 的 capture_profile，url=pc://192.168.1.20:8428，duration_seconds=30，keep_session=true，然后对最慢帧调用 analyze_frame。
 ```
+
+### `capture_android_profile`
+
+兼容旧工具，连接固定 Android Debug / Release FramePro socket。新调用优先使用 `capture_profile`。
+
+参数：
+
+- `target`: `debug` 或 `release`
+- `duration_seconds`: 抓取秒数，默认 `60`
+- `top`: 返回慢帧和热点条数，默认 `10`
+- `keep_session`: 是否把本次采集保留在 MCP server 内存中并返回 `sessionId`，默认 `false`
 
 ### `analyze_session_file`
 
@@ -202,11 +224,9 @@ public GitHub plugin 安装会使用 `.agents/plugins/plugins/profiler-study/ski
 
 ## 当前限制
 
-- MCP server 是 Windows / .NET Framework 侧车进程，复用当前 `ProfilerStudyCore`。
+- MCP server 是 .NET 侧车进程，复用当前 `ProfilerStudyCore`。
 - 目前工具仍是不控制 WinForms UI 的 sidecar 模式。
-- Android 采集使用当前固定 socket：
-  - Debug: `/data/user_de/0/org.azahar_emu.azahar.debug/files/framepro`
-  - Release: `/data/user_de/0/org.azahar_emu.azahar/files/framepro`
+- live 采集优先使用 URL：Android 使用 `android://{forward_name}`，PC 使用 `pc://{ip}:{port}`。
 - 工具不会提供任意 shell / adb 执行能力。
 - 读取文件限制在当前工作区和 `C:\workspace` 下，避免 MCP 变成任意文件读取通道。
 - `analyze_frame` 的未归因时间是保守估算：用 frame scope 或 frame duration 减去最大非 frame scope，避免嵌套 scope 双重计数。

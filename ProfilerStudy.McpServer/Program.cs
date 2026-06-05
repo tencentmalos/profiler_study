@@ -203,8 +203,46 @@ internal sealed class ProfilerMcpTools
 		{
 			new Dictionary<string, object>
 			{
+				["name"] = "capture_profile",
+				["description"] = "Connect to a profiler target by URL, capture for a duration, then return a compact performance analysis. Use android://{forward_name} for adb forward to a device unix socket, or pc://{ip}:{port} for direct TCP.",
+				["inputSchema"] = new Dictionary<string, object>
+				{
+					["type"] = "object",
+					["required"] = new ArrayList { "url" },
+					["properties"] = new Dictionary<string, object>
+					{
+						["url"] = new Dictionary<string, object>
+						{
+							["type"] = "string",
+							["description"] = "Capture target URL, for example android:///data/local/tmp/framepro or pc://127.0.0.1:8428."
+						},
+						["duration_seconds"] = new Dictionary<string, object>
+						{
+							["type"] = "integer",
+							["minimum"] = 1,
+							["maximum"] = 300,
+							["default"] = 60
+						},
+						["top"] = new Dictionary<string, object>
+						{
+							["type"] = "integer",
+							["minimum"] = 1,
+							["maximum"] = 50,
+							["default"] = 10
+						},
+						["keep_session"] = new Dictionary<string, object>
+						{
+							["type"] = "boolean",
+							["default"] = false,
+							["description"] = "Keep the captured session in memory and return a session_id for follow-up queries."
+						}
+					}
+				}
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "capture_android_profile",
-				["description"] = "Connect to the fixed Android FramePro socket, capture for a duration, then return a compact performance analysis.",
+				["description"] = "Compatibility wrapper for fixed Android debug/release FramePro sockets. Prefer capture_profile with android:// or pc:// URLs for new use.",
 				["inputSchema"] = new Dictionary<string, object>
 				{
 					["type"] = "object",
@@ -345,6 +383,13 @@ internal sealed class ProfilerMcpTools
 			Dictionary<string, object> structured;
 			switch (name)
 			{
+				case "capture_profile":
+					structured = m_AnalysisService.CaptureProfile(
+						GetString(arguments, "url", string.Empty),
+						GetInt(arguments, "duration_seconds", 60, 1, 300),
+						GetInt(arguments, "top", 10, 1, 50),
+						GetBool(arguments, "keep_session", false));
+					break;
 				case "capture_android_profile":
 					structured = m_AnalysisService.CaptureAndroidProfile(
 						GetString(arguments, "target", "debug"),

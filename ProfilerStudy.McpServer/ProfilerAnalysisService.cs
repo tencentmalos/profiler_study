@@ -28,17 +28,30 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> CaptureAndroidProfile(string target, int durationSeconds, int top, bool keepSession)
 	{
-		Stopwatch stopwatch = Stopwatch.StartNew();
 		string endpoint = ResolveAndroidEndpoint(target);
+		return CaptureProfile(ProfilerCaptureTarget.FromAndroidEndpoint("android:" + target, endpoint), durationSeconds, top, keepSession);
+	}
+
+	public Dictionary<string, object> CaptureProfile(string url, int durationSeconds, int top, bool keepSession)
+	{
+		return CaptureProfile(ProfilerCaptureTarget.Parse(url), durationSeconds, top, keepSession);
+	}
+
+	private Dictionary<string, object> CaptureProfile(ProfilerCaptureTarget target, int durationSeconds, int top, bool keepSession)
+	{
+		Stopwatch stopwatch = Stopwatch.StartNew();
 		CapturingLog log = new CapturingLog();
 		Session session = new Session(new CoreSettings(), log);
 		bool keepAlive = false;
 		try
 		{
 			Stopwatch connectStopwatch = Stopwatch.StartNew();
-			if (!session.ConnectToAndroid(endpoint))
+			bool connected = target.Kind == ProfilerCaptureTargetKind.AndroidForward
+				? session.ConnectToAndroid(target.Endpoint)
+				: session.ConnectToTcp(target.ConnectHost, target.ConnectPort, target.Url, interactive: true, recordContextSwitches: false);
+			if (!connected)
 			{
-				throw new InvalidOperationException(session.LastConnectionError ?? "Android connection failed.");
+				throw new InvalidOperationException(session.LastConnectionError ?? "Profiler capture connection failed.");
 			}
 			connectStopwatch.Stop();
 
@@ -58,8 +71,11 @@ internal sealed class ProfilerAnalysisService
 			Dictionary<string, object> analysis = AnalyzeSession(session, top);
 			analysis["capture"] = new Dictionary<string, object>
 			{
-				["target"] = target,
-				["endpoint"] = endpoint,
+				["url"] = target.Url,
+				["kind"] = target.Kind.ToString(),
+				["endpoint"] = target.Endpoint,
+				["connectHost"] = target.ConnectHost,
+				["connectPort"] = target.ConnectPort,
 				["durationSeconds"] = durationSeconds,
 				["disconnectReason"] = session.DisconnectReason.ToString(),
 				["keepSession"] = keepSession
@@ -74,7 +90,7 @@ internal sealed class ProfilerAnalysisService
 			};
 			if (keepSession)
 			{
-				string sessionId = AddSession(session, "android:" + target, log);
+				string sessionId = AddSession(session, target.Url, log);
 				analysis["sessionId"] = sessionId;
 				keepAlive = true;
 			}

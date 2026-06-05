@@ -24,6 +24,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			Dictionary<string, object> pattern = ProfilerDiagnostics.AnalyzeSlowFramePattern(samples, 50.0);
 			AssertEqual(true, pattern["hasPeriodicSlowFrames"], "periodic slow frames");
 			AssertEqual(5, pattern["dominantIndexDelta"], "dominant delta");
+			RunCaptureTargetTests();
 			RunAnalysisServiceTests();
 
 			return 0;
@@ -35,6 +36,47 @@ internal static class ProfilerDiagnosticsSelfTest
 			Console.Error.WriteLine(ex.StackTrace ?? string.Empty);
 			return 1;
 		}
+	}
+
+	private static void RunCaptureTargetTests()
+	{
+		ProfilerCaptureTarget android = ProfilerCaptureTarget.Parse("android:///data/local/tmp/framepro");
+		AssertEqual(ProfilerCaptureTargetKind.AndroidForward, android.Kind, "android target kind");
+		AssertEqual("localfilesystem:/data/local/tmp/framepro", android.Endpoint, "android endpoint");
+		AssertEqual("127.0.0.1", android.ConnectHost, "android connect host");
+		AssertEqual(0, android.ConnectPort, "android connect port");
+
+		ProfilerCaptureTarget namedAndroid = ProfilerCaptureTarget.Parse("android://azahar.debug/framepro");
+		AssertEqual("localfilesystem:azahar.debug/framepro", namedAndroid.Endpoint, "named android endpoint");
+
+		ProfilerCaptureTarget pc = ProfilerCaptureTarget.Parse("pc://192.168.1.20:8428");
+		AssertEqual(ProfilerCaptureTargetKind.Tcp, pc.Kind, "pc target kind");
+		AssertEqual("192.168.1.20", pc.ConnectHost, "pc host");
+		AssertEqual(8428, pc.ConnectPort, "pc port");
+		AssertEqual("192.168.1.20:8428", pc.Endpoint, "pc endpoint");
+
+		AssertThrows(() => ProfilerCaptureTarget.Parse("http://127.0.0.1:8428"), "unsupported scheme");
+		AssertCaptureProfileTool();
+	}
+
+	private static void AssertCaptureProfileTool()
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "capture_profile")
+			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IList required = inputSchema["required"] as IList;
+				if (required == null || !required.Contains("url"))
+				{
+					throw new InvalidOperationException("capture_profile must require url.");
+				}
+				return;
+			}
+		}
+		throw new InvalidOperationException("capture_profile tool is missing.");
 	}
 
 	private static void RunAnalysisServiceTests()
@@ -168,6 +210,19 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			throw new InvalidOperationException(name + " expected at least one item.");
 		}
+	}
+
+	private static void AssertThrows(Action action, string name)
+	{
+		try
+		{
+			action();
+		}
+		catch
+		{
+			return;
+		}
+		throw new InvalidOperationException(name + " expected an exception.");
 	}
 
 	private static void AssertEqual<T>(T expected, object actual, string name)

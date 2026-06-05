@@ -4,7 +4,8 @@
 
 | Tool | Use |
 | --- | --- |
-| `capture_android_profile` | Capture Android FramePro data from the fixed debug/release socket. Use `keep_session=true` for follow-ups. |
+| `capture_profile` | Capture FramePro data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Use `keep_session=true` for follow-ups. |
+| `capture_android_profile` | Compatibility wrapper for fixed Android debug/release sockets. Prefer `capture_profile` for new live captures. |
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |
 | `list_sessions` | Show retained sessions. |
@@ -37,10 +38,16 @@ Counter investigation:
 For session s1, list counters filtered by GPU, then query the most relevant counter across frames 1200-1300.
 ```
 
-Android capture:
+Live PC capture:
 
 ```text
-Capture target=debug for 30 seconds with keep_session=true, then analyze slow frames and the worst frame.
+Capture url=pc://127.0.0.1:8428 for 30 seconds with keep_session=true, then analyze slow frames and the worst frame.
+```
+
+Live Android capture:
+
+```text
+Capture url=android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro for 30 seconds with keep_session=true, then analyze slow frames and the worst frame.
 ```
 
 Single-frame detail:
