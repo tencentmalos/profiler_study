@@ -120,6 +120,24 @@ ProfilerStudy.Avalonia/
 
 SukiUI 用于应用外壳和常规 UI，不用于高密度 profiler 绘图。
 
+## 视觉还原策略
+
+Avalonia 版本的主工作区必须以旧版 WinForms `ProfilerStudy/FramePro` 的视觉语言为基准，而不是另起一套现代 dashboard 风格。SukiUI 只补足窗口、按钮、对话框、导航等通用外壳；用户真正用于分析的区域需要尽量还原旧版 FramePro 的工程化界面。
+
+还原优先级：
+
+1. **Timeline/Frame Graph 优先**：旧版 `Timeline` 是上方时间标尺 + 下方连续 frame strip，旧版 `FrameGraphPanel` 是浅灰背景、绿色/橙色/红色 frame bars、目标帧耗时线、选中/hover 覆盖层。Avalonia 版需要用 SkiaSharp 直接绘制这些元素，避免普通 Avalonia chart 或卡片式布局带来的视觉偏差。
+2. **颜色沿用旧版 `Colours`**：优先映射 `FrameGraphBackground`、`FrameGraphFrameBar`、`FrameGraphFrameBarWarning`、`FrameGraphFrameBarAlert`、`FrameGraphTargetLine`、`FrameGraphSelectionFill`、`FrameGraphSelectionLine`、`TimelieBackground`、`TimeLineFrameFillColour`、`TimeLineFrameTextColour`、`FrameLine` 等配色。
+3. **密度和边界沿用旧版**：顶部 timeline 保持约 50px 高度，其中标尺约 30px、frame strip 约 20px；frame strip 使用深灰填充、白色 frame 边界，空间足够时显示 `Frame: N` 或 `N`。
+4. **Profiler 工作区保持工具感**：主窗口背景、侧栏、状态栏使用浅灰和细边框，减少卡片、圆角、渐变和装饰色。SukiUI 控件可以保留，但不应喧宾夺主。
+5. **SkiaSharp 作为还原核心**：旧版 GDI+ 绘制逻辑迁移时优先翻译为 SkiaSharp 的坐标、笔刷、裁剪、文本测量和 overlay；Avalonia 控件只负责承载输入和布局。
+
+当前第一步还原范围：
+
+- `FrameTimelineControl` 改为一体化 Skia 工作区：顶部时间标尺、顶部连续帧条、下方 frame graph、目标线、hover/selection marker、旧版配色。
+- `MainWindow.axaml` 调整为浅灰工具壳，保留 SukiUI 但去掉深色 dashboard 风格。
+- 后续 Threads/Scopes/Counters 也应沿用旧版 `TimeSpanGraph`、`ScopeDataGrid`、`CustomStatsGraph` 的密度、颜色和交互语义。
+
 SukiUI 负责：
 
 - 主窗口 `SukiWindow`。

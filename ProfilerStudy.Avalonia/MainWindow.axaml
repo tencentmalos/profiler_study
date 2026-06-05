@@ -12,46 +12,46 @@
     CanPin="False"
     ShowBottomBorder="True"
     BackgroundAnimationEnabled="False">
-  <Grid RowDefinitions="Auto,*,Auto" Background="#1F2329">
-    <Border Grid.Row="0" Background="#2A3038" BorderBrush="#3A424D" BorderThickness="0,0,0,1" Padding="12,10">
+  <Grid RowDefinitions="Auto,*,Auto" Background="#C8C8C8">
+    <Border Grid.Row="0" Background="#E6E6E6" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="8,7">
       <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
-          <Button Command="{Binding OpenSessionCommand}" Padding="12,6">Open</Button>
-          <Button Command="{Binding LoadSampleCommand}" Padding="12,6">Sample</Button>
-          <Button Command="{Binding ResetTimelineCommand}" Padding="12,6">Reset Zoom</Button>
+          <Button Command="{Binding OpenSessionCommand}" Padding="10,4">Open</Button>
+          <Button Command="{Binding LoadSampleCommand}" Padding="10,4">Sample</Button>
+          <Button Command="{Binding ResetTimelineCommand}" Padding="10,4">Reset Zoom</Button>
         </StackPanel>
-        <TextBlock Text="{Binding StatusText}" Foreground="#D8DEE9" VerticalAlignment="Center" Margin="16,0,0,0" />
+        <TextBlock Text="{Binding StatusText}" Foreground="#202020" VerticalAlignment="Center" Margin="14,0,0,0" />
       </DockPanel>
     </Border>
 
     <Grid Grid.Row="1" ColumnDefinitions="280,*">
-      <Border Grid.Column="0" Background="#252B33" BorderBrush="#3A424D" BorderThickness="0,0,1,0" Padding="16">
-        <StackPanel Spacing="14">
-          <TextBlock Text="Session" Foreground="#F2F4F8" FontSize="18" FontWeight="SemiBold" />
+      <Border Grid.Column="0" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,0,1,0" Padding="12">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Session" Foreground="#101010" FontSize="15" FontWeight="SemiBold" />
           <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
-            <TextBlock Text="Frames" Foreground="#9AA4B2" />
-            <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="#F2F4F8" />
-            <TextBlock Grid.Row="1" Text="Average" Foreground="#9AA4B2" />
-            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.AverageFrameTimeText}" Foreground="#F2F4F8" />
-            <TextBlock Grid.Row="2" Text="Max" Foreground="#9AA4B2" />
-            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#F2F4F8" />
-            <TextBlock Grid.Row="3" Text="Budget" Foreground="#9AA4B2" />
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#F2F4F8" />
-            <TextBlock Grid.Row="4" Text="Threads" Foreground="#9AA4B2" />
-            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="#F2F4F8" />
-            <TextBlock Grid.Row="5" Text="Source" Foreground="#9AA4B2" />
-            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#F2F4F8" TextWrapping="Wrap" />
+            <TextBlock Text="Frames" Foreground="#404040" />
+            <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="#101010" />
+            <TextBlock Grid.Row="1" Text="Average" Foreground="#404040" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" />
+            <TextBlock Grid.Row="2" Text="Max" Foreground="#404040" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
+            <TextBlock Grid.Row="3" Text="Budget" Foreground="#404040" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#101010" />
+            <TextBlock Grid.Row="4" Text="Threads" Foreground="#404040" />
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="#101010" />
+            <TextBlock Grid.Row="5" Text="Source" Foreground="#404040" />
+            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextWrapping="Wrap" />
           </Grid>
         </StackPanel>
       </Border>
 
-      <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="20">
-        <StackPanel Orientation="Horizontal" Spacing="18" Margin="0,0,0,12">
-          <TextBlock Text="Frame Timeline" Foreground="#F2F4F8" FontSize="20" FontWeight="SemiBold" />
-          <TextBlock Text="{Binding Summary.RangeText}" Foreground="#9AA4B2" VerticalAlignment="Center" />
-          <TextBlock Text="{Binding TimelineRangeText}" Foreground="#9AA4B2" VerticalAlignment="Center" />
+      <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="10">
+        <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,0,0,8">
+          <TextBlock Text="Frame Timeline" Foreground="#101010" FontSize="15" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Summary.RangeText}" Foreground="#404040" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" VerticalAlignment="Center" />
         </StackPanel>
-        <Border Grid.Row="1" Background="#15191F" BorderBrush="#3A424D" BorderThickness="1">
+        <Border Grid.Row="1" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="1">
           <local:FrameTimelineControl
               Samples="{Binding FrameSamples}"
               TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
@@ -61,8 +61,8 @@
       </Grid>
     </Grid>
 
-    <Border Grid.Row="2" Background="#252B33" BorderBrush="#3A424D" BorderThickness="0,1,0,0" Padding="12,8">
-      <TextBlock Text="{Binding FooterText}" Foreground="#9AA4B2" />
+    <Border Grid.Row="2" Background="#E6E6E6" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" Padding="8,6">
+      <TextBlock Text="{Binding FooterText}" Foreground="#202020" />
     </Border>
   </Grid>
 </suki:SukiWindow>

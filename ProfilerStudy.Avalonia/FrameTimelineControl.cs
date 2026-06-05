@@ -13,6 +13,28 @@ namespace ProfilerStudy.Avalonia;
 
 public sealed class FrameTimelineControl : Control
 {
+	private const float RulerHeight = 30.0f;
+	private const float FrameStripHeight = 20.0f;
+	private const float HeaderHeight = RulerHeight + FrameStripHeight;
+	private const float AxisWidth = 54.0f;
+	private const float RightPadding = 12.0f;
+	private const float GraphTopGap = 12.0f;
+	private const float BottomPadding = 24.0f;
+	private const float MinFrameLineWidth = 5.0f;
+
+	private static readonly SKColor TimelineBackground = new SKColor(200, 200, 200);
+	private static readonly SKColor TimelineFrameFill = new SKColor(99, 99, 99);
+	private static readonly SKColor TimelineFrameText = new SKColor(245, 245, 245);
+	private static readonly SKColor FrameLine = SKColors.White;
+	private static readonly SKColor GraphBackground = SKColors.LightGray;
+	private static readonly SKColor FrameBar = SKColors.Green;
+	private static readonly SKColor FrameBarWarning = SKColors.Orange;
+	private static readonly SKColor FrameBarAlert = SKColors.Red;
+	private static readonly SKColor TargetLine = new SKColor(182, 82, 0, 128);
+	private static readonly SKColor SelectionFill = new SKColor(0, 128, 255, 32);
+	private static readonly SKColor SelectionLine = new SKColor(64, 170, 255, 160);
+	private static readonly SKColor HoverLine = new SKColor(255, 255, 255, 180);
+
 	public static readonly StyledProperty<IReadOnlyList<FrameSample>> SamplesProperty =
 		AvaloniaProperty.Register<FrameTimelineControl, IReadOnlyList<FrameSample>>(nameof(Samples));
 
@@ -181,7 +203,7 @@ public sealed class FrameTimelineControl : Control
 	{
 		canvas.Save();
 		canvas.ClipRect(bounds);
-		canvas.Clear(new SKColor(21, 25, 31));
+		canvas.Clear(TimelineBackground);
 
 		IReadOnlyList<FrameSample> samples = Samples;
 		TimelineViewport viewport = Viewport;
@@ -192,11 +214,13 @@ public sealed class FrameTimelineControl : Control
 			return;
 		}
 
-		float left = bounds.Left + 16;
-		float right = bounds.Right - 16;
-		float top = bounds.Top + 18;
-		float bottom = bounds.Bottom - 28;
-		float height = Math.Max(1, bottom - top);
+		float stripLeft = bounds.Left;
+		float plotLeft = bounds.Left + AxisWidth;
+		float right = bounds.Right - RightPadding;
+		float stripRight = bounds.Right;
+		float graphTop = bounds.Top + HeaderHeight + GraphTopGap;
+		float bottom = bounds.Bottom - BottomPadding;
+		float graphHeight = Math.Max(1, bottom - graphTop);
 		double maxMs = TargetFrameMs * 2.0;
 		int startFrame = Math.Max(0, viewport.StartFrame);
 		int endFrame = Math.Min(viewport.EndFrame, samples[samples.Count - 1].Index);
@@ -208,27 +232,43 @@ public sealed class FrameTimelineControl : Control
 			}
 		}
 
-		using SKPaint gridPaint = new SKPaint { Color = new SKColor(58, 66, 77), StrokeWidth = 1, IsAntialias = true };
-		using SKFont labelFont = new SKFont { Size = 12 };
-		using SKPaint textPaint = new SKPaint { Color = new SKColor(154, 164, 178), IsAntialias = true };
-		using SKPaint framePaint = new SKPaint { Color = new SKColor(118, 184, 159), IsAntialias = false };
-		using SKPaint slowFramePaint = new SKPaint { Color = new SKColor(224, 112, 96), IsAntialias = false };
-		using SKPaint targetPaint = new SKPaint { Color = new SKColor(236, 196, 108), StrokeWidth = 1, IsAntialias = true };
+		using SKFont labelFont = new SKFont { Size = 11 };
+		using SKFont frameFont = new SKFont { Size = 10 };
+		using SKPaint blackTextPaint = new SKPaint { Color = SKColors.Black, IsAntialias = true };
+		using SKPaint whiteTextPaint = new SKPaint { Color = TimelineFrameText, IsAntialias = true };
+		using SKPaint tickPaint = new SKPaint { Color = SKColors.Black, StrokeWidth = 1, IsAntialias = false };
+		using SKPaint minorTickPaint = new SKPaint { Color = new SKColor(90, 90, 90), StrokeWidth = 1, IsAntialias = false };
+		using SKPaint stripFillPaint = new SKPaint { Color = TimelineFrameFill, IsAntialias = false };
+		using SKPaint stripLinePaint = new SKPaint { Color = FrameLine, StrokeWidth = 1, IsAntialias = false };
+		using SKPaint graphBackPaint = new SKPaint { Color = GraphBackground, IsAntialias = false };
+		using SKPaint gridPaint = new SKPaint { Color = new SKColor(160, 160, 160), StrokeWidth = 1, IsAntialias = false };
+		using SKPaint framePaint = new SKPaint { Color = FrameBar, IsAntialias = false };
+		using SKPaint warningFramePaint = new SKPaint { Color = FrameBarWarning, IsAntialias = false };
+		using SKPaint alertFramePaint = new SKPaint { Color = FrameBarAlert, IsAntialias = false };
+		using SKPaint targetPaint = new SKPaint { Color = TargetLine, StrokeWidth = 1, IsAntialias = false };
 
-		for (int i = 0; i <= 4; i++)
-		{
-			float y = top + height * i / 4f;
-			canvas.DrawLine(left, y, right, y, gridPaint);
-		}
+		canvas.DrawRect(new SKRect(bounds.Left, graphTop, bounds.Right, bottom), graphBackPaint);
 
-		float targetY = bottom - (float)(Math.Min(TargetFrameMs, maxMs) / maxMs) * height;
-		canvas.DrawLine(left, targetY, right, targetY, targetPaint);
-		canvas.DrawText("target " + TargetFrameMs.ToString("0.###") + " ms", left, targetY - 5, SKTextAlign.Left, labelFont, textPaint);
-
-		float chartWidth = Math.Max(1, right - left);
+		float chartWidth = Math.Max(1, right - plotLeft);
 		int visibleFrameCount = Math.Max(1, endFrame - startFrame + 1);
 		float barStep = chartWidth / visibleFrameCount;
 		float barWidth = Math.Max(1, Math.Min(8, barStep - 1));
+
+		DrawRuler(canvas, samples, startFrame, endFrame, stripLeft, stripRight, labelFont, blackTextPaint, tickPaint, minorTickPaint);
+		DrawFrameStrip(canvas, startFrame, endFrame, stripLeft, stripRight, frameFont, stripFillPaint, stripLinePaint, whiteTextPaint);
+
+		for (int i = 0; i <= 4; i++)
+		{
+			float y = graphTop + graphHeight * i / 4f;
+			canvas.DrawLine(plotLeft, y, right, y, gridPaint);
+			double labelValue = maxMs * (4 - i) / 4.0;
+			canvas.DrawText(labelValue.ToString("0.#") + "ms", plotLeft - 6, y + 4, SKTextAlign.Right, labelFont, blackTextPaint);
+		}
+
+		float targetY = bottom - (float)(Math.Min(TargetFrameMs, maxMs) / maxMs) * graphHeight;
+		canvas.DrawLine(plotLeft, targetY, right, targetY, targetPaint);
+		canvas.DrawText(TargetFrameMs.ToString("0.###") + "ms", right, targetY - 4, SKTextAlign.Right, labelFont, blackTextPaint);
+
 		for (int frameIndex = startFrame; frameIndex <= endFrame; frameIndex++)
 		{
 			if (!TryGetSample(samples, frameIndex, out FrameSample sample))
@@ -236,17 +276,124 @@ public sealed class FrameTimelineControl : Control
 				continue;
 			}
 
-			float x = left + (frameIndex - startFrame) * barStep;
-			float barHeight = (float)(Math.Min(sample.DurationMs, maxMs) / maxMs) * height;
-			SKPaint paint = sample.DurationMs > TargetFrameMs ? slowFramePaint : framePaint;
+			float x = plotLeft + (frameIndex - startFrame) * barStep;
+			float barHeight = (float)(Math.Min(sample.DurationMs, maxMs) / maxMs) * graphHeight;
+			SKPaint paint = sample.DurationMs >= TargetFrameMs * 1.5 ? alertFramePaint : (sample.DurationMs > TargetFrameMs ? warningFramePaint : framePaint);
 			canvas.DrawRect(x, bottom - barHeight, barWidth, Math.Max(1, barHeight), paint);
 		}
 
-		DrawSelectionOverlay(canvas, left, top, bottom, chartWidth, startFrame, visibleFrameCount);
-		canvas.DrawText(startFrame.ToString(), left, bottom + 18, SKTextAlign.Left, labelFont, textPaint);
-		canvas.DrawText(endFrame.ToString(), right, bottom + 18, SKTextAlign.Right, labelFont, textPaint);
-		canvas.DrawText(maxMs.ToString("0.#") + " ms", left, top - 4, SKTextAlign.Left, labelFont, textPaint);
+		DrawSelectionOverlay(canvas, plotLeft, graphTop, bottom, chartWidth, startFrame, visibleFrameCount);
+		canvas.DrawText("Frame " + startFrame, plotLeft, bottom + 17, SKTextAlign.Left, labelFont, blackTextPaint);
+		canvas.DrawText("Frame " + endFrame, right, bottom + 17, SKTextAlign.Right, labelFont, blackTextPaint);
 		canvas.Restore();
+	}
+
+	private static void DrawRuler(SKCanvas canvas, IReadOnlyList<FrameSample> samples, int startFrame, int endFrame, float left, float right, SKFont font, SKPaint textPaint, SKPaint tickPaint, SKPaint minorTickPaint)
+	{
+		float width = Math.Max(1, right - left);
+		int visibleFrameCount = Math.Max(1, endFrame - startFrame + 1);
+		double visibleMs = 0.0;
+		for (int i = startFrame; i <= endFrame; i++)
+		{
+			if (TryGetSample(samples, i, out FrameSample sample))
+			{
+				visibleMs += sample.DurationMs;
+			}
+		}
+
+		double majorStepMs = ChooseTimeStep(Math.Max(1.0, visibleMs), Math.Max(1.0, width));
+		double nextMajorMs = 0.0;
+		double elapsedMs = 0.0;
+		for (int frameIndex = startFrame; frameIndex <= endFrame; frameIndex++)
+		{
+			if (!TryGetSample(samples, frameIndex, out FrameSample sample))
+			{
+				continue;
+			}
+
+			float frameStartX = left + (float)((frameIndex - startFrame) * width / visibleFrameCount);
+			float frameEndX = left + (float)((frameIndex - startFrame + 1) * width / visibleFrameCount);
+			while (nextMajorMs <= elapsedMs + sample.DurationMs)
+			{
+				double ratioInsideFrame = sample.DurationMs <= 0.0 ? 0.0 : (nextMajorMs - elapsedMs) / sample.DurationMs;
+				float x = frameStartX + (frameEndX - frameStartX) * (float)Math.Clamp(ratioInsideFrame, 0.0, 1.0);
+				canvas.DrawLine(x, 0, x, 10, tickPaint);
+				canvas.DrawText(FormatMs(nextMajorMs), x, 22, SKTextAlign.Center, font, textPaint);
+				for (int i = 1; i < 5; i++)
+				{
+					float minorX = x + (float)(majorStepMs * i / 5.0 / Math.Max(visibleMs, 1.0) * width);
+					if (minorX < right)
+					{
+						canvas.DrawLine(minorX, 0, minorX, 5, minorTickPaint);
+					}
+				}
+				nextMajorMs += majorStepMs;
+			}
+			elapsedMs += sample.DurationMs;
+		}
+	}
+
+	private static void DrawFrameStrip(SKCanvas canvas, int startFrame, int endFrame, float left, float right, SKFont font, SKPaint fillPaint, SKPaint linePaint, SKPaint textPaint)
+	{
+		float top = RulerHeight;
+		float bottom = RulerHeight + FrameStripHeight;
+		int visibleFrameCount = Math.Max(1, endFrame - startFrame + 1);
+		float width = Math.Max(1, right - left);
+		float frameStep = width / visibleFrameCount;
+		for (int frameIndex = startFrame; frameIndex <= endFrame; frameIndex++)
+		{
+			float x = left + (frameIndex - startFrame) * frameStep;
+			float nextX = left + (frameIndex - startFrame + 1) * frameStep;
+			float frameWidth = nextX - x;
+			if (frameWidth < MinFrameLineWidth)
+			{
+				continue;
+			}
+
+			SKRect rect = new SKRect(x, top, nextX, bottom);
+			canvas.DrawRect(rect, fillPaint);
+			canvas.DrawLine(rect.Left, rect.Top, rect.Left, rect.Bottom, linePaint);
+			canvas.DrawLine(rect.Right, rect.Top, rect.Right, rect.Bottom, linePaint);
+			if (frameWidth > 52.0f)
+			{
+				canvas.DrawText("Frame: " + frameIndex, rect.MidX, rect.MidY + 4, SKTextAlign.Center, font, textPaint);
+			}
+			else if (frameWidth > 24.0f)
+			{
+				canvas.DrawText(frameIndex.ToString(), rect.MidX, rect.MidY + 4, SKTextAlign.Center, font, textPaint);
+			}
+		}
+	}
+
+	private static double ChooseTimeStep(double visibleMs, double width)
+	{
+		double[] steps = { 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000 };
+		double idealMs = visibleMs * 100.0 / width;
+		double best = steps[0];
+		double bestDiff = double.MaxValue;
+		for (int i = 0; i < steps.Length; i++)
+		{
+			double diff = Math.Abs(steps[i] - idealMs);
+			if (diff < bestDiff)
+			{
+				best = steps[i];
+				bestDiff = diff;
+			}
+		}
+		return best;
+	}
+
+	private static string FormatMs(double ms)
+	{
+		if (ms >= 1000.0)
+		{
+			return (ms / 1000.0).ToString("0.#") + "s";
+		}
+		if (ms < 1.0)
+		{
+			return (ms * 1000.0).ToString("0.#") + "us";
+		}
+		return ms.ToString("0.#") + "ms";
 	}
 
 	private void DrawSelectionOverlay(SKCanvas canvas, float left, float top, float bottom, float chartWidth, int startFrame, int visibleFrameCount)
@@ -257,10 +404,24 @@ public sealed class FrameTimelineControl : Control
 			return;
 		}
 
-		using SKPaint selectedPaint = new SKPaint { Color = new SKColor(121, 162, 255, 180), StrokeWidth = 2, IsAntialias = false };
-		using SKPaint hoverPaint = new SKPaint { Color = new SKColor(242, 244, 248, 120), StrokeWidth = 1, IsAntialias = false };
+		using SKPaint selectedFillPaint = new SKPaint { Color = SelectionFill, IsAntialias = false };
+		using SKPaint selectedPaint = new SKPaint { Color = SelectionLine, StrokeWidth = 2, IsAntialias = false };
+		using SKPaint hoverPaint = new SKPaint { Color = HoverLine, StrokeWidth = 1, IsAntialias = false };
+		FillFrameMarker(canvas, selection.SelectedFrameIndex, selectedFillPaint, left, top, bottom, chartWidth, startFrame, visibleFrameCount);
 		DrawFrameMarker(canvas, selection.SelectedFrameIndex, selectedPaint, left, top, bottom, chartWidth, startFrame, visibleFrameCount);
 		DrawFrameMarker(canvas, selection.HoveredFrameIndex, hoverPaint, left, top, bottom, chartWidth, startFrame, visibleFrameCount);
+	}
+
+	private static void FillFrameMarker(SKCanvas canvas, int frameIndex, SKPaint paint, float left, float top, float bottom, float chartWidth, int startFrame, int visibleFrameCount)
+	{
+		if (frameIndex < startFrame || frameIndex >= startFrame + visibleFrameCount)
+		{
+			return;
+		}
+
+		float x0 = left + (frameIndex - startFrame) * chartWidth / visibleFrameCount;
+		float x1 = left + (frameIndex - startFrame + 1) * chartWidth / visibleFrameCount;
+		canvas.DrawRect(new SKRect(x0, top, x1, bottom), paint);
 	}
 
 	private static void DrawFrameMarker(SKCanvas canvas, int frameIndex, SKPaint paint, float left, float top, float bottom, float chartWidth, int startFrame, int visibleFrameCount)
@@ -279,7 +440,7 @@ public sealed class FrameTimelineControl : Control
 		using SKFont font = new SKFont { Size = 15 };
 		using SKPaint textPaint = new SKPaint
 		{
-			Color = new SKColor(154, 164, 178),
+			Color = SKColors.Black,
 			IsAntialias = true
 		};
 		canvas.DrawText("No frame samples", bounds.MidX, bounds.MidY, SKTextAlign.Center, font, textPaint);
@@ -338,8 +499,8 @@ public sealed class FrameTimelineControl : Control
 			return false;
 		}
 
-		double left = 16.0;
-		double right = Math.Max(left + 1.0, Bounds.Width - 16.0);
+		double left = AxisWidth;
+		double right = Math.Max(left + 1.0, Bounds.Width - RightPadding);
 		if (position.X < left || position.X > right)
 		{
 			return false;
