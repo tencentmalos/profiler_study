@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerCanvas", "ProfilerC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerStudy.McpServer", "ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj", "{7C62AB64-E776-4D24-AAB3-04F3599F45E1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerStudy.Avalonia", "ProfilerStudy.Avalonia\ProfilerStudy.Avalonia.csproj", "{EF0EB6F3-691E-463A-B413-26ADC8CB5B2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{7C62AB64-E776-4D24-AAB3-04F3599F45E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C62AB64-E776-4D24-AAB3-04F3599F45E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C62AB64-E776-4D24-AAB3-04F3599F45E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF0EB6F3-691E-463A-B413-26ADC8CB5B2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF0EB6F3-691E-463A-B413-26ADC8CB5B2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF0EB6F3-691E-463A-B413-26ADC8CB5B2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF0EB6F3-691E-463A-B413-26ADC8CB5B2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
