@@ -24,13 +24,17 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_TimelineRangeText = string.Empty;
 	private bool m_IsLoading;
 
-	public MainWindowViewModel()
+	public MainWindowViewModel(bool loadSampleOnStartup = false)
 	{
 		Summary = new SessionSummaryViewModel();
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
 		AttachTimelineState(Selection, Viewport);
+		if (loadSampleOnStartup)
+		{
+			_ = LoadSampleAsync();
+		}
 	}
 
 	public RelayCommand OpenSessionCommand => m_OpenSessionCommand;

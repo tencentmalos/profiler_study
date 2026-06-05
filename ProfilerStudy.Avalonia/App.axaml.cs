@@ -6,6 +6,8 @@ namespace ProfilerStudy.Avalonia;
 
 public sealed class App : Application
 {
+	public static bool LoadSampleOnStartup { get; set; }
+
 	public override void Initialize()
 	{
 		AvaloniaXamlLoader.Load(this);
@@ -17,7 +19,7 @@ public sealed class App : Application
 		{
 			desktop.MainWindow = new MainWindow
 			{
-				DataContext = new MainWindowViewModel()
+				DataContext = new MainWindowViewModel(LoadSampleOnStartup)
 			};
 		}
 

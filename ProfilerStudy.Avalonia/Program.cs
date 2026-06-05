@@ -12,6 +12,7 @@ internal static class Program
 			Environment.Exit(AvaloniaSmokeTest.Run());
 		}
 
+		App.LoadSampleOnStartup = args != null && Array.IndexOf(args, "--load-sample") >= 0;
 		BuildAvaloniaApp()
 			.StartWithClassicDesktopLifetime(args);
 	}
