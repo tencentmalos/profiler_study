@@ -166,6 +166,44 @@ internal sealed class ProfilerStatsController : ObservableObject
 		ApplyPlotHeight(plotHeight);
 	}
 
+	public void ApplyViewport(TimelineViewport viewport)
+	{
+		if (Dispatcher.UIThread.CheckAccess() is false)
+		{
+			Dispatcher.UIThread.Post(() => ApplyViewport(viewport));
+			return;
+		}
+
+		if (viewport == null || m_CurrentFrameSamples == null || m_CurrentFrameSamples.Length == 0)
+		{
+			return;
+		}
+
+		int startSampleIndex = GetDisplaySampleIndex(viewport.StartFrame);
+		int endSampleIndex = GetDisplaySampleIndex(viewport.EndFrame);
+		if (startSampleIndex < 0 || endSampleIndex < 0)
+		{
+			return;
+		}
+
+		if (endSampleIndex < startSampleIndex)
+		{
+			(startSampleIndex, endSampleIndex) = (endSampleIndex, startSampleIndex);
+		}
+
+		double xStart = m_CurrentFrameSamples[startSampleIndex].Index;
+		double xEnd = m_CurrentFrameSamples[endSampleIndex].Index;
+		if (xEnd <= xStart)
+		{
+			xEnd = xStart + 1.0;
+		}
+
+		m_IsAutoFollow = false;
+		m_IsAutoFollowByUi = true;
+		Timeline.ChildSelectScope.UpdateXRange(xStart, xEnd, false);
+		ApplyExplicitRange(xStart, xEnd);
+	}
+
 	private void BuildPlots()
 	{
 		Timeline.ChildDetails.ClearAll();
@@ -266,7 +304,13 @@ internal sealed class ProfilerStatsController : ObservableObject
 		}
 
 		Timeline.ChildSelectScope.UpdateXRange(xStart, xEnd, false);
+		ApplyExplicitRange(xStart, xEnd);
+	}
+
+	private void ApplyExplicitRange(double xStart, double xEnd)
+	{
 		Timeline.ChildMainStats.UpdateXRange(xStart, xEnd, m_IsAutoScaleY);
+		Timeline.ChildSharedXAxis.UpdateXRange(xStart, xEnd);
 		Timeline.ChildDetails.UpdateXRange(xStart, xEnd, m_IsAutoScaleY);
 	}
 

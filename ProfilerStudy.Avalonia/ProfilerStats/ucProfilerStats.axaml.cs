@@ -37,6 +37,11 @@ public partial class ucProfilerStats : UserControl
 		m_Controller.ApplyDocument(document);
 	}
 
+	internal void ApplyViewport(TimelineViewport viewport)
+	{
+		m_Controller.ApplyViewport(viewport);
+	}
+
 	public StackPanel DetailPlotControlsHost => DetailPlotControlsPanel;
 
 	private void PlotHeightComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
