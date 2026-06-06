@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using ProfilerStudy.Avalonia.ProfilerStats;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -28,6 +29,11 @@ internal static class AvaloniaSmokeTest
 			document.Selection.SelectedFrameTimeMs = sample.DurationMs;
 			Assert(document.Selection.SelectedFrameIndex == sample.Index, "selection index");
 			Assert(document.Selection.SelectedFrameTimeMs > 0.0, "selection duration");
+
+			ProfilerStatsDocumentSummary profilerStatsSummary = ProfilerStatsDocumentAnalyzer.Analyze(document);
+			Assert(profilerStatsSummary.FrameSeriesPointCount == document.FrameSamples.Length, "profiler stats frame series");
+			Assert(profilerStatsSummary.CustomStatPlotCount == 0, "sample custom stat plots");
+			Assert(profilerStatsSummary.CustomStatCurveCount == 0, "sample custom stat curves");
 			return 0;
 		}
 		catch (Exception ex)
