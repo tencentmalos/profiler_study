@@ -488,6 +488,18 @@ internal sealed class ProfilerStatsController : ObservableObject
 
 		m_ScopeFlamePlot = Timeline.AddFlameGraphDetailView("Profiler Scopes");
 		m_ScopeFlamePlot.FlameGenerator?.Configure(flameConfig);
+		if (m_ScopeFlamePlot.FlameGenerator != null)
+		{
+			m_ScopeFlamePlot.FlameGenerator.FrameClicked += ScopeFlamePlot_FrameClicked;
+		}
+	}
+
+	private void ScopeFlamePlot_FrameClicked(FlameGenerator.StackFrame frame)
+	{
+		if (frame.FrameIndex >= 0)
+		{
+			m_View.NotifyFrameSelectedByUser(frame.FrameIndex);
+		}
 	}
 
 	private void SetAllDetailPlotsVisible(bool isVisible)

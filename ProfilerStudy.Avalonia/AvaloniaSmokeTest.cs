@@ -123,6 +123,7 @@ internal static class AvaloniaSmokeTest
 		else
 		{
 			Assert(config.StackFrames.All(item => item.EndTime > item.StartTime), "scope flame frame duration");
+			Assert(config.StackFrames.All(item => item.FrameIndex >= 0), "scope flame frame index");
 		}
 	}
 

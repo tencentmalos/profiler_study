@@ -155,6 +155,10 @@ internal sealed class ProfilerTimelineAdapter
 					StackLevel = stackLevel,
 					Color = new Color(color.R, color.G, color.B, 210),
 					Module = row.ThreadName,
+					FrameIndex = sample.Index,
+					SourceText = row.SourceText,
+					SourceFile = row.SourceFile,
+					SourceLine = row.SourceLine,
 				});
 			}
 		}

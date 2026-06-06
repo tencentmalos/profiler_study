@@ -21,6 +21,7 @@ public sealed partial class MainWindow : SukiWindow
 		m_ViewModelPropertyChanged = OnViewModelPropertyChanged;
 		m_ViewportPropertyChanged = OnViewportPropertyChanged;
 		ProfilerStatsControl.ViewportChangedByUser += OnProfilerStatsViewportChangedByUser;
+		ProfilerStatsControl.FrameSelectedByUser += OnProfilerStatsFrameSelectedByUser;
 		DataContextChanged += OnDataContextChanged;
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
@@ -131,6 +132,11 @@ public sealed partial class MainWindow : SukiWindow
 		{
 			m_IsApplyingProfilerStatsViewport = false;
 		}
+	}
+
+	private void OnProfilerStatsFrameSelectedByUser(int frameIndex)
+	{
+		m_ViewModel?.SelectFrameFromProfilerStats(frameIndex);
 	}
 
 	private void ApplyProfilerStatsDocumentAndViewport()

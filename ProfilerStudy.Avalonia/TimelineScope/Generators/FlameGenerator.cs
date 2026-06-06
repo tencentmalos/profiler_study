@@ -30,6 +30,10 @@ public class FlameGenerator : IFlameGenerator
         public int StackLevel { get; set; }
         public ScottPlotColor Color { get; set; } = Colors.Blue;
         public string Module { get; set; } = "";
+        public int FrameIndex { get; set; } = -1;
+        public string SourceText { get; set; } = "";
+        public string SourceFile { get; set; } = "";
+        public int SourceLine { get; set; } = -1;
         public double Duration => EndTime - StartTime;
     }
 
@@ -128,6 +132,8 @@ public class FlameGenerator : IFlameGenerator
 
     public FlameGraphConfig     Config => _config;
     public AvaPlot              Plot => _plot;
+
+    public event Action<StackFrame>? FrameClicked;
 
     public OneFrameInfo this[int index]
     {
@@ -311,6 +317,7 @@ public class FlameGenerator : IFlameGenerator
         {
             _plot.PointerMoved += OnMouseMove;
             _plot.PointerExited += OnMouseExit;
+            _plot.PointerPressed += OnMousePressed;
             _mouseInteractionAttached = true;
         }
 
@@ -349,10 +356,18 @@ public class FlameGenerator : IFlameGenerator
             var tooltipText = new StringBuilder();
             tooltipText.AppendLine($"Function: {hoveredFrame.FunctionName}");
             tooltipText.AppendLine($"Module: {hoveredFrame.Module}");
+            if (hoveredFrame.FrameIndex >= 0)
+            {
+                tooltipText.AppendLine($"Frame: {hoveredFrame.FrameIndex}");
+            }
             tooltipText.AppendLine($"Start: {hoveredFrame.StartTime:F2} ms");
             tooltipText.AppendLine($"End: {hoveredFrame.EndTime:F2} ms");
             tooltipText.AppendLine($"Duration: {hoveredFrame.Duration:F2} ms");
             tooltipText.AppendLine($"Stack Level: {hoveredFrame.StackLevel}");
+            if (string.IsNullOrWhiteSpace(hoveredFrame.SourceText) is false)
+            {
+                tooltipText.AppendLine($"Source: {hoveredFrame.SourceText}");
+            }
 
             // Show call stack path
             var stackPath = GetStackPath(hoveredFrame);
@@ -389,6 +404,25 @@ public class FlameGenerator : IFlameGenerator
                 _tooltip.IsVisible = false;
                 _plot.Refresh();
             }
+        }
+    }
+
+    private void OnMousePressed(object? sender, PointerPressedEventArgs e)
+    {
+        PointerPointProperties properties = e.GetCurrentPoint(_plot).Properties;
+        if (properties.IsLeftButtonPressed is false)
+        {
+            return;
+        }
+
+        var pos = e.GetPosition(_plot);
+        Pixel mousePixel = new(pos.X, pos.Y);
+        Coordinates mouseLocation = _plot.Plot.GetCoordinates(mousePixel);
+        StackFrame? frame = FindFrameAtPosition(mouseLocation.X, mouseLocation.Y);
+        if (frame != null)
+        {
+            FrameClicked?.Invoke(frame);
+            e.Handled = true;
         }
     }
 

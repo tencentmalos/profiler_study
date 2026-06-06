@@ -256,6 +256,46 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_IsLoading, value);
 	}
 
+	public void SelectFrameFromProfilerStats(int frameIndex)
+	{
+		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
+		{
+			StatusText = "No frame samples loaded.";
+			return;
+		}
+
+		FrameSample frame = default;
+		bool hasFrame = false;
+		foreach (FrameSample sample in CurrentDocument.FrameSamples)
+		{
+			if (sample.Index == frameIndex)
+			{
+				frame = sample;
+				hasFrame = true;
+				break;
+			}
+		}
+
+		if (hasFrame is false)
+		{
+			StatusText = $"Frame {frameIndex} is not available in the current session.";
+			return;
+		}
+
+		if (Viewport.Contains(frame.Index) is false)
+		{
+			int visibleCount = Math.Min(CurrentDocument.Summary.FrameCount, Math.Max(1, Viewport.VisibleFrameCount));
+			int startFrame = Math.Max(0, frame.Index - (visibleCount / 2));
+			int endFrame = Math.Min(CurrentDocument.Summary.FrameCount - 1, startFrame + visibleCount - 1);
+			startFrame = Math.Max(0, endFrame - visibleCount + 1);
+			Viewport.SetRange(startFrame, endFrame);
+		}
+
+		Selection.SelectedFrameIndex = frame.Index;
+		Selection.SelectedFrameTimeMs = frame.DurationMs;
+		StatusText = $"Selected frame {frame.Index} from profiler scope timeline ({frame.DurationMs:0.###} ms).";
+	}
+
 	private async Task OpenSessionAsync()
 	{
 		try
