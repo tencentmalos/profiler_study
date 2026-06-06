@@ -6,6 +6,7 @@
     xmlns:stats="clr-namespace:ProfilerStudy.Avalonia.ProfilerStats"
     xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
     Title="ProfilerStudy"
+    Icon="avares://ProfilerStudy.Avalonia/Assets/AppIcon.ico"
     Width="1180"
     Height="760"
     MinWidth="860"
