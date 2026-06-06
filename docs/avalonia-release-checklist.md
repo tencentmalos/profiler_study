@@ -35,6 +35,23 @@ Run as needed:
 
 Current profiles are framework-dependent and keep trimming, single-file publish, and ReadyToRun disabled to avoid Avalonia, ScottPlot, and native resource issues during the first release.
 
+## macOS app bundle
+
+After publishing a macOS runtime, package it as a `.app` bundle:
+
+```bash
+scripts/avalonia/package_macos_app.sh osx-arm64
+scripts/avalonia/package_macos_app.sh osx-x64
+```
+
+The script creates `ProfilerStudy.Avalonia/bin/Release/net8.0/publish/<rid>/ProfilerStudy.app` with:
+
+- `Contents/Info.plist`
+- `Contents/MacOS/ProfilerStudy.Avalonia`
+- `Contents/Resources/AppIcon.icns`
+
+The bundle is not signed or notarized. Gatekeeper behavior must be checked before external distribution.
+
 ## Manual smoke checklist
 
 Use at least one real `.profiler`, `.profiler_recording`, or `.profiler_dump` file.
@@ -68,7 +85,7 @@ These are intentionally not first-release complete:
 
 - No WinForms-style dockable window system.
 - No full settings UI; only recent files are persisted.
-- No app icon or native bundle metadata beyond basic publish output.
+- macOS `.app` bundles are not signed or notarized.
 - No Android adb capture workflow in the Avalonia UI.
 - No ETL/context-switch capture UI.
 - No recording player or demo simulator replacement.
