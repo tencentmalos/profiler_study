@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using ProfilerStudy.Avalonia.ProfilerStats;
@@ -35,10 +36,12 @@ internal static class AvaloniaSmokeTest
 
 			ProfilerStatsDocumentSummary profilerStatsSummary = ProfilerStatsDocumentAnalyzer.Analyze(document);
 			Assert(profilerStatsSummary.FrameSeriesPointCount == document.FrameSamples.Length, "profiler stats frame series");
+			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			if (document.Session == null)
 			{
 				Assert(profilerStatsSummary.CustomStatPlotCount == 0, "sample custom stat plots");
 				Assert(profilerStatsSummary.CustomStatCurveCount == 0, "sample custom stat curves");
+				Assert(scopeHotspots.Count == 0, "sample scope hotspots");
 			}
 			else if (document.Session.GetCustomStats().Count > 0)
 			{

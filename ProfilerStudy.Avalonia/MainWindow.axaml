@@ -67,7 +67,60 @@
                         VerticalAlignment="Stretch"
                         ResizeDirection="Rows" />
 
-          <stats:ucProfilerStats x:Name="ProfilerStatsControl" Grid.Row="2" Margin="0,8,0,0" MinHeight="260" />
+          <Grid Grid.Row="2" RowDefinitions="*,6,190" Margin="0,8,0,0">
+            <stats:ucProfilerStats x:Name="ProfilerStatsControl" Grid.Row="0" MinHeight="260" />
+
+            <GridSplitter Grid.Row="1"
+                          Background="#9A9A9A"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          ResizeDirection="Rows" />
+
+            <Border Grid.Row="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+              <Grid RowDefinitions="Auto,Auto,*">
+                <DockPanel Grid.Row="0" LastChildFill="True">
+                  <TextBlock DockPanel.Dock="Left"
+                             Text="Scope Hotspots"
+                             Foreground="#101010"
+                             FontSize="14"
+                             FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding ScopeHotspotSummaryText}"
+                             Foreground="#404040"
+                             HorizontalAlignment="Right" />
+                </DockPanel>
+
+                <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
+                  <Grid ColumnDefinitions="*,90,90,90,90,90">
+                    <TextBlock Text="Scope" Foreground="#202020" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Text="Total ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="2" Text="Calls" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="3" Text="Avg ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="4" Text="Max/frame" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="5" Text="Calls/frame" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                  </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                  <ItemsControl ItemsSource="{Binding ScopeHotspots}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="6,3">
+                          <Grid ColumnDefinitions="*,90,90,90,90,90">
+                            <TextBlock Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="2" Text="{Binding TotalCountText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding AverageTimeText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="{Binding MaxTimePerFrameText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="5" Text="{Binding MaxCountPerFrameText}" Foreground="#101010" TextAlignment="Right" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </Grid>
+            </Border>
+          </Grid>
         </Grid>
       </Grid>
     </Grid>

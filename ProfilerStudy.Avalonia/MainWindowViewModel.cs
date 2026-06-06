@@ -19,9 +19,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
 	private TimelineSelection m_Selection = new TimelineSelection();
 	private TimelineViewport m_Viewport = TimelineViewport.CreateForFrames(0);
+	private IReadOnlyList<ScopeHotspotRow> m_ScopeHotspots = Array.Empty<ScopeHotspotRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
+	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private bool m_IsLoading;
 
 	public MainWindowViewModel(bool loadSampleOnStartup = false)
@@ -103,6 +105,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_TimelineRangeText;
 		private set => SetProperty(ref m_TimelineRangeText, value);
+	}
+
+	public IReadOnlyList<ScopeHotspotRow> ScopeHotspots
+	{
+		get => m_ScopeHotspots;
+		private set => SetProperty(ref m_ScopeHotspots, value);
+	}
+
+	public string ScopeHotspotSummaryText
+	{
+		get => m_ScopeHotspotSummaryText;
+		private set => SetProperty(ref m_ScopeHotspotSummaryText, value);
 	}
 
 	public bool IsLoading
@@ -195,9 +209,27 @@ internal sealed class MainWindowViewModel : ObservableObject
 		Summary.Apply(document.Summary);
 		Selection = document.Selection;
 		Viewport = document.Viewport;
+		ApplyScopeHotspots(document);
 		AttachTimelineState(Selection, Viewport);
 		UpdateTimelineText();
 		UpdateFooterText();
+	}
+
+	private void ApplyScopeHotspots(SessionDocument document)
+	{
+		ScopeHotspots = ScopeHotspotAnalyzer.Build(document);
+		if (document?.Session == null)
+		{
+			ScopeHotspotSummaryText = "Generated sample has no profiler scope stream.";
+		}
+		else if (ScopeHotspots.Count == 0)
+		{
+			ScopeHotspotSummaryText = "No scope hotspots found in this session.";
+		}
+		else
+		{
+			ScopeHotspotSummaryText = $"Top {ScopeHotspots.Count} scopes by total time";
+		}
 	}
 
 	private void ResetTimeline()
