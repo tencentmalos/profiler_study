@@ -32,12 +32,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<ScopeHotspotRow> m_AllScopeHotspots = Array.Empty<ScopeHotspotRow>();
 	private IReadOnlyList<ScopeHotspotRow> m_ScopeHotspots = Array.Empty<ScopeHotspotRow>();
 	private IReadOnlyList<ScopeFrameDetailRow> m_SelectedFrameScopes = Array.Empty<ScopeFrameDetailRow>();
+	private IReadOnlyList<SelectedFrameCounterRow> m_SelectedFrameCounters = Array.Empty<SelectedFrameCounterRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
 	private string m_ScopeFilterText = string.Empty;
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
+	private string m_SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
 	private bool m_IsLoading;
 
 	public MainWindowViewModel(bool loadSampleOnStartup = false)
@@ -194,6 +196,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_SelectedFrameScopeSummaryText, value);
 	}
 
+	public IReadOnlyList<SelectedFrameCounterRow> SelectedFrameCounters
+	{
+		get => m_SelectedFrameCounters;
+		private set => SetProperty(ref m_SelectedFrameCounters, value);
+	}
+
+	public string SelectedFrameCounterSummaryText
+	{
+		get => m_SelectedFrameCounterSummaryText;
+		private set => SetProperty(ref m_SelectedFrameCounterSummaryText, value);
+	}
+
 	public bool IsLoading
 	{
 		get => m_IsLoading;
@@ -344,6 +358,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		Viewport = document.Viewport;
 		ApplyScopeHotspots(document);
 		ApplySelectedFrameScopes();
+		ApplySelectedFrameCounters();
 		AttachTimelineState(Selection, Viewport);
 		UpdateTimelineText();
 		UpdateFooterText();
@@ -414,6 +429,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		CurrentDocument.Selection.SelectedFrameTimeMs = 0.0;
 		CurrentDocument.Selection.HoveredFrameTimeMs = 0.0;
 		ApplySelectedFrameScopes();
+		ApplySelectedFrameCounters();
 		UpdateTimelineText();
 		UpdateFooterText();
 	}
@@ -447,6 +463,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		if (e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex))
 		{
 			ApplySelectedFrameScopes();
+			ApplySelectedFrameCounters();
 		}
 		UpdateTimelineText();
 		UpdateFooterText();
@@ -472,6 +489,28 @@ internal sealed class MainWindowViewModel : ObservableObject
 		else
 		{
 			SelectedFrameScopeSummaryText = $"Frame {selectedFrameIndex}: {SelectedFrameScopes.Count} scopes";
+		}
+	}
+
+	private void ApplySelectedFrameCounters()
+	{
+		int selectedFrameIndex = Selection?.SelectedFrameIndex ?? -1;
+		SelectedFrameCounters = SelectedFrameCounterAnalyzer.Build(CurrentDocument, selectedFrameIndex);
+		if (CurrentDocument?.Session == null)
+		{
+			SelectedFrameCounterSummaryText = "Generated sample has no profiler counter stream.";
+		}
+		else if (selectedFrameIndex < 0)
+		{
+			SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
+		}
+		else if (SelectedFrameCounters.Count == 0)
+		{
+			SelectedFrameCounterSummaryText = $"No counters found for frame {selectedFrameIndex}.";
+		}
+		else
+		{
+			SelectedFrameCounterSummaryText = $"Frame {selectedFrameIndex}: {SelectedFrameCounters.Count} counters";
 		}
 	}
 

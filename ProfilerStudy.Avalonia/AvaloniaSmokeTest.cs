@@ -44,12 +44,14 @@ internal static class AvaloniaSmokeTest
 			Assert(profilerStatsSummary.FrameSeriesPointCount == document.FrameSamples.Length, "profiler stats frame series");
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
+			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
 			if (document.Session == null)
 			{
 				Assert(profilerStatsSummary.CustomStatPlotCount == 0, "sample custom stat plots");
 				Assert(profilerStatsSummary.CustomStatCurveCount == 0, "sample custom stat curves");
 				Assert(scopeHotspots.Count == 0, "sample scope hotspots");
 				Assert(selectedFrameScopes.Count == 0, "sample frame scope details");
+				Assert(selectedFrameCounters.Count == 0, "sample frame counters");
 			}
 			else if (document.Session.GetCustomStats().Count > 0)
 			{

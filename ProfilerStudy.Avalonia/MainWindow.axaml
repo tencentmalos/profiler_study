@@ -73,7 +73,7 @@
                         VerticalAlignment="Stretch"
                         ResizeDirection="Rows" />
 
-          <Grid Grid.Row="2" RowDefinitions="*,6,190,6,190" Margin="0,8,0,0">
+          <Grid Grid.Row="2" RowDefinitions="*,6,180,6,160,6,150" Margin="0,8,0,0">
             <stats:ucProfilerStats x:Name="ProfilerStatsControl" Grid.Row="0" MinHeight="260" />
 
             <GridSplitter Grid.Row="1"
@@ -180,6 +180,55 @@
                                     IsEnabled="{Binding CanOpenSource}"
                                     Command="{Binding $parent[Window].DataContext.OpenScopeSourceCommand}"
                                     CommandParameter="{Binding}" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </Grid>
+            </Border>
+
+            <GridSplitter Grid.Row="5"
+                          Background="#9A9A9A"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          ResizeDirection="Rows" />
+
+            <Border Grid.Row="6" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+              <Grid RowDefinitions="Auto,Auto,*">
+                <DockPanel Grid.Row="0" LastChildFill="True">
+                  <TextBlock DockPanel.Dock="Left"
+                             Text="Selected Frame Counters"
+                             Foreground="#101010"
+                             FontSize="14"
+                             FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding SelectedFrameCounterSummaryText}"
+                             Foreground="#404040"
+                             HorizontalAlignment="Right" />
+                </DockPanel>
+
+                <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
+                  <Grid ColumnDefinitions="150,*,90,90,80">
+                    <TextBlock Text="Graph" Foreground="#202020" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Text="Counter" Foreground="#202020" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="2" Text="Value" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="3" Text="Count" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="4" Text="Unit" Foreground="#202020" FontWeight="SemiBold" />
+                  </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                  <ItemsControl ItemsSource="{Binding SelectedFrameCounters}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="6,3">
+                          <Grid ColumnDefinitions="150,*,90,90,80">
+                            <TextBlock Text="{Binding GraphName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="2" Text="{Binding ValueText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding CountText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="{Binding UnitText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                           </Grid>
                         </Border>
                       </DataTemplate>
