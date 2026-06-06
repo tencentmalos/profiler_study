@@ -1,11 +1,42 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-RID="${1:-osx-arm64}"
+RID="osx-arm64"
+SKIP_PUBLISH=0
+VERIFY_ONLY=0
+
+usage() {
+  echo "Usage: $0 [osx-arm64|osx-x64] [--skip-publish] [--verify-only]" >&2
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    osx-arm64|osx-x64)
+      RID="$1"
+      ;;
+    --skip-publish)
+      SKIP_PUBLISH=1
+      ;;
+    --verify-only)
+      SKIP_PUBLISH=1
+      VERIFY_ONLY=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 2
+      ;;
+  esac
+  shift
+done
+
 case "$RID" in
   osx-arm64|osx-x64) ;;
   *)
-    echo "Usage: $0 [osx-arm64|osx-x64]" >&2
+    usage
     exit 2
     ;;
 esac
@@ -27,7 +58,34 @@ EXECUTABLE_NAME="ProfilerStudy.Avalonia"
 BUNDLE_VERSION="${BUNDLE_VERSION:-0.1.0}"
 BUNDLE_IDENTIFIER="${BUNDLE_IDENTIFIER:-com.profilerstudy.avalonia}"
 
-"$DOTNET_BIN" publish "$PROJECT" --no-restore -p:PublishProfile="$RID" -p:NuGetAudit=false
+verify_bundle() {
+  local executable_path="$MACOS_DIR/$EXECUTABLE_NAME"
+  local plist_path="$CONTENTS_DIR/Info.plist"
+  local icon_path="$RESOURCES_DIR/AppIcon.icns"
+
+  [[ -d "$APP_DIR" ]] || { echo "Missing app bundle: $APP_DIR" >&2; exit 1; }
+  [[ -x "$executable_path" ]] || { echo "Missing executable: $executable_path" >&2; exit 1; }
+  [[ -f "$plist_path" ]] || { echo "Missing Info.plist: $plist_path" >&2; exit 1; }
+  [[ -f "$icon_path" ]] || { echo "Missing icon: $icon_path" >&2; exit 1; }
+  grep -q "<string>$EXECUTABLE_NAME</string>" "$plist_path" || { echo "Info.plist does not name $EXECUTABLE_NAME" >&2; exit 1; }
+
+  echo "Verified $APP_DIR"
+}
+
+if [[ "$SKIP_PUBLISH" -eq 0 ]]; then
+  "$DOTNET_BIN" publish "$PROJECT" --no-restore -p:PublishProfile="$RID" -p:NuGetAudit=false
+fi
+
+if [[ "$VERIFY_ONLY" -eq 1 ]]; then
+  verify_bundle
+  exit 0
+fi
+
+if [[ ! -d "$PUBLISH_DIR" ]]; then
+  echo "Missing publish directory: $PUBLISH_DIR" >&2
+  echo "Run dotnet publish first or omit --skip-publish." >&2
+  exit 1
+fi
 
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
@@ -76,3 +134,4 @@ cat > "$CONTENTS_DIR/Info.plist" <<EOF_PLIST
 EOF_PLIST
 
 echo "Created $APP_DIR"
+verify_bundle

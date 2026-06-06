@@ -44,11 +44,20 @@ scripts/avalonia/package_macos_app.sh osx-arm64
 scripts/avalonia/package_macos_app.sh osx-x64
 ```
 
+If publish has already completed and only the `.app` bundle needs to be regenerated or checked:
+
+```bash
+scripts/avalonia/package_macos_app.sh osx-arm64 --skip-publish
+scripts/avalonia/package_macos_app.sh osx-arm64 --verify-only
+```
+
 The script creates `ProfilerStudy.Avalonia/bin/Release/net8.0/publish/<rid>/ProfilerStudy.app` with:
 
 - `Contents/Info.plist`
 - `Contents/MacOS/ProfilerStudy.Avalonia`
 - `Contents/Resources/AppIcon.icns`
+
+The script also verifies the bundle directory, executable bit, Info.plist executable name, and app icon after packaging. `--verify-only` performs those checks without republishing or copying files.
 
 The bundle is not signed or notarized. Gatekeeper behavior must be checked before external distribution.
 
@@ -62,17 +71,19 @@ Use at least one real `.profiler`, `.profiler_recording`, or `.profiler_dump` fi
 4. Confirm the top Skia frame timeline renders frame bars and supports wheel zoom and pan.
 5. Click `Find Slowest` and confirm the selected frame marker moves and the viewport centers around the slow frame.
 6. Confirm the ScottPlot profiler stats panel follows the selected viewport.
-7. Filter `Scope Hotspots` by a known scope name and confirm the result count changes without losing total-time ordering.
-8. Click sortable headers in `Scope Hotspots` and confirm scope, total time, call count, average, and max columns reorder rows.
-9. Select a frame and confirm `Selected Frame Scopes` updates with thread, scope, duration, and source columns.
-10. Confirm the selected-frame flame chart renders colored scope bars above the scope table.
-11. Click sortable headers in `Selected Frame Scopes` and confirm thread, scope, start, duration, and source columns reorder rows.
-12. Select a frame with custom stats and confirm `Selected Frame Counters` shows graph, counter, value, count, and unit.
-13. Click sortable headers in `Selected Frame Counters` and confirm graph, counter, value, count, and unit columns reorder rows.
-14. If source paths exist locally, click `Open` in `Selected Frame Scopes` and confirm the configured editor or system opener launches.
-15. If captured source paths differ from local paths, set `Captured root` and `Local root`, then confirm `Open` resolves the mapped local file.
-16. Close and reopen the app, then confirm the file appears in `Recent files` and `Open Recent` reloads it.
-17. Start the application with a profiler file path as the first non-option argument and confirm it loads on startup.
+7. Confirm the ScottPlot `Profiler Scopes` flame detail plot renders real profiler scope bars when the file contains scope data.
+8. Click a bar in `Profiler Scopes` and confirm the main selected frame updates and the selected-frame scopes/counters refresh.
+9. Filter `Scope Hotspots` by a known scope name and confirm the result count changes without losing total-time ordering.
+10. Click sortable headers in `Scope Hotspots` and confirm scope, total time, call count, average, and max columns reorder rows.
+11. Select a frame and confirm `Selected Frame Scopes` updates with thread, scope, duration, and source columns.
+12. Confirm the selected-frame flame chart renders colored scope bars above the scope table.
+13. Click sortable headers in `Selected Frame Scopes` and confirm thread, scope, start, duration, and source columns reorder rows.
+14. Select a frame with custom stats and confirm `Selected Frame Counters` shows graph, counter, value, count, and unit.
+15. Click sortable headers in `Selected Frame Counters` and confirm graph, counter, value, count, and unit columns reorder rows.
+16. If source paths exist locally, click `Open` in `Selected Frame Scopes` and confirm the configured editor or system opener launches.
+17. If captured source paths differ from local paths, set `Captured root` and `Local root`, then confirm `Open` resolves the mapped local file.
+18. Close and reopen the app, then confirm the file appears in `Recent files` and `Open Recent` reloads it.
+19. Start the application with a profiler file path as the first non-option argument and confirm it loads on startup.
 
 ## Source launch behavior
 
@@ -89,12 +100,12 @@ If the source path is missing or does not exist, the status bar must show an act
 These are intentionally not first-release complete:
 
 - No WinForms-style dockable window system.
-- No full settings UI; only recent files are persisted.
+- No full settings UI; recent files and source path roots are persisted.
 - macOS `.app` bundles are not signed or notarized.
 - No Android adb capture workflow in the Avalonia UI.
 - No ETL/context-switch capture UI.
 - No recording player or demo simulator replacement.
-- No full thread timeline/flame graph parity with WinForms; current first-release detail is a selected-frame flame chart plus scope table.
+- No full thread timeline/flame graph parity with WinForms; current first-release scope detail is a ScottPlot profiler scope flame timeline plus selected-frame flame chart and scope table.
 - No virtualized DataGrid for scope and counter tables; current tables are sortable `ItemsControl` projections.
 - Publish profiles are framework-dependent; non-development machines need a compatible .NET runtime installed.
 
