@@ -8,6 +8,8 @@ public sealed class App : Application
 {
 	public static bool LoadSampleOnStartup { get; set; }
 
+	public static string StartupProfilerPath { get; set; }
+
 	public override void Initialize()
 	{
 		AvaloniaXamlLoader.Load(this);
@@ -19,7 +21,7 @@ public sealed class App : Application
 		{
 			desktop.MainWindow = new MainWindow
 			{
-				DataContext = new MainWindowViewModel(LoadSampleOnStartup)
+				DataContext = new MainWindowViewModel(LoadSampleOnStartup, StartupProfilerPath)
 			};
 		}
 

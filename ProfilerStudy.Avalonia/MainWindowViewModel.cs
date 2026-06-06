@@ -42,12 +42,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
 	private bool m_IsLoading;
 
-	public MainWindowViewModel(bool loadSampleOnStartup = false)
-		: this(new SourceViewerLauncher(), new AppSettingsService(), loadSampleOnStartup)
+	public MainWindowViewModel(bool loadSampleOnStartup = false, string startupProfilerPath = null)
+		: this(new SourceViewerLauncher(), new AppSettingsService(), loadSampleOnStartup, startupProfilerPath)
 	{
 	}
 
-	internal MainWindowViewModel(ISourceViewerLauncher sourceViewerLauncher, IAppSettingsService appSettingsService, bool loadSampleOnStartup = false)
+	internal MainWindowViewModel(ISourceViewerLauncher sourceViewerLauncher, IAppSettingsService appSettingsService, bool loadSampleOnStartup = false, string startupProfilerPath = null)
 	{
 		m_SourceViewerLauncher = sourceViewerLauncher ?? new SourceViewerLauncher();
 		m_AppSettingsService = appSettingsService ?? new AppSettingsService();
@@ -61,7 +61,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
 		AttachTimelineState(Selection, Viewport);
-		if (loadSampleOnStartup)
+		if (!string.IsNullOrWhiteSpace(startupProfilerPath))
+		{
+			_ = OpenStartupProfilerAsync(startupProfilerPath);
+		}
+		else if (loadSampleOnStartup)
 		{
 			_ = LoadSampleAsync();
 		}
@@ -271,6 +275,17 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			StatusText = "Recent file not found: " + path;
 			RemoveRecentFile(path);
+			return;
+		}
+
+		await LoadFileDocumentAsync(path);
+	}
+
+	private async Task OpenStartupProfilerAsync(string path)
+	{
+		if (!File.Exists(path))
+		{
+			StatusText = "Startup profiler file not found: " + path;
 			return;
 		}
 
