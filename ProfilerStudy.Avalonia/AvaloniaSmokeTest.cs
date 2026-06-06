@@ -24,6 +24,8 @@ internal static class AvaloniaSmokeTest
 			Assert(document.Viewport.VisibleFrameCount < initialVisibleCount, "zoom in");
 			document.Viewport.ScrollFrames(Math.Max(1, document.Viewport.VisibleFrameCount / 2));
 			Assert(document.Viewport.StartFrame > 0, "scroll");
+			document.Viewport.SetRange(10, 20);
+			Assert(document.Viewport.StartFrame == 10 && document.Viewport.EndFrame == 20, "explicit viewport range");
 
 			FrameSample sample = document.FrameSamples[document.Viewport.StartFrame];
 			document.Selection.SelectedFrameIndex = sample.Index;

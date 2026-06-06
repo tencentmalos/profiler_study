@@ -58,6 +58,27 @@ public sealed class TimelineViewport : ObservableObject
 		EndFrame = Math.Max(0, FrameCount - 1);
 	}
 
+	public void SetRange(int startFrame, int endFrame)
+	{
+		if (FrameCount == 0)
+		{
+			StartFrame = 0;
+			EndFrame = 0;
+			return;
+		}
+
+		startFrame = Math.Clamp(startFrame, 0, FrameCount - 1);
+		endFrame = Math.Clamp(endFrame, 0, FrameCount - 1);
+
+		if (endFrame < startFrame)
+		{
+			(startFrame, endFrame) = (endFrame, startFrame);
+		}
+
+		StartFrame = startFrame;
+		EndFrame = endFrame;
+	}
+
 	public void ScrollFrames(int deltaFrames)
 	{
 		if (FrameCount == 0 || deltaFrames == 0)

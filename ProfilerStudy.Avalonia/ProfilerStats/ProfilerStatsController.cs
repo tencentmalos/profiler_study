@@ -601,6 +601,63 @@ internal sealed class ProfilerStatsController : ObservableObject
 	{
 		m_IsAutoFollow = false;
 		m_IsAutoFollowByUi = true;
+
+		int startFrame = GetNearestFrameIndex(Timeline.ChildSelectScope.ScopeStart);
+		int endFrame = GetNearestFrameIndex(Timeline.ChildSelectScope.ScopeEnd);
+		if (startFrame < 0 || endFrame < 0)
+		{
+			return;
+		}
+
+		if (endFrame < startFrame)
+		{
+			(startFrame, endFrame) = (endFrame, startFrame);
+		}
+
+		m_View.NotifyViewportChangedByUser(startFrame, endFrame);
+	}
+
+	private int GetNearestFrameIndex(double targetX)
+	{
+		if (m_CurrentFrameSamples.Length == 0)
+		{
+			return -1;
+		}
+
+		int left = 0;
+		int right = m_CurrentFrameSamples.Length - 1;
+		while (left <= right)
+		{
+			int mid = left + ((right - left) / 2);
+			double sampleFrameIndex = m_CurrentFrameSamples[mid].Index;
+			if (sampleFrameIndex == targetX)
+			{
+				return m_CurrentFrameSamples[mid].Index;
+			}
+
+			if (sampleFrameIndex < targetX)
+			{
+				left = mid + 1;
+			}
+			else
+			{
+				right = mid - 1;
+			}
+		}
+
+		if (left >= m_CurrentFrameSamples.Length)
+		{
+			return m_CurrentFrameSamples[^1].Index;
+		}
+
+		if (right < 0)
+		{
+			return m_CurrentFrameSamples[0].Index;
+		}
+
+		double leftDistance = Math.Abs(m_CurrentFrameSamples[left].Index - targetX);
+		double rightDistance = Math.Abs(m_CurrentFrameSamples[right].Index - targetX);
+		return leftDistance < rightDistance ? m_CurrentFrameSamples[left].Index : m_CurrentFrameSamples[right].Index;
 	}
 
 	private int GetDisplaySampleIndex(int sourceFrameIndex)

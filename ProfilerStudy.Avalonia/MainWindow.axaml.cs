@@ -12,6 +12,7 @@ public sealed partial class MainWindow : SukiWindow
 	private TimelineViewport m_AttachedViewport;
 	private readonly PropertyChangedEventHandler m_ViewModelPropertyChanged;
 	private readonly PropertyChangedEventHandler m_ViewportPropertyChanged;
+	private bool m_IsApplyingProfilerStatsViewport;
 
 	public MainWindow()
 	{
@@ -19,6 +20,7 @@ public sealed partial class MainWindow : SukiWindow
 
 		m_ViewModelPropertyChanged = OnViewModelPropertyChanged;
 		m_ViewportPropertyChanged = OnViewportPropertyChanged;
+		ProfilerStatsControl.ViewportChangedByUser += OnProfilerStatsViewportChangedByUser;
 		DataContextChanged += OnDataContextChanged;
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
@@ -106,7 +108,28 @@ public sealed partial class MainWindow : SukiWindow
 		if (e.PropertyName == nameof(TimelineViewport.StartFrame) ||
 			e.PropertyName == nameof(TimelineViewport.EndFrame))
 		{
-			ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
+			if (m_IsApplyingProfilerStatsViewport is false)
+			{
+				ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
+			}
+		}
+	}
+
+	private void OnProfilerStatsViewportChangedByUser(int startFrame, int endFrame)
+	{
+		if (m_ViewModel?.Viewport == null)
+		{
+			return;
+		}
+
+		m_IsApplyingProfilerStatsViewport = true;
+		try
+		{
+			m_ViewModel.Viewport.SetRange(startFrame, endFrame);
+		}
+		finally
+		{
+			m_IsApplyingProfilerStatsViewport = false;
 		}
 	}
 

@@ -9,6 +9,9 @@ namespace ProfilerStudy.Avalonia.ProfilerStats;
 public partial class ucProfilerStats : UserControl
 {
 	private readonly ProfilerStatsController m_Controller;
+
+	internal event Action<int, int> ViewportChangedByUser;
+
 	public ucProfilerStats()
 	{
 		InitializeComponent();
@@ -40,6 +43,11 @@ public partial class ucProfilerStats : UserControl
 	internal void ApplyViewport(TimelineViewport viewport)
 	{
 		m_Controller.ApplyViewport(viewport);
+	}
+
+	internal void NotifyViewportChangedByUser(int startFrame, int endFrame)
+	{
+		ViewportChangedByUser?.Invoke(startFrame, endFrame);
 	}
 
 	public StackPanel DetailPlotControlsHost => DetailPlotControlsPanel;
