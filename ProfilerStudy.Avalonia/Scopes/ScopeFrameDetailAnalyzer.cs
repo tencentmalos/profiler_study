@@ -57,7 +57,9 @@ internal static class ScopeFrameDetailAnalyzer
 				session.GetTimerName(info.Name),
 				Math.Max(0, span.StartTime - frameStart) * ticksToMs,
 				span.Duration * ticksToMs,
-				FormatSource(sourceInfo)));
+				FormatSource(sourceInfo),
+				sourceInfo.IsValid ? sourceInfo.Filename : string.Empty,
+				sourceInfo.IsValid ? sourceInfo.Line : -1));
 		}
 
 		for (FramePro.TimeSpan child = span.Children; child != null && rows.Count < maxRows; child = child.Next)

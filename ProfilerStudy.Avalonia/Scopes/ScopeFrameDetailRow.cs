@@ -4,7 +4,7 @@ namespace ProfilerStudy.Avalonia;
 
 internal sealed class ScopeFrameDetailRow
 {
-	public ScopeFrameDetailRow(string threadName, int depth, string name, double startOffsetMs, double durationMs, string sourceText)
+	public ScopeFrameDetailRow(string threadName, int depth, string name, double startOffsetMs, double durationMs, string sourceText, string sourceFile, int sourceLine)
 	{
 		ThreadName = string.IsNullOrWhiteSpace(threadName) ? "(unnamed thread)" : threadName;
 		Depth = Math.Max(0, depth);
@@ -12,6 +12,8 @@ internal sealed class ScopeFrameDetailRow
 		StartOffsetMs = startOffsetMs;
 		DurationMs = durationMs;
 		SourceText = sourceText ?? string.Empty;
+		SourceFile = sourceFile ?? string.Empty;
+		SourceLine = sourceLine;
 	}
 
 	public string ThreadName { get; }
@@ -25,6 +27,12 @@ internal sealed class ScopeFrameDetailRow
 	public double DurationMs { get; }
 
 	public string SourceText { get; }
+
+	public string SourceFile { get; }
+
+	public int SourceLine { get; }
+
+	public bool CanOpenSource => !string.IsNullOrWhiteSpace(SourceFile);
 
 	public string IndentedName => new string(' ', Depth * 2) + Name;
 

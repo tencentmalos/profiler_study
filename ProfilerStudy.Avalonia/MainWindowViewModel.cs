@@ -14,6 +14,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
+	private readonly RelayCommand m_OpenScopeSourceCommand;
+	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private CancellationTokenSource m_LoadCancellation;
 	private SessionDocument m_CurrentDocument;
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
@@ -29,11 +31,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsLoading;
 
 	public MainWindowViewModel(bool loadSampleOnStartup = false)
+		: this(new SourceViewerLauncher(), loadSampleOnStartup)
 	{
+	}
+
+	internal MainWindowViewModel(ISourceViewerLauncher sourceViewerLauncher, bool loadSampleOnStartup = false)
+	{
+		m_SourceViewerLauncher = sourceViewerLauncher ?? new SourceViewerLauncher();
 		Summary = new SessionSummaryViewModel();
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
+		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
 		AttachTimelineState(Selection, Viewport);
 		if (loadSampleOnStartup)
 		{
@@ -46,6 +55,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
 
 	public RelayCommand ResetTimelineCommand => m_ResetTimelineCommand;
+
+	public RelayCommand OpenScopeSourceCommand => m_OpenScopeSourceCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -301,6 +312,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		int selectedFrameIndex = Selection?.SelectedFrameIndex ?? -1;
 		SelectedFrameScopes = ScopeFrameDetailAnalyzer.Build(CurrentDocument, selectedFrameIndex);
+		m_OpenScopeSourceCommand.RaiseCanExecuteChanged();
 		if (CurrentDocument?.Session == null)
 		{
 			SelectedFrameScopeSummaryText = "Generated sample has no profiler scope stream.";
@@ -316,6 +328,24 @@ internal sealed class MainWindowViewModel : ObservableObject
 		else
 		{
 			SelectedFrameScopeSummaryText = $"Frame {selectedFrameIndex}: {SelectedFrameScopes.Count} scopes";
+		}
+	}
+
+	private void OpenScopeSource(object parameter)
+	{
+		if (parameter is not ScopeFrameDetailRow row || !row.CanOpenSource)
+		{
+			StatusText = "Selected scope has no source location.";
+			return;
+		}
+
+		if (m_SourceViewerLauncher.TryLaunch(row.SourceFile, row.SourceLine, out string error))
+		{
+			StatusText = "Opened source: " + row.SourceText;
+		}
+		else
+		{
+			StatusText = error;
 		}
 	}
 

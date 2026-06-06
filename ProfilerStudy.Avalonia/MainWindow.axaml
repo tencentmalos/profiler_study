@@ -141,12 +141,13 @@
                 </DockPanel>
 
                 <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
-                  <Grid ColumnDefinitions="140,*,80,80,220">
+                  <Grid ColumnDefinitions="140,*,80,80,220,64">
                     <TextBlock Text="Thread" Foreground="#202020" FontWeight="SemiBold" />
                     <TextBlock Grid.Column="1" Text="Scope" Foreground="#202020" FontWeight="SemiBold" />
                     <TextBlock Grid.Column="2" Text="Start ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
                     <TextBlock Grid.Column="3" Text="Dur ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
                     <TextBlock Grid.Column="4" Text="Source" Foreground="#202020" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="5" Text="Open" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
                   </Grid>
                 </Border>
 
@@ -155,12 +156,19 @@
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
                         <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="6,3">
-                          <Grid ColumnDefinitions="140,*,80,80,220">
+                          <Grid ColumnDefinitions="140,*,80,80,220,64">
                             <TextBlock Text="{Binding ThreadName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="#101010" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
                             <TextBlock Grid.Column="2" Text="{Binding StartOffsetText}" Foreground="#101010" TextAlignment="Right" />
                             <TextBlock Grid.Column="3" Text="{Binding DurationText}" Foreground="#101010" TextAlignment="Right" />
                             <TextBlock Grid.Column="4" Text="{Binding SourceText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                            <Button Grid.Column="5"
+                                    Content="Open"
+                                    Padding="6,1"
+                                    HorizontalAlignment="Right"
+                                    IsEnabled="{Binding CanOpenSource}"
+                                    Command="{Binding $parent[Window].DataContext.OpenScopeSourceCommand}"
+                                    CommandParameter="{Binding}" />
                           </Grid>
                         </Border>
                       </DataTemplate>
