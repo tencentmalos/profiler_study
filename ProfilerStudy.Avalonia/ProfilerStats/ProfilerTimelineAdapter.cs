@@ -1,0 +1,222 @@
+using FramePro;
+using ProfilerStudy.Avalonia.ProfilerStats.Timeline;
+using ProfilerStudy.Avalonia.Timeline;
+using ScottPlot;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace ProfilerStudy.Avalonia.ProfilerStats;
+
+internal sealed class ProfilerTimelineAdapter
+{
+	private Session m_Session;
+	private FrameSample[] m_FrameSamples = Array.Empty<FrameSample>();
+
+	public FrameSample[] FrameSamples => m_FrameSamples;
+
+	public ProfilerTimelinePlotModel CreatePlotModel(SessionDocument document)
+	{
+		m_Session = document?.Session;
+		m_FrameSamples = document?.FrameSamples ?? Array.Empty<FrameSample>();
+
+		DiagramMetadata metadata = ProfilerStatisticsProcessor.GetMetadataFromProfilerStatisticsInfo();
+		var customStats = new List<ProfilerCustomStatTimelineInfo>();
+
+		if (m_Session != null)
+		{
+			AppendCustomStatMetadata(m_Session, metadata, customStats);
+		}
+
+		return new ProfilerTimelinePlotModel(metadata, customStats);
+	}
+
+	public void FillFrameSeries(CurveUiPlotBridgeItem mainStatsBridge)
+	{
+		if (m_FrameSamples.Length == 0 || mainStatsBridge == null)
+		{
+			return;
+		}
+
+		var mainCurve = mainStatsBridge.CurveList.FirstOrDefault();
+		if (mainCurve == null)
+		{
+			return;
+		}
+
+		foreach (FrameSample frame in m_FrameSamples)
+		{
+			mainCurve.AppendData(frame.Index, frame.DurationMs);
+		}
+	}
+
+	public void FillCustomStatSeries(IReadOnlyList<ProfilerCustomStatTimelineInfo> customStats, IDictionary<string, CurveUiPlotBridgeItem> plotBridges)
+	{
+		if (m_Session == null || customStats.Count == 0 || m_FrameSamples.Length == 0)
+		{
+			return;
+		}
+
+		int startFrameIndex = 0;
+		int endFrameIndex = m_Session.FrameCount > 0 ? m_Session.FrameCount - 1 : 0;
+		foreach (ProfilerCustomStatTimelineInfo statInfo in customStats)
+		{
+			var points = new List<FrameValue>();
+			m_Session.GetCustomStats(startFrameIndex, endFrameIndex, statInfo.StatId, false, points);
+			if (points.Count == 0 ||
+				plotBridges.TryGetValue(statInfo.PlotKey, out CurveUiPlotBridgeItem bridge) is false ||
+				bridge.CurveDictionary.TryGetValue(statInfo.CurveKey, out Curve2DGenerator.OneCurve curve) is false)
+			{
+				continue;
+			}
+
+			foreach (FrameValue point in points)
+			{
+				double value = point.m_Value;
+				if (statInfo.ConvertCyclesToMilliseconds && m_Session.TimerFrequency > 0)
+				{
+					value = value * 1000.0 / m_Session.TimerFrequency;
+				}
+
+				int sourceFrameIndex = m_Session.GetFrameIndex(point.m_FrameEndTime);
+				int displayIndex = GetDisplaySampleIndex(sourceFrameIndex);
+				if (displayIndex < 0)
+				{
+					continue;
+				}
+
+				curve.AppendData(m_FrameSamples[displayIndex].Index, value);
+			}
+		}
+	}
+
+	public int GetNearestFrameIndex(double targetX)
+	{
+		if (m_FrameSamples.Length == 0)
+		{
+			return -1;
+		}
+
+		int left = 0;
+		int right = m_FrameSamples.Length - 1;
+		while (left <= right)
+		{
+			int mid = left + ((right - left) / 2);
+			double sampleFrameIndex = m_FrameSamples[mid].Index;
+			if (sampleFrameIndex == targetX)
+			{
+				return m_FrameSamples[mid].Index;
+			}
+
+			if (sampleFrameIndex < targetX)
+			{
+				left = mid + 1;
+			}
+			else
+			{
+				right = mid - 1;
+			}
+		}
+
+		if (left >= m_FrameSamples.Length)
+		{
+			return m_FrameSamples[^1].Index;
+		}
+
+		if (right < 0)
+		{
+			return m_FrameSamples[0].Index;
+		}
+
+		double leftDistance = Math.Abs(m_FrameSamples[left].Index - targetX);
+		double rightDistance = Math.Abs(m_FrameSamples[right].Index - targetX);
+		return leftDistance < rightDistance ? m_FrameSamples[left].Index : m_FrameSamples[right].Index;
+	}
+
+	public int GetDisplaySampleIndex(int sourceFrameIndex)
+	{
+		if (m_FrameSamples.Length == 0)
+		{
+			return -1;
+		}
+
+		int firstSampleFrameIndex = m_FrameSamples[0].Index;
+		int lastSampleFrameIndex = m_FrameSamples[^1].Index;
+		if (sourceFrameIndex <= firstSampleFrameIndex)
+		{
+			return 0;
+		}
+
+		if (sourceFrameIndex >= lastSampleFrameIndex)
+		{
+			return m_FrameSamples.Length - 1;
+		}
+
+		int left = 0;
+		int right = m_FrameSamples.Length - 1;
+		while (left <= right)
+		{
+			int mid = left + ((right - left) / 2);
+			int sampleFrameIndex = m_FrameSamples[mid].Index;
+			if (sampleFrameIndex == sourceFrameIndex)
+			{
+				return mid;
+			}
+
+			if (sampleFrameIndex < sourceFrameIndex)
+			{
+				left = mid + 1;
+			}
+			else
+			{
+				right = mid - 1;
+			}
+		}
+
+		int previousIndex = Math.Max(0, right);
+		int nextIndex = Math.Min(m_FrameSamples.Length - 1, left);
+		int previousDistance = sourceFrameIndex - m_FrameSamples[previousIndex].Index;
+		int nextDistance = m_FrameSamples[nextIndex].Index - sourceFrameIndex;
+		return previousDistance <= nextDistance ? previousIndex : nextIndex;
+	}
+
+	private static void AppendCustomStatMetadata(Session session, DiagramMetadata metadata, List<ProfilerCustomStatTimelineInfo> customStats)
+	{
+		var orderedStats = ProfilerStatsDocumentAnalyzer.GetCustomStatDescriptors(session);
+		foreach (var graphGroup in orderedStats.GroupBy(item => item.GraphName))
+		{
+			string plotProperty = $"CustomStatGraph_{metadata.PlotList.Count}";
+			var plotMeta = new CurvePlotMetadata
+			{
+				PropertyName = plotProperty,
+				PlotTitle = string.Equals(graphGroup.Key, "default", StringComparison.OrdinalIgnoreCase) ? "Custom Stats" : graphGroup.Key,
+				IsMainPlot = false
+			};
+
+			int curveIndex = 0;
+			foreach (var item in graphGroup)
+			{
+				string curveProperty = $"Value_{curveIndex}";
+				var curveMeta = new CurveFieldMetadata
+				{
+					PropertyName = curveProperty,
+					CurveLabel = item.Name,
+					CurveUnit = item.DisplayUnit,
+					LineColor = ConvertDrawingColor(item.Color),
+				};
+				plotMeta.SubFields.Add(curveMeta);
+				plotMeta.FieldDictionary.Add(curveMeta.PropertyName, curveMeta);
+				customStats.Add(new ProfilerCustomStatTimelineInfo(plotMeta.PropertyName, curveMeta.PropertyName, item.StatId, item.ConvertCyclesToMilliseconds));
+				curveIndex++;
+			}
+
+			metadata.PlotList.Add(plotMeta);
+			metadata.PlotDictionary.Add(plotMeta.PropertyName, plotMeta);
+		}
+	}
+
+	private static Color ConvertDrawingColor(System.Drawing.Color color)
+	{
+		return new Color(color.R, color.G, color.B, color.A);
+	}
+}
