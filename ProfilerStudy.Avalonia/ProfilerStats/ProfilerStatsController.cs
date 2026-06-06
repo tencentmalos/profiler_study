@@ -1,8 +1,6 @@
-using FramePro;
 using ProfilerStudy;
 using ProfilerStudy.Avalonia.ProfilerStats.Timeline;
 using ProfilerStudy.Avalonia.Timeline;
-using ScottPlot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,20 +12,16 @@ namespace ProfilerStudy.Avalonia.ProfilerStats;
 
 internal sealed class ProfilerStatsController : ObservableObject
 {
-	private sealed record CustomStatPlotInfo(string PlotKey, string CurveKey, long StatId, string Name, string Unit, bool ConvertCyclesToMilliseconds);
-
 	private const double kDefaultSelectWindow = 30.0;
 
 	private readonly ucProfilerStats m_View;
+	private readonly ProfilerTimelineAdapter m_TimelineAdapter = new();
 	private readonly List<DetailPlotControlItem> m_DetailPlotControls = new();
-	private readonly List<CustomStatPlotInfo> m_CustomStatInfos = new();
 	private readonly Dictionary<string, CurveUiPlotBridgeItem> m_PlotBridges = new();
 	private readonly List<CurveUiPlotBridgeItem> m_AllBridges = new();
 
-	private DiagramMetadata m_StatisticsDiagramMetadata = ProfilerStatisticsProcessor.GetMetadataFromProfilerStatisticsInfo();
+	private ProfilerTimelinePlotModel m_PlotModel;
 	private CurveUiPlotBridgeItem m_MainStatsBridge = null!;
-	private Session m_CurrentSession;
-	private FrameSample[] m_CurrentFrameSamples = Array.Empty<FrameSample>();
 	private bool m_IsAutoFollow = true;
 	private bool m_IsAutoScaleY = true;
 	private bool m_ShowDetailPlots = true;
@@ -85,19 +79,18 @@ internal sealed class ProfilerStatsController : ObservableObject
 			return;
 		}
 
-		m_CurrentSession = document?.Session;
-		m_CurrentFrameSamples = document?.FrameSamples ?? Array.Empty<FrameSample>();
+		m_PlotModel = m_TimelineAdapter.CreatePlotModel(document);
 
 		BuildPlots();
 
-		if (m_CurrentFrameSamples.Length == 0)
+		if (m_TimelineAdapter.FrameSamples.Length == 0)
 		{
 			ApplyEmptyState();
 			return;
 		}
 
-		FillFrameSeries();
-		FillCustomStatsSeries();
+		m_TimelineAdapter.FillFrameSeries(m_MainStatsBridge);
+		m_TimelineAdapter.FillCustomStatSeries(m_PlotModel.CustomStats, m_PlotBridges);
 
 		Timeline.UpdateMainStatsAndAllDetailPlots();
 		ApplyRangeAndViewport();
@@ -174,13 +167,13 @@ internal sealed class ProfilerStatsController : ObservableObject
 			return;
 		}
 
-		if (viewport == null || m_CurrentFrameSamples == null || m_CurrentFrameSamples.Length == 0)
+		if (viewport == null || m_TimelineAdapter.FrameSamples.Length == 0)
 		{
 			return;
 		}
 
-		int startSampleIndex = GetDisplaySampleIndex(viewport.StartFrame);
-		int endSampleIndex = GetDisplaySampleIndex(viewport.EndFrame);
+		int startSampleIndex = m_TimelineAdapter.GetDisplaySampleIndex(viewport.StartFrame);
+		int endSampleIndex = m_TimelineAdapter.GetDisplaySampleIndex(viewport.EndFrame);
 		if (startSampleIndex < 0 || endSampleIndex < 0)
 		{
 			return;
@@ -191,8 +184,8 @@ internal sealed class ProfilerStatsController : ObservableObject
 			(startSampleIndex, endSampleIndex) = (endSampleIndex, startSampleIndex);
 		}
 
-		double xStart = m_CurrentFrameSamples[startSampleIndex].Index;
-		double xEnd = m_CurrentFrameSamples[endSampleIndex].Index;
+		double xStart = m_TimelineAdapter.FrameSamples[startSampleIndex].Index;
+		double xEnd = m_TimelineAdapter.FrameSamples[endSampleIndex].Index;
 		if (xEnd <= xStart)
 		{
 			xEnd = xStart + 1.0;
@@ -209,18 +202,15 @@ internal sealed class ProfilerStatsController : ObservableObject
 		Timeline.ChildDetails.ClearAll();
 		UnsubscribePlotControls();
 		m_DetailPlotControls.Clear();
-		m_CustomStatInfos.Clear();
 		m_PlotBridges.Clear();
 		m_AllBridges.Clear();
 
-		m_StatisticsDiagramMetadata = ProfilerStatisticsProcessor.GetMetadataFromProfilerStatisticsInfo();
-
-		if (m_CurrentSession != null)
+		if (m_PlotModel == null)
 		{
-			AppendCustomStatMetadata(m_CurrentSession);
+			m_PlotModel = m_TimelineAdapter.CreatePlotModel(null);
 		}
 
-		foreach (var plotMeta in m_StatisticsDiagramMetadata.PlotList)
+		foreach (var plotMeta in m_PlotModel.Metadata.PlotList)
 		{
 			var bridge = CreateBridgeFromPlotMetadata(plotMeta);
 			m_AllBridges.Add(bridge);
@@ -249,7 +239,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 		Timeline.ChildDetails.ClearAll();
 		m_PlotBridges.Clear();
 		m_AllBridges.Clear();
-		m_CustomStatInfos.Clear();
+		m_PlotModel = m_TimelineAdapter.CreatePlotModel(null);
 
 		// Keep a clean main plot even in empty states
 		Timeline.ChangeTimelineConfig(CreateDefaultMainPlotConfig());
@@ -274,7 +264,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 
 	private void ApplyRangeAndViewport()
 	{
-		if (Timeline == null || m_CurrentFrameSamples == null || m_CurrentFrameSamples.Length == 0)
+		if (Timeline == null || m_TimelineAdapter.FrameSamples.Length == 0)
 		{
 			Timeline.ChildSelectScope.UpdateXRange(0, Math.Max(kDefaultSelectWindow, 1.0), false);
 			Timeline.ChildMainStats.UpdateXRange(0, Math.Max(kDefaultSelectWindow, 1.0), m_IsAutoScaleY);
@@ -282,8 +272,8 @@ internal sealed class ProfilerStatsController : ObservableObject
 			return;
 		}
 
-		double minX = m_CurrentFrameSamples[0].Index;
-		double maxX = m_CurrentFrameSamples[m_CurrentFrameSamples.Length - 1].Index;
+		double minX = m_TimelineAdapter.FrameSamples[0].Index;
+		double maxX = m_TimelineAdapter.FrameSamples[m_TimelineAdapter.FrameSamples.Length - 1].Index;
 		if (maxX <= minX)
 		{
 			maxX = minX + 1.0;
@@ -355,76 +345,6 @@ internal sealed class ProfilerStatsController : ObservableObject
 		}
 	}
 
-	private void FillFrameSeries()
-	{
-		if (m_CurrentFrameSamples == null || m_CurrentFrameSamples.Length == 0 || m_MainStatsBridge == null)
-		{
-			return;
-		}
-
-		var mainCurve = m_MainStatsBridge.CurveList.FirstOrDefault();
-		if (mainCurve == null)
-		{
-			return;
-		}
-
-		foreach (FrameSample frame in m_CurrentFrameSamples)
-		{
-			mainCurve.AppendData(frame.Index, frame.DurationMs);
-		}
-	}
-
-	private void FillCustomStatsSeries()
-	{
-		if (m_CurrentSession == null || m_CustomStatInfos.Count == 0)
-		{
-			return;
-		}
-
-		for (int customIndex = 0; customIndex < m_CustomStatInfos.Count; customIndex++)
-		{
-			CustomStatPlotInfo statInfo = m_CustomStatInfos[customIndex];
-			var points = new List<FrameValue>();
-			int startFrameIndex = 0;
-			int endFrameIndex = m_CurrentSession.FrameCount > 0 ? m_CurrentSession.FrameCount - 1 : 0;
-			m_CurrentSession.GetCustomStats(startFrameIndex, endFrameIndex, statInfo.StatId, false, points);
-			if (points.Count == 0 ||
-				!m_PlotBridges.TryGetValue(statInfo.PlotKey, out var bridge) ||
-				!bridge.CurveDictionary.TryGetValue(statInfo.CurveKey, out var curve))
-			{
-				continue;
-			}
-
-			if (m_CurrentFrameSamples.Length == 0)
-			{
-				continue;
-			}
-
-			foreach (FrameValue point in points)
-			{
-				double value = point.m_Value;
-				if (statInfo.ConvertCyclesToMilliseconds && m_CurrentSession.TimerFrequency > 0)
-				{
-					value = value * 1000.0 / m_CurrentSession.TimerFrequency;
-				}
-
-				int sourceFrameIndex = m_CurrentSession.GetFrameIndex(point.m_FrameEndTime);
-				if (sourceFrameIndex < 0)
-				{
-					continue;
-				}
-
-				int displayIndex = GetDisplaySampleIndex(sourceFrameIndex);
-				if (displayIndex < 0)
-				{
-					continue;
-				}
-
-				curve.AppendData(m_CurrentFrameSamples[displayIndex].Index, value);
-			}
-		}
-	}
-
 	private void RefreshDetailPlotControlPanel()
 	{
 		StackPanel controlsPanel = m_View.DetailPlotControlsHost;
@@ -460,53 +380,6 @@ internal sealed class ProfilerStatsController : ObservableObject
 	private void UnsubscribePlotControls()
 	{
 		m_View.DetailPlotControlsHost.Children.Clear();
-	}
-
-	private void AppendCustomStatMetadata(Session session)
-	{
-		var customStats = session.GetCustomStats();
-		if (customStats == null || customStats.Count == 0)
-		{
-			return;
-		}
-
-		var orderedStats = ProfilerStatsDocumentAnalyzer.GetCustomStatDescriptors(session);
-
-		foreach (var graphGroup in orderedStats.GroupBy(item => item.GraphName))
-		{
-			string plotProperty = $"CustomStatGraph_{m_StatisticsDiagramMetadata.PlotList.Count}";
-			var plotMeta = new CurvePlotMetadata
-			{
-				PropertyName = plotProperty,
-				PlotTitle = string.Equals(graphGroup.Key, "default", StringComparison.OrdinalIgnoreCase) ? "Custom Stats" : graphGroup.Key,
-				IsMainPlot = false
-			};
-
-			int curveIndex = 0;
-			foreach (var item in graphGroup)
-			{
-				string curveProperty = $"Value_{curveIndex}";
-				var curveMeta = new CurveFieldMetadata
-				{
-					PropertyName = curveProperty,
-					CurveLabel = item.Name,
-					CurveUnit = item.DisplayUnit,
-					LineColor = ConvertDrawingColor(item.Color),
-				};
-				plotMeta.SubFields.Add(curveMeta);
-				plotMeta.FieldDictionary.Add(curveMeta.PropertyName, curveMeta);
-				m_CustomStatInfos.Add(new CustomStatPlotInfo(plotMeta.PropertyName, curveMeta.PropertyName, item.StatId, item.Name, item.DisplayUnit, item.ConvertCyclesToMilliseconds));
-				curveIndex++;
-			}
-
-			m_StatisticsDiagramMetadata.PlotList.Add(plotMeta);
-			m_StatisticsDiagramMetadata.PlotDictionary.Add(plotMeta.PropertyName, plotMeta);
-		}
-	}
-
-	private static Color ConvertDrawingColor(System.Drawing.Color color)
-	{
-		return new Color(color.R, color.G, color.B, color.A);
 	}
 
 	private CurveUiPlotBridgeItem CreateBridgeFromPlotMetadata(CurvePlotMetadata plotMeta)
@@ -602,8 +475,8 @@ internal sealed class ProfilerStatsController : ObservableObject
 		m_IsAutoFollow = false;
 		m_IsAutoFollowByUi = true;
 
-		int startFrame = GetNearestFrameIndex(Timeline.ChildSelectScope.ScopeStart);
-		int endFrame = GetNearestFrameIndex(Timeline.ChildSelectScope.ScopeEnd);
+		int startFrame = m_TimelineAdapter.GetNearestFrameIndex(Timeline.ChildSelectScope.ScopeStart);
+		int endFrame = m_TimelineAdapter.GetNearestFrameIndex(Timeline.ChildSelectScope.ScopeEnd);
 		if (startFrame < 0 || endFrame < 0)
 		{
 			return;
@@ -615,97 +488,5 @@ internal sealed class ProfilerStatsController : ObservableObject
 		}
 
 		m_View.NotifyViewportChangedByUser(startFrame, endFrame);
-	}
-
-	private int GetNearestFrameIndex(double targetX)
-	{
-		if (m_CurrentFrameSamples.Length == 0)
-		{
-			return -1;
-		}
-
-		int left = 0;
-		int right = m_CurrentFrameSamples.Length - 1;
-		while (left <= right)
-		{
-			int mid = left + ((right - left) / 2);
-			double sampleFrameIndex = m_CurrentFrameSamples[mid].Index;
-			if (sampleFrameIndex == targetX)
-			{
-				return m_CurrentFrameSamples[mid].Index;
-			}
-
-			if (sampleFrameIndex < targetX)
-			{
-				left = mid + 1;
-			}
-			else
-			{
-				right = mid - 1;
-			}
-		}
-
-		if (left >= m_CurrentFrameSamples.Length)
-		{
-			return m_CurrentFrameSamples[^1].Index;
-		}
-
-		if (right < 0)
-		{
-			return m_CurrentFrameSamples[0].Index;
-		}
-
-		double leftDistance = Math.Abs(m_CurrentFrameSamples[left].Index - targetX);
-		double rightDistance = Math.Abs(m_CurrentFrameSamples[right].Index - targetX);
-		return leftDistance < rightDistance ? m_CurrentFrameSamples[left].Index : m_CurrentFrameSamples[right].Index;
-	}
-
-	private int GetDisplaySampleIndex(int sourceFrameIndex)
-	{
-		if (m_CurrentFrameSamples.Length == 0)
-		{
-			return -1;
-		}
-
-		int firstSampleFrameIndex = m_CurrentFrameSamples[0].Index;
-		int lastSampleFrameIndex = m_CurrentFrameSamples[^1].Index;
-
-		if (sourceFrameIndex <= firstSampleFrameIndex)
-		{
-			return 0;
-		}
-
-		if (sourceFrameIndex >= lastSampleFrameIndex)
-		{
-			return m_CurrentFrameSamples.Length - 1;
-		}
-
-		int left = 0;
-		int right = m_CurrentFrameSamples.Length - 1;
-		while (left <= right)
-		{
-			int mid = left + ((right - left) / 2);
-			int sampleFrameIndex = m_CurrentFrameSamples[mid].Index;
-			if (sampleFrameIndex == sourceFrameIndex)
-			{
-				return mid;
-			}
-
-			if (sampleFrameIndex < sourceFrameIndex)
-			{
-				left = mid + 1;
-			}
-			else
-			{
-				right = mid - 1;
-			}
-		}
-
-		// `left` is first index with frame index greater than sourceFrameIndex
-		int previousIndex = Math.Max(0, right);
-		int nextIndex = Math.Min(m_CurrentFrameSamples.Length - 1, left);
-		int previousDistance = sourceFrameIndex - m_CurrentFrameSamples[previousIndex].Index;
-		int nextDistance = m_CurrentFrameSamples[nextIndex].Index - sourceFrameIndex;
-		return (previousDistance <= nextDistance) ? previousIndex : nextIndex;
 	}
 }
