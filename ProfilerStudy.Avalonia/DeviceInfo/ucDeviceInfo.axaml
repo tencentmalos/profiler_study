@@ -1,0 +1,27 @@
+<UserControl
+    x:Class="ProfilerStudy.Avalonia.DeviceInfo.ucDeviceInfo"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:timeline="clr-namespace:ProfilerStudy.Avalonia.Timeline">
+  <Grid RowDefinitions="Auto,*" Margin="0">
+    <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,6">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <CheckBox x:Name="AutoFollowCheckBox" Content="Auto Follow" IsChecked="True" IsEnabled="True" />
+        <CheckBox x:Name="AutoScaleCheckBox" Content="Auto Scale Y" IsChecked="True" IsEnabled="True" />
+        <CheckBox x:Name="ShowDetailPlotsCheckBox" Content="Show Detail Plots" IsChecked="True" IsEnabled="True" />
+        <Button x:Name="ShowAllPlotsButton" Content="Show All" Padding="8,3" />
+        <Button x:Name="HideAllPlotsButton" Content="Hide All" Padding="8,3" />
+        <ComboBox x:Name="PlotHeightComboBox" Width="135">
+          <ComboBoxItem Content="Small" />
+          <ComboBoxItem Content="Medium" />
+          <ComboBoxItem Content="Large" />
+          <ComboBoxItem Content="Extra Large" />
+        </ComboBox>
+      </StackPanel>
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <StackPanel x:Name="DetailPlotControlsPanel" Orientation="Horizontal" Spacing="8" />
+      </ScrollViewer>
+    </StackPanel>
+    <timeline:ucTimelineScope x:Name="TimelineScope" Grid.Row="1" />
+  </Grid>
+</UserControl>

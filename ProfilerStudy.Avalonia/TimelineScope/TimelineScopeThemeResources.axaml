@@ -1,0 +1,71 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="TimelineScopePanelBackgroundBrush" Color="#FFF7F9FC" />
+      <SolidColorBrush x:Key="TimelineScopeSubtleBackgroundBrush" Color="#FFF0F4F8" />
+      <SolidColorBrush x:Key="TimelineScopeCardBackgroundBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="TimelineScopePanelBorderBrush" Color="#FFD0D9E4" />
+      <SolidColorBrush x:Key="TimelineScopeSeparatorBrush" Color="#FFC5CED9" />
+      <SolidColorBrush x:Key="TimelineScopeTextBrush" Color="#FF18212B" />
+      <SolidColorBrush x:Key="TimelineScopeSubtleTextBrush" Color="#FF5D6977" />
+      <SolidColorBrush x:Key="TimelineScopePlotSurfaceBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="TimelineScopePlotTitleSurfaceBrush" Color="#FFF7FAFD" />
+      <SolidColorBrush x:Key="TimelineScopePlotGridBrush" Color="#1A203040" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipBackgroundBrush" Color="#FF101922" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipBorderBrush" Color="#FF41566D" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipTextBrush" Color="#FFF5F8FB" />
+      <SolidColorBrush x:Key="TimelineScopeLegendBackgroundBrush" Color="#F2FFFFFF" />
+      <SolidColorBrush x:Key="TimelineScopeLegendBorderBrush" Color="#FFCBD6E2" />
+      <SolidColorBrush x:Key="TimelineScopeAddedBrush" Color="#FF128A52" />
+      <SolidColorBrush x:Key="TimelineScopeRemovedBrush" Color="#FFC93B4C" />
+      <SolidColorBrush x:Key="TimelineScopeWarningBrush" Color="#FFCC7A00" />
+      <SolidColorBrush x:Key="TimelineScopeInfoBrush" Color="#FF2169D6" />
+      <SolidColorBrush x:Key="TimelineScopeAccentBrush" Color="#FF6A3FE0" />
+      <SolidColorBrush x:Key="TimelineScopeAddedSurfaceBrush" Color="#FFEAF8F0" />
+      <SolidColorBrush x:Key="TimelineScopeRemovedSurfaceBrush" Color="#FFFCECEF" />
+      <SolidColorBrush x:Key="TimelineScopeWarningSurfaceBrush" Color="#FFFFF3E3" />
+      <SolidColorBrush x:Key="TimelineScopeInfoSurfaceBrush" Color="#FFEAF2FF" />
+      <SolidColorBrush x:Key="TimelineScopeAccentSurfaceBrush" Color="#FFF1EDFF" />
+      <SolidColorBrush x:Key="TimelineScopeAddedBorderBrush" Color="#FF3AA56E" />
+      <SolidColorBrush x:Key="TimelineScopeRemovedBorderBrush" Color="#FFD65B69" />
+      <SolidColorBrush x:Key="TimelineScopeWarningBorderBrush" Color="#FFE39A32" />
+      <SolidColorBrush x:Key="TimelineScopeInfoBorderBrush" Color="#FF5A95F0" />
+      <SolidColorBrush x:Key="TimelineScopeAccentBorderBrush" Color="#FF8A6AF0" />
+      <SolidColorBrush x:Key="TimelineScopeOnAccentBrush" Color="#FFFFFFFF" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="TimelineScopePanelBackgroundBrush" Color="#FF131A21" />
+      <SolidColorBrush x:Key="TimelineScopeSubtleBackgroundBrush" Color="#FF1A232C" />
+      <SolidColorBrush x:Key="TimelineScopeCardBackgroundBrush" Color="#FF1D2832" />
+      <SolidColorBrush x:Key="TimelineScopePanelBorderBrush" Color="#FF334454" />
+      <SolidColorBrush x:Key="TimelineScopeSeparatorBrush" Color="#FF405161" />
+      <SolidColorBrush x:Key="TimelineScopeTextBrush" Color="#FFF2F6FA" />
+      <SolidColorBrush x:Key="TimelineScopeSubtleTextBrush" Color="#FFAAC0D3" />
+      <SolidColorBrush x:Key="TimelineScopePlotSurfaceBrush" Color="#FF11181F" />
+      <SolidColorBrush x:Key="TimelineScopePlotTitleSurfaceBrush" Color="#E61B2731" />
+      <SolidColorBrush x:Key="TimelineScopePlotGridBrush" Color="#263F5365" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipBackgroundBrush" Color="#FF0D1319" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipBorderBrush" Color="#FF4E677C" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipTextBrush" Color="#FFF5F8FB" />
+      <SolidColorBrush x:Key="TimelineScopeLegendBackgroundBrush" Color="#E619232D" />
+      <SolidColorBrush x:Key="TimelineScopeLegendBorderBrush" Color="#FF3E5366" />
+      <SolidColorBrush x:Key="TimelineScopeAddedBrush" Color="#FF63D79B" />
+      <SolidColorBrush x:Key="TimelineScopeRemovedBrush" Color="#FFFF7E8B" />
+      <SolidColorBrush x:Key="TimelineScopeWarningBrush" Color="#FFFFB44F" />
+      <SolidColorBrush x:Key="TimelineScopeInfoBrush" Color="#FF73B5FF" />
+      <SolidColorBrush x:Key="TimelineScopeAccentBrush" Color="#FFC0A2FF" />
+      <SolidColorBrush x:Key="TimelineScopeAddedSurfaceBrush" Color="#1F2F7D57" />
+      <SolidColorBrush x:Key="TimelineScopeRemovedSurfaceBrush" Color="#1F923748" />
+      <SolidColorBrush x:Key="TimelineScopeWarningSurfaceBrush" Color="#1F8A5A19" />
+      <SolidColorBrush x:Key="TimelineScopeInfoSurfaceBrush" Color="#1F2B5F97" />
+      <SolidColorBrush x:Key="TimelineScopeAccentSurfaceBrush" Color="#1F5D41A2" />
+      <SolidColorBrush x:Key="TimelineScopeAddedBorderBrush" Color="#FF4FBA81" />
+      <SolidColorBrush x:Key="TimelineScopeRemovedBorderBrush" Color="#FFF46979" />
+      <SolidColorBrush x:Key="TimelineScopeWarningBorderBrush" Color="#FFDA9A42" />
+      <SolidColorBrush x:Key="TimelineScopeInfoBorderBrush" Color="#FF5F9CE0" />
+      <SolidColorBrush x:Key="TimelineScopeAccentBorderBrush" Color="#FFAA86F0" />
+      <SolidColorBrush x:Key="TimelineScopeOnAccentBrush" Color="#FFFFFFFF" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

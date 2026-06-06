@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ProfilerStudy.Avalonia"
+    xmlns:device="clr-namespace:ProfilerStudy.Avalonia.DeviceInfo"
     xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
     Title="ProfilerStudy"
     Width="1180"
@@ -51,13 +52,17 @@
           <TextBlock Text="{Binding Summary.RangeText}" Foreground="#404040" VerticalAlignment="Center" />
           <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" VerticalAlignment="Center" />
         </StackPanel>
-        <Border Grid.Row="1" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="1">
+        <Grid Grid.Row="1" RowDefinitions="*,Auto">
+          <Border Grid.Row="0" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="1">
           <local:FrameTimelineControl
               Samples="{Binding FrameSamples}"
               TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
               Selection="{Binding Selection}"
               Viewport="{Binding Viewport}" />
-        </Border>
+          </Border>
+
+          <device:ucDeviceInfo x:Name="DeviceInfoControl" Grid.Row="1" Margin="0,8,0,0" />
+        </Grid>
       </Grid>
     </Grid>
 
