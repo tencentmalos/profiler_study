@@ -49,6 +49,7 @@ internal static class AvaloniaSmokeTest
 			Assert(plotModel.Metadata.PlotList.Any(item => item.IsMainPlot), "profiler timeline main plot");
 			AssertSourcePathMapping();
 			AssertTableSorting();
+			AssertFlameChartControl();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -131,6 +132,19 @@ internal static class AvaloniaSmokeTest
 			new SelectedFrameCounterRow("GPU", "Large", 8.0, 1.0, "ms"),
 		}, "Value", true);
 		Assert(counters[0].Name == "Large", "counter sort");
+	}
+
+	private static void AssertFlameChartControl()
+	{
+		var control = new SelectedFrameFlameChartControl
+		{
+			Rows = new[]
+			{
+				new ScopeFrameDetailRow("Render", 0, "Frame", 0.0, 16.0, string.Empty, string.Empty, -1),
+				new ScopeFrameDetailRow("Render", 1, "Draw", 2.0, 6.0, string.Empty, string.Empty, -1),
+			}
+		};
+		Assert(control.Rows.Count == 2, "flame chart rows");
 	}
 
 	private static FrameSample FindSlowestFrame(FrameSample[] samples)

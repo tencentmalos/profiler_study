@@ -2,7 +2,7 @@ using System;
 
 namespace ProfilerStudy.Avalonia;
 
-internal sealed class ScopeFrameDetailRow
+public sealed class ScopeFrameDetailRow
 {
 	public ScopeFrameDetailRow(string threadName, int depth, string name, double startOffsetMs, double durationMs, string sourceText, string sourceFile, int sourceLine)
 	{
