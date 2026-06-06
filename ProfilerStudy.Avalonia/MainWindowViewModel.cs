@@ -19,6 +19,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_SelectSlowestFrameCommand;
 	private readonly RelayCommand m_OpenRecentSessionCommand;
 	private readonly RelayCommand m_OpenScopeSourceCommand;
+	private readonly RelayCommand m_SortTableCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -42,6 +43,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
 	private string m_SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
+	private string m_ScopeHotspotSortKey = "TotalTime";
+	private bool m_ScopeHotspotSortDescending = true;
+	private string m_SelectedFrameScopeSortKey = "Start";
+	private bool m_SelectedFrameScopeSortDescending;
+	private string m_SelectedFrameCounterSortKey = "Graph";
+	private bool m_SelectedFrameCounterSortDescending;
 	private bool m_IsLoading;
 
 	public MainWindowViewModel(bool loadSampleOnStartup = false, string startupProfilerPath = null)
@@ -61,6 +68,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_SelectSlowestFrameCommand = new RelayCommand(_ => SelectSlowestFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_OpenRecentSessionCommand = new RelayCommand(parameter => _ = OpenRecentSessionAsync(parameter as string ?? SelectedRecentFile), _ => !string.IsNullOrWhiteSpace(SelectedRecentFile));
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
+		m_SortTableCommand = new RelayCommand(SortTable);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -86,6 +94,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand OpenRecentSessionCommand => m_OpenRecentSessionCommand;
 
 	public RelayCommand OpenScopeSourceCommand => m_OpenScopeSourceCommand;
+
+	public RelayCommand SortTableCommand => m_SortTableCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -422,29 +432,32 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void ApplyScopeHotspotFilter()
 	{
+		IReadOnlyList<ScopeHotspotRow> filteredRows;
 		if (CurrentDocument?.Session == null)
 		{
-			ScopeHotspots = m_AllScopeHotspots;
+			filteredRows = m_AllScopeHotspots;
 			ScopeHotspotSummaryText = "Generated sample has no profiler scope stream.";
 		}
 		else if (m_AllScopeHotspots.Count == 0)
 		{
-			ScopeHotspots = m_AllScopeHotspots;
+			filteredRows = m_AllScopeHotspots;
 			ScopeHotspotSummaryText = "No scope hotspots found in this session.";
 		}
 		else if (string.IsNullOrWhiteSpace(ScopeFilterText))
 		{
-			ScopeHotspots = m_AllScopeHotspots;
+			filteredRows = m_AllScopeHotspots;
 			ScopeHotspotSummaryText = $"Top {m_AllScopeHotspots.Count} scopes by total time";
 		}
 		else
 		{
 			string filter = ScopeFilterText.Trim();
-			ScopeHotspots = m_AllScopeHotspots
+			filteredRows = m_AllScopeHotspots
 				.Where(item => item.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
 				.ToArray();
-			ScopeHotspotSummaryText = $"{ScopeHotspots.Count} of {m_AllScopeHotspots.Count} scopes match \"{filter}\"";
+			ScopeHotspotSummaryText = $"{filteredRows.Count} of {m_AllScopeHotspots.Count} scopes match \"{filter}\"";
 		}
+
+		ScopeHotspots = ProfilerTableSorter.SortHotspots(filteredRows, m_ScopeHotspotSortKey, m_ScopeHotspotSortDescending);
 	}
 
 	private void SelectSlowestFrame()
@@ -522,7 +535,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void ApplySelectedFrameScopes()
 	{
 		int selectedFrameIndex = Selection?.SelectedFrameIndex ?? -1;
-		SelectedFrameScopes = ScopeFrameDetailAnalyzer.Build(CurrentDocument, selectedFrameIndex);
+		SelectedFrameScopes = ProfilerTableSorter.SortFrameScopes(
+			ScopeFrameDetailAnalyzer.Build(CurrentDocument, selectedFrameIndex),
+			m_SelectedFrameScopeSortKey,
+			m_SelectedFrameScopeSortDescending);
 		m_OpenScopeSourceCommand.RaiseCanExecuteChanged();
 		if (CurrentDocument?.Session == null)
 		{
@@ -542,10 +558,60 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 	}
 
+	private void SortTable(object parameter)
+	{
+		string[] parts = (parameter as string)?.Split(':');
+		if (parts == null || parts.Length != 2)
+		{
+			return;
+		}
+
+		string tableName = parts[0];
+		string sortKey = parts[1];
+		if (string.Equals(tableName, "Hotspot", StringComparison.Ordinal))
+		{
+			ToggleSort(ref m_ScopeHotspotSortKey, ref m_ScopeHotspotSortDescending, sortKey, IsDescendingByDefault(sortKey));
+			ApplyScopeHotspotFilter();
+			StatusText = "Sorted scope hotspots by " + sortKey + ".";
+		}
+		else if (string.Equals(tableName, "FrameScope", StringComparison.Ordinal))
+		{
+			ToggleSort(ref m_SelectedFrameScopeSortKey, ref m_SelectedFrameScopeSortDescending, sortKey, IsDescendingByDefault(sortKey));
+			ApplySelectedFrameScopes();
+			StatusText = "Sorted selected frame scopes by " + sortKey + ".";
+		}
+		else if (string.Equals(tableName, "Counter", StringComparison.Ordinal))
+		{
+			ToggleSort(ref m_SelectedFrameCounterSortKey, ref m_SelectedFrameCounterSortDescending, sortKey, IsDescendingByDefault(sortKey));
+			ApplySelectedFrameCounters();
+			StatusText = "Sorted selected frame counters by " + sortKey + ".";
+		}
+	}
+
+	private static void ToggleSort(ref string currentKey, ref bool currentDescending, string newKey, bool defaultDescending)
+	{
+		if (string.Equals(currentKey, newKey, StringComparison.Ordinal))
+		{
+			currentDescending = !currentDescending;
+			return;
+		}
+
+		currentKey = newKey;
+		currentDescending = defaultDescending;
+	}
+
+	private static bool IsDescendingByDefault(string sortKey)
+	{
+		return sortKey is "TotalTime" or "Calls" or "Average" or "MaxTime" or "MaxCount" or "Duration" or "Value" or "Count";
+	}
+
 	private void ApplySelectedFrameCounters()
 	{
 		int selectedFrameIndex = Selection?.SelectedFrameIndex ?? -1;
-		SelectedFrameCounters = SelectedFrameCounterAnalyzer.Build(CurrentDocument, selectedFrameIndex);
+		SelectedFrameCounters = ProfilerTableSorter.SortCounters(
+			SelectedFrameCounterAnalyzer.Build(CurrentDocument, selectedFrameIndex),
+			m_SelectedFrameCounterSortKey,
+			m_SelectedFrameCounterSortDescending);
 		if (CurrentDocument?.Session == null)
 		{
 			SelectedFrameCounterSummaryText = "Generated sample has no profiler counter stream.";

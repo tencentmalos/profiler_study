@@ -48,6 +48,7 @@ internal static class AvaloniaSmokeTest
 			Assert(plotModel.Metadata.PlotList.Count > 0, "profiler timeline plot metadata");
 			Assert(plotModel.Metadata.PlotList.Any(item => item.IsMainPlot), "profiler timeline main plot");
 			AssertSourcePathMapping();
+			AssertTableSorting();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -106,6 +107,30 @@ internal static class AvaloniaSmokeTest
 				Directory.Delete(tempRoot, true);
 			}
 		}
+	}
+
+	private static void AssertTableSorting()
+	{
+		IReadOnlyList<ScopeHotspotRow> hotspots = ProfilerTableSorter.SortHotspots(new[]
+		{
+			new ScopeHotspotRow("B", 10.0, 2, 7.0, 1),
+			new ScopeHotspotRow("A", 20.0, 1, 20.0, 1),
+		}, "TotalTime", true);
+		Assert(hotspots[0].Name == "A", "scope hotspot sort");
+
+		IReadOnlyList<ScopeFrameDetailRow> frameScopes = ProfilerTableSorter.SortFrameScopes(new[]
+		{
+			new ScopeFrameDetailRow("Render", 0, "Late", 4.0, 1.0, "late.cpp:4", "late.cpp", 4),
+			new ScopeFrameDetailRow("Render", 0, "Early", 1.0, 2.0, "early.cpp:1", "early.cpp", 1),
+		}, "Start", false);
+		Assert(frameScopes[0].Name == "Early", "frame scope sort");
+
+		IReadOnlyList<SelectedFrameCounterRow> counters = ProfilerTableSorter.SortCounters(new[]
+		{
+			new SelectedFrameCounterRow("GPU", "Small", 1.0, 1.0, "ms"),
+			new SelectedFrameCounterRow("GPU", "Large", 8.0, 1.0, "ms"),
+		}, "Value", true);
+		Assert(counters[0].Name == "Large", "counter sort");
 	}
 
 	private static FrameSample FindSlowestFrame(FrameSample[] samples)

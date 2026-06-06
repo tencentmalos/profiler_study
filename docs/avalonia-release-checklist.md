@@ -63,12 +63,15 @@ Use at least one real `.profiler`, `.profiler_recording`, or `.profiler_dump` fi
 5. Click `Find Slowest` and confirm the selected frame marker moves and the viewport centers around the slow frame.
 6. Confirm the ScottPlot profiler stats panel follows the selected viewport.
 7. Filter `Scope Hotspots` by a known scope name and confirm the result count changes without losing total-time ordering.
-8. Select a frame and confirm `Selected Frame Scopes` updates with thread, scope, duration, and source columns.
-9. Select a frame with custom stats and confirm `Selected Frame Counters` shows graph, counter, value, count, and unit.
-10. If source paths exist locally, click `Open` in `Selected Frame Scopes` and confirm the configured editor or system opener launches.
-11. If captured source paths differ from local paths, set `Captured root` and `Local root`, then confirm `Open` resolves the mapped local file.
-12. Close and reopen the app, then confirm the file appears in `Recent files` and `Open Recent` reloads it.
-13. Start the application with a profiler file path as the first non-option argument and confirm it loads on startup.
+8. Click sortable headers in `Scope Hotspots` and confirm scope, total time, call count, average, and max columns reorder rows.
+9. Select a frame and confirm `Selected Frame Scopes` updates with thread, scope, duration, and source columns.
+10. Click sortable headers in `Selected Frame Scopes` and confirm thread, scope, start, duration, and source columns reorder rows.
+11. Select a frame with custom stats and confirm `Selected Frame Counters` shows graph, counter, value, count, and unit.
+12. Click sortable headers in `Selected Frame Counters` and confirm graph, counter, value, count, and unit columns reorder rows.
+13. If source paths exist locally, click `Open` in `Selected Frame Scopes` and confirm the configured editor or system opener launches.
+14. If captured source paths differ from local paths, set `Captured root` and `Local root`, then confirm `Open` resolves the mapped local file.
+15. Close and reopen the app, then confirm the file appears in `Recent files` and `Open Recent` reloads it.
+16. Start the application with a profiler file path as the first non-option argument and confirm it loads on startup.
 
 ## Source launch behavior
 
@@ -91,7 +94,7 @@ These are intentionally not first-release complete:
 - No ETL/context-switch capture UI.
 - No recording player or demo simulator replacement.
 - No full thread timeline/flame graph parity with WinForms; current first-release detail is a selected-frame scope table.
-- No sortable/virtualized DataGrid for scope and counter tables; current tables are fixed, read-only `ItemsControl` projections.
+- No virtualized DataGrid for scope and counter tables; current tables are sortable `ItemsControl` projections.
 - Publish profiles are framework-dependent; non-development machines need a compatible .NET runtime installed.
 
 ## First-release acceptance

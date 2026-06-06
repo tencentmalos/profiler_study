@@ -111,12 +111,12 @@
 
                 <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
                   <Grid ColumnDefinitions="*,90,90,90,90,90">
-                    <TextBlock Text="Scope" Foreground="#202020" FontWeight="SemiBold" />
-                    <TextBlock Grid.Column="1" Text="Total ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="2" Text="Calls" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="3" Text="Avg ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="4" Text="Max/frame" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="5" Text="Calls/frame" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
+                    <Button Grid.Column="1" Content="Total ms" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:TotalTime" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="2" Content="Calls" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Calls" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="3" Content="Avg ms" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Average" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="4" Content="Max/frame" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:MaxTime" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="5" Content="Calls/frame" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:MaxCount" Padding="0" HorizontalContentAlignment="Right" />
                   </Grid>
                 </Border>
 
@@ -162,11 +162,11 @@
 
                 <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
                   <Grid ColumnDefinitions="140,*,80,80,220,64">
-                    <TextBlock Text="Thread" Foreground="#202020" FontWeight="SemiBold" />
-                    <TextBlock Grid.Column="1" Text="Scope" Foreground="#202020" FontWeight="SemiBold" />
-                    <TextBlock Grid.Column="2" Text="Start ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="3" Text="Dur ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="4" Text="Source" Foreground="#202020" FontWeight="SemiBold" />
+                    <Button Content="Thread" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Thread" Padding="0" HorizontalContentAlignment="Left" />
+                    <Button Grid.Column="1" Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Scope" Padding="0" HorizontalContentAlignment="Left" />
+                    <Button Grid.Column="2" Content="Start ms" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Start" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="3" Content="Dur ms" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Duration" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="4" Content="Source" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Source" Padding="0" HorizontalContentAlignment="Left" />
                     <TextBlock Grid.Column="5" Text="Open" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
                   </Grid>
                 </Border>
@@ -219,11 +219,11 @@
 
                 <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
                   <Grid ColumnDefinitions="150,*,90,90,80">
-                    <TextBlock Text="Graph" Foreground="#202020" FontWeight="SemiBold" />
-                    <TextBlock Grid.Column="1" Text="Counter" Foreground="#202020" FontWeight="SemiBold" />
-                    <TextBlock Grid.Column="2" Text="Value" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="3" Text="Count" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-                    <TextBlock Grid.Column="4" Text="Unit" Foreground="#202020" FontWeight="SemiBold" />
+                    <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
+                    <Button Grid.Column="1" Content="Counter" Command="{Binding SortTableCommand}" CommandParameter="Counter:Counter" Padding="0" HorizontalContentAlignment="Left" />
+                    <Button Grid.Column="2" Content="Value" Command="{Binding SortTableCommand}" CommandParameter="Counter:Value" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="3" Content="Count" Command="{Binding SortTableCommand}" CommandParameter="Counter:Count" Padding="0" HorizontalContentAlignment="Right" />
+                    <Button Grid.Column="4" Content="Unit" Command="{Binding SortTableCommand}" CommandParameter="Counter:Unit" Padding="0" HorizontalContentAlignment="Left" />
                   </Grid>
                 </Border>
 
