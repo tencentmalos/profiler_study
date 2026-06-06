@@ -1,0 +1,39 @@
+using System;
+
+namespace ProfilerStudy.Avalonia;
+
+internal sealed class ScopeFrameDetailRow
+{
+	public ScopeFrameDetailRow(string threadName, int depth, string name, double startOffsetMs, double durationMs, string sourceText)
+	{
+		ThreadName = string.IsNullOrWhiteSpace(threadName) ? "(unnamed thread)" : threadName;
+		Depth = Math.Max(0, depth);
+		Name = string.IsNullOrWhiteSpace(name) ? "(unnamed scope)" : name;
+		StartOffsetMs = startOffsetMs;
+		DurationMs = durationMs;
+		SourceText = sourceText ?? string.Empty;
+	}
+
+	public string ThreadName { get; }
+
+	public int Depth { get; }
+
+	public string Name { get; }
+
+	public double StartOffsetMs { get; }
+
+	public double DurationMs { get; }
+
+	public string SourceText { get; }
+
+	public string IndentedName => new string(' ', Depth * 2) + Name;
+
+	public string StartOffsetText => FormatMs(StartOffsetMs);
+
+	public string DurationText => FormatMs(DurationMs);
+
+	private static string FormatMs(double value)
+	{
+		return value <= 0.0 ? "0" : Math.Round(value, 3).ToString("0.###");
+	}
+}

@@ -67,7 +67,7 @@
                         VerticalAlignment="Stretch"
                         ResizeDirection="Rows" />
 
-          <Grid Grid.Row="2" RowDefinitions="*,6,190" Margin="0,8,0,0">
+          <Grid Grid.Row="2" RowDefinitions="*,6,190,6,190" Margin="0,8,0,0">
             <stats:ucProfilerStats x:Name="ProfilerStatsControl" Grid.Row="0" MinHeight="260" />
 
             <GridSplitter Grid.Row="1"
@@ -112,6 +112,55 @@
                             <TextBlock Grid.Column="3" Text="{Binding AverageTimeText}" Foreground="#101010" TextAlignment="Right" />
                             <TextBlock Grid.Column="4" Text="{Binding MaxTimePerFrameText}" Foreground="#101010" TextAlignment="Right" />
                             <TextBlock Grid.Column="5" Text="{Binding MaxCountPerFrameText}" Foreground="#101010" TextAlignment="Right" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </Grid>
+            </Border>
+
+            <GridSplitter Grid.Row="3"
+                          Background="#9A9A9A"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          ResizeDirection="Rows" />
+
+            <Border Grid.Row="4" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+              <Grid RowDefinitions="Auto,Auto,*">
+                <DockPanel Grid.Row="0" LastChildFill="True">
+                  <TextBlock DockPanel.Dock="Left"
+                             Text="Selected Frame Scopes"
+                             Foreground="#101010"
+                             FontSize="14"
+                             FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding SelectedFrameScopeSummaryText}"
+                             Foreground="#404040"
+                             HorizontalAlignment="Right" />
+                </DockPanel>
+
+                <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
+                  <Grid ColumnDefinitions="140,*,80,80,220">
+                    <TextBlock Text="Thread" Foreground="#202020" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Text="Scope" Foreground="#202020" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="2" Text="Start ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="3" Text="Dur ms" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="4" Text="Source" Foreground="#202020" FontWeight="SemiBold" />
+                  </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                  <ItemsControl ItemsSource="{Binding SelectedFrameScopes}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="6,3">
+                          <Grid ColumnDefinitions="140,*,80,80,220">
+                            <TextBlock Text="{Binding ThreadName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="#101010" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
+                            <TextBlock Grid.Column="2" Text="{Binding StartOffsetText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding DurationText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="{Binding SourceText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                           </Grid>
                         </Border>
                       </DataTemplate>

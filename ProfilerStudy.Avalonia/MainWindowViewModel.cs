@@ -20,10 +20,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private TimelineSelection m_Selection = new TimelineSelection();
 	private TimelineViewport m_Viewport = TimelineViewport.CreateForFrames(0);
 	private IReadOnlyList<ScopeHotspotRow> m_ScopeHotspots = Array.Empty<ScopeHotspotRow>();
+	private IReadOnlyList<ScopeFrameDetailRow> m_SelectedFrameScopes = Array.Empty<ScopeFrameDetailRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
+	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
 	private bool m_IsLoading;
 
 	public MainWindowViewModel(bool loadSampleOnStartup = false)
@@ -119,6 +121,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_ScopeHotspotSummaryText, value);
 	}
 
+	public IReadOnlyList<ScopeFrameDetailRow> SelectedFrameScopes
+	{
+		get => m_SelectedFrameScopes;
+		private set => SetProperty(ref m_SelectedFrameScopes, value);
+	}
+
+	public string SelectedFrameScopeSummaryText
+	{
+		get => m_SelectedFrameScopeSummaryText;
+		private set => SetProperty(ref m_SelectedFrameScopeSummaryText, value);
+	}
+
 	public bool IsLoading
 	{
 		get => m_IsLoading;
@@ -210,6 +224,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		Selection = document.Selection;
 		Viewport = document.Viewport;
 		ApplyScopeHotspots(document);
+		ApplySelectedFrameScopes();
 		AttachTimelineState(Selection, Viewport);
 		UpdateTimelineText();
 		UpdateFooterText();
@@ -243,6 +258,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		CurrentDocument.Selection.HoveredFrameIndex = -1;
 		CurrentDocument.Selection.SelectedFrameTimeMs = 0.0;
 		CurrentDocument.Selection.HoveredFrameTimeMs = 0.0;
+		ApplySelectedFrameScopes();
 		UpdateTimelineText();
 		UpdateFooterText();
 	}
@@ -273,8 +289,34 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void TimelineStatePropertyChanged(object sender, PropertyChangedEventArgs e)
 	{
+		if (e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex))
+		{
+			ApplySelectedFrameScopes();
+		}
 		UpdateTimelineText();
 		UpdateFooterText();
+	}
+
+	private void ApplySelectedFrameScopes()
+	{
+		int selectedFrameIndex = Selection?.SelectedFrameIndex ?? -1;
+		SelectedFrameScopes = ScopeFrameDetailAnalyzer.Build(CurrentDocument, selectedFrameIndex);
+		if (CurrentDocument?.Session == null)
+		{
+			SelectedFrameScopeSummaryText = "Generated sample has no profiler scope stream.";
+		}
+		else if (selectedFrameIndex < 0)
+		{
+			SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
+		}
+		else if (SelectedFrameScopes.Count == 0)
+		{
+			SelectedFrameScopeSummaryText = $"No scopes found for frame {selectedFrameIndex}.";
+		}
+		else
+		{
+			SelectedFrameScopeSummaryText = $"Frame {selectedFrameIndex}: {SelectedFrameScopes.Count} scopes";
+		}
 	}
 
 	private void UpdateTimelineText()
