@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using ProfilerStudy.Avalonia.ProfilerStats;
 
@@ -6,12 +7,12 @@ namespace ProfilerStudy.Avalonia;
 
 internal static class AvaloniaSmokeTest
 {
-	public static int Run()
+	public static int Run(string profilerPath = null)
 	{
 		try
 		{
 			SessionLoader loader = new SessionLoader();
-			SessionDocument document = loader.LoadSampleAsync(CancellationToken.None).GetAwaiter().GetResult();
+			SessionDocument document = LoadDocument(loader, profilerPath);
 			Assert(document != null, "document");
 			Assert(document.Summary.FrameCount > 0, "frame count");
 			Assert(document.FrameSamples.Length == document.Summary.FrameCount, "frame samples");
@@ -32,8 +33,16 @@ internal static class AvaloniaSmokeTest
 
 			ProfilerStatsDocumentSummary profilerStatsSummary = ProfilerStatsDocumentAnalyzer.Analyze(document);
 			Assert(profilerStatsSummary.FrameSeriesPointCount == document.FrameSamples.Length, "profiler stats frame series");
-			Assert(profilerStatsSummary.CustomStatPlotCount == 0, "sample custom stat plots");
-			Assert(profilerStatsSummary.CustomStatCurveCount == 0, "sample custom stat curves");
+			if (document.Session == null)
+			{
+				Assert(profilerStatsSummary.CustomStatPlotCount == 0, "sample custom stat plots");
+				Assert(profilerStatsSummary.CustomStatCurveCount == 0, "sample custom stat curves");
+			}
+			else if (document.Session.GetCustomStats().Count > 0)
+			{
+				Assert(profilerStatsSummary.CustomStatPlotCount > 0, "file custom stat plots");
+				Assert(profilerStatsSummary.CustomStatCurveCount > 0, "file custom stat curves");
+			}
 			return 0;
 		}
 		catch (Exception ex)
@@ -51,5 +60,20 @@ internal static class AvaloniaSmokeTest
 		{
 			throw new InvalidOperationException("Smoke test failed: " + name);
 		}
+	}
+
+	private static SessionDocument LoadDocument(SessionLoader loader, string profilerPath)
+	{
+		if (string.IsNullOrWhiteSpace(profilerPath))
+		{
+			return loader.LoadSampleAsync(CancellationToken.None).GetAwaiter().GetResult();
+		}
+
+		if (!File.Exists(profilerPath))
+		{
+			throw new FileNotFoundException("Smoke test profiler file not found.", profilerPath);
+		}
+
+		return loader.LoadFileAsync(profilerPath, CancellationToken.None).GetAwaiter().GetResult();
 	}
 }

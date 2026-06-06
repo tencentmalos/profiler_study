@@ -9,7 +9,6 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
-using DrawingColor = System.Drawing.Color;
 
 namespace ProfilerStudy.Avalonia.ProfilerStats;
 
@@ -17,7 +16,6 @@ internal sealed class ProfilerStatsController : ObservableObject
 {
 	private sealed record CustomStatPlotInfo(string PlotKey, string CurveKey, long StatId, string Name, string Unit, bool ConvertCyclesToMilliseconds);
 
-	private const int kMaxCustomStatCurves = 10;
 	private const double kDefaultSelectWindow = 30.0;
 
 	private readonly ucProfilerStats m_View;
@@ -428,15 +426,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 			return;
 		}
 
-		var orderedStats = customStats
-			.Select(item => item.Name)
-			.Distinct()
-			.Select(statId => CreateCustomStatDescriptor(session, statId))
-			.Where(item => !string.IsNullOrWhiteSpace(item.Name))
-			.OrderBy(item => item.GraphName)
-			.ThenBy(item => item.Name)
-			.Take(kMaxCustomStatCurves)
-			.ToList();
+		var orderedStats = ProfilerStatsDocumentAnalyzer.GetCustomStatDescriptors(session);
 
 		foreach (var graphGroup in orderedStats.GroupBy(item => item.GraphName))
 		{
@@ -470,16 +460,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 		}
 	}
 
-	private static (long StatId, string Name, string GraphName, string DisplayUnit, bool ConvertCyclesToMilliseconds, DrawingColor Color) CreateCustomStatDescriptor(Session session, long statId)
-	{
-		string name = session.GetString(statId);
-		string graphName = session.GetCustomStatGraph(statId);
-		string unit = session.GetCustomStatUnit(statId);
-		bool convertCyclesToMilliseconds = string.Equals(unit, "cycles", StringComparison.OrdinalIgnoreCase);
-		return (statId, name, string.IsNullOrWhiteSpace(graphName) ? "default" : graphName, convertCyclesToMilliseconds ? "ms" : unit, convertCyclesToMilliseconds, session.GetCustomStatColour(statId));
-	}
-
-	private static Color ConvertDrawingColor(DrawingColor color)
+	private static Color ConvertDrawingColor(System.Drawing.Color color)
 	{
 		return new Color(color.R, color.G, color.B, color.A);
 	}

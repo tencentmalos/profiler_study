@@ -7,9 +7,10 @@ internal static class Program
 {
 	public static void Main(string[] args)
 	{
-		if (args != null && args.Length == 1 && args[0] == "--smoke-test")
+		if (args != null && args.Length >= 1 && args[0] == "--smoke-test")
 		{
-			Environment.Exit(AvaloniaSmokeTest.Run());
+			string profilerPath = args.Length >= 2 ? args[1] : null;
+			Environment.Exit(AvaloniaSmokeTest.Run(profilerPath));
 		}
 
 		App.LoadSampleOnStartup = args != null && Array.IndexOf(args, "--load-sample") >= 0;
