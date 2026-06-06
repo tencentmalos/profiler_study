@@ -2,7 +2,7 @@ using Avalonia;
 using System;
 using System.ComponentModel;
 using SukiUI.Controls;
-using ProfilerStudy.Avalonia.DeviceInfo;
+using ProfilerStudy.Avalonia.ProfilerStats;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -51,7 +51,7 @@ public sealed partial class MainWindow : SukiWindow
 
 		m_ViewModel = viewModel;
 		m_ViewModel.PropertyChanged += m_ViewModelPropertyChanged;
-		DeviceInfoControl?.ApplyDocument(m_ViewModel.CurrentDocument);
+		ProfilerStatsControl?.ApplyDocument(m_ViewModel.CurrentDocument);
 	}
 
 	private void OnUnloaded(object sender, global::Avalonia.Interactivity.RoutedEventArgs e)
@@ -67,7 +67,7 @@ public sealed partial class MainWindow : SukiWindow
 	{
 		if (e.PropertyName == nameof(MainWindowViewModel.CurrentDocument))
 		{
-			DeviceInfoControl?.ApplyDocument(m_ViewModel.CurrentDocument);
+			ProfilerStatsControl?.ApplyDocument(m_ViewModel.CurrentDocument);
 		}
 	}
 }

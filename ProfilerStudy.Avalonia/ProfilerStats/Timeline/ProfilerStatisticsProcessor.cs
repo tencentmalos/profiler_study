@@ -3,15 +3,15 @@ using System.Linq;
 using System.Reflection;
 using ProfilerStudy.Avalonia.Timeline;
 
-namespace ProfilerStudy.Avalonia.DeviceInfo.Timeline;
+namespace ProfilerStudy.Avalonia.ProfilerStats.Timeline;
 
-public static class DeviceStatisticsProcessor
+public static class ProfilerStatisticsProcessor
 {
-	public static DiagramMetadata GetMetadataFromDeviceStatisticsInfo()
+	public static DiagramMetadata GetMetadataFromProfilerStatisticsInfo()
 	{
 		var diagramMeta = new DiagramMetadata();
 
-		var statisticsInfoType = typeof(DeviceStatisticsInfo);
+		var statisticsInfoType = typeof(ProfilerStatisticsInfo);
 		var properties = statisticsInfoType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 		foreach (var property in properties)
 		{

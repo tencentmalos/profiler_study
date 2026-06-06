@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using ProfilerStudy.Avalonia.Timeline;
 
-namespace ProfilerStudy.Avalonia.DeviceInfo;
+namespace ProfilerStudy.Avalonia.ProfilerStats;
 
 internal sealed class DetailPlotControlItem
 {

@@ -4,16 +4,16 @@ using ProfilerStudy;
 using ProfilerStudy.Avalonia.Timeline;
 using System;
 
-namespace ProfilerStudy.Avalonia.DeviceInfo;
+namespace ProfilerStudy.Avalonia.ProfilerStats;
 
-public partial class ucDeviceInfo : UserControl
+public partial class ucProfilerStats : UserControl
 {
-	private readonly ProfilerDeviceInfoController m_Controller;
-	public ucDeviceInfo()
+	private readonly ProfilerStatsController m_Controller;
+	public ucProfilerStats()
 	{
 		InitializeComponent();
 
-		m_Controller = new ProfilerDeviceInfoController(this);
+		m_Controller = new ProfilerStatsController(this);
 		m_Controller.Initialize();
 
 		AutoFollowCheckBox.IsChecked = true;

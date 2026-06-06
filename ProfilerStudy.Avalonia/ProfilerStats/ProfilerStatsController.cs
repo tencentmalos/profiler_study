@@ -1,6 +1,6 @@
 using FramePro;
 using ProfilerStudy;
-using ProfilerStudy.Avalonia.DeviceInfo.Timeline;
+using ProfilerStudy.Avalonia.ProfilerStats.Timeline;
 using ProfilerStudy.Avalonia.Timeline;
 using ScottPlot;
 using System;
@@ -11,22 +11,22 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
 using DrawingColor = System.Drawing.Color;
 
-namespace ProfilerStudy.Avalonia.DeviceInfo;
+namespace ProfilerStudy.Avalonia.ProfilerStats;
 
-internal sealed class ProfilerDeviceInfoController : ObservableObject
+internal sealed class ProfilerStatsController : ObservableObject
 {
 	private sealed record CustomStatPlotInfo(string PlotKey, string CurveKey, long StatId, string Name, string Unit, bool ConvertCyclesToMilliseconds);
 
 	private const int kMaxCustomStatCurves = 10;
 	private const double kDefaultSelectWindow = 30.0;
 
-	private readonly ucDeviceInfo m_View;
+	private readonly ucProfilerStats m_View;
 	private readonly List<DetailPlotControlItem> m_DetailPlotControls = new();
 	private readonly List<CustomStatPlotInfo> m_CustomStatInfos = new();
 	private readonly Dictionary<string, CurveUiPlotBridgeItem> m_PlotBridges = new();
 	private readonly List<CurveUiPlotBridgeItem> m_AllBridges = new();
 
-	private DiagramMetadata m_StatisticsDiagramMetadata = DeviceStatisticsProcessor.GetMetadataFromDeviceStatisticsInfo();
+	private DiagramMetadata m_StatisticsDiagramMetadata = ProfilerStatisticsProcessor.GetMetadataFromProfilerStatisticsInfo();
 	private CurveUiPlotBridgeItem m_MainStatsBridge = null!;
 	private Session m_CurrentSession;
 	private FrameSample[] m_CurrentFrameSamples = Array.Empty<FrameSample>();
@@ -37,7 +37,7 @@ internal sealed class ProfilerDeviceInfoController : ObservableObject
 	private bool m_IsInitialized;
 	private bool m_IsAutoFollowByUi;
 
-	internal ProfilerDeviceInfoController(ucDeviceInfo view)
+	internal ProfilerStatsController(ucProfilerStats view)
 	{
 		m_View = view;
 	}
@@ -177,7 +177,7 @@ internal sealed class ProfilerDeviceInfoController : ObservableObject
 		m_PlotBridges.Clear();
 		m_AllBridges.Clear();
 
-		m_StatisticsDiagramMetadata = DeviceStatisticsProcessor.GetMetadataFromDeviceStatisticsInfo();
+		m_StatisticsDiagramMetadata = ProfilerStatisticsProcessor.GetMetadataFromProfilerStatisticsInfo();
 
 		if (m_CurrentSession != null)
 		{
@@ -223,7 +223,7 @@ internal sealed class ProfilerDeviceInfoController : ObservableObject
 		{
 			Metadata = new CurvePlotMetadata
 			{
-				PropertyName = nameof(DeviceStatisticsInfo.MainStats),
+				PropertyName = nameof(ProfilerStatisticsInfo.MainStats),
 				PlotTitle = "Frame Duration",
 				IsMainPlot = true,
 			},

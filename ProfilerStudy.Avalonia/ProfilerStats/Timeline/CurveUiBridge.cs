@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using ProfilerStudy.Avalonia.Timeline;
 
-namespace ProfilerStudy.Avalonia.DeviceInfo.Timeline;
+namespace ProfilerStudy.Avalonia.ProfilerStats.Timeline;
 
 public sealed class CurveUiPlotBridgeItem
 {

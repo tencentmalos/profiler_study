@@ -1,5 +1,5 @@
 <UserControl
-    x:Class="ProfilerStudy.Avalonia.DeviceInfo.ucDeviceInfo"
+    x:Class="ProfilerStudy.Avalonia.ProfilerStats.ucProfilerStats"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:timeline="clr-namespace:ProfilerStudy.Avalonia.Timeline">

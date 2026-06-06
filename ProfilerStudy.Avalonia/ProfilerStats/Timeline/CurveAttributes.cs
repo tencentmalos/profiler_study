@@ -1,6 +1,6 @@
 using System;
 
-namespace ProfilerStudy.Avalonia.DeviceInfo.Timeline;
+namespace ProfilerStudy.Avalonia.ProfilerStats.Timeline;
 
 /// <summary>
 /// Marks a property as a curve field in a timeline plot.

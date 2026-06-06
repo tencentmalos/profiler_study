@@ -2,7 +2,7 @@ using ScottPlot;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace ProfilerStudy.Avalonia.DeviceInfo.Timeline;
+namespace ProfilerStudy.Avalonia.ProfilerStats.Timeline;
 
 public sealed class CurveFieldMetadata
 {

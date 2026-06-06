@@ -3,7 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ProfilerStudy.Avalonia"
-    xmlns:device="clr-namespace:ProfilerStudy.Avalonia.DeviceInfo"
+    xmlns:stats="clr-namespace:ProfilerStudy.Avalonia.ProfilerStats"
     xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
     Title="ProfilerStudy"
     Width="1180"
@@ -61,7 +61,7 @@
               Viewport="{Binding Viewport}" />
           </Border>
 
-          <device:ucDeviceInfo x:Name="DeviceInfoControl" Grid.Row="1" Margin="0,8,0,0" />
+          <stats:ucProfilerStats x:Name="ProfilerStatsControl" Grid.Row="1" Margin="0,8,0,0" />
         </Grid>
       </Grid>
     </Grid>

@@ -1,4 +1,4 @@
-namespace ProfilerStudy.Avalonia.DeviceInfo;
+namespace ProfilerStudy.Avalonia.ProfilerStats;
 
 public enum PlotHeight
 {
