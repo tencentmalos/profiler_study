@@ -16,20 +16,28 @@
     BackgroundAnimationEnabled="False">
   <Grid RowDefinitions="Auto,*,Auto" Background="#C8C8C8">
     <Border Grid.Row="0" Background="#E6E6E6" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="8,7">
-      <DockPanel LastChildFill="True">
-        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
-          <Button Command="{Binding OpenSessionCommand}" Padding="10,4">Open</Button>
-          <ComboBox ItemsSource="{Binding RecentFiles}"
-                    SelectedItem="{Binding SelectedRecentFile}"
-                    Width="240"
-                    PlaceholderText="Recent files" />
-          <Button Command="{Binding OpenRecentSessionCommand}" Padding="10,4">Open Recent</Button>
-          <Button Command="{Binding LoadSampleCommand}" Padding="10,4">Sample</Button>
-          <Button Command="{Binding SelectSlowestFrameCommand}" Padding="10,4">Find Slowest</Button>
-          <Button Command="{Binding ResetTimelineCommand}" Padding="10,4">Reset Zoom</Button>
+      <StackPanel Spacing="6">
+        <DockPanel LastChildFill="True">
+          <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="8">
+            <Button Command="{Binding OpenSessionCommand}" Padding="10,4">Open</Button>
+            <ComboBox ItemsSource="{Binding RecentFiles}"
+                      SelectedItem="{Binding SelectedRecentFile}"
+                      Width="240"
+                      PlaceholderText="Recent files" />
+            <Button Command="{Binding OpenRecentSessionCommand}" Padding="10,4">Open Recent</Button>
+            <Button Command="{Binding LoadSampleCommand}" Padding="10,4">Sample</Button>
+            <Button Command="{Binding SelectSlowestFrameCommand}" Padding="10,4">Find Slowest</Button>
+            <Button Command="{Binding ResetTimelineCommand}" Padding="10,4">Reset Zoom</Button>
+          </StackPanel>
+          <TextBlock Text="{Binding StatusText}" Foreground="#202020" VerticalAlignment="Center" Margin="14,0,0,0" />
+        </DockPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="Captured root" Foreground="#404040" VerticalAlignment="Center" />
+          <TextBox Text="{Binding CapturedSourceRoot}" Width="300" PlaceholderText="/buildbot/workspace/project" />
+          <TextBlock Text="Local root" Foreground="#404040" VerticalAlignment="Center" />
+          <TextBox Text="{Binding LocalSourceRoot}" Width="300" PlaceholderText="/Users/me/project" />
         </StackPanel>
-        <TextBlock Text="{Binding StatusText}" Foreground="#202020" VerticalAlignment="Center" Margin="14,0,0,0" />
-      </DockPanel>
+      </StackPanel>
     </Border>
 
     <Grid Grid.Row="1" ColumnDefinitions="280,*">

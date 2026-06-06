@@ -47,6 +47,7 @@ internal static class AvaloniaSmokeTest
 			ProfilerTimelinePlotModel plotModel = adapter.CreatePlotModel(document);
 			Assert(plotModel.Metadata.PlotList.Count > 0, "profiler timeline plot metadata");
 			Assert(plotModel.Metadata.PlotList.Any(item => item.IsMainPlot), "profiler timeline main plot");
+			AssertSourcePathMapping();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -79,6 +80,31 @@ internal static class AvaloniaSmokeTest
 		if (!condition)
 		{
 			throw new InvalidOperationException("Smoke test failed: " + name);
+		}
+	}
+
+	private static void AssertSourcePathMapping()
+	{
+		string tempRoot = Path.Combine(Path.GetTempPath(), "ProfilerStudy.Avalonia.SourceMap." + Guid.NewGuid().ToString("N"));
+		try
+		{
+			string localRoot = Path.Combine(tempRoot, "local");
+			string localFile = Path.Combine(localRoot, "src", "main.cpp");
+			Directory.CreateDirectory(Path.GetDirectoryName(localFile));
+			File.WriteAllText(localFile, "int main() { return 0; }");
+
+			string mapped = SourcePathMapper.Resolve("/build/agent/project/src/main.cpp", "/build/agent/project", localRoot);
+			Assert(string.Equals(mapped, localFile, StringComparison.Ordinal), "source path mapping");
+
+			string unmapped = SourcePathMapper.Resolve("/other/project/src/main.cpp", "/build/agent/project", localRoot);
+			Assert(string.Equals(unmapped, "/other/project/src/main.cpp", StringComparison.Ordinal), "source path mapping mismatch");
+		}
+		finally
+		{
+			if (Directory.Exists(tempRoot))
+			{
+				Directory.Delete(tempRoot, true);
+			}
 		}
 	}
 

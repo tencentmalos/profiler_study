@@ -66,8 +66,9 @@ Use at least one real `.profiler`, `.profiler_recording`, or `.profiler_dump` fi
 8. Select a frame and confirm `Selected Frame Scopes` updates with thread, scope, duration, and source columns.
 9. Select a frame with custom stats and confirm `Selected Frame Counters` shows graph, counter, value, count, and unit.
 10. If source paths exist locally, click `Open` in `Selected Frame Scopes` and confirm the configured editor or system opener launches.
-11. Close and reopen the app, then confirm the file appears in `Recent files` and `Open Recent` reloads it.
-12. Start the application with a profiler file path as the first non-option argument and confirm it loads on startup.
+11. If captured source paths differ from local paths, set `Captured root` and `Local root`, then confirm `Open` resolves the mapped local file.
+12. Close and reopen the app, then confirm the file appears in `Recent files` and `Open Recent` reloads it.
+13. Start the application with a profiler file path as the first non-option argument and confirm it loads on startup.
 
 ## Source launch behavior
 
@@ -91,7 +92,6 @@ These are intentionally not first-release complete:
 - No recording player or demo simulator replacement.
 - No full thread timeline/flame graph parity with WinForms; current first-release detail is a selected-frame scope table.
 - No sortable/virtualized DataGrid for scope and counter tables; current tables are fixed, read-only `ItemsControl` projections.
-- Source path remapping is not yet configurable in UI; local source paths must already match captured paths or be handled by the configured external viewer.
 - Publish profiles are framework-dependent; non-development machines need a compatible .NET runtime installed.
 
 ## First-release acceptance

@@ -27,6 +27,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
 	private IReadOnlyList<string> m_RecentFiles = Array.Empty<string>();
 	private string m_SelectedRecentFile;
+	private string m_CapturedSourceRoot;
+	private string m_LocalSourceRoot;
 	private TimelineSelection m_Selection = new TimelineSelection();
 	private TimelineViewport m_Viewport = TimelineViewport.CreateForFrames(0);
 	private IReadOnlyList<ScopeHotspotRow> m_AllScopeHotspots = Array.Empty<ScopeHotspotRow>();
@@ -59,6 +61,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_SelectSlowestFrameCommand = new RelayCommand(_ => SelectSlowestFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_OpenRecentSessionCommand = new RelayCommand(parameter => _ = OpenRecentSessionAsync(parameter as string ?? SelectedRecentFile), _ => !string.IsNullOrWhiteSpace(SelectedRecentFile));
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
+		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
+		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
 		AttachTimelineState(Selection, Viewport);
 		if (!string.IsNullOrWhiteSpace(startupProfilerPath))
@@ -118,6 +122,30 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_SelectedRecentFile, value))
 			{
 				m_OpenRecentSessionCommand.RaiseCanExecuteChanged();
+			}
+		}
+	}
+
+	public string CapturedSourceRoot
+	{
+		get => m_CapturedSourceRoot;
+		set
+		{
+			if (SetProperty(ref m_CapturedSourceRoot, value ?? string.Empty))
+			{
+				SaveSourcePathSettings();
+			}
+		}
+	}
+
+	public string LocalSourceRoot
+	{
+		get => m_LocalSourceRoot;
+		set
+		{
+			if (SetProperty(ref m_LocalSourceRoot, value ?? string.Empty))
+			{
+				SaveSourcePathSettings();
 			}
 		}
 	}
@@ -363,6 +391,13 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_AppSettingsService.Save(m_AppSettings);
 	}
 
+	private void SaveSourcePathSettings()
+	{
+		m_AppSettings.CapturedSourceRoot = CapturedSourceRoot ?? string.Empty;
+		m_AppSettings.LocalSourceRoot = LocalSourceRoot ?? string.Empty;
+		m_AppSettingsService.Save(m_AppSettings);
+	}
+
 	private void ApplyDocument(SessionDocument document)
 	{
 		DetachTimelineState(Selection, Viewport);
@@ -537,9 +572,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 			return;
 		}
 
-		if (m_SourceViewerLauncher.TryLaunch(row.SourceFile, row.SourceLine, out string error))
+		string sourceFile = SourcePathMapper.Resolve(row.SourceFile, CapturedSourceRoot, LocalSourceRoot);
+		if (m_SourceViewerLauncher.TryLaunch(sourceFile, row.SourceLine, out string error))
 		{
-			StatusText = "Opened source: " + row.SourceText;
+			StatusText = string.Equals(sourceFile, row.SourceFile, StringComparison.OrdinalIgnoreCase)
+				? "Opened source: " + row.SourceText
+				: "Opened mapped source: " + sourceFile;
 		}
 		else
 		{
