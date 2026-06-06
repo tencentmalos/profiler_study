@@ -22,6 +22,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 
 	private ProfilerTimelinePlotModel m_PlotModel;
 	private CurveUiPlotBridgeItem m_MainStatsBridge = null!;
+	private ucDetailPlotComponent m_ScopeFlamePlot;
 	private bool m_IsAutoFollow = true;
 	private bool m_IsAutoScaleY = true;
 	private bool m_ShowDetailPlots = true;
@@ -91,6 +92,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 
 		m_TimelineAdapter.FillFrameSeries(m_MainStatsBridge);
 		m_TimelineAdapter.FillCustomStatSeries(m_PlotModel.CustomStats, m_PlotBridges);
+		ApplyScopeFlamePlot(document);
 
 		Timeline.UpdateMainStatsAndAllDetailPlots();
 		ApplyRangeAndViewport();
@@ -204,6 +206,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 		m_DetailPlotControls.Clear();
 		m_PlotBridges.Clear();
 		m_AllBridges.Clear();
+		m_ScopeFlamePlot = null;
 
 		if (m_PlotModel == null)
 		{
@@ -239,6 +242,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 		Timeline.ChildDetails.ClearAll();
 		m_PlotBridges.Clear();
 		m_AllBridges.Clear();
+		m_ScopeFlamePlot = null;
 		m_PlotModel = m_TimelineAdapter.CreatePlotModel(null);
 
 		// Keep a clean main plot even in empty states
@@ -318,6 +322,11 @@ internal sealed class ProfilerStatsController : ObservableObject
 				bridge.UiComponent.Border.IsVisible = m_ShowDetailPlots;
 			}
 		}
+
+		if (m_ScopeFlamePlot?.Border != null)
+		{
+			m_ScopeFlamePlot.Border.IsVisible = m_ShowDetailPlots;
+		}
 	}
 
 	private void ApplyPlotHeight(PlotHeight height)
@@ -343,6 +352,11 @@ internal sealed class ProfilerStatsController : ObservableObject
 				bridge.UiComponent.Border.Height = heightPx;
 			}
 		}
+
+		if (m_ScopeFlamePlot?.Border != null)
+		{
+			m_ScopeFlamePlot.Border.Height = heightPx;
+		}
 	}
 
 	private void RefreshDetailPlotControlPanel()
@@ -359,6 +373,26 @@ internal sealed class ProfilerStatsController : ObservableObject
 			}
 
 			var control = new DetailPlotControlItem(bridge.Metadata.PlotTitle, bridge.UiComponent);
+			var toggle = new ToggleButton
+			{
+				Content = control.Title,
+				IsChecked = m_ShowDetailPlots,
+				Margin = new global::Avalonia.Thickness(2, 0),
+				FontSize = 11,
+				Height = 28,
+			};
+
+			var localControl = control;
+			toggle.IsCheckedChanged += (_, _) => localControl.ChangePlotVisible(toggle.IsChecked ?? false);
+			control.UiItem = toggle;
+			control.ChangePlotVisible(m_ShowDetailPlots);
+			m_DetailPlotControls.Add(control);
+			controlsPanel.Children.Add(toggle);
+		}
+
+		if (m_ScopeFlamePlot?.Border != null)
+		{
+			var control = new DetailPlotControlItem("Profiler Scopes", m_ScopeFlamePlot);
 			var toggle = new ToggleButton
 			{
 				Content = control.Title,
@@ -441,6 +475,19 @@ internal sealed class ProfilerStatsController : ObservableObject
 			bridge.CurveDictionary[field.PropertyName] = curve;
 			fieldIndex++;
 		}
+	}
+
+	private void ApplyScopeFlamePlot(SessionDocument document)
+	{
+		FlameGenerator.FlameGraphConfig flameConfig = m_TimelineAdapter.CreateScopeFlameGraphConfig(document);
+		if (flameConfig.StackFrames.Count == 0)
+		{
+			m_ScopeFlamePlot = null;
+			return;
+		}
+
+		m_ScopeFlamePlot = Timeline.AddFlameGraphDetailView("Profiler Scopes");
+		m_ScopeFlamePlot.FlameGenerator?.Configure(flameConfig);
 	}
 
 	private void SetAllDetailPlotsVisible(bool isVisible)

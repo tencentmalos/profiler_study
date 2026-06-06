@@ -90,6 +90,79 @@ internal sealed class ProfilerTimelineAdapter
 		}
 	}
 
+	public FlameGenerator.FlameGraphConfig CreateScopeFlameGraphConfig(SessionDocument document, int maxFrames = 300, int maxScopes = 5000)
+	{
+		var config = new FlameGenerator.FlameGraphConfig
+		{
+			Title = "Profiler Scopes",
+			TimelineStart = m_FrameSamples.Length == 0 ? 0.0 : m_FrameSamples[0].Index,
+			TimelineEnd = m_FrameSamples.Length == 0 ? 1.0 : m_FrameSamples[^1].Index + 1.0,
+			MaxStackDepth = 1,
+			FrameHeight = 18.0,
+		};
+
+		if (document?.Session == null || m_FrameSamples.Length == 0 || maxFrames <= 0 || maxScopes <= 0)
+		{
+			return config;
+		}
+
+		int stride = Math.Max(1, (int)Math.Ceiling(m_FrameSamples.Length / (double)maxFrames));
+		var threadLaneIndexes = new Dictionary<string, int>(StringComparer.Ordinal);
+		int maxDepth = 0;
+
+		for (int sampleIndex = 0; sampleIndex < m_FrameSamples.Length && config.StackFrames.Count < maxScopes; sampleIndex += stride)
+		{
+			FrameSample sample = m_FrameSamples[sampleIndex];
+			if (sample.DurationMs <= 0.0)
+			{
+				continue;
+			}
+
+			IReadOnlyList<ScopeFrameDetailRow> rows = ScopeFrameDetailAnalyzer.Build(document, sample.Index, 120);
+			foreach (ScopeFrameDetailRow row in rows)
+			{
+				if (config.StackFrames.Count >= maxScopes)
+				{
+					break;
+				}
+
+				if (row.DurationMs <= 0.0)
+				{
+					continue;
+				}
+
+				if (threadLaneIndexes.TryGetValue(row.ThreadName, out int threadLane) is false)
+				{
+					threadLane = threadLaneIndexes.Count;
+					threadLaneIndexes[row.ThreadName] = threadLane;
+				}
+
+				double startRatio = Math.Clamp(row.StartOffsetMs / sample.DurationMs, 0.0, 1.0);
+				double endRatio = Math.Clamp((row.StartOffsetMs + row.DurationMs) / sample.DurationMs, startRatio, 1.0);
+				if (endRatio <= startRatio)
+				{
+					endRatio = Math.Min(1.0, startRatio + 0.002);
+				}
+
+				int stackLevel = (threadLane * 12) + Math.Min(row.Depth, 11);
+				maxDepth = Math.Max(maxDepth, stackLevel + 1);
+				Color color = ScottPlotColorUtil.GetMutedColor(row.Depth + (threadLane * 3));
+				config.StackFrames.Add(new FlameGenerator.StackFrame
+				{
+					FunctionName = row.Name,
+					StartTime = sample.Index + startRatio,
+					EndTime = sample.Index + endRatio,
+					StackLevel = stackLevel,
+					Color = new Color(color.R, color.G, color.B, 210),
+					Module = row.ThreadName,
+				});
+			}
+		}
+
+		config.MaxStackDepth = Math.Max(1, maxDepth);
+		return config;
+	}
+
 	public int GetNearestFrameIndex(double targetX)
 	{
 		if (m_FrameSamples.Length == 0)

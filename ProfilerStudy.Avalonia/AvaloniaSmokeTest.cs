@@ -47,6 +47,7 @@ internal static class AvaloniaSmokeTest
 			ProfilerTimelinePlotModel plotModel = adapter.CreatePlotModel(document);
 			Assert(plotModel.Metadata.PlotList.Count > 0, "profiler timeline plot metadata");
 			Assert(plotModel.Metadata.PlotList.Any(item => item.IsMainPlot), "profiler timeline main plot");
+			AssertProfilerScopeFlameConfig(adapter, document);
 			AssertSourcePathMapping();
 			AssertTableSorting();
 			AssertFlameChartControl();
@@ -107,6 +108,21 @@ internal static class AvaloniaSmokeTest
 			{
 				Directory.Delete(tempRoot, true);
 			}
+		}
+	}
+
+	private static void AssertProfilerScopeFlameConfig(ProfilerTimelineAdapter adapter, SessionDocument document)
+	{
+		var config = adapter.CreateScopeFlameGraphConfig(document, 8, 64);
+		Assert(config.TimelineEnd > config.TimelineStart, "scope flame timeline range");
+		Assert(config.MaxStackDepth >= 1, "scope flame depth");
+		if (document.Session == null)
+		{
+			Assert(config.StackFrames.Count == 0, "sample scope flame frames");
+		}
+		else
+		{
+			Assert(config.StackFrames.All(item => item.EndTime > item.StartTime), "scope flame frame duration");
 		}
 	}
 

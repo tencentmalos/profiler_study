@@ -124,6 +124,7 @@ public class FlameGenerator : IFlameGenerator
     private List<OneFrameInfo>      _frameList = new List<OneFrameInfo>();
     private Crosshair               _crosshair = null!;
     private Tooltip                 _tooltip = null!;
+    private bool                    _mouseInteractionAttached;
 
     public FlameGraphConfig     Config => _config;
     public AvaPlot              Plot => _plot;
@@ -156,8 +157,15 @@ public class FlameGenerator : IFlameGenerator
     public FlameGenerator(AvaPlot targetPlot)
     {
         _plot = targetPlot;
-        _config = GenerateFlameGraphData();
+        _config = new FlameGraphConfig();
         SetupFlameGraph();
+    }
+
+    public void Configure(FlameGraphConfig config)
+    {
+        _config = config ?? new FlameGraphConfig();
+        SetupFlameGraph();
+        _plot.Refresh();
     }
 
     /// <summary>
@@ -299,23 +307,24 @@ public class FlameGenerator : IFlameGenerator
     /// </summary>
     private void SetupMouseInteraction()
     {
-        // Add crosshair
+        if (_mouseInteractionAttached is false)
+        {
+            _plot.PointerMoved += OnMouseMove;
+            _plot.PointerExited += OnMouseExit;
+            _mouseInteractionAttached = true;
+        }
+
         _crosshair = _plot.Plot.Add.Crosshair(0, 0);
         _crosshair.IsVisible = false;
         TimelineScopeThemeHelper.ApplyCrosshairTheme(_crosshair, TimelineScopeThemeHelper.InfoBrushKey, "#FF73B5FF");
         _crosshair.LineWidth = 1;
         _crosshair.LinePattern = LinePattern.Dashed;
 
-        // Add tooltip
         _tooltip = _plot.Plot.Add.Tooltip(new Coordinates(0, 0), "", new Coordinates(0, 0));
         _tooltip.IsVisible = false;
         _tooltip.LineWidth = 1;
         _tooltip.LabelFontSize = 10;
         TimelineScopeThemeHelper.ApplyTooltipTheme(_tooltip);
-
-        // Bind mouse events
-        _plot.PointerMoved += OnMouseMove;
-        _plot.PointerExited += OnMouseExit;
     }
 
     /// <summary>
@@ -448,8 +457,7 @@ public class FlameGenerator : IFlameGenerator
     /// </summary>
     public void GenerateDataByConfig()
     {
-        // For flame graphs, this regenerates the flame graph data
-        _config = GenerateFlameGraphData();
+        SetupFlameGraph();
     }
 
     /// <summary>
@@ -504,7 +512,6 @@ public class FlameGenerator : IFlameGenerator
     /// </summary>
     public void RegenerateData()
     {
-        _config = GenerateFlameGraphData();
         SetupFlameGraph();
         _plot.Refresh();
     }
@@ -519,7 +526,6 @@ public class FlameGenerator : IFlameGenerator
 
     public (double, double) GetDataSourceXRange()
     {
-        //ToDo: need add right range here for flame plot
-        return (0, 0);
+        return (_config.TimelineStart, _config.TimelineEnd);
     }
 }
