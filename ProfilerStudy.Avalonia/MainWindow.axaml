@@ -24,6 +24,7 @@
                     PlaceholderText="Recent files" />
           <Button Command="{Binding OpenRecentSessionCommand}" Padding="10,4">Open Recent</Button>
           <Button Command="{Binding LoadSampleCommand}" Padding="10,4">Sample</Button>
+          <Button Command="{Binding SelectSlowestFrameCommand}" Padding="10,4">Find Slowest</Button>
           <Button Command="{Binding ResetTimelineCommand}" Padding="10,4">Reset Zoom</Button>
         </StackPanel>
         <TextBlock Text="{Binding StatusText}" Foreground="#202020" VerticalAlignment="Center" Margin="14,0,0,0" />
@@ -89,6 +90,11 @@
                              Foreground="#101010"
                              FontSize="14"
                              FontWeight="SemiBold" />
+                  <TextBox DockPanel.Dock="Right"
+                           Text="{Binding ScopeFilterText}"
+                           Width="180"
+                           Margin="10,0,0,0"
+                           PlaceholderText="Filter scopes" />
                   <TextBlock Text="{Binding ScopeHotspotSummaryText}"
                              Foreground="#404040"
                              HorizontalAlignment="Right" />

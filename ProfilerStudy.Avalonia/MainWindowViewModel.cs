@@ -16,6 +16,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
+	private readonly RelayCommand m_SelectSlowestFrameCommand;
 	private readonly RelayCommand m_OpenRecentSessionCommand;
 	private readonly RelayCommand m_OpenScopeSourceCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
@@ -28,11 +29,13 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_SelectedRecentFile;
 	private TimelineSelection m_Selection = new TimelineSelection();
 	private TimelineViewport m_Viewport = TimelineViewport.CreateForFrames(0);
+	private IReadOnlyList<ScopeHotspotRow> m_AllScopeHotspots = Array.Empty<ScopeHotspotRow>();
 	private IReadOnlyList<ScopeHotspotRow> m_ScopeHotspots = Array.Empty<ScopeHotspotRow>();
 	private IReadOnlyList<ScopeFrameDetailRow> m_SelectedFrameScopes = Array.Empty<ScopeFrameDetailRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
+	private string m_ScopeFilterText = string.Empty;
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
 	private bool m_IsLoading;
@@ -51,6 +54,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
+		m_SelectSlowestFrameCommand = new RelayCommand(_ => SelectSlowestFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_OpenRecentSessionCommand = new RelayCommand(parameter => _ = OpenRecentSessionAsync(parameter as string ?? SelectedRecentFile), _ => !string.IsNullOrWhiteSpace(SelectedRecentFile));
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -67,6 +71,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand ResetTimelineCommand => m_ResetTimelineCommand;
 
+	public RelayCommand SelectSlowestFrameCommand => m_SelectSlowestFrameCommand;
+
 	public RelayCommand OpenRecentSessionCommand => m_OpenRecentSessionCommand;
 
 	public RelayCommand OpenScopeSourceCommand => m_OpenScopeSourceCommand;
@@ -81,6 +87,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
 				m_ResetTimelineCommand.RaiseCanExecuteChanged();
+				m_SelectSlowestFrameCommand.RaiseCanExecuteChanged();
 			}
 		}
 	}
@@ -155,6 +162,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_ScopeHotspots;
 		private set => SetProperty(ref m_ScopeHotspots, value);
+	}
+
+	public string ScopeFilterText
+	{
+		get => m_ScopeFilterText;
+		set
+		{
+			if (SetProperty(ref m_ScopeFilterText, value ?? string.Empty))
+			{
+				ApplyScopeHotspotFilter();
+			}
+		}
 	}
 
 	public string ScopeHotspotSummaryText
@@ -332,19 +351,55 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void ApplyScopeHotspots(SessionDocument document)
 	{
-		ScopeHotspots = ScopeHotspotAnalyzer.Build(document);
-		if (document?.Session == null)
+		m_AllScopeHotspots = ScopeHotspotAnalyzer.Build(document);
+		ApplyScopeHotspotFilter();
+	}
+
+	private void ApplyScopeHotspotFilter()
+	{
+		if (CurrentDocument?.Session == null)
 		{
+			ScopeHotspots = m_AllScopeHotspots;
 			ScopeHotspotSummaryText = "Generated sample has no profiler scope stream.";
 		}
-		else if (ScopeHotspots.Count == 0)
+		else if (m_AllScopeHotspots.Count == 0)
 		{
+			ScopeHotspots = m_AllScopeHotspots;
 			ScopeHotspotSummaryText = "No scope hotspots found in this session.";
+		}
+		else if (string.IsNullOrWhiteSpace(ScopeFilterText))
+		{
+			ScopeHotspots = m_AllScopeHotspots;
+			ScopeHotspotSummaryText = $"Top {m_AllScopeHotspots.Count} scopes by total time";
 		}
 		else
 		{
-			ScopeHotspotSummaryText = $"Top {ScopeHotspots.Count} scopes by total time";
+			string filter = ScopeFilterText.Trim();
+			ScopeHotspots = m_AllScopeHotspots
+				.Where(item => item.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+				.ToArray();
+			ScopeHotspotSummaryText = $"{ScopeHotspots.Count} of {m_AllScopeHotspots.Count} scopes match \"{filter}\"";
 		}
+	}
+
+	private void SelectSlowestFrame()
+	{
+		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
+		{
+			StatusText = "No frame samples loaded.";
+			return;
+		}
+
+		FrameSample slowestFrame = CurrentDocument.FrameSamples.OrderByDescending(item => item.DurationMs).First();
+		int visibleCount = Math.Min(CurrentDocument.Summary.FrameCount, 120);
+		int startFrame = Math.Max(0, slowestFrame.Index - (visibleCount / 2));
+		int endFrame = Math.Min(CurrentDocument.Summary.FrameCount - 1, startFrame + visibleCount - 1);
+		startFrame = Math.Max(0, endFrame - visibleCount + 1);
+
+		Viewport.SetRange(startFrame, endFrame);
+		Selection.SelectedFrameIndex = slowestFrame.Index;
+		Selection.SelectedFrameTimeMs = slowestFrame.DurationMs;
+		StatusText = $"Selected slowest frame {slowestFrame.Index} ({slowestFrame.DurationMs:0.###} ms).";
 	}
 
 	private void ResetTimeline()

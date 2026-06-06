@@ -33,6 +33,12 @@ internal static class AvaloniaSmokeTest
 			document.Selection.SelectedFrameTimeMs = sample.DurationMs;
 			Assert(document.Selection.SelectedFrameIndex == sample.Index, "selection index");
 			Assert(document.Selection.SelectedFrameTimeMs > 0.0, "selection duration");
+			FrameSample slowestFrame = FindSlowestFrame(document.FrameSamples);
+			document.Viewport.SetRange(Math.Max(0, slowestFrame.Index - 5), Math.Min(document.Summary.FrameCount - 1, slowestFrame.Index + 5));
+			document.Selection.SelectedFrameIndex = slowestFrame.Index;
+			document.Selection.SelectedFrameTimeMs = slowestFrame.DurationMs;
+			Assert(document.Viewport.Contains(slowestFrame.Index), "slowest frame viewport");
+			Assert(document.Selection.SelectedFrameIndex == slowestFrame.Index, "slowest frame selection");
 
 			ProfilerStatsDocumentSummary profilerStatsSummary = ProfilerStatsDocumentAnalyzer.Analyze(document);
 			Assert(profilerStatsSummary.FrameSeriesPointCount == document.FrameSamples.Length, "profiler stats frame series");
@@ -67,6 +73,19 @@ internal static class AvaloniaSmokeTest
 		{
 			throw new InvalidOperationException("Smoke test failed: " + name);
 		}
+	}
+
+	private static FrameSample FindSlowestFrame(FrameSample[] samples)
+	{
+		FrameSample slowestFrame = samples[0];
+		for (int i = 1; i < samples.Length; i++)
+		{
+			if (samples[i].DurationMs > slowestFrame.DurationMs)
+			{
+				slowestFrame = samples[i];
+			}
+		}
+		return slowestFrame;
 	}
 
 	private static SessionDocument LoadDocument(SessionLoader loader, string profilerPath)
