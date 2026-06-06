@@ -1,4 +1,5 @@
 using System;
+using FramePro;
 
 namespace ProfilerStudy.McpServer;
 
@@ -50,9 +51,9 @@ internal sealed class ProfilerCaptureTarget
 	public static ProfilerCaptureTarget FromAndroidEndpoint(string source, string endpoint)
 	{
 		endpoint = (endpoint ?? string.Empty).Trim();
-		if (!endpoint.StartsWith("localfilesystem:", StringComparison.OrdinalIgnoreCase))
+		if (!AdbSocketDiscovery.IsAdbSocketEndpoint(endpoint))
 		{
-			throw new ArgumentException("Android endpoint must start with localfilesystem:.");
+			throw new ArgumentException("Android endpoint must be localfilesystem:<path>, localabstract:<name>, or tcp:<port>.");
 		}
 
 		return new ProfilerCaptureTarget
@@ -70,17 +71,38 @@ internal sealed class ProfilerCaptureTarget
 		forwardName = Uri.UnescapeDataString((forwardName ?? string.Empty).Trim());
 		if (forwardName.Length == 0)
 		{
-			throw new ArgumentException("Android capture url must include a unix socket name or path.");
+			throw new ArgumentException("Android capture url must include a unix socket name, path, or port.");
+		}
+
+		string endpoint = ResolveAndroidEndpoint(forwardName);
+		if (!AdbSocketDiscovery.IsAdbSocketEndpoint(endpoint))
+		{
+			throw new ArgumentException("Android capture url must resolve to localfilesystem:<path>, localabstract:<name>, or tcp:<port>.");
 		}
 
 		return new ProfilerCaptureTarget
 		{
 			Kind = ProfilerCaptureTargetKind.AndroidForward,
 			Url = url,
-			Endpoint = "localfilesystem:" + forwardName,
+			Endpoint = endpoint,
 			ConnectHost = "127.0.0.1",
 			ConnectPort = 0
 		};
+	}
+
+	private static string ResolveAndroidEndpoint(string forwardName)
+	{
+		if (forwardName.StartsWith("localfilesystem:", StringComparison.OrdinalIgnoreCase)
+			|| forwardName.StartsWith("localabstract:", StringComparison.OrdinalIgnoreCase)
+			|| forwardName.StartsWith("tcp:", StringComparison.OrdinalIgnoreCase))
+		{
+			return forwardName;
+		}
+		if (int.TryParse(forwardName, out int port) && port > 0 && port <= 65535)
+		{
+			return "tcp:" + port;
+		}
+		return "localfilesystem:" + forwardName;
 	}
 
 	private static ProfilerCaptureTarget ParsePc(string url)

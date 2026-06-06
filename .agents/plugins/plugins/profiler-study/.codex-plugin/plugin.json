@@ -1,6 +1,6 @@
 {
   "name": "profiler-study",
-  "version": "0.1.0",
+  "version": "0.1.0+codex.local-20260606-131104",
   "description": "ProfilerStudy FramePro analysis plugin with a local stdio MCP server and profiler-mcp skill.",
   "author": {
     "name": "ProfilerStudy"

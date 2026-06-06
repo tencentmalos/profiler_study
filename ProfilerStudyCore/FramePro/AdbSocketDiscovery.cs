@@ -16,7 +16,20 @@ public static class AdbSocketDiscovery
 	public static bool IsAdbSocketEndpoint(string endpoint)
 	{
 		endpoint = (endpoint ?? string.Empty).Trim();
-		return endpoint.StartsWith("localfilesystem:", StringComparison.OrdinalIgnoreCase);
+		if (endpoint.StartsWith("localfilesystem:", StringComparison.OrdinalIgnoreCase))
+		{
+			return endpoint.Length > "localfilesystem:".Length;
+		}
+		if (endpoint.StartsWith("localabstract:", StringComparison.OrdinalIgnoreCase))
+		{
+			return endpoint.Length > "localabstract:".Length;
+		}
+		if (endpoint.StartsWith("tcp:", StringComparison.OrdinalIgnoreCase))
+		{
+			string portText = endpoint.Substring("tcp:".Length);
+			return int.TryParse(portText, out int port) && port > 0 && port <= 65535;
+		}
+		return false;
 	}
 
 	public static int AllocateLocalTcpPort()

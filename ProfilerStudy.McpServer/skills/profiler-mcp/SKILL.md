@@ -26,7 +26,7 @@ dotnet build ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release -
 ## Workflow
 
 1. For an existing capture file, call `load_session_file` when follow-up questions are likely; call `analyze_session_file` only for one-shot summaries.
-2. For live captures, call `capture_profile` with a target URL and `keep_session=true` when the user may ask follow-up questions. Use `android://{forward_name}` for adb forward to a device unix socket and `pc://{ip}:{port}` for direct TCP.
+2. For live captures, call `capture_profile` with a target URL and `keep_session=true` when the user may ask follow-up questions. Use `android://{forward_name}` for adb forward to a device `localfilesystem`, `localabstract`, or `tcp` endpoint and `pc://{ip}:{port}` for direct TCP.
 3. Start broad: `get_session_summary`, then `find_slow_frames`, then `find_scope_hotspots`.
 4. Narrow by evidence: use `analyze_frame` for a suspicious frame, `analyze_frame_detail` when hierarchical single-frame flame graph data and same-frame counter samples are needed, and `analyze_time_range` for a slow-frame cluster or comparison window.
 5. For custom stat / counter questions, call `list_counters` first, then `query_counter` using the exact returned `counter_name`.
@@ -39,7 +39,7 @@ dotnet build ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release -
 - Do not infer missing scope time from nested totals. The server's diagnostics use conservative broad-unattributed estimates.
 - Keep raw output bounded: use `top`, frame ranges, `max_nodes`, `max_depth`, `min_duration_ms`, and `max_samples` instead of requesting whole traces.
 - Preserve paths and session ids exactly as returned by tools.
-- For live targets, prefer `capture_profile` URLs. Do not run arbitrary adb commands through this skill; Android capture only forwards the requested `localfilesystem:{forward_name}` endpoint.
+- For live targets, prefer `capture_profile` URLs. Do not run arbitrary adb commands through this skill; Android capture only forwards the requested `localfilesystem:<path>`, `localabstract:<name>`, or `tcp:<port>` endpoint.
 
 ## Tool Reference
 

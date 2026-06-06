@@ -204,7 +204,7 @@ internal sealed class ProfilerMcpTools
 			new Dictionary<string, object>
 			{
 				["name"] = "capture_profile",
-				["description"] = "Connect to a profiler target by URL, capture for a duration, then return a compact performance analysis. Use android://{forward_name} for adb forward to a device unix socket, or pc://{ip}:{port} for direct TCP.",
+				["description"] = "Connect to a profiler target by URL, capture for a duration, then return a compact performance analysis. Use android://{forward_name} for adb forward to a device localfilesystem, localabstract, or tcp endpoint, or pc://{ip}:{port} for direct TCP.",
 				["inputSchema"] = new Dictionary<string, object>
 				{
 					["type"] = "object",
@@ -214,7 +214,7 @@ internal sealed class ProfilerMcpTools
 						["url"] = new Dictionary<string, object>
 						{
 							["type"] = "string",
-							["description"] = "Capture target URL, for example android:///data/local/tmp/framepro or pc://127.0.0.1:8428."
+							["description"] = "Capture target URL, for example android:///data/local/tmp/framepro, android://localabstract:azahar-framepro, android://tcp:8428, or pc://127.0.0.1:8428."
 						},
 						["duration_seconds"] = new Dictionary<string, object>
 						{

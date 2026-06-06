@@ -49,12 +49,24 @@ internal static class ProfilerDiagnosticsSelfTest
 		ProfilerCaptureTarget namedAndroid = ProfilerCaptureTarget.Parse("android://azahar.debug/framepro");
 		AssertEqual("localfilesystem:azahar.debug/framepro", namedAndroid.Endpoint, "named android endpoint");
 
+		ProfilerCaptureTarget localAbstractAndroid = ProfilerCaptureTarget.Parse("android://localabstract:azahar-framepro");
+		AssertEqual("localabstract:azahar-framepro", localAbstractAndroid.Endpoint, "localabstract android endpoint");
+		AssertEqual(true, AdbSocketDiscovery.IsAdbSocketEndpoint(localAbstractAndroid.Endpoint), "localabstract endpoint accepted");
+
+		ProfilerCaptureTarget tcpAndroid = ProfilerCaptureTarget.Parse("android://tcp:8428");
+		AssertEqual("tcp:8428", tcpAndroid.Endpoint, "tcp android endpoint");
+		AssertEqual(true, AdbSocketDiscovery.IsAdbSocketEndpoint(tcpAndroid.Endpoint), "tcp endpoint accepted");
+
+		ProfilerCaptureTarget portAndroid = ProfilerCaptureTarget.Parse("android://8429");
+		AssertEqual("tcp:8429", portAndroid.Endpoint, "port android endpoint");
+
 		ProfilerCaptureTarget pc = ProfilerCaptureTarget.Parse("pc://192.168.1.20:8428");
 		AssertEqual(ProfilerCaptureTargetKind.Tcp, pc.Kind, "pc target kind");
 		AssertEqual("192.168.1.20", pc.ConnectHost, "pc host");
 		AssertEqual(8428, pc.ConnectPort, "pc port");
 		AssertEqual("192.168.1.20:8428", pc.Endpoint, "pc endpoint");
 
+		AssertThrows(() => ProfilerCaptureTarget.Parse("android://tcp:not-a-port"), "invalid tcp android port");
 		AssertThrows(() => ProfilerCaptureTarget.Parse("http://127.0.0.1:8428"), "unsupported scheme");
 		AssertCaptureProfileTool();
 	}

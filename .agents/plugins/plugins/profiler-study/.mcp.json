@@ -1,15 +1,11 @@
 {
   "mcpServers": {
     "profiler-study": {
-      "command": "powershell.exe",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "scripts/start-profiler-mcp.ps1"
+        "scripts/start-profiler-mcp.sh"
       ],
-      "note": "Builds and launches the ProfilerStudy MCP stdio server from the Git marketplace source. Requires Windows PowerShell for this launcher, git for GitHub marketplace installs, and a .NET 8 SDK."
+      "note": "Builds and launches the ProfilerStudy MCP stdio server from the local marketplace source. Requires bash and a .NET 8 SDK."
     }
   }
 }

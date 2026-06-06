@@ -66,7 +66,7 @@ public GitHub plugin 安装会使用 `.agents/plugins/plugins/profiler-study/ski
 
 支持的 URL：
 
-- `android://{forward_name}`：执行 `adb forward tcp:<local_port> localfilesystem:{forward_name}`，再连接本地转发端口。例如 `android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro`。
+- `android://{forward_name}`：执行 `adb forward tcp:<local_port> <endpoint>`，再连接本地转发端口。默认把普通路径解析为 `localfilesystem:{forward_name}`，也支持显式 `localfilesystem:<path>`、`localabstract:<name>`、`tcp:<port>`，裸数字端口会解析为 `tcp:<port>`。例如 `android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro`、`android://localabstract:azahar-framepro`、`android://tcp:8428`。
 - `pc://{ip}:{port}`：直接通过 TCP 连接 PC target。例如 `pc://127.0.0.1:8428`。
 
 参数：
