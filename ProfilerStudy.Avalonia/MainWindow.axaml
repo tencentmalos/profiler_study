@@ -1775,6 +1775,70 @@
             BorderThickness="1"
             BoxShadow="0 8 24 0 #66000000"
             Padding="0"
+            IsVisible="{Binding IsThreadSettingsPanelVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+          <DockPanel LastChildFill="True">
+            <TextBlock Text="Thread View Settings" FontWeight="SemiBold" Foreground="#101010" />
+            <Button DockPanel.Dock="Right"
+                    Content="x"
+                    Width="24"
+                    Height="22"
+                    Padding="0"
+                    Command="{Binding CloseThreadSettingsCommand}" />
+          </DockPanel>
+        </Border>
+        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+          <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="#101010" />
+          <TextBlock Text="Show or hide the docked panels used by the Threads view. These controls mirror the View menu and toolbar buttons." Foreground="#404040" TextWrapping="Wrap" />
+          <UniformGrid Columns="2" RowSpacing="7" ColumnSpacing="7" Margin="0,4,0,0">
+            <ToggleButton Content="Info"
+                          IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}"
+                          Command="{Binding ToggleThreadsPanelCommand}"
+                          CommandParameter="Info" />
+            <ToggleButton Content="Frame Graph"
+                          IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}"
+                          Command="{Binding ToggleThreadsPanelCommand}"
+                          CommandParameter="FrameGraph" />
+            <ToggleButton Content="Scope Graph"
+                          IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}"
+                          Command="{Binding ToggleThreadsPanelCommand}"
+                          CommandParameter="ScopeGraph" />
+            <ToggleButton Content="CPU Graph"
+                          IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}"
+                          Command="{Binding ToggleThreadsPanelCommand}"
+                          CommandParameter="CoreGraph" />
+            <ToggleButton Content="Custom Stats Graph"
+                          IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}"
+                          Command="{Binding ToggleThreadsPanelCommand}"
+                          CommandParameter="CustomStats" />
+            <ToggleButton Content="Data Grid"
+                          IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}"
+                          Command="{Binding ToggleThreadsPanelCommand}"
+                          CommandParameter="DataGrid" />
+          </UniformGrid>
+          <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
+            <TextBlock Text="Lane context commands still operate from the thread graph right-click menu: Hide, Move Up, Move Down, Collapse All, and Expand All." Foreground="#303030" TextWrapping="Wrap" />
+          </Border>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+            <Button Content="Collapse All" Width="92" Command="{Binding CollapseAllThreadsCommand}" />
+            <Button Content="Expand All" Width="88" Command="{Binding ExpandAllThreadsCommand}" />
+            <Button Content="Close" Width="86" Command="{Binding CloseThreadSettingsCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="520"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D2D2D2"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            Padding="0"
             IsVisible="{Binding IsCallstacksPanelVisible}">
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">

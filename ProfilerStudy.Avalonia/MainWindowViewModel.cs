@@ -54,6 +54,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_CollapseAllThreadsCommand;
 	private readonly RelayCommand m_ExpandAllThreadsCommand;
 	private readonly RelayCommand m_ThreadSettingsCommand;
+	private readonly RelayCommand m_CloseThreadSettingsCommand;
 	private readonly RelayCommand m_ToggleThreadsPanelCommand;
 	private readonly RelayCommand m_ToggleOutputWindowCommand;
 	private readonly RelayCommand m_ToggleToolboxCommand;
@@ -153,6 +154,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsCoreGraphVisible = true;
 	private bool m_IsThreadsCustomStatsVisible = true;
 	private bool m_IsThreadsDataGridVisible = true;
+	private bool m_IsThreadSettingsPanelVisible;
 	private bool m_IsOutputWindowVisible = true;
 	private bool m_IsOutputWindowMinimized;
 	private bool m_IsOutputWindowFloating;
@@ -245,7 +247,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_MoveFocusedThreadDownCommand = new RelayCommand(_ => MoveFocusedThread(1), _ => CanMoveFocusedThread(1));
 		m_CollapseAllThreadsCommand = new RelayCommand(_ => SetThreadScopeCollapseState(true));
 		m_ExpandAllThreadsCommand = new RelayCommand(_ => SetThreadScopeCollapseState(false));
-		m_ThreadSettingsCommand = new RelayCommand(_ => ShowThreadSettingsStatus());
+		m_ThreadSettingsCommand = new RelayCommand(_ => OpenThreadSettingsPanel());
+		m_CloseThreadSettingsCommand = new RelayCommand(_ => CloseThreadSettingsPanel());
 		m_ToggleThreadsPanelCommand = new RelayCommand(ToggleThreadsPanel);
 		m_ToggleOutputWindowCommand = new RelayCommand(_ => ToggleOutputWindow());
 		m_ToggleToolboxCommand = new RelayCommand(_ => ToggleToolbox());
@@ -381,6 +384,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ExpandAllThreadsCommand => m_ExpandAllThreadsCommand;
 
 	public RelayCommand ThreadSettingsCommand => m_ThreadSettingsCommand;
+
+	public RelayCommand CloseThreadSettingsCommand => m_CloseThreadSettingsCommand;
 
 	public RelayCommand ToggleThreadsPanelCommand => m_ToggleThreadsPanelCommand;
 
@@ -892,6 +897,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	}
 
 	public bool IsThreadsDataGridCollapsed => !IsThreadsDataGridVisible;
+
+	public bool IsThreadSettingsPanelVisible
+	{
+		get => m_IsThreadSettingsPanelVisible;
+		private set => SetProperty(ref m_IsThreadSettingsPanelVisible, value);
+	}
 
 	public string ScopeColorMode
 	{
@@ -1585,6 +1596,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenSettingsPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
@@ -1604,6 +1616,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenAndroidPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsSettingsPanelVisible = false;
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
@@ -1920,6 +1933,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenConnectionPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsCallstacksPanelVisible = false;
@@ -2139,6 +2153,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenCallstacksPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
@@ -2158,6 +2173,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenHelpPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
@@ -2177,6 +2193,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenRegistrationPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
@@ -2196,6 +2213,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenUpdateCheckPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
@@ -2215,6 +2233,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenAboutPanel()
 	{
+		IsThreadSettingsPanelVisible = false;
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
@@ -3396,9 +3415,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 		StatusText = collapsed ? "Collapsed all thread scopes to top-level lanes." : "Expanded all thread scopes.";
 	}
 
-	private void ShowThreadSettingsStatus()
+	private void OpenThreadSettingsPanel()
 	{
-		StatusText = "Thread settings: right-click a lane, then use Hide, Move Up, Move Down, Collapse All, or Expand All.";
+		IsSettingsPanelVisible = false;
+		IsAndroidPanelVisible = false;
+		IsConnectionPanelVisible = false;
+		IsCallstacksPanelVisible = false;
+		IsHelpPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
+		IsAboutPanelVisible = false;
+		IsThreadSettingsPanelVisible = true;
+		ActiveSessionView = "Threads";
+		StatusText = "Thread View Settings panel opened.";
+	}
+
+	private void CloseThreadSettingsPanel()
+	{
+		IsThreadSettingsPanelVisible = false;
+		StatusText = "Thread View Settings panel closed.";
 	}
 
 	private void UpdateThreadOrder(IReadOnlyList<ThreadTimelineScopeRow> rows)
