@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using FramePro;
 
@@ -323,6 +324,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 				RaisePropertyChanged(nameof(IsScopesViewActive));
 				RaisePropertyChanged(nameof(IsCustomStatsViewActive));
 				RaisePropertyChanged(nameof(IsLogViewActive));
+				RaisePropertyChanged(nameof(ThreadsViewBrush));
+				RaisePropertyChanged(nameof(CoresViewBrush));
+				RaisePropertyChanged(nameof(ScopesViewBrush));
+				RaisePropertyChanged(nameof(CustomStatsViewBrush));
+				RaisePropertyChanged(nameof(LogViewBrush));
 			}
 		}
 	}
@@ -338,6 +344,16 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public bool IsCustomStatsViewActive => ActiveSessionView == "Custom Stats";
 
 	public bool IsLogViewActive => ActiveSessionView == "Log";
+
+	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+
+	public IBrush CoresViewBrush => IsCoresViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+
+	public IBrush ScopesViewBrush => IsScopesViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+
+	public IBrush CustomStatsViewBrush => IsCustomStatsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+
+	public IBrush LogViewBrush => IsLogViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
 
 	public bool IsLoading
 	{

@@ -28,9 +28,11 @@
           <MenuItem Header="E_xit" IsEnabled="False" />
         </MenuItem>
         <MenuItem Header="_View">
-          <MenuItem Header="_Threads View" />
-          <MenuItem Header="_Cores View" IsEnabled="False" />
-          <MenuItem Header="_Scopes View" />
+          <MenuItem Header="_Threads View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
+          <MenuItem Header="_Cores View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
+          <MenuItem Header="_Scopes View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
+          <MenuItem Header="Custom _Stats View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" />
+          <MenuItem Header="_Log View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
           <Separator />
           <MenuItem Header="_Threads View">
             <MenuItem Header="_Info" />
@@ -129,25 +131,25 @@
               <TextBlock Text="Info" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Frames" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Scope" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Cores" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="104" MinHeight="118" Padding="4">
+          <Button Width="104" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
@@ -249,11 +251,13 @@
                     <TextBlock Text="Views" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="7" Spacing="4">
-                    <Button HorizontalContentAlignment="Left" Padding="6,2">Frame Graph</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2">Profiler Scopes</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2">Scope Hotspots</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2">Selected Frame</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2">Counters</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Frame Graph</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Profiler Scopes</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}">Scope Hotspots</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Selected Frame</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}">Counters</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}">Cores</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}">Log</Button>
                   </StackPanel>
                 </Grid>
               </Border>
@@ -738,15 +742,17 @@
         </Border>
 
         <Border Grid.Row="2" Background="#EDEDED" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,8,0,0">
-          <Grid RowDefinitions="8,*">
-            <Polygon Points="46,0 64,0 55,8" Fill="#6382CF" HorizontalAlignment="Left" />
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="22" Margin="18,0,0,0" VerticalAlignment="Center">
-              <Button Content="Threads" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#6382CF" Background="Transparent" BorderThickness="0" />
-              <Button Content="Cores" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" Background="Transparent" BorderThickness="0" />
-              <Button Content="Scopes" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" Background="Transparent" BorderThickness="0" />
-              <Button Content="Custom Stats" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" Background="Transparent" BorderThickness="0" />
-              <Button Content="Log" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" Background="Transparent" BorderThickness="0" />
-            </StackPanel>
+          <Grid RowDefinitions="8,*" ColumnDefinitions="104,82,96,176,72,*">
+            <Polygon Grid.Column="0" Points="42,0 62,0 52,8" Fill="#4169E1" IsVisible="{Binding IsThreadsViewActive}" />
+            <Polygon Grid.Column="1" Points="28,0 48,0 38,8" Fill="#4169E1" IsVisible="{Binding IsCoresViewActive}" />
+            <Polygon Grid.Column="2" Points="34,0 54,0 44,8" Fill="#4169E1" IsVisible="{Binding IsScopesViewActive}" />
+            <Polygon Grid.Column="3" Points="72,0 92,0 82,8" Fill="#4169E1" IsVisible="{Binding IsCustomStatsViewActive}" />
+            <Polygon Grid.Column="4" Points="22,0 42,0 32,8" Fill="#4169E1" IsVisible="{Binding IsLogViewActive}" />
+            <Button Grid.Row="1" Grid.Column="0" Content="Threads" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="{Binding ThreadsViewBrush}" Background="Transparent" BorderThickness="0" />
+            <Button Grid.Row="1" Grid.Column="1" Content="Cores" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="{Binding CoresViewBrush}" Background="Transparent" BorderThickness="0" />
+            <Button Grid.Row="1" Grid.Column="2" Content="Scopes" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="{Binding ScopesViewBrush}" Background="Transparent" BorderThickness="0" />
+            <Button Grid.Row="1" Grid.Column="3" Content="Custom Stats" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="{Binding CustomStatsViewBrush}" Background="Transparent" BorderThickness="0" />
+            <Button Grid.Row="1" Grid.Column="4" Content="Log" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="{Binding LogViewBrush}" Background="Transparent" BorderThickness="0" />
           </Grid>
         </Border>
       </Grid>
