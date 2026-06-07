@@ -7,15 +7,34 @@ This checklist tracks the first cross-platform Avalonia client release gate. It 
 Run from the repository root:
 
 ```bash
-/Users/bytedance/.dotnet/dotnet build ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -c Debug
-ProfilerStudy.Avalonia/bin/Debug/net8.0/ProfilerStudy.Avalonia --smoke-test
+/Users/bytedance/.dotnet/dotnet build ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -c Debug --no-restore
+scripts/avalonia/validate_release.sh
 ```
+
+The validation script expects the selected configuration to be built already. This keeps smoke validation separate from NuGet audit, network, and macOS keychain state. If a single command should build and validate, pass `--build`; if dependencies must be restored as part of that build, also pass `--restore`.
 
 Expected result:
 
 - Build exits with code `0`.
 - Smoke test exits with code `0`.
 - Existing warnings are acceptable if they are unchanged and are not introduced by the release change.
+
+To include a real profiler file in the automated gate:
+
+```bash
+scripts/avalonia/validate_release.sh --profiler-file /path/to/session.profiler
+scripts/avalonia/validate_release.sh --build --profiler-file /path/to/session.profiler
+```
+
+The validation script runs:
+
+```bash
+/Users/bytedance/.dotnet/dotnet build ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -c Debug
+ProfilerStudy.Avalonia/bin/Debug/net8.0/ProfilerStudy.Avalonia --smoke-test
+ProfilerStudy.Avalonia/bin/Debug/net8.0/ProfilerStudy.Avalonia --smoke-test /path/to/session.profiler
+```
+
+The real profiler file argument may be `.profiler`, `.profiler_recording`, or `.profiler_dump`. The file is read in place and is not copied into the repository.
 
 ## Publish profiles
 
@@ -49,6 +68,7 @@ If publish has already completed and only the `.app` bundle needs to be regenera
 ```bash
 scripts/avalonia/package_macos_app.sh osx-arm64 --skip-publish
 scripts/avalonia/package_macos_app.sh osx-arm64 --verify-only
+scripts/avalonia/validate_release.sh --verify-bundle osx-arm64
 ```
 
 The script creates `ProfilerStudy.Avalonia/bin/Release/net8.0/publish/<rid>/ProfilerStudy.app` with:
