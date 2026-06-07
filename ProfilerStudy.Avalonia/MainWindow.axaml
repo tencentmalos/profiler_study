@@ -1029,7 +1029,7 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-          <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
+          <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,0,0,0,0,0,0" Margin="0,3,0,0" Background="#C8C8C8">
             <Grid Grid.Row="4" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
 
@@ -1169,7 +1169,7 @@
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
-                          IsVisible="{Binding IsThreadsScopeGraphVisible}" />
+                          IsVisible="False" />
 
             <Grid Grid.Row="0" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
