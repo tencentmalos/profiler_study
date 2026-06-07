@@ -240,7 +240,7 @@
           <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
         </MenuItem>
         <MenuItem Header="_Help">
-          <MenuItem Header="_Help" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Help" />
+          <MenuItem Header="_Help" Command="{Binding OpenHelpCommand}" />
           <MenuItem Header="_Registration..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Registration" />
           <MenuItem Header="_Check for Updates" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Check for Updates" />
           <Separator />
@@ -250,7 +250,7 @@
           </MenuItem>
           <MenuItem Header="_Show Startup Page" Command="{Binding ShowStartupPageCommand}" />
           <Separator />
-          <MenuItem Header="_About" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="About" />
+          <MenuItem Header="_About" Command="{Binding OpenAboutCommand}" />
         </MenuItem>
       </Menu>
     </Border>
@@ -1521,6 +1521,60 @@
                  Foreground="#101010"
                  FontFamily="Menlo,Consolas,monospace"
                  FontSize="11" />
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="560"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D2D2D2"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            Padding="0"
+            IsVisible="{Binding IsHelpPanelVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+          <DockPanel LastChildFill="True">
+            <TextBlock Text="ProfilerStudy Help" FontWeight="SemiBold" Foreground="#101010" />
+            <Button DockPanel.Dock="Right"
+                    Content="x"
+                    Width="24"
+                    Height="22"
+                    Padding="0"
+                    Command="{Binding CloseHelpCommand}" />
+          </DockPanel>
+        </Border>
+        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+          <TextBlock Text="Common actions" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
+
+          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
+            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+              <TextBlock Text="Open session" Foreground="#404040" />
+              <TextBlock Grid.Column="1" Text="File > Open or Ctrl+O" Foreground="#101010" />
+              <TextBlock Grid.Row="1" Text="Save session" Foreground="#404040" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="File > Save or Ctrl+S" Foreground="#101010" />
+              <TextBlock Grid.Row="2" Text="Find scope" Foreground="#404040" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="Tools > Find or Ctrl+F" Foreground="#101010" />
+              <TextBlock Grid.Row="3" Text="Switch views" Foreground="#404040" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="Use the View menu, tabs, or Toolbox view buttons" Foreground="#101010" />
+              <TextBlock Grid.Row="4" Text="Timeline" Foreground="#404040" />
+              <TextBlock Grid.Row="4" Grid.Column="1" Text="Mouse wheel zooms; drag pans in the ScottPlot timeline controls" Foreground="#101010" TextWrapping="Wrap" />
+            </Grid>
+          </Border>
+
+          <TextBlock Grid.Row="2"
+                     Text="This Avalonia shell reuses the legacy FramePro session core. The toolbar, dock panels, startup page, and TimelineScope controls map to the original profiler entry points."
+                     Foreground="#404040"
+                     TextWrapping="Wrap" />
+
+          <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Startup Page" Width="104" Command="{Binding ShowStartupPageCommand}" />
+            <Button Content="Close" Width="86" Command="{Binding CloseHelpCommand}" />
+          </StackPanel>
+        </Grid>
       </Grid>
     </Border>
 
