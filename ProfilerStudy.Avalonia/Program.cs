@@ -5,6 +5,7 @@ namespace ProfilerStudy.Avalonia;
 
 internal static class Program
 {
+	[STAThread]
 	public static void Main(string[] args)
 	{
 		if (args != null && args.Length >= 1 && args[0] == "--smoke-test")

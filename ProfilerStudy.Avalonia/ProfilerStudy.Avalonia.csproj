@@ -20,10 +20,10 @@
     <ProjectReference Include="..\ProfilerStudyCore\ProfilerStudyCore.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.4" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.17" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.17" />
     <PackageReference Include="Material.Icons.Avalonia" Version="2.3.1" />
     <PackageReference Include="ScottPlot.Avalonia" Version="5.1.58" />
-    <PackageReference Include="SukiUI" Version="7.0.1" />
+    <PackageReference Include="SukiUI" Version="6.1.1" />
   </ItemGroup>
 </Project>

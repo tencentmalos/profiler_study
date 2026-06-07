@@ -376,7 +376,7 @@
         <Border Grid.Column="3" Classes="toolbar-panel" Padding="8,5" MinWidth="280">
           <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="6">
             <material:MaterialIcon Kind="Magnify" Width="18" Height="18" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" Text="{Binding ScopeFilterText}" PlaceholderText="Find scope" MinWidth="110" />
+            <TextBox Grid.Column="1" Text="{Binding ScopeFilterText}" Watermark="Find scope" MinWidth="110" />
             <Button Grid.Column="2" Classes="panel-command" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
             <Button Grid.Column="3" Classes="panel-command" Content="Next" Command="{Binding FindNextScopeCommand}" />
             <Button Grid.Column="4" Classes="panel-command" Content="Clear" Command="{Binding ClearScopeFindCommand}" />
@@ -565,7 +565,7 @@
                     <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="4">
-                    <TextBox Text="{Binding ScopeFilterText}" PlaceholderText="scope text" />
+                    <TextBox Text="{Binding ScopeFilterText}" Watermark="scope text" />
                     <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="4">
                       <Button Classes="toolbox-action" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
                       <Button Grid.Column="1" Classes="toolbox-action" Content="Next" Command="{Binding FindNextScopeCommand}" />
@@ -582,9 +582,9 @@
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="4">
                     <TextBlock Text="Captured root" Foreground="{DynamicResource SukiLowText}" />
-                    <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
+                    <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
                     <TextBlock Text="Local root" Foreground="{DynamicResource SukiLowText}" Margin="0,4,0,0" />
-                    <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
+                    <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
                   </StackPanel>
                 </Grid>
               </Border>
@@ -1117,7 +1117,7 @@
                            Text="{Binding ScopeFilterText}"
                            Width="180"
                            Margin="10,0,0,0"
-                           PlaceholderText="Filter scopes" />
+                           Watermark="Filter scopes" />
                   <TextBlock Text="{Binding ScopeHotspotSummaryText}"
                              Foreground="{DynamicResource SukiLowText}"
                              HorizontalAlignment="Right" />
@@ -1847,7 +1847,7 @@
                   <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 </Border>
                 <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="5">
-                  <TextBox Text="{Binding ScopeFilterText}" PlaceholderText="scope text" />
+                  <TextBox Text="{Binding ScopeFilterText}" Watermark="scope text" />
                   <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="5">
                     <Button Classes="toolbox-action" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
                     <Button Grid.Column="1" Classes="toolbox-action" Content="Next" Command="{Binding FindNextScopeCommand}" />
@@ -1864,9 +1864,9 @@
                 </Border>
                 <StackPanel Grid.Row="1" Margin="6" Spacing="4">
                   <TextBlock Text="Captured root" Foreground="{DynamicResource SukiLowText}" />
-                  <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
+                  <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
                   <TextBlock Text="Local root" Foreground="{DynamicResource SukiLowText}" Margin="0,4,0,0" />
-                  <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
+                  <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
                 </StackPanel>
               </Grid>
             </Border>
@@ -2125,9 +2125,9 @@
           <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           <TextBlock Text="These settings are used when opening captured source paths from profiler scope rows." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <TextBlock Text="Captured root" Foreground="{DynamicResource SukiLowText}" Margin="0,4,0,0" />
-          <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
+          <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
           <TextBlock Text="Local root" Foreground="{DynamicResource SukiLowText}" />
-          <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
+          <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
           <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
             <TextBlock Text="Changes are saved automatically and reused by the source navigation commands." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           </Border>
@@ -2285,9 +2285,9 @@
           <TextBlock Text="Connection controls are represented here to match the original profiler entry points." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="84,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <TextBlock Text="Host" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" Text="{Binding ConnectionHost}" PlaceholderText="localhost" />
+            <TextBox Grid.Column="1" Text="{Binding ConnectionHost}" Watermark="localhost" />
             <TextBlock Grid.Row="1" Text="Port" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConnectionPort}" PlaceholderText="8428" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConnectionPort}" Watermark="8428" />
             <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
               <TextBlock Text="{Binding ConnectionPanelStatusText}" Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </Border>
@@ -2333,7 +2333,7 @@
               <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
             </Border>
             <Grid Grid.Column="1" ColumnDefinitions="*,64,68" ColumnSpacing="6">
-              <TextBox Text="{Binding AndroidEndpoint}" PlaceholderText="localfilesystem:/data/user_de/0/.../files/framepro" />
+              <TextBox Text="{Binding AndroidEndpoint}" Watermark="localfilesystem:/data/user_de/0/.../files/framepro" />
               <Button Grid.Column="1"
                       Content="Debug"
                       Command="{Binding AndroidActionCommand}"
