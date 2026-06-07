@@ -39,6 +39,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<ScopeFrameDetailRow> m_SelectedFrameScopes = Array.Empty<ScopeFrameDetailRow>();
 	private IReadOnlyList<SelectedFrameCounterRow> m_SelectedFrameCounters = Array.Empty<SelectedFrameCounterRow>();
 	private IReadOnlyList<LogMessageRow> m_LogRows = Array.Empty<LogMessageRow>();
+	private IReadOnlyList<CoreSummaryRow> m_CoreRows = Array.Empty<CoreSummaryRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
@@ -47,6 +48,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
 	private string m_SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
 	private string m_LogSummaryText = "No profiler log messages loaded.";
+	private string m_CoreSummaryText = "No profiler core data loaded.";
 	private string m_ActiveSessionView = "Threads";
 	private string m_ScopeHotspotSortKey = "TotalTime";
 	private bool m_ScopeHotspotSortDescending = true;
@@ -280,6 +282,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_LogSummaryText;
 		private set => SetProperty(ref m_LogSummaryText, value);
+	}
+
+	public IReadOnlyList<CoreSummaryRow> CoreRows
+	{
+		get => m_CoreRows;
+		private set => SetProperty(ref m_CoreRows, value);
+	}
+
+	public string CoreSummaryText
+	{
+		get => m_CoreSummaryText;
+		private set => SetProperty(ref m_CoreSummaryText, value);
 	}
 
 	public string ActiveSessionView
@@ -534,9 +548,69 @@ internal sealed class MainWindowViewModel : ObservableObject
 		ApplySelectedFrameScopes();
 		ApplySelectedFrameCounters();
 		ApplyLogMessages(document);
+		ApplyCoreSummary();
 		AttachTimelineState(Selection, Viewport);
 		UpdateTimelineText();
 		UpdateFooterText();
+	}
+
+	private void ApplyCoreSummary()
+	{
+		if (CurrentDocument?.Session == null)
+		{
+			CoreRows = Array.Empty<CoreSummaryRow>();
+			CoreSummaryText = "Generated sample has no profiler core stream.";
+			return;
+		}
+
+		int coreCount = Math.Max(0, CurrentDocument.Session.CoreCount);
+		List<CoreSummaryRow> rows = new List<CoreSummaryRow>(coreCount);
+		if (coreCount == 0)
+		{
+			CoreRows = rows;
+			CoreSummaryText = "No core data found in this session.";
+			return;
+		}
+
+		List<List<ContextSwitch>> contextSwitches = null;
+		if (CurrentDocument.Session.RecordingContextSwitches && TryGetVisibleFrameTimeRange(out long startTime, out long endTime))
+		{
+			CurrentDocument.Session.GetContextSwitches(startTime, endTime, out contextSwitches);
+		}
+
+		for (int i = 0; i < coreCount; i++)
+		{
+			int contextSwitchCount = contextSwitches != null && i < contextSwitches.Count ? contextSwitches[i].Count : 0;
+			rows.Add(new CoreSummaryRow(i, contextSwitchCount));
+		}
+
+		CoreRows = rows;
+		CoreSummaryText = CurrentDocument.Session.RecordingContextSwitches
+			? $"{coreCount} cores, context switches in {Viewport.RangeText}"
+			: $"{coreCount} cores, context switch recording not available";
+	}
+
+	private bool TryGetVisibleFrameTimeRange(out long startTime, out long endTime)
+	{
+		startTime = 0L;
+		endTime = 0L;
+		if (CurrentDocument?.Session == null || Viewport == null || CurrentDocument.Session.FrameCount == 0)
+		{
+			return false;
+		}
+
+		int startFrame = Math.Max(0, Math.Min(Viewport.StartFrame, CurrentDocument.Session.FrameCount - 1));
+		int endFrame = Math.Max(startFrame, Math.Min(Viewport.EndFrame, CurrentDocument.Session.FrameCount - 1));
+		Frame start = CurrentDocument.Session.GetFrame(startFrame);
+		Frame end = CurrentDocument.Session.GetFrame(endFrame);
+		if (start == null || end == null || !start.Valid || !end.Valid)
+		{
+			return false;
+		}
+
+		startTime = start.StartTime;
+		endTime = end.EndTime;
+		return true;
 	}
 
 	private void ApplyLogMessages(SessionDocument document)
@@ -661,6 +735,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			ApplySelectedFrameScopes();
 			ApplySelectedFrameCounters();
+		}
+		if (e.PropertyName == nameof(TimelineViewport.StartFrame) ||
+			e.PropertyName == nameof(TimelineViewport.EndFrame))
+		{
+			ApplyCoreSummary();
 		}
 		UpdateTimelineText();
 		UpdateFooterText();
