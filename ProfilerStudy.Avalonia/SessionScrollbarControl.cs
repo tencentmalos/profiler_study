@@ -8,11 +8,12 @@ namespace ProfilerStudy.Avalonia;
 
 public sealed class SessionScrollbarControl : Control
 {
-	private static readonly IBrush BackgroundBrush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
-	private static readonly IBrush TrackBrush = new SolidColorBrush(Color.FromRgb(183, 183, 183));
-	private static readonly IBrush WindowBrush = new SolidColorBrush(Color.FromArgb(32, 0, 0, 128));
+	private static readonly IBrush BackgroundBrush = new SolidColorBrush(Color.FromRgb(207, 207, 207));
+	private static readonly IBrush TrackBrush = new SolidColorBrush(Color.FromRgb(175, 175, 175));
+	private static readonly IBrush WindowBrush = new SolidColorBrush(Color.FromRgb(99, 130, 207));
+	private static readonly IBrush WindowHighlightBrush = new SolidColorBrush(Color.FromRgb(127, 157, 230));
 	private static readonly Pen BorderPen = new Pen(new SolidColorBrush(Color.FromRgb(128, 128, 128)), 1.0);
-	private static readonly Pen WindowPen = new Pen(new SolidColorBrush(Color.FromArgb(90, 64, 64, 255)), 1.0);
+	private static readonly Pen WindowPen = new Pen(new SolidColorBrush(Color.FromRgb(48, 76, 149)), 1.0);
 
 	private bool m_IsDragging;
 	private double m_DragStartX;
@@ -106,6 +107,7 @@ public sealed class SessionScrollbarControl : Control
 
 		Rect windowRect = GetWindowRect();
 		context.FillRectangle(WindowBrush, windowRect);
+		context.FillRectangle(WindowHighlightBrush, new Rect(windowRect.X + 1.0, windowRect.Y + 1.0, Math.Max(0.0, windowRect.Width - 2.0), 3.0));
 		context.DrawRectangle(null, WindowPen, windowRect);
 	}
 
