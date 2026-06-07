@@ -13,6 +13,15 @@
     <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
     <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
     <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenFindScopeCommand}" />
+    <KeyBinding Gesture="Home" Command="{Binding ResetTimelineCommand}" />
+    <KeyBinding Gesture="End" Command="{Binding SelectLastFrameCommand}" />
+    <KeyBinding Gesture="PageUp" Command="{Binding SelectPreviousSpikeCommand}" />
+    <KeyBinding Gesture="PageDown" Command="{Binding SelectNextSpikeCommand}" />
+    <KeyBinding Gesture="Ctrl+PageUp" Command="{Binding PanTimelineLeftCommand}" />
+    <KeyBinding Gesture="Ctrl+PageDown" Command="{Binding PanTimelineRightCommand}" />
+    <KeyBinding Gesture="Ctrl+=" Command="{Binding ZoomTimelineInCommand}" />
+    <KeyBinding Gesture="Ctrl+-" Command="{Binding ZoomTimelineOutCommand}" />
+    <KeyBinding Gesture="Ctrl+T" Command="{Binding TrackSelectedFrameCommand}" />
   </Window.KeyBindings>
   <Window.Styles>
     <Style Selector="Button.toolbar-button">
