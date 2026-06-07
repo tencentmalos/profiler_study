@@ -131,6 +131,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_TimelineRangeText = string.Empty;
 	private string m_SessionStatusText = "Session: none";
 	private string m_SelectedFrameStatusText = "Frame: none";
+	private string m_StatusBarSessionText = "none";
+	private string m_StatusBarSelectedFrameText = "none";
+	private string m_StatusBarHoveredFrameText = "none";
 	private string m_ConditionalScopeTimeText = "All scope times";
 	private double m_ConditionalScopeTimeMs;
 	private double m_ConditionalScopeTimeWidth;
@@ -625,6 +628,24 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_SelectedFrameStatusText;
 		private set => SetProperty(ref m_SelectedFrameStatusText, value);
+	}
+
+	public string StatusBarSessionText
+	{
+		get => m_StatusBarSessionText;
+		private set => SetProperty(ref m_StatusBarSessionText, value);
+	}
+
+	public string StatusBarSelectedFrameText
+	{
+		get => m_StatusBarSelectedFrameText;
+		private set => SetProperty(ref m_StatusBarSelectedFrameText, value);
+	}
+
+	public string StatusBarHoveredFrameText
+	{
+		get => m_StatusBarHoveredFrameText;
+		private set => SetProperty(ref m_StatusBarHoveredFrameText, value);
 	}
 
 	public string ConditionalScopeTimeText
@@ -2335,15 +2356,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			SessionStatusText = "Session: none";
 			SelectedFrameStatusText = "Frame: none";
+			StatusBarSessionText = "none";
+			StatusBarSelectedFrameText = "none";
+			StatusBarHoveredFrameText = "none";
 			FooterText = "No session";
 			return;
 		}
 
 		SessionStatusText = $"Session: {CurrentDocument.Summary.FrameCount} frames";
+		StatusBarSessionText = $"{CurrentDocument.Summary.FrameCount} frames";
 		FooterText = $"{CurrentDocument.Summary.FrameCount} frames";
 		SelectedFrameStatusText = Selection.SelectedFrameIndex >= 0
 			? $"Frame: {Selection.SelectedFrameIndex} ({Selection.SelectedFrameTimeMs:0.###} ms)"
 			: "Frame: none";
+		StatusBarSelectedFrameText = Selection.SelectedFrameIndex >= 0
+			? $"{Selection.SelectedFrameIndex} ({Selection.SelectedFrameTimeMs:0.###} ms)"
+			: "none";
+		StatusBarHoveredFrameText = Selection.HoveredFrameIndex >= 0
+			? $"{Selection.HoveredFrameIndex} ({Selection.HoveredFrameTimeMs:0.###} ms)"
+			: "none";
 	}
 
 	public void SelectFrameFromProfilerStats(int frameIndex)
@@ -3565,6 +3596,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 		if (CurrentDocument == null)
 		{
 			FooterText = "No profiler session loaded";
+			StatusBarSessionText = "none";
+			StatusBarSelectedFrameText = "none";
+			StatusBarHoveredFrameText = "none";
 			return;
 		}
 
@@ -3574,6 +3608,13 @@ internal sealed class MainWindowViewModel : ObservableObject
 		string hoverText = Selection.HoveredFrameIndex >= 0
 			? $"hover frame {Selection.HoveredFrameIndex} ({Selection.HoveredFrameTimeMs:0.###} ms)"
 			: "hover none";
+		StatusBarSessionText = $"{CurrentDocument.Summary.FrameCount} frames";
+		StatusBarSelectedFrameText = Selection.SelectedFrameIndex >= 0
+			? $"{Selection.SelectedFrameIndex} ({Selection.SelectedFrameTimeMs:0.###} ms)"
+			: "none";
+		StatusBarHoveredFrameText = Selection.HoveredFrameIndex >= 0
+			? $"{Selection.HoveredFrameIndex} ({Selection.HoveredFrameTimeMs:0.###} ms)"
+			: "none";
 		FooterText = $"{CurrentDocument.Summary.FrameCount} frames | {Viewport.RangeText} | {selectedText} | {hoverText}";
 	}
 }
