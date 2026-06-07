@@ -24,6 +24,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_CloseSessionCommand;
+	private readonly RelayCommand m_CreateSessionFromSelectionCommand;
 	private readonly RelayCommand m_SaveSessionCommand;
 	private readonly RelayCommand m_SaveSessionAsCommand;
 	private readonly RelayCommand m_ExportFramesToCsvCommand;
@@ -183,6 +184,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_CloseSessionCommand = new RelayCommand(_ => CloseSession(), _ => CurrentDocument != null);
+		m_CreateSessionFromSelectionCommand = new RelayCommand(_ => _ = CreateSessionFromSelectionAsync(), _ => CurrentDocument?.Session != null);
 		m_SaveSessionCommand = new RelayCommand(_ => _ = SaveSessionAsync(false), _ => CurrentDocument?.Session != null);
 		m_SaveSessionAsCommand = new RelayCommand(_ => _ = SaveSessionAsync(true), _ => CurrentDocument?.Session != null);
 		m_ExportFramesToCsvCommand = new RelayCommand(_ => _ = ExportFramesToCsvAsync(), _ => CurrentDocument?.FrameSamples?.Length > 0);
@@ -266,6 +268,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
 
 	public RelayCommand CloseSessionCommand => m_CloseSessionCommand;
+
+	public RelayCommand CreateSessionFromSelectionCommand => m_CreateSessionFromSelectionCommand;
 
 	public RelayCommand SaveSessionCommand => m_SaveSessionCommand;
 
@@ -381,6 +385,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
 				m_CloseSessionCommand.RaiseCanExecuteChanged();
+				m_CreateSessionFromSelectionCommand.RaiseCanExecuteChanged();
 				m_SaveSessionCommand.RaiseCanExecuteChanged();
 				m_SaveSessionAsCommand.RaiseCanExecuteChanged();
 				m_ExportFramesToCsvCommand.RaiseCanExecuteChanged();
@@ -2057,6 +2062,72 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			StatusText = ex.Message;
 		}
+	}
+
+	private async Task CreateSessionFromSelectionAsync()
+	{
+		SessionDocument sourceDocument = CurrentDocument;
+		Session sourceSession = sourceDocument?.Session;
+		if (sourceSession == null)
+		{
+			StatusText = "No profiler session is available to clone.";
+			return;
+		}
+
+		if (sourceSession.FrameCount == 0 || sourceDocument.Viewport == null)
+		{
+			StatusText = "No frames are available for creating a session.";
+			return;
+		}
+
+		int startFrame = Math.Max(0, Math.Min(sourceDocument.Viewport.StartFrame, sourceSession.FrameCount - 1));
+		int endFrame = Math.Max(startFrame, Math.Min(sourceDocument.Viewport.EndFrame, sourceSession.FrameCount - 1));
+		if (endFrame < startFrame)
+		{
+			(startFrame, endFrame) = (endFrame, startFrame);
+		}
+
+		sourceSession.GetFrameStartEndTime(startFrame, out long startTime, out _);
+		sourceSession.GetFrameStartEndTime(endFrame, out _, out long endTime);
+		if (endTime <= startTime)
+		{
+			StatusText = "Selected frame range is empty.";
+			return;
+		}
+
+		try
+		{
+			StatusText = "Cloning session from visible frame range...";
+			Session clonedSession = new Session(new CoreSettings(), new NullLog());
+			ThreadJobContext context = new ThreadJobContext();
+			string error = string.Empty;
+			bool cloned = await Task.Run(() => sourceSession.CopyTo(clonedSession, startTime, endTime, context, ref error));
+			if (!cloned)
+			{
+				StatusText = "Error cloning session: " + error;
+				return;
+			}
+
+			SessionDocument clonedDocument = CreateSessionDocumentFromSession(
+				clonedSession,
+				"Selection: " + sourceDocument.Summary.SourceName,
+				"Selection " + startFrame + "-" + endFrame);
+			ApplyDocument(clonedDocument);
+			StatusText = "Created session from visible frames " + startFrame + " - " + endFrame + ".";
+		}
+		catch (Exception ex)
+		{
+			StatusText = "Error cloning session: " + ex.Message;
+		}
+	}
+
+	private static SessionDocument CreateSessionDocumentFromSession(Session session, string sourcePath, string sourceName)
+	{
+		SessionQueryService queryService = new SessionQueryService(session, 33.333);
+		FrameSample[] samples = queryService.GetFrameSamples(0, Math.Max(0, session.FrameCount - 1), 0);
+		SessionSummary summary = queryService.CreateSummary(sourcePath, samples);
+		summary.SourceName = sourceName;
+		return new SessionDocument(sourcePath, session, summary, samples);
 	}
 
 	private async Task SaveSessionAsync(bool saveAs)

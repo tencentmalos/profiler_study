@@ -147,7 +147,7 @@
           <Separator />
           <MenuItem Header="_Find" Command="{Binding OpenFindScopeCommand}" />
           <Separator />
-          <MenuItem Header="_Create Session from Selection" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Create Session from Selection" />
+          <MenuItem Header="_Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
           <Separator />
           <MenuItem Header="_Android">
             <MenuItem Header="_Start Recording Context Switches..." Command="{Binding OpenAndroidCommand}" />
