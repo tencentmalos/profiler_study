@@ -48,6 +48,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ThreadSettingsCommand;
 	private readonly RelayCommand m_ToggleThreadsPanelCommand;
 	private readonly RelayCommand m_ToggleOutputWindowCommand;
+	private readonly RelayCommand m_ToggleToolboxCommand;
 	private readonly RelayCommand m_FindPreviousScopeCommand;
 	private readonly RelayCommand m_FindNextScopeCommand;
 	private readonly RelayCommand m_ClearScopeFindCommand;
@@ -116,6 +117,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsCustomStatsVisible = true;
 	private bool m_IsThreadsDataGridVisible = true;
 	private bool m_IsOutputWindowVisible = true;
+	private bool m_IsToolboxVisible = true;
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
@@ -177,6 +179,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ThreadSettingsCommand = new RelayCommand(_ => ShowThreadSettingsStatus());
 		m_ToggleThreadsPanelCommand = new RelayCommand(ToggleThreadsPanel);
 		m_ToggleOutputWindowCommand = new RelayCommand(_ => ToggleOutputWindow());
+		m_ToggleToolboxCommand = new RelayCommand(_ => ToggleToolbox());
 		m_FindPreviousScopeCommand = new RelayCommand(_ => FindScope(-1), _ => CanFindScope());
 		m_FindNextScopeCommand = new RelayCommand(_ => FindScope(1), _ => CanFindScope());
 		m_ClearScopeFindCommand = new RelayCommand(_ => ScopeFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ScopeFilterText));
@@ -282,6 +285,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ToggleThreadsPanelCommand => m_ToggleThreadsPanelCommand;
 
 	public RelayCommand ToggleOutputWindowCommand => m_ToggleOutputWindowCommand;
+
+	public RelayCommand ToggleToolboxCommand => m_ToggleToolboxCommand;
 
 	public RelayCommand FindPreviousScopeCommand => m_FindPreviousScopeCommand;
 
@@ -758,6 +763,23 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public GridLength OutputWindowHeight => IsOutputWindowVisible ? new GridLength(150) : new GridLength(0);
 
+	public bool IsToolboxVisible
+	{
+		get => m_IsToolboxVisible;
+		private set
+		{
+			if (SetProperty(ref m_IsToolboxVisible, value))
+			{
+				RaisePropertyChanged(nameof(ToolboxColumnWidth));
+				RaisePropertyChanged(nameof(ToolboxSplitterWidth));
+			}
+		}
+	}
+
+	public GridLength ToolboxColumnWidth => IsToolboxVisible ? new GridLength(220) : new GridLength(0);
+
+	public GridLength ToolboxSplitterWidth => IsToolboxVisible ? new GridLength(4) : new GridLength(0);
+
 	public bool IsSettingsPanelVisible
 	{
 		get => m_IsSettingsPanelVisible;
@@ -894,6 +916,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		IsOutputWindowVisible = !IsOutputWindowVisible;
 		StatusText = IsOutputWindowVisible ? "Output Window visible." : "Output Window hidden.";
+	}
+
+	private void ToggleToolbox()
+	{
+		IsToolboxVisible = !IsToolboxVisible;
+		StatusText = IsToolboxVisible ? "Toolbox visible." : "Toolbox hidden.";
 	}
 
 	private void SetScopeColorMode(object parameter)

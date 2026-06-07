@@ -55,6 +55,7 @@
             <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
           </MenuItem>
           <Separator />
+          <MenuItem Header="_Toolbox" ToggleType="CheckBox" IsChecked="{Binding IsToolboxVisible, Mode=OneWay}" Command="{Binding ToggleToolboxCommand}" />
           <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
         <MenuItem Header="_Connection">
@@ -275,13 +276,24 @@
       </ScrollViewer>
     </Border>
 
-    <Grid Grid.Row="2" ColumnDefinitions="220,4,*" Background="#BEBEBE">
-      <Border Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0">
+    <Grid Grid.Row="2" Background="#BEBEBE">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="{Binding ToolboxColumnWidth}" />
+        <ColumnDefinition Width="{Binding ToolboxSplitterWidth}" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <Border Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxVisible}">
         <Grid RowDefinitions="Auto,*">
           <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Toolbox" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
-              <TextBlock DockPanel.Dock="Right" Text="x" Foreground="#303030" FontSize="11" Margin="6,0,0,0" />
+              <Button DockPanel.Dock="Right"
+                      Content="x"
+                      Width="22"
+                      Height="20"
+                      Padding="0"
+                      FontSize="11"
+                      Command="{Binding ToggleToolboxCommand}" />
             </DockPanel>
           </Border>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -349,6 +361,7 @@
                     BorderThickness="1,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    IsVisible="{Binding IsToolboxVisible}"
                     ResizeDirection="Columns" />
 
       <Grid Grid.Column="2" RowDefinitions="Auto,*,47" Margin="4" Background="#C8C8C8">
