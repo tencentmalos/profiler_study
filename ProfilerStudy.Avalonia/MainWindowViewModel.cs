@@ -57,14 +57,19 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ToggleThreadsPanelCommand;
 	private readonly RelayCommand m_ToggleOutputWindowCommand;
 	private readonly RelayCommand m_ToggleToolboxCommand;
+	private readonly RelayCommand m_ToggleMainSessionDockCommand;
 	private readonly RelayCommand m_MinimizeOutputWindowCommand;
 	private readonly RelayCommand m_RestoreOutputWindowCommand;
 	private readonly RelayCommand m_MinimizeToolboxCommand;
 	private readonly RelayCommand m_RestoreToolboxCommand;
+	private readonly RelayCommand m_MinimizeMainSessionDockCommand;
+	private readonly RelayCommand m_RestoreMainSessionDockCommand;
 	private readonly RelayCommand m_FloatOutputWindowCommand;
 	private readonly RelayCommand m_DockOutputWindowCommand;
 	private readonly RelayCommand m_FloatToolboxCommand;
 	private readonly RelayCommand m_DockToolboxCommand;
+	private readonly RelayCommand m_FloatMainSessionDockCommand;
+	private readonly RelayCommand m_DockMainSessionDockCommand;
 	private readonly RelayCommand m_FindPreviousScopeCommand;
 	private readonly RelayCommand m_FindNextScopeCommand;
 	private readonly RelayCommand m_ClearScopeFindCommand;
@@ -155,6 +160,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsToolboxVisible = true;
 	private bool m_IsToolboxMinimized;
 	private bool m_IsToolboxFloating;
+	private bool m_IsMainSessionDockVisible = true;
+	private bool m_IsMainSessionDockMinimized;
+	private bool m_IsMainSessionDockFloating;
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
@@ -242,14 +250,19 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ToggleThreadsPanelCommand = new RelayCommand(ToggleThreadsPanel);
 		m_ToggleOutputWindowCommand = new RelayCommand(_ => ToggleOutputWindow());
 		m_ToggleToolboxCommand = new RelayCommand(_ => ToggleToolbox());
+		m_ToggleMainSessionDockCommand = new RelayCommand(_ => ToggleMainSessionDock());
 		m_MinimizeOutputWindowCommand = new RelayCommand(_ => MinimizeOutputWindow());
 		m_RestoreOutputWindowCommand = new RelayCommand(_ => RestoreOutputWindow());
 		m_MinimizeToolboxCommand = new RelayCommand(_ => MinimizeToolbox());
 		m_RestoreToolboxCommand = new RelayCommand(_ => RestoreToolbox());
+		m_MinimizeMainSessionDockCommand = new RelayCommand(_ => MinimizeMainSessionDock());
+		m_RestoreMainSessionDockCommand = new RelayCommand(_ => RestoreMainSessionDock());
 		m_FloatOutputWindowCommand = new RelayCommand(_ => FloatOutputWindow());
 		m_DockOutputWindowCommand = new RelayCommand(_ => DockOutputWindow());
 		m_FloatToolboxCommand = new RelayCommand(_ => FloatToolbox());
 		m_DockToolboxCommand = new RelayCommand(_ => DockToolbox());
+		m_FloatMainSessionDockCommand = new RelayCommand(_ => FloatMainSessionDock());
+		m_DockMainSessionDockCommand = new RelayCommand(_ => DockMainSessionDock());
 		m_FindPreviousScopeCommand = new RelayCommand(_ => FindScope(-1), _ => CanFindScope());
 		m_FindNextScopeCommand = new RelayCommand(_ => FindScope(1), _ => CanFindScope());
 		m_ClearScopeFindCommand = new RelayCommand(_ => ScopeFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ScopeFilterText));
@@ -377,6 +390,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand ToggleToolboxCommand => m_ToggleToolboxCommand;
 
+	public RelayCommand ToggleMainSessionDockCommand => m_ToggleMainSessionDockCommand;
+
 	public RelayCommand MinimizeOutputWindowCommand => m_MinimizeOutputWindowCommand;
 
 	public RelayCommand RestoreOutputWindowCommand => m_RestoreOutputWindowCommand;
@@ -385,6 +400,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand RestoreToolboxCommand => m_RestoreToolboxCommand;
 
+	public RelayCommand MinimizeMainSessionDockCommand => m_MinimizeMainSessionDockCommand;
+
+	public RelayCommand RestoreMainSessionDockCommand => m_RestoreMainSessionDockCommand;
+
 	public RelayCommand FloatOutputWindowCommand => m_FloatOutputWindowCommand;
 
 	public RelayCommand DockOutputWindowCommand => m_DockOutputWindowCommand;
@@ -392,6 +411,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand FloatToolboxCommand => m_FloatToolboxCommand;
 
 	public RelayCommand DockToolboxCommand => m_DockToolboxCommand;
+
+	public RelayCommand FloatMainSessionDockCommand => m_FloatMainSessionDockCommand;
+
+	public RelayCommand DockMainSessionDockCommand => m_DockMainSessionDockCommand;
 
 	public RelayCommand FindPreviousScopeCommand => m_FindPreviousScopeCommand;
 
@@ -1005,6 +1028,54 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public GridLength ToolboxSplitterWidth => IsToolboxExpanded ? new GridLength(4) : new GridLength(0);
 
+	public bool IsMainSessionDockVisible
+	{
+		get => m_IsMainSessionDockVisible;
+		private set
+		{
+			if (SetProperty(ref m_IsMainSessionDockVisible, value))
+			{
+				RaisePropertyChanged(nameof(IsMainSessionDockExpanded));
+				RaisePropertyChanged(nameof(IsMainSessionDockMinimizedBarVisible));
+				RaisePropertyChanged(nameof(IsMainSessionDockFloatingVisible));
+			}
+		}
+	}
+
+	public bool IsMainSessionDockMinimized
+	{
+		get => m_IsMainSessionDockMinimized;
+		private set
+		{
+			if (SetProperty(ref m_IsMainSessionDockMinimized, value))
+			{
+				RaisePropertyChanged(nameof(IsMainSessionDockExpanded));
+				RaisePropertyChanged(nameof(IsMainSessionDockMinimizedBarVisible));
+				RaisePropertyChanged(nameof(IsMainSessionDockFloatingVisible));
+			}
+		}
+	}
+
+	public bool IsMainSessionDockFloating
+	{
+		get => m_IsMainSessionDockFloating;
+		private set
+		{
+			if (SetProperty(ref m_IsMainSessionDockFloating, value))
+			{
+				RaisePropertyChanged(nameof(IsMainSessionDockExpanded));
+				RaisePropertyChanged(nameof(IsMainSessionDockMinimizedBarVisible));
+				RaisePropertyChanged(nameof(IsMainSessionDockFloatingVisible));
+			}
+		}
+	}
+
+	public bool IsMainSessionDockExpanded => IsMainSessionDockVisible && !IsMainSessionDockMinimized && !IsMainSessionDockFloating;
+
+	public bool IsMainSessionDockMinimizedBarVisible => IsMainSessionDockVisible && IsMainSessionDockMinimized && !IsMainSessionDockFloating;
+
+	public bool IsMainSessionDockFloatingVisible => IsMainSessionDockVisible && IsMainSessionDockFloating;
+
 	public bool IsSettingsPanelVisible
 	{
 		get => m_IsSettingsPanelVisible;
@@ -1279,6 +1350,49 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsToolboxFloating = false;
 		IsToolboxMinimized = false;
 		StatusText = "Toolbox docked.";
+	}
+
+	private void ToggleMainSessionDock()
+	{
+		IsMainSessionDockVisible = !IsMainSessionDockVisible;
+		if (!IsMainSessionDockVisible)
+		{
+			IsMainSessionDockMinimized = false;
+			IsMainSessionDockFloating = false;
+		}
+		StatusText = IsMainSessionDockVisible ? "Main Session View visible." : "Main Session View hidden.";
+	}
+
+	private void MinimizeMainSessionDock()
+	{
+		IsMainSessionDockVisible = true;
+		IsMainSessionDockFloating = false;
+		IsMainSessionDockMinimized = true;
+		StatusText = "Main Session View minimized.";
+	}
+
+	private void RestoreMainSessionDock()
+	{
+		IsMainSessionDockVisible = true;
+		IsMainSessionDockFloating = false;
+		IsMainSessionDockMinimized = false;
+		StatusText = "Main Session View restored.";
+	}
+
+	private void FloatMainSessionDock()
+	{
+		IsMainSessionDockVisible = true;
+		IsMainSessionDockMinimized = false;
+		IsMainSessionDockFloating = true;
+		StatusText = "Main Session View floating.";
+	}
+
+	private void DockMainSessionDock()
+	{
+		IsMainSessionDockVisible = true;
+		IsMainSessionDockFloating = false;
+		IsMainSessionDockMinimized = false;
+		StatusText = "Main Session View docked.";
 	}
 
 	private void SetScopeColorMode(object parameter)

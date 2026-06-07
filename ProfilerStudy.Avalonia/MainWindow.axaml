@@ -218,6 +218,7 @@
             <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
             <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
           </MenuItem>
+          <MenuItem Header="_Main Session View" ToggleType="CheckBox" IsChecked="{Binding IsMainSessionDockVisible, Mode=OneWay}" Command="{Binding ToggleMainSessionDockCommand}" />
           <MenuItem Header="_Toolbox" ToggleType="CheckBox" IsChecked="{Binding IsToolboxVisible, Mode=OneWay}" Command="{Binding ToggleToolboxCommand}" />
           <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
@@ -686,15 +687,26 @@
                     IsVisible="{Binding IsToolboxExpanded}"
                     ResizeDirection="Columns" />
 
-      <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="0,*,31" Margin="0" Background="#C8C8C8">
+      <Border Grid.Row="1" Grid.Column="2" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="1" Height="28" VerticalAlignment="Top" IsVisible="{Binding IsMainSessionDockMinimizedBarVisible}">
+        <DockPanel LastChildFill="True" Margin="7,3">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" />
+            <Button Content="Restore" Width="70" Height="20" Padding="0" Command="{Binding RestoreMainSessionDockCommand}" />
+            <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleMainSessionDockCommand}" />
+          </StackPanel>
+          <TextBlock Text="Main Session View" FontWeight="SemiBold" Foreground="#101010" VerticalAlignment="Center" />
+        </DockPanel>
+      </Border>
+
+      <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="0,*,31" Margin="0" Background="#C8C8C8" IsVisible="{Binding IsMainSessionDockExpanded}">
         <Border Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,0,0,4">
           <Grid RowDefinitions="24,Auto,Auto">
             <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="6,0">
               <DockPanel LastChildFill="True">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                  <Button Content="_" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Minimize Dock" />
-                  <Button Content="□" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Float Dock" />
-                  <Button Content="x" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ToggleOutputWindowCommand}" />
+                  <Button Content="_" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding MinimizeMainSessionDockCommand}" ToolTip.Tip="Minimize main session view" />
+                  <Button Content="□" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding FloatMainSessionDockCommand}" ToolTip.Tip="Float main session view" />
+                  <Button Content="x" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ToggleMainSessionDockCommand}" ToolTip.Tip="Close main session view" />
                 </StackPanel>
                 <TextBlock Text="Main Session View" Foreground="#101010" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
               </DockPanel>
@@ -1568,6 +1580,59 @@
             <Button Content="About" Width="86" Command="{Binding OpenAboutCommand}" />
             <Button Content="Close" Width="86" Command="{Binding CloseUpdateCheckCommand}" />
           </StackPanel>
+        </Grid>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="720"
+            Height="360"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D4D4D4"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            IsVisible="{Binding IsMainSessionDockFloatingVisible}">
+      <Grid RowDefinitions="Auto,Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="7,4">
+          <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+              <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockMainSessionDockCommand}" />
+              <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleMainSessionDockCommand}" />
+            </StackPanel>
+            <TextBlock Text="Main Session View" FontWeight="SemiBold" Foreground="#101010" />
+          </DockPanel>
+        </Border>
+        <Border Grid.Row="1" Background="#D7D7D7" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="4,3">
+          <StackPanel Orientation="Horizontal" Spacing="3">
+            <Button Content="Threads" Width="86" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}" />
+            <Button Content="Cores" Width="76" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}" />
+            <Button Content="Scopes" Width="82" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}" />
+            <Button Content="Custom Stats" Width="112" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}" />
+            <Button Content="Log" Width="64" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}" />
+          </StackPanel>
+        </Border>
+        <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="8" RowSpacing="8">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#101010" FontSize="13" FontWeight="SemiBold" />
+            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" FontSize="11" />
+          </Grid>
+          <Border Grid.Row="1" Background="#C8C8C8" BorderBrush="#8A8A8A" BorderThickness="1" Padding="10">
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="7">
+              <TextBlock Text="Session" Foreground="#505050" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Row="1" Text="Range" Foreground="#505050" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TimelineRangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Row="2" Text="Frame" Foreground="#505050" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFrameStatusText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Row="3" Text="Scope Graph" Foreground="#505050" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#101010" TextWrapping="Wrap" />
+              <TextBlock Grid.Row="4" Text="Custom Stats" Foreground="#505050" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#101010" TextWrapping="Wrap" />
+            </Grid>
+          </Border>
         </Grid>
       </Grid>
     </Border>
