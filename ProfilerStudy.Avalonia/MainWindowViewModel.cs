@@ -57,6 +57,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ExitCommand;
 	private readonly RelayCommand m_ShowFeatureStatusCommand;
 	private readonly RelayCommand m_AdjustConditionalScopeTimeCommand;
+	private readonly RelayCommand m_OpenSettingsCommand;
+	private readonly RelayCommand m_CloseSettingsCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -105,6 +107,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsCustomStatsVisible = true;
 	private bool m_IsThreadsDataGridVisible = true;
 	private bool m_IsOutputWindowVisible = true;
+	private bool m_IsSettingsPanelVisible;
 	private string m_ScopeColorMode = "Thread";
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
@@ -166,6 +169,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ExitCommand = new RelayCommand(_ => ExitApplication());
 		m_ShowFeatureStatusCommand = new RelayCommand(ShowFeatureStatus);
 		m_AdjustConditionalScopeTimeCommand = new RelayCommand(AdjustConditionalScopeTime);
+		m_OpenSettingsCommand = new RelayCommand(_ => OpenSettingsPanel());
+		m_CloseSettingsCommand = new RelayCommand(_ => CloseSettingsPanel());
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -269,6 +274,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ShowFeatureStatusCommand => m_ShowFeatureStatusCommand;
 
 	public RelayCommand AdjustConditionalScopeTimeCommand => m_AdjustConditionalScopeTimeCommand;
+
+	public RelayCommand OpenSettingsCommand => m_OpenSettingsCommand;
+
+	public RelayCommand CloseSettingsCommand => m_CloseSettingsCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -705,6 +714,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public GridLength OutputWindowHeight => IsOutputWindowVisible ? new GridLength(150) : new GridLength(0);
 
+	public bool IsSettingsPanelVisible
+	{
+		get => m_IsSettingsPanelVisible;
+		private set => SetProperty(ref m_IsSettingsPanelVisible, value);
+	}
+
 	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
 
 	public IBrush CoresViewBrush => IsCoresViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
@@ -823,6 +838,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		StatusText = featureName + " is visible in the Avalonia shell but is not implemented yet.";
+	}
+
+	private void OpenSettingsPanel()
+	{
+		IsSettingsPanelVisible = true;
+		StatusText = "Settings panel opened.";
+	}
+
+	private void CloseSettingsPanel()
+	{
+		IsSettingsPanelVisible = false;
+		StatusText = "Settings saved.";
 	}
 
 	private void AdjustConditionalScopeTime(object parameter)

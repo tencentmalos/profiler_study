@@ -73,7 +73,7 @@
             <MenuItem Header="_Load Context Switch File" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Android context switch loading" />
           </MenuItem>
           <Separator />
-          <MenuItem Header="_Settings" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Settings" />
+          <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
         </MenuItem>
         <MenuItem Header="_Help">
           <MenuItem Header="_Registration..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Registration" />
@@ -958,6 +958,46 @@
         </Border>
       </Grid>
     </Grid>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="520"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D2D2D2"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            Padding="0"
+            IsVisible="{Binding IsSettingsPanelVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+          <DockPanel LastChildFill="True">
+            <TextBlock Text="Settings" FontWeight="SemiBold" Foreground="#101010" />
+            <Button DockPanel.Dock="Right"
+                    Content="x"
+                    Width="24"
+                    Height="22"
+                    Padding="0"
+                    Command="{Binding CloseSettingsCommand}" />
+          </DockPanel>
+        </Border>
+        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+          <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
+          <TextBlock Text="These settings are used when opening captured source paths from profiler scope rows." Foreground="#404040" TextWrapping="Wrap" />
+          <TextBlock Text="Captured root" Foreground="#303030" Margin="0,4,0,0" />
+          <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
+          <TextBlock Text="Local root" Foreground="#303030" />
+          <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
+          <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
+            <TextBlock Text="Changes are saved automatically and reused by the source navigation commands." Foreground="#303030" TextWrapping="Wrap" />
+          </Border>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+            <Button Content="Close" Width="86" Command="{Binding CloseSettingsCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+    </Border>
 
     <Border Grid.Row="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowVisible}">
       <Grid RowDefinitions="Auto,*">
