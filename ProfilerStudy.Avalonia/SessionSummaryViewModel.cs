@@ -111,6 +111,18 @@ internal sealed class SessionSummaryViewModel : ObservableObject
 		SourceName = summary.SourceName;
 	}
 
+	public void Reset()
+	{
+		FrameCount = 0;
+		AverageFrameTimeMs = 0.0;
+		MaxFrameTimeMs = 0.0;
+		TargetFrameTimeMs = 33.333;
+		FirstFrameIndex = 0;
+		LastFrameIndex = 0;
+		ThreadCount = 0;
+		SourceName = "No session loaded";
+	}
+
 	private static string FormatMs(double value)
 	{
 		return value <= 0.0 ? "-" : Math.Round(value, 3).ToString("0.###") + " ms";

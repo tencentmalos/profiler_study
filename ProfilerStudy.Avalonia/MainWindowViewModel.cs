@@ -20,6 +20,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly SessionLoader m_SessionLoader = new SessionLoader();
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
+	private readonly RelayCommand m_CloseSessionCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
 	private readonly RelayCommand m_TrackSelectedFrameCommand;
 	private readonly RelayCommand m_SelectLastFrameCommand;
@@ -119,6 +120,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		Summary = new SessionSummaryViewModel();
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
+		m_CloseSessionCommand = new RelayCommand(_ => CloseSession(), _ => CurrentDocument != null);
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
 		m_TrackSelectedFrameCommand = new RelayCommand(_ => TrackSelectedFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_SelectLastFrameCommand = new RelayCommand(_ => SelectLastFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
@@ -180,6 +182,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand OpenSessionCommand => m_OpenSessionCommand;
 
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
+
+	public RelayCommand CloseSessionCommand => m_CloseSessionCommand;
 
 	public RelayCommand ResetTimelineCommand => m_ResetTimelineCommand;
 
@@ -254,6 +258,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
+				m_CloseSessionCommand.RaiseCanExecuteChanged();
 				m_ResetTimelineCommand.RaiseCanExecuteChanged();
 				m_TrackSelectedFrameCommand.RaiseCanExecuteChanged();
 				m_SelectLastFrameCommand.RaiseCanExecuteChanged();
@@ -963,6 +968,45 @@ internal sealed class MainWindowViewModel : ObservableObject
 		AttachTimelineState(Selection, Viewport);
 		UpdateTimelineText();
 		UpdateFooterText();
+	}
+
+	private void CloseSession()
+	{
+		if (CurrentDocument == null && FrameSamples.Count == 0)
+		{
+			StatusText = "No session loaded.";
+			return;
+		}
+
+		m_LoadCancellation?.Cancel();
+		DetachTimelineState(Selection, Viewport);
+		CurrentDocument = null;
+		FrameSamples = Array.Empty<FrameSample>();
+		Summary.Reset();
+		Selection = new TimelineSelection();
+		Viewport = TimelineViewport.CreateForFrames(0);
+		m_AllScopeHotspots = Array.Empty<ScopeHotspotRow>();
+		ScopeHotspots = Array.Empty<ScopeHotspotRow>();
+		VisibleThreadScopes = Array.Empty<ThreadTimelineScopeRow>();
+		SelectedFrameScopes = Array.Empty<ScopeFrameDetailRow>();
+		SelectedFrameCounters = Array.Empty<SelectedFrameCounterRow>();
+		LogRows = Array.Empty<LogMessageRow>();
+		CoreRows = Array.Empty<CoreSummaryRow>();
+		ThreadTimelineSummaryText = "No profiler thread scope data loaded.";
+		ScopeHotspotSummaryText = "No profiler scope data loaded.";
+		SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
+		SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
+		LogSummaryText = "No profiler log messages loaded.";
+		CoreSummaryText = "No profiler core data loaded.";
+		ThreadTimelineFirstVisibleThreadIndex = 0;
+		ThreadTimelineTotalThreadCount = 0;
+		FocusedThreadName = string.Empty;
+		m_ThreadTimelineThreadOrder.Clear();
+		m_HiddenThreadNames.Clear();
+		AttachTimelineState(Selection, Viewport);
+		UpdateTimelineText();
+		UpdateFooterText();
+		StatusText = "Closed profiler session.";
 	}
 
 	private void ApplyCoreSummary()

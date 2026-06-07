@@ -23,8 +23,8 @@
           <MenuItem Header="_Open" Command="{Binding OpenSessionCommand}" />
           <MenuItem Header="_Save" IsEnabled="False" />
           <MenuItem Header="Save _As..." IsEnabled="False" />
-          <MenuItem Header="_Close" IsEnabled="False" />
-          <MenuItem Header="Close A_ll" IsEnabled="False" />
+          <MenuItem Header="_Close" Command="{Binding CloseSessionCommand}" />
+          <MenuItem Header="Close A_ll" Command="{Binding CloseSessionCommand}" />
           <Separator />
           <MenuItem Header="_Export to CSV" IsEnabled="False" />
           <MenuItem Header="Export _Frame Graph to CSV" IsEnabled="False" />
