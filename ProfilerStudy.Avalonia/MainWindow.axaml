@@ -1,16 +1,20 @@
-<Window
+<suki:SukiWindow
     x:Class="ProfilerStudy.Avalonia.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ProfilerStudy.Avalonia"
+    xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:suki="https://github.com/kikipoulet/SukiUI"
     xmlns:stats="clr-namespace:ProfilerStudy.Avalonia.ProfilerStats"
     Title="ProfilerStudy"
     Width="1180"
     Height="760"
     WindowState="Maximized"
+    Icon="/Assets/AppIcon.ico"
+    IsMenuVisible="False"
     MinWidth="860"
     MinHeight="560">
-  <Window.KeyBindings>
+  <suki:SukiWindow.KeyBindings>
     <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
     <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
     <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenFindScopeCommand}" />
@@ -23,26 +27,23 @@
     <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomTimelineInCommand}" />
     <KeyBinding Gesture="Ctrl+-" Command="{Binding ZoomTimelineOutCommand}" />
     <KeyBinding Gesture="Ctrl+T" Command="{Binding TrackSelectedFrameCommand}" />
-  </Window.KeyBindings>
-  <Window.Styles>
+  </suki:SukiWindow.KeyBindings>
+  <suki:SukiWindow.Styles>
     <Style Selector="Button.toolbar-button">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Foreground" Value="#6E6E6E" />
-      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Foreground" Value="#1F2933" />
+      <Setter Property="FontSize" Value="12" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
       <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
     <Style Selector="Button.toolbar-button:pointerover">
-      <Setter Property="Background" Value="#E6E6E6" />
-      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="#E7EEF7" />
     </Style>
     <Style Selector="Button.toolbar-button:pressed">
-      <Setter Property="Background" Value="#DCDCDC" />
-      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="#D9E4F2" />
     </Style>
     <Style Selector="Button.toolbar-button:disabled">
       <Setter Property="Opacity" Value="0.45" />
@@ -51,30 +52,27 @@
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.toolbar-button Border">
-      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Foreground" Value="#6E6E6E" />
-      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Foreground" Value="#1F2933" />
+      <Setter Property="FontSize" Value="12" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
       <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:pointerover">
-      <Setter Property="Background" Value="#E6E6E6" />
-      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="#E7EEF7" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:checked">
-      <Setter Property="Background" Value="#E2E2E2" />
-      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="#D7E7FA" />
+      <Setter Property="Foreground" Value="#0E5CAD" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:checked:pointerover">
-      <Setter Property="Background" Value="#DCDCDC" />
-      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="#CFE0F5" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:disabled">
       <Setter Property="Opacity" Value="0.45" />
@@ -83,40 +81,64 @@
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button Border">
-      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="Border.toolbar-gap">
-      <Setter Property="Background" Value="#D1D1D1" />
-      <Setter Property="BorderBrush" Value="#9A9A9A" />
-      <Setter Property="BorderThickness" Value="1,0,1,0" />
+      <Setter Property="Background" Value="#D6DEE8" />
     </Style>
     <Style Selector="Border.toolbar-panel">
-      <Setter Property="Background" Value="#D1D1D1" />
-      <Setter Property="BorderBrush" Value="#8C8C8C" />
-      <Setter Property="BorderThickness" Value="1,0,1,1" />
+      <Setter Property="Background" Value="#F4F7FA" />
+      <Setter Property="BorderBrush" Value="#CCD6E2" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="Border.toolbox-section">
-      <Setter Property="Background" Value="#D0D0D0" />
-      <Setter Property="BorderBrush" Value="#858585" />
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#D7DEE8" />
       <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="Border.toolbox-section-header">
-      <Setter Property="Background" Value="#BCBCBC" />
-      <Setter Property="BorderBrush" Value="#858585" />
+      <Setter Property="Background" Value="#EEF3F8" />
+      <Setter Property="BorderBrush" Value="#D7DEE8" />
       <Setter Property="BorderThickness" Value="0,0,0,1" />
-      <Setter Property="Padding" Value="5,2" />
+      <Setter Property="CornerRadius" Value="6,6,0,0" />
+      <Setter Property="Padding" Value="8,5" />
     </Style>
     <Style Selector="Button.toolbox-action">
       <Setter Property="HorizontalContentAlignment" Value="Left" />
-      <Setter Property="Padding" Value="6,2" />
-      <Setter Property="Background" Value="#E0E0E0" />
-      <Setter Property="BorderBrush" Value="#969696" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Padding" Value="8,5" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="5" />
+      <Setter Property="Foreground" Value="#26323F" />
+      <Setter Property="FontSize" Value="12" />
     </Style>
     <Style Selector="Button.toolbox-action:pointerover">
-      <Setter Property="Background" Value="#EAEAEA" />
+      <Setter Property="Background" Value="#E7EEF7" />
+    </Style>
+    <Style Selector="Button.panel-command">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#CCD6E2" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="5" />
+      <Setter Property="Padding" Value="7,4" />
+      <Setter Property="Foreground" Value="#26323F" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="Button.panel-command:pointerover">
+      <Setter Property="Background" Value="#E7EEF7" />
+    </Style>
+    <Style Selector="TextBlock.panel-caption">
+      <Setter Property="Foreground" Value="#607083" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.panel-title">
+      <Setter Property="Foreground" Value="#18222D" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="Button.startup-action">
       <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -179,7 +201,7 @@
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
-  </Window.Styles>
+  </suki:SukiWindow.Styles>
   <Grid Background="#C8C8C8">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -263,156 +285,108 @@
       </Menu>
     </Border>
 
-    <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Height="120">
-      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-        <StackPanel Orientation="Horizontal" Spacing="0" Margin="0">
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Connect" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Button Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/connect_settings.png" HorizontalAlignment="Center" Stretch="None" />
-            </StackPanel>
-          </Button>
-          <Border Classes="toolbar-gap" Width="11" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Android" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Border Classes="toolbar-gap" Width="11" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/disconnect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Disconnect" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Border Classes="toolbar-gap" Width="61" />
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/goto_start.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Start" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track the currently selected frame in the visible timeline">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/track_end.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Track" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}" ToolTip.Tip="Jump to the latest frame in the session">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/goto_end.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="End" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Border Classes="toolbar-gap" Width="18" />
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/info.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Info" TextAlignment="Center" />
-              </Grid>
-          </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the frame graph">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/frames.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Frames" TextAlignment="Center" />
-              </Grid>
-          </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread scope graph">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/scope.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Scope" TextAlignment="Center" />
-              </Grid>
-          </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the CPU core graph">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/cores.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Cores" TextAlignment="Center" />
-              </Grid>
-          </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the custom stats graph">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/custom_stats.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
-              </Grid>
-          </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the profiler data grids">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/details.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Details" TextAlignment="Center" />
-              </Grid>
-          </ToggleButton>
-          <Border Classes="toolbar-gap" Width="48" />
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/prev_spike.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Prev" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select the slowest frame in the current session">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/max_frame.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Max" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}" ToolTip.Tip="Select the next frame spike">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/next_spike.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Next" TextAlignment="Center" />
-              </Grid>
-          </Button>
-          <Border Classes="toolbar-gap" Width="48" />
-          <Border Classes="toolbar-panel" Width="629" MinHeight="118" Padding="8,9">
-            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="6">
-              <DockPanel>
-                <TextBlock Text="Find Scope" Foreground="#101010" FontSize="11" />
-              </DockPanel>
-              <TextBox Grid.Row="1" Text="{Binding ScopeFilterText}" />
-              <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6">
-                <Button Content="Prev" Width="68" Command="{Binding FindPreviousScopeCommand}" />
-                <Button Content="Next" Width="68" Command="{Binding FindNextScopeCommand}" />
-                <Button Content="Clear" Width="68" Command="{Binding ClearScopeFindCommand}" />
-              </StackPanel>
-            </Grid>
-          </Border>
-          <Border Classes="toolbar-gap" Width="48" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
-            <Grid RowDefinitions="*,Auto,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/colour_mode.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Colour Mode" TextAlignment="Center" TextWrapping="Wrap" />
-                <TextBlock Grid.Row="2" Text="{Binding ScopeColorModeText}" TextAlignment="Center" FontSize="10" Foreground="#505050" />
-              </Grid>
-          </Button>
-          <Border Classes="toolbar-gap" Width="34" />
-          <Border Classes="toolbar-panel" Width="358" MinHeight="118" Padding="8,9">
-            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
-              <TextBlock Text="Conditional Scope Time" Foreground="#101010" FontSize="11" />
-              <DockPanel Grid.Row="1">
-                <TextBlock Text="{Binding ConditionalScopeTimeText}" Foreground="#404040" />
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
-                  <Button Content="-" Width="26" Padding="0" Command="{Binding AdjustConditionalScopeTimeCommand}" CommandParameter="Down" />
-                  <Button Content="+" Width="26" Padding="0" Command="{Binding AdjustConditionalScopeTimeCommand}" CommandParameter="Up" />
-                </StackPanel>
-              </DockPanel>
-              <Border Grid.Row="2" Height="18" Background="#C2C2C2" BorderBrush="#8A8A8A" BorderThickness="1">
-                <Border Width="{Binding ConditionalScopeTimeWidth}" Background="#8F8F8F" HorizontalAlignment="Left" />
-              </Border>
-            </Grid>
-          </Border>
-          <Border Classes="toolbar-gap" Width="12" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Open callstack capture and symbol tools">
-            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
-                <Image Grid.Row="0" Source="/Assets/Toolbar/callstacks.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
-                <TextBlock Grid.Row="1" Text="Callstacks" TextAlignment="Center" />
-              </Grid>
-          </Button>
+    <Border Grid.Row="1" Background="#F7F9FC" BorderBrush="#D6DEE8" BorderThickness="0,0,0,1" Height="54">
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="10,5" ColumnSpacing="10">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <material:MaterialIcon Kind="Speedometer" Width="24" Height="24" Foreground="#0E5CAD" />
+          <TextBlock Text="Profiler" FontSize="16" FontWeight="Bold" Foreground="#18222D" VerticalAlignment="Center" />
         </StackPanel>
-      </ScrollViewer>
+        <Border Grid.Column="1" Width="1" Background="#D6DEE8" Margin="2,6" />
+        <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="Tools" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Connect" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="Android" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Android" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="AlertCircle" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Disconnect" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Border Classes="toolbar-gap" Width="1" Margin="6,8" />
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
+              <material:MaterialIcon Kind="FirstPage" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track the currently selected frame in the visible timeline">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="Timer" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Track" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding SelectLastFrameCommand}" ToolTip.Tip="Jump to the latest frame in the session">
+              <material:MaterialIcon Kind="LastPage" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
+              <material:MaterialIcon Kind="Undo" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select the slowest frame in the current session">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="Speedometer" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Max" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding SelectNextSpikeCommand}" ToolTip.Tip="Select the next frame spike">
+              <material:MaterialIcon Kind="Redo" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Border Classes="toolbar-gap" Width="1" Margin="6,8" />
+            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="Information" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Info" VerticalAlignment="Center" />
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the frame graph">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="ChartBar" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Frames" VerticalAlignment="Center" />
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the CPU core graph">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="Cpu64Bit" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Cores" VerticalAlignment="Center" />
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the profiler data grids">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="DatabaseEdit" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Details" VerticalAlignment="Center" />
+              </StackPanel>
+            </ToggleButton>
+            <Border Classes="toolbar-gap" Width="1" Margin="6,8" />
+            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="Theme" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ScopeColorModeText}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Open callstack capture and symbol tools">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <material:MaterialIcon Kind="CodeBraces" Width="18" Height="18" VerticalAlignment="Center" />
+                <TextBlock Text="Callstacks" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+        <Border Grid.Column="3" Classes="toolbar-panel" Padding="8,5" MinWidth="280">
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="6">
+            <material:MaterialIcon Kind="Magnify" Width="18" Height="18" Foreground="#607083" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Text="{Binding ScopeFilterText}" PlaceholderText="Find scope" MinWidth="110" />
+            <Button Grid.Column="2" Classes="panel-command" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
+            <Button Grid.Column="3" Classes="panel-command" Content="Next" Command="{Binding FindNextScopeCommand}" />
+            <Button Grid.Column="4" Classes="panel-command" Content="Clear" Command="{Binding ClearScopeFindCommand}" />
+          </Grid>
+        </Border>
+      </Grid>
     </Border>
 
     <Grid Grid.Row="2" Background="#C8C8C8">
@@ -595,7 +569,7 @@
                     <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
                   <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="4">
-                    <TextBox Text="{Binding ScopeFilterText}" Watermark="scope text" />
+                    <TextBox Text="{Binding ScopeFilterText}" PlaceholderText="scope text" />
                     <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="4">
                       <Button Classes="toolbox-action" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
                       <Button Grid.Column="1" Classes="toolbox-action" Content="Next" Command="{Binding FindNextScopeCommand}" />
@@ -612,9 +586,9 @@
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="4">
                     <TextBlock Text="Captured root" Foreground="#404040" />
-                    <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
+                    <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
                     <TextBlock Text="Local root" Foreground="#404040" Margin="0,4,0,0" />
-                    <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
+                    <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
                   </StackPanel>
                 </Grid>
               </Border>
@@ -1147,7 +1121,7 @@
                            Text="{Binding ScopeFilterText}"
                            Width="180"
                            Margin="10,0,0,0"
-                           Watermark="Filter scopes" />
+                           PlaceholderText="Filter scopes" />
                   <TextBlock Text="{Binding ScopeHotspotSummaryText}"
                              Foreground="#404040"
                              HorizontalAlignment="Right" />
@@ -1877,7 +1851,7 @@
                   <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="#101010" />
                 </Border>
                 <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="5">
-                  <TextBox Text="{Binding ScopeFilterText}" Watermark="scope text" />
+                  <TextBox Text="{Binding ScopeFilterText}" PlaceholderText="scope text" />
                   <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="5">
                     <Button Classes="toolbox-action" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
                     <Button Grid.Column="1" Classes="toolbox-action" Content="Next" Command="{Binding FindNextScopeCommand}" />
@@ -1894,9 +1868,9 @@
                 </Border>
                 <StackPanel Grid.Row="1" Margin="6" Spacing="4">
                   <TextBlock Text="Captured root" Foreground="#404040" />
-                  <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
+                  <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
                   <TextBlock Text="Local root" Foreground="#404040" Margin="0,4,0,0" />
-                  <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
+                  <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
                 </StackPanel>
               </Grid>
             </Border>
@@ -2155,9 +2129,9 @@
           <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
           <TextBlock Text="These settings are used when opening captured source paths from profiler scope rows." Foreground="#404040" TextWrapping="Wrap" />
           <TextBlock Text="Captured root" Foreground="#303030" Margin="0,4,0,0" />
-          <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
+          <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
           <TextBlock Text="Local root" Foreground="#303030" />
-          <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
+          <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
           <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
             <TextBlock Text="Changes are saved automatically and reused by the source navigation commands." Foreground="#303030" TextWrapping="Wrap" />
           </Border>
@@ -2315,9 +2289,9 @@
           <TextBlock Text="Connection controls are represented here to match the original profiler entry points." Foreground="#404040" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="84,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <TextBlock Text="Host" Foreground="#303030" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" Text="{Binding ConnectionHost}" Watermark="localhost" />
+            <TextBox Grid.Column="1" Text="{Binding ConnectionHost}" PlaceholderText="localhost" />
             <TextBlock Grid.Row="1" Text="Port" Foreground="#303030" VerticalAlignment="Center" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConnectionPort}" Watermark="8428" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConnectionPort}" PlaceholderText="8428" />
             <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
               <TextBlock Text="{Binding ConnectionPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
             </Border>
@@ -2363,7 +2337,7 @@
               <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
             </Border>
             <Grid Grid.Column="1" ColumnDefinitions="*,64,68" ColumnSpacing="6">
-              <TextBox Text="{Binding AndroidEndpoint}" Watermark="localfilesystem:/data/user_de/0/.../files/framepro" />
+              <TextBox Text="{Binding AndroidEndpoint}" PlaceholderText="localfilesystem:/data/user_de/0/.../files/framepro" />
               <Button Grid.Column="1"
                       Content="Debug"
                       Command="{Binding AndroidActionCommand}"
@@ -2532,4 +2506,4 @@
     </Border>
 
   </Grid>
-</Window>
+</suki:SukiWindow>
