@@ -513,14 +513,13 @@
         <Grid RowDefinitions="Auto,*">
           <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3">
             <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Toolbox" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
-              <Button DockPanel.Dock="Right"
-                      Content="x"
-                      Width="22"
-                      Height="20"
-                      Padding="0"
-                      FontSize="11"
-                      Command="{Binding ToggleToolboxCommand}" />
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+                <TextBlock Text="{Binding ActiveSessionView}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <Button Content="_" Width="22" Height="20" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Minimize Toolbox" ToolTip.Tip="Minimize toolbox" />
+                <Button Content="□" Width="22" Height="20" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Float Toolbox" ToolTip.Tip="Float toolbox" />
+                <Button Content="x" Width="22" Height="20" Padding="0" FontSize="11" Command="{Binding ToggleToolboxCommand}" ToolTip.Tip="Close toolbox" />
+              </StackPanel>
+              <TextBlock Text="Toolbox" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
             </DockPanel>
           </Border>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
