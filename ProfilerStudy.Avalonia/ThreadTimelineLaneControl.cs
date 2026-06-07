@@ -49,6 +49,9 @@ public sealed class ThreadTimelineLaneControl : Control
 	public static readonly StyledProperty<TimelineSelection> SelectionProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, TimelineSelection>(nameof(Selection));
 
+	public static readonly StyledProperty<string> ColorModeProperty =
+		AvaloniaProperty.Register<ThreadTimelineLaneControl, string>(nameof(ColorMode), "Thread");
+
 	public static readonly StyledProperty<ICommand> OpenScopeSourceCommandProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, ICommand>(nameof(OpenScopeSourceCommand));
 
@@ -57,7 +60,7 @@ public sealed class ThreadTimelineLaneControl : Control
 
 	static ThreadTimelineLaneControl()
 	{
-		AffectsRender<ThreadTimelineLaneControl>(RowsProperty, SamplesProperty, ViewportProperty, SelectionProperty);
+		AffectsRender<ThreadTimelineLaneControl>(RowsProperty, SamplesProperty, ViewportProperty, SelectionProperty, ColorModeProperty);
 	}
 
 	public IReadOnlyList<ThreadTimelineScopeRow> Rows
@@ -82,6 +85,12 @@ public sealed class ThreadTimelineLaneControl : Control
 	{
 		get => GetValue(SelectionProperty);
 		set => SetValue(SelectionProperty, value);
+	}
+
+	public string ColorMode
+	{
+		get => GetValue(ColorModeProperty);
+		set => SetValue(ColorModeProperty, value);
 	}
 
 	public ICommand OpenScopeSourceCommand
@@ -291,7 +300,7 @@ public sealed class ThreadTimelineLaneControl : Control
 					continue;
 				}
 
-				IBrush fill = new SolidColorBrush(GetScopeColor(row.Depth));
+				IBrush fill = new SolidColorBrush(ResolveScopeColor(row.Depth, row.ThreadName, row.Name));
 				context.FillRectangle(fill, barRect);
 				context.DrawRectangle(null, ReferenceEquals(row, m_HoveredScope) ? HoverPen : BorderPen, barRect);
 				if (barRect.Width > 58.0)
@@ -455,6 +464,30 @@ public sealed class ThreadTimelineLaneControl : Control
 			row.EndFrame.ToString("0.###", CultureInfo.InvariantCulture) +
 			sourceText +
 			openText;
+	}
+
+	private Color ResolveScopeColor(int depth, string threadName, string scopeName)
+	{
+		if (string.Equals(ColorMode, "Scope", StringComparison.Ordinal))
+		{
+			return GetScopeColor(GetStablePaletteIndex(scopeName));
+		}
+
+		return GetScopeColor(GetStablePaletteIndex(threadName) + depth);
+	}
+
+	private static int GetStablePaletteIndex(string value)
+	{
+		unchecked
+		{
+			int hash = 17;
+			foreach (char ch in value ?? string.Empty)
+			{
+				hash = (hash * 31) + ch;
+			}
+
+			return Math.Abs(hash);
+		}
 	}
 
 	private static void DrawAxis(DrawingContext context, double left, double right, double top, int startFrame, int endFrame)

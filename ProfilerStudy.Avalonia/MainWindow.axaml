@@ -51,8 +51,8 @@
             <MenuItem Header="_Data Grid" ToggleType="CheckBox" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" />
           </MenuItem>
           <MenuItem Header="Scope _Colouring">
-            <MenuItem Header="Colour by _Thread" IsEnabled="False" />
-            <MenuItem Header="Colour by _Scope" IsEnabled="False" />
+            <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
+            <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
           </MenuItem>
           <Separator />
           <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
@@ -239,12 +239,13 @@
             </Grid>
           </Border>
           <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
-          <Button Width="119" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#BCA0C8" BorderBrush="#6B4878" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="RGB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#33203C" />
               </Border>
               <TextBlock Text="Colour Mode" TextAlignment="Center" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding ScopeColorModeText}" TextAlignment="Center" FontSize="10" Foreground="#505050" />
             </StackPanel>
           </Button>
           <Border Width="358" MinHeight="118" Background="#CCCCCC" BorderBrush="#8A8A8A" BorderThickness="1,0" Padding="8,7">
@@ -485,6 +486,7 @@
                     Samples="{Binding FrameSamples}"
                     Viewport="{Binding Viewport}"
                     Selection="{Binding Selection}"
+                    ColorMode="{Binding ScopeColorMode}"
                     OpenScopeSourceCommand="{Binding OpenScopeSourceCommand}"
                     FocusThreadCommand="{Binding FocusThreadCommand}">
                   <local:ThreadTimelineLaneControl.ContextMenu>
@@ -693,7 +695,7 @@
                 </DockPanel>
 
                 <Border Grid.Row="1" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,7,0,7">
-                  <local:SelectedFrameThreadLaneControl Rows="{Binding SelectedFrameScopes}" />
+                  <local:SelectedFrameThreadLaneControl Rows="{Binding SelectedFrameScopes}" ColorMode="{Binding ScopeColorMode}" />
                 </Border>
 
                 <Border Grid.Row="2" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="6,4">

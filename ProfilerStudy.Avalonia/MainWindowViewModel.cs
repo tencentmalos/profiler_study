@@ -49,6 +49,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_FindPreviousScopeCommand;
 	private readonly RelayCommand m_FindNextScopeCommand;
 	private readonly RelayCommand m_ClearScopeFindCommand;
+	private readonly RelayCommand m_SetScopeColorModeCommand;
+	private readonly RelayCommand m_ToggleScopeColorModeCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -92,6 +94,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsCustomStatsVisible = true;
 	private bool m_IsThreadsDataGridVisible = true;
 	private bool m_IsOutputWindowVisible = true;
+	private string m_ScopeColorMode = "Thread";
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
 	private string m_ScopeHotspotSortKey = "TotalTime";
@@ -144,6 +147,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_FindPreviousScopeCommand = new RelayCommand(_ => FindScope(-1), _ => CanFindScope());
 		m_FindNextScopeCommand = new RelayCommand(_ => FindScope(1), _ => CanFindScope());
 		m_ClearScopeFindCommand = new RelayCommand(_ => ScopeFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ScopeFilterText));
+		m_SetScopeColorModeCommand = new RelayCommand(SetScopeColorMode);
+		m_ToggleScopeColorModeCommand = new RelayCommand(_ => ToggleScopeColorMode());
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -231,6 +236,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand FindNextScopeCommand => m_FindNextScopeCommand;
 
 	public RelayCommand ClearScopeFindCommand => m_ClearScopeFindCommand;
+
+	public RelayCommand SetScopeColorModeCommand => m_SetScopeColorModeCommand;
+
+	public RelayCommand ToggleScopeColorModeCommand => m_ToggleScopeColorModeCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -606,6 +615,26 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public bool IsThreadsDataGridCollapsed => !IsThreadsDataGridVisible;
 
+	public string ScopeColorMode
+	{
+		get => m_ScopeColorMode;
+		private set
+		{
+			if (SetProperty(ref m_ScopeColorMode, value))
+			{
+				RaisePropertyChanged(nameof(IsScopeColorModeThread));
+				RaisePropertyChanged(nameof(IsScopeColorModeScope));
+				RaisePropertyChanged(nameof(ScopeColorModeText));
+			}
+		}
+	}
+
+	public bool IsScopeColorModeThread => ScopeColorMode == "Thread";
+
+	public bool IsScopeColorModeScope => ScopeColorMode == "Scope";
+
+	public string ScopeColorModeText => IsScopeColorModeThread ? "Thread" : "Scope";
+
 	public bool IsOutputWindowVisible
 	{
 		get => m_IsOutputWindowVisible;
@@ -693,6 +722,23 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		IsOutputWindowVisible = !IsOutputWindowVisible;
 		StatusText = IsOutputWindowVisible ? "Output Window visible." : "Output Window hidden.";
+	}
+
+	private void SetScopeColorMode(object parameter)
+	{
+		string mode = parameter as string;
+		if (mode != "Thread" && mode != "Scope")
+		{
+			return;
+		}
+
+		ScopeColorMode = mode;
+		StatusText = "Scope colouring by " + mode.ToLowerInvariant() + ".";
+	}
+
+	private void ToggleScopeColorMode()
+	{
+		SetScopeColorMode(IsScopeColorModeThread ? "Scope" : "Thread");
 	}
 
 	public void SelectFrameFromProfilerStats(int frameIndex)

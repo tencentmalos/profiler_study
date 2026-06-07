@@ -32,15 +32,24 @@ public sealed class SelectedFrameThreadLaneControl : Control
 	public static readonly StyledProperty<IReadOnlyList<ScopeFrameDetailRow>> RowsProperty =
 		AvaloniaProperty.Register<SelectedFrameThreadLaneControl, IReadOnlyList<ScopeFrameDetailRow>>(nameof(Rows));
 
+	public static readonly StyledProperty<string> ColorModeProperty =
+		AvaloniaProperty.Register<SelectedFrameThreadLaneControl, string>(nameof(ColorMode), "Thread");
+
 	static SelectedFrameThreadLaneControl()
 	{
-		AffectsRender<SelectedFrameThreadLaneControl>(RowsProperty);
+		AffectsRender<SelectedFrameThreadLaneControl>(RowsProperty, ColorModeProperty);
 	}
 
 	public IReadOnlyList<ScopeFrameDetailRow> Rows
 	{
 		get => GetValue(RowsProperty);
 		set => SetValue(RowsProperty, value);
+	}
+
+	public string ColorMode
+	{
+		get => GetValue(ColorModeProperty);
+		set => SetValue(ColorModeProperty, value);
 	}
 
 	protected override Size MeasureOverride(Size availableSize)
@@ -111,7 +120,7 @@ public sealed class SelectedFrameThreadLaneControl : Control
 					continue;
 				}
 
-				IBrush fill = new SolidColorBrush(GetScopeColor(row.Depth));
+				IBrush fill = new SolidColorBrush(ResolveScopeColor(row.Depth, row.ThreadName, row.Name));
 				context.FillRectangle(fill, barRect);
 				context.DrawRectangle(null, BorderPen, barRect);
 				if (barRect.Width > 54.0)
@@ -135,6 +144,30 @@ public sealed class SelectedFrameThreadLaneControl : Control
 			double x = left + ((right - left) * ratio);
 			context.DrawLine(AxisPen, new Point(x, axisY), new Point(x, axisY - 5.0));
 			DrawText(context, FormatMs(maxEndMs * ratio), MutedTextBrush, 9.0, x + 2.0, top);
+		}
+	}
+
+	private Color ResolveScopeColor(int depth, string threadName, string scopeName)
+	{
+		if (string.Equals(ColorMode, "Scope", StringComparison.Ordinal))
+		{
+			return GetScopeColor(GetStablePaletteIndex(scopeName));
+		}
+
+		return GetScopeColor(GetStablePaletteIndex(threadName) + depth);
+	}
+
+	private static int GetStablePaletteIndex(string value)
+	{
+		unchecked
+		{
+			int hash = 17;
+			foreach (char ch in value ?? string.Empty)
+			{
+				hash = (hash * 31) + ch;
+			}
+
+			return Math.Abs(hash);
 		}
 	}
 
