@@ -147,8 +147,8 @@
     <Border Grid.Row="0" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1">
       <Menu Background="#EFEFEF" FontSize="12" Padding="2,0">
         <MenuItem Header="_File">
-          <MenuItem Header="_Open" Command="{Binding OpenSessionCommand}" />
-          <MenuItem Header="_Save" Command="{Binding SaveSessionCommand}" />
+          <MenuItem Header="_Open" InputGesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
+          <MenuItem Header="_Save" InputGesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
           <MenuItem Header="Save _As..." Command="{Binding SaveSessionAsCommand}" />
           <MenuItem Header="_Close" Command="{Binding CloseSessionCommand}" />
           <MenuItem Header="Close A_ll" Command="{Binding CloseSessionCommand}" />
@@ -180,8 +180,8 @@
             <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
             <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
           </MenuItem>
-        <MenuItem Header="_Toolbox" ToggleType="CheckBox" IsChecked="{Binding IsToolboxVisible, Mode=OneWay}" Command="{Binding ToggleToolboxCommand}" />
-        <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
+          <MenuItem Header="_Toolbox" ToggleType="CheckBox" IsChecked="{Binding IsToolboxVisible, Mode=OneWay}" Command="{Binding ToggleToolboxCommand}" />
+          <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
         <MenuItem Header="_Connection">
           <MenuItem Header="_New Connection..." Command="{Binding OpenConnectionCommand}" />
@@ -218,6 +218,39 @@
     <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Height="120">
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
         <StackPanel Orientation="Horizontal" Spacing="0" Margin="0">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding OpenSessionCommand}">
+            <StackPanel Spacing="4">
+              <Border Width="28" Height="36" Background="#C6C099" BorderBrush="#706A3F" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Text="open" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#332F16" />
+              </Border>
+              <TextBlock Text="Open" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SaveSessionCommand}">
+            <StackPanel Spacing="4">
+              <Border Width="28" Height="36" Background="#A8B4C8" BorderBrush="#4B596F" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Text="save" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#222B38" />
+              </Border>
+              <TextBlock Text="Save" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SaveSessionAsCommand}">
+            <StackPanel Spacing="4">
+              <Border Width="28" Height="36" Background="#A8B4C8" BorderBrush="#4B596F" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Text="as" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#222B38" />
+              </Border>
+              <TextBlock Text="Save As" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding LoadSampleCommand}">
+            <StackPanel Spacing="4">
+              <Border Width="28" Height="36" Background="#B7B7B7" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Text="demo" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#202020" />
+              </Border>
+              <TextBlock Text="Sample" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Border Width="18" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9FB6D5" BorderBrush="#4F6584" BorderThickness="1" HorizontalAlignment="Center">
