@@ -132,7 +132,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsCustomStatsVisible = true;
 	private bool m_IsThreadsDataGridVisible = true;
 	private bool m_IsOutputWindowVisible = true;
-	private bool m_IsToolboxVisible = true;
+	private bool m_IsToolboxVisible = false;
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";

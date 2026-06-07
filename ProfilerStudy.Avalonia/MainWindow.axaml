@@ -134,8 +134,6 @@
             <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
             <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
           </MenuItem>
-          <Separator />
-          <MenuItem Header="_Toolbox" ToggleType="CheckBox" IsChecked="{Binding IsToolboxVisible, Mode=OneWay}" Command="{Binding ToggleToolboxCommand}" />
           <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
         <MenuItem Header="_Connection">
@@ -188,7 +186,7 @@
               </Border>
             </StackPanel>
           </Button>
-          <Border Width="42" Background="#D1D1D1" />
+          <Border Width="11" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1" HorizontalAlignment="Center">
@@ -197,7 +195,7 @@
               <TextBlock Text="Android" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="42" Background="#D1D1D1" />
+          <Border Width="11" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#C16B62" BorderBrush="#73342E" BorderThickness="1" HorizontalAlignment="Center">
@@ -206,8 +204,8 @@
               <TextBlock Text="Disconnect" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="42" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}">
+          <Border Width="61" Background="#D1D1D1" />
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="|&lt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />
@@ -215,7 +213,7 @@
               <TextBlock Text="Start" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="||" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />
@@ -223,7 +221,7 @@
               <TextBlock Text="Track" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&gt;|" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />
@@ -231,7 +229,7 @@
               <TextBlock Text="End" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="24" Background="#D1D1D1" />
+          <Border Width="18" Background="#D1D1D1" />
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
@@ -281,7 +279,7 @@
             </StackPanel>
           </ToggleButton>
           <Border Width="49" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&lt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#3A2818" />
@@ -289,7 +287,7 @@
               <TextBlock Text="Prev" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="!" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#3A2818" />
@@ -297,7 +295,7 @@
               <TextBlock Text="Max" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&gt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#3A2818" />
@@ -503,7 +501,7 @@
                     IsVisible="{Binding IsToolboxVisible}"
                     ResizeDirection="Columns" />
 
-      <Grid Grid.Column="2" RowDefinitions="Auto,*,47" Margin="4" Background="#C8C8C8">
+      <Grid Grid.Column="2" RowDefinitions="0,*,47" Margin="0" Background="#C8C8C8">
         <Border Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,0,0,4">
           <Grid RowDefinitions="24,Auto,Auto">
             <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="6,0">
