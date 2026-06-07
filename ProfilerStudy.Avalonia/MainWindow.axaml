@@ -24,7 +24,72 @@
     <KeyBinding Gesture="Ctrl+T" Command="{Binding TrackSelectedFrameCommand}" />
   </Window.KeyBindings>
   <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Background" Value="#D4D0C8" />
+      <Setter Property="BorderBrush" Value="#808080" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Padding" Value="3,1" />
+    </Style>
+    <Style Selector="Button:pointerover">
+      <Setter Property="Background" Value="#E6E6E6" />
+    </Style>
+    <Style Selector="Button:disabled">
+      <Setter Property="Opacity" Value="0.45" />
+    </Style>
+    <Style Selector="ToggleButton">
+      <Setter Property="Background" Value="#D4D0C8" />
+      <Setter Property="BorderBrush" Value="#808080" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Padding" Value="2,1" />
+    </Style>
+    <Style Selector="ToggleButton:pointerover">
+      <Setter Property="Background" Value="#E6E6E6" />
+    </Style>
+    <Style Selector="ToggleButton:checked">
+      <Setter Property="Background" Value="#E2E2E2" />
+      <Setter Property="BorderBrush" Value="#808080" />
+    </Style>
+    <Style Selector="ToggleButton:checked:pointerover">
+      <Setter Property="Background" Value="#DCDCDC" />
+    </Style>
+    <Style Selector="ToggleButton:disabled">
+      <Setter Property="Opacity" Value="0.45" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#808080" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Padding" Value="3,1" />
+    </Style>
+    <Style Selector="TextBlock">
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#101010" />
+    </Style>
+    <Style Selector="MenuItem">
+      <Setter Property="Background" Value="#D4D0C8" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Padding" Value="6,2" />
+    </Style>
+    <Style Selector="MenuItem:pointerover">
+      <Setter Property="Background" Value="#E6E6E6" />
+    </Style>
     <Style Selector="Button.toolbar-button">
+      <Setter Property="Height" Value="120" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
@@ -53,6 +118,7 @@
       <Setter Property="CornerRadius" Value="0" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button">
+      <Setter Property="Height" Value="120" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
@@ -85,14 +151,43 @@
       <Setter Property="CornerRadius" Value="0" />
     </Style>
     <Style Selector="Border.toolbar-gap">
-      <Setter Property="Background" Value="#D1D1D1" />
+      <Setter Property="Background" Value="#D4D0C8" />
       <Setter Property="BorderBrush" Value="#9A9A9A" />
       <Setter Property="BorderThickness" Value="1,0,1,0" />
     </Style>
     <Style Selector="Border.toolbar-panel">
-      <Setter Property="Background" Value="#D1D1D1" />
+      <Setter Property="Height" Value="120" />
+      <Setter Property="Background" Value="#D4D0C8" />
       <Setter Property="BorderBrush" Value="#8C8C8C" />
       <Setter Property="BorderThickness" Value="1,0,1,1" />
+    </Style>
+    <Style Selector="Border.toolbar-panel Button">
+      <Setter Property="Background" Value="#D4D0C8" />
+      <Setter Property="BorderBrush" Value="#808080" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Padding" Value="4,1" />
+    </Style>
+    <Style Selector="Border.toolbar-panel Button:pointerover">
+      <Setter Property="Background" Value="#E6E6E6" />
+    </Style>
+    <Style Selector="Border.toolbar-panel TextBlock">
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#101010" />
+    </Style>
+    <Style Selector="Border.toolbar-panel TextBox">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#808080" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Padding" Value="3,1" />
     </Style>
     <Style Selector="Border.toolbox-section">
       <Setter Property="Background" Value="#D0D0D0" />
@@ -119,14 +214,14 @@
     </Style>
     <Style Selector="Button.startup-action">
       <Setter Property="HorizontalContentAlignment" Value="Left" />
-      <Setter Property="Padding" Value="10,5" />
-      <Setter Property="Background" Value="#E0E0E0" />
-      <Setter Property="BorderBrush" Value="#8C8C8C" />
+      <Setter Property="Padding" Value="6,2" />
+      <Setter Property="Background" Value="#D4D0C8" />
+      <Setter Property="BorderBrush" Value="#808080" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="0" />
       <Setter Property="Foreground" Value="#101010" />
       <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="11" />
     </Style>
     <Style Selector="Button.startup-action:pointerover">
       <Setter Property="Background" Value="#EFEFEF" />
@@ -136,13 +231,13 @@
       <Setter Property="Background" Value="#D4D0C8" />
       <Setter Property="BorderBrush" Value="#8A8A8A" />
       <Setter Property="BorderThickness" Value="1,1,0,0" />
-      <Setter Property="Padding" Value="5,1" />
+      <Setter Property="Padding" Value="4,1" />
     </Style>
     <Style Selector="TextBlock.status-label">
       <Setter Property="Foreground" Value="#404040" />
       <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
-      <Setter Property="FontSize" Value="10" />
-      <Setter Property="Margin" Value="0,0,4,0" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Margin" Value="0" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="TextBlock.status-value">
@@ -179,7 +274,7 @@
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
   </Window.Styles>
-  <Grid Background="#C8C8C8">
+  <Grid Background="#D4D0C8">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
@@ -187,8 +282,8 @@
       <RowDefinition Height="{Binding OutputWindowHeight}" />
       <RowDefinition Height="22" />
     </Grid.RowDefinitions>
-    <Border Grid.Row="0" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1">
-      <Menu Background="#EFEFEF" FontSize="12" Padding="2,0">
+    <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1">
+      <Menu Background="#D4D0C8" FontFamily="Microsoft Sans Serif, Segoe UI" FontSize="12" Padding="2,0">
         <MenuItem Header="_File">
           <MenuItem Header="_Open" InputGesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
           <MenuItem Header="_Save" InputGesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
@@ -262,116 +357,110 @@
       </Menu>
     </Border>
 
-    <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Height="120">
-      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-        <StackPanel Orientation="Horizontal" Spacing="0" Margin="0">
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
+    <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Height="120">
+      <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+        <Canvas Width="3164" Height="120">
+          <Button Canvas.Left="0" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Connect" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Button Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings">
+          <Button Canvas.Left="119" Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings">
             <StackPanel Spacing="4">
               <Image Source="/Assets/Toolbar/connect_settings.png" HorizontalAlignment="Center" Stretch="None" />
             </StackPanel>
           </Button>
-          <Border Classes="toolbar-gap" Width="11" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
+          <Button Canvas.Left="161" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Android" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Border Classes="toolbar-gap" Width="11" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
+          <Button Canvas.Left="291" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/disconnect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Disconnect" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Border Classes="toolbar-gap" Width="61" />
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
+          <Button Canvas.Left="471" Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/goto_start.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Start" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track the currently selected frame in the visible timeline">
+          <Button Canvas.Left="555" Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track the currently selected frame in the visible timeline">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/track_end.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Track" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}" ToolTip.Tip="Jump to the latest frame in the session">
+          <Button Canvas.Left="640" Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}" ToolTip.Tip="Jump to the latest frame in the session">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/goto_end.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="End" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Border Classes="toolbar-gap" Width="18" />
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
+          <ToggleButton Canvas.Left="737" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/info.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Info" TextAlignment="Center" />
               </Grid>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the frame graph">
+          <ToggleButton Canvas.Left="867" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the frame graph">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/frames.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Frames" TextAlignment="Center" />
               </Grid>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread scope graph">
+          <ToggleButton Canvas.Left="997" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread scope graph">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/scope.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Scope" TextAlignment="Center" />
               </Grid>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the CPU core graph">
+          <ToggleButton Canvas.Left="1127" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the CPU core graph">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/cores.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Cores" TextAlignment="Center" />
               </Grid>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the custom stats graph">
+          <ToggleButton Canvas.Left="1258" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the custom stats graph">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/custom_stats.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
               </Grid>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the profiler data grids">
+          <ToggleButton Canvas.Left="1388" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the profiler data grids">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/details.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Details" TextAlignment="Center" />
               </Grid>
           </ToggleButton>
-          <Border Classes="toolbar-gap" Width="49" />
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
+          <Button Canvas.Left="1556" Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/prev_spike.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Prev" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select the slowest frame in the current session">
+          <Button Canvas.Left="1641" Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select the slowest frame in the current session">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/max_frame.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Max" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}" ToolTip.Tip="Select the next frame spike">
+          <Button Canvas.Left="1725" Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}" ToolTip.Tip="Select the next frame spike">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/next_spike.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Next" TextAlignment="Center" />
               </Grid>
           </Button>
-          <Border Classes="toolbar-panel" Width="629" MinHeight="118" Padding="8,9">
+          <Border Canvas.Left="1846" Classes="toolbar-panel" Width="629" MinHeight="118" Padding="8,9">
             <Grid RowDefinitions="Auto,Auto,*" RowSpacing="6">
               <DockPanel>
-                <TextBlock Text="Find" Foreground="#101010" />
-                <TextBlock Text="Find Scope" DockPanel.Dock="Right" Foreground="#505050" />
+                <TextBlock Text="Find Scope" Foreground="#101010" FontSize="11" />
               </DockPanel>
-              <TextBox Grid.Row="1" Watermark="Scope text" Text="{Binding ScopeFilterText}" Background="#E6E6E6" BorderBrush="#8A8A8A" BorderThickness="1" />
+              <TextBox Grid.Row="1" Text="{Binding ScopeFilterText}" />
               <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6">
                 <Button Content="Prev" Width="68" Command="{Binding FindPreviousScopeCommand}" />
                 <Button Content="Next" Width="68" Command="{Binding FindNextScopeCommand}" />
@@ -379,17 +468,16 @@
               </StackPanel>
             </Grid>
           </Border>
-          <Border Classes="toolbar-gap" Width="47" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
+          <Button Canvas.Left="2522" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
             <Grid RowDefinitions="*,Auto,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/colour_mode.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Colour Mode" TextAlignment="Center" TextWrapping="Wrap" />
                 <TextBlock Grid.Row="2" Text="{Binding ScopeColorModeText}" TextAlignment="Center" FontSize="10" Foreground="#505050" />
               </Grid>
           </Button>
-          <Border Classes="toolbar-panel" Width="358" MinHeight="118" Padding="8,9">
+          <Border Canvas.Left="2675" Classes="toolbar-panel" Width="358" MinHeight="118" Padding="8,9">
             <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
-              <TextBlock Text="Conditional Scope Time" Foreground="#101010" />
+              <TextBlock Text="Conditional Scope Time" Foreground="#101010" FontSize="11" />
               <DockPanel Grid.Row="1">
                 <TextBlock Text="{Binding ConditionalScopeTimeText}" Foreground="#404040" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
@@ -402,17 +490,17 @@
               </Border>
             </Grid>
           </Border>
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Open callstack capture and symbol tools">
+          <Button Canvas.Left="3045" Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Open callstack capture and symbol tools">
             <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
                 <Image Grid.Row="0" Source="/Assets/Toolbar/callstacks.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
                 <TextBlock Grid.Row="1" Text="Callstacks" TextAlignment="Center" />
               </Grid>
           </Button>
-        </StackPanel>
+        </Canvas>
       </ScrollViewer>
     </Border>
 
-    <Grid Grid.Row="2" Background="#BEBEBE">
+    <Grid Grid.Row="2" Background="#D4D0C8">
       <Grid.RowDefinitions>
         <RowDefinition Height="0" />
         <RowDefinition Height="*" />
@@ -422,7 +510,7 @@
         <ColumnDefinition Width="{Binding ToolboxSplitterWidth}" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
-      <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#BEBEBE" BorderBrush="#868686" BorderThickness="0,0,0,1">
+      <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#D4D0C8" BorderBrush="#868686" BorderThickness="0,0,0,1">
         <Grid ColumnDefinitions="Auto,*">
           <Border Grid.Column="0" Classes="document-tab" Margin="3,3,0,0">
             <StackPanel Orientation="Horizontal" Spacing="5">
@@ -469,7 +557,7 @@
       </Border>
       <Border Grid.Row="1" Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxExpanded}">
         <Grid RowDefinitions="Auto,*">
-          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3" IsVisible="False">
+          <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3" IsVisible="False">
             <DockPanel LastChildFill="True">
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
                 <TextBlock Text="{Binding ActiveSessionView}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
@@ -641,8 +729,8 @@
         </DockPanel>
       </Border>
 
-      <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*,47" Margin="0" Background="#C8C8C8" IsVisible="{Binding IsMainSessionDockExpanded}">
-        <Grid Grid.Row="0" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+      <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*,47" Margin="0" Background="#D4D0C8" IsVisible="{Binding IsMainSessionDockExpanded}">
+        <Grid Grid.Row="0" IsVisible="{Binding IsThreadsViewActive}" Background="#D4D0C8">
           <Grid.RowDefinitions>
             <RowDefinition Height="{Binding ThreadsInfoPanelHeight}" />
             <RowDefinition Height="{Binding ThreadsFrameScrollbarHeight}" />
@@ -658,7 +746,7 @@
             <ColumnDefinition Width="{Binding ThreadsDataGridColumnWidth}" />
           </Grid.ColumnDefinitions>
           <Grid Grid.Row="0" ColumnDefinitions="32,*" IsVisible="{Binding IsThreadsInfoPanelVisible}">
-            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="INFO"
                          Foreground="#202020"
                          FontWeight="SemiBold"
@@ -674,7 +762,7 @@
             </Border>
 
             <Border Grid.Column="1" Background="#F5F5F5" BorderBrush="#7D7D7D" BorderThickness="1" Padding="8,6">
-              <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto,*,Auto,*" ColumnSpacing="10" RowSpacing="5">
+              <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto,*,Auto,*" ColumnSpacing="6" RowSpacing="5">
                 <TextBlock Text="Session" Foreground="#505050" FontWeight="SemiBold" />
                 <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Column="2" Text="Frames" Foreground="#505050" FontWeight="SemiBold" />
@@ -699,7 +787,7 @@
             </Border>
           </Grid>
 
-          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
+          <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                 <TextBlock Text="INFO" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -713,7 +801,7 @@
           </Border>
 
           <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
-            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
                          Foreground="#202020"
                          FontWeight="SemiBold"
@@ -734,7 +822,7 @@
                   <Border Background="#D0D0D0" Padding="6,5">
                     <StackPanel Spacing="1">
                       <TextBlock Text="Average Frame" Foreground="#202020" FontFamily="Monaco,Consolas" FontSize="10" />
-                      <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="24" />
+                      <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="12" />
                     </StackPanel>
                   </Border>
                   <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
@@ -763,13 +851,13 @@
               </Grid>
             </Border>
 
-            <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" MinHeight="120">
+            <Border Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" MinHeight="120">
               <stats:ucProfilerStats x:Name="ThreadsProfilerStatsControl"
                                      IsCompactMode="True" />
             </Border>
           </Grid>
 
-          <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+          <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                 <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -783,8 +871,8 @@
           </Border>
 
           <Grid Grid.Row="1" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
-            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
-            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="4,2">
+            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
+            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="3,1">
               <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
                 <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
                 <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
@@ -799,12 +887,12 @@
             </Grid>
           </Border>
 
-            <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="8,4">
+            <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="3,1">
               <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
             </Border>
           </Grid>
 
-          <Border Grid.Row="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+          <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
           </Border>
 
@@ -818,7 +906,7 @@
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
           <Grid Grid.Row="4" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
-            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Time"
                          Foreground="#202020"
                          FontWeight="SemiBold"
@@ -833,11 +921,11 @@
               </TextBlock>
             </Border>
 
-            <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
               <Grid RowDefinitions="Auto,Auto,*">
-                <TextBlock Text="Time Spans" Foreground="#F0F0F0" FontFamily="Microsoft Sans Serif, Segoe UI" FontSize="11" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
-                <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#BDBDBD" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="Time Spans" Foreground="#202020" FontFamily="Microsoft Sans Serif, Segoe UI" FontSize="11" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#505050" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
               </Grid>
             </Border>
 
@@ -855,7 +943,7 @@
             <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#7D7D7D" BorderThickness="1" />
           </Grid>
 
-          <Border Grid.Row="4" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
+          <Border Grid.Row="4" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                 <TextBlock Text="Time" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -877,9 +965,9 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-          <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,0,0,0,0,0,0" Margin="0,3,0,0" Background="#C8C8C8">
+          <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,0,0,0,0,0,0" Margin="0,3,0,0" Background="#D4D0C8">
             <Grid Grid.Row="4" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
-              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
+              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
                 <Grid RowDefinitions="39,30" ColumnDefinitions="*,46">
@@ -896,7 +984,6 @@
                   <TextBox Grid.Row="1"
                            Grid.Column="0"
                            Text="{Binding ThreadFilterText}"
-                           Watermark="thread or scope text"
                            Margin="0,2,1,0" />
                   <Button Grid.Row="1"
                           Grid.Column="1"
@@ -926,7 +1013,7 @@
                           IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
             <Grid Grid.Row="6" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
-              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
                            Foreground="#202020"
                            FontWeight="SemiBold"
@@ -941,12 +1028,12 @@
                 </TextBlock>
               </Border>
 
-              <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
-                  <TextBlock Text="Thread Activity" Foreground="#F0F0F0" FontSize="11" FontWeight="SemiBold" />
-                  <TextBlock Grid.Row="1" Text="{Binding ThreadTimelineSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
-                  <TextBlock Grid.Row="2" Text="{Binding Summary.ThreadCountLabel}" Foreground="#D8D8D8" FontSize="10" Margin="0,4,0,0" />
-                  <TextBlock Grid.Row="4" Text="{Binding TimelineRangeText}" Foreground="#BDBDBD" FontSize="10" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="Thread Activity" Foreground="#202020" FontSize="11" FontWeight="SemiBold" />
+                  <TextBlock Grid.Row="1" Text="{Binding ThreadTimelineSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="2" Text="{Binding Summary.ThreadCountLabel}" Foreground="#505050" FontSize="10" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="4" Text="{Binding TimelineRangeText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" />
                 </Grid>
               </Border>
 
@@ -995,7 +1082,7 @@
               </Border>
             </Grid>
 
-            <Border Grid.Row="6" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
+            <Border Grid.Row="6" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Threads" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1018,7 +1105,7 @@
                           IsVisible="False" />
 
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
-              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Cores"
                            Foreground="#202020"
                            FontWeight="SemiBold"
@@ -1033,14 +1120,14 @@
                 </TextBlock>
               </Border>
 
-              <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
-                  <TextBlock Text="Core Activity" Foreground="#F0F0F0" FontSize="11" FontWeight="SemiBold" />
-                  <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Text="Core Activity" Foreground="#202020" FontSize="11" FontWeight="SemiBold" />
+                  <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
                   <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}" Margin="0,5,0,0">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <TextBlock Text="{Binding CoreText}" Foreground="#F0F0F0" FontSize="10" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding CoreText}" Foreground="#202020" FontSize="10" TextTrimming="CharacterEllipsis" />
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
@@ -1054,7 +1141,7 @@
               </Border>
             </Grid>
 
-            <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
+            <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1075,7 +1162,7 @@
                           IsVisible="{Binding IsThreadsCoreGraphVisible}" />
 
             <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
-              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="" />
               </Border>
 
@@ -1088,7 +1175,7 @@
                         CommandParameter="CustomStats" />
               </Border>
 
-              <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" Padding="6,0">
+              <Border Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" Padding="6,0">
                 <Grid ColumnDefinitions="*,120,120">
                   <stats:ucProfilerStats x:Name="ProfilerStatsControl"
                                           IsVisible="False"
@@ -1113,7 +1200,7 @@
               </Border>
             </Grid>
 
-            <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
+            <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Stats" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1166,7 +1253,7 @@
                   <ItemsControl ItemsSource="{Binding ScopeHotspots}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="6,3">
+                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="*,90,90,90,90,90">
                             <TextBlock Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="#101010" TextAlignment="Right" />
@@ -1222,7 +1309,7 @@
                   <ItemsControl ItemsSource="{Binding SelectedFrameScopes}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="6,3">
+                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="140,*,80,80,220,64">
                             <TextBlock Text="{Binding ThreadName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="#101010" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
@@ -1245,7 +1332,7 @@
               </Grid>
             </Border>
 
-            <Border Grid.Row="8" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="False">
+            <Border Grid.Row="8" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="False">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Data" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1292,7 +1379,7 @@
                   <ItemsControl ItemsSource="{Binding SelectedFrameCounters}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="6,3">
+                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="150,*,90,90,80">
                             <TextBlock Text="{Binding GraphName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
@@ -1325,12 +1412,11 @@
                   BorderThickness="1"
                   IsVisible="{Binding IsThreadsDataGridVisible}">
             <Grid RowDefinitions="28,*,4,*,4,*">
-              <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="6,3">
+              <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="3,1">
                 <DockPanel LastChildFill="True">
                   <TextBox DockPanel.Dock="Right"
                            Text="{Binding ScopeFilterText}"
                            Width="140"
-                           Watermark="Filter"
                            Margin="6,0,0,0" />
                   <TextBlock Text="Scope Data Grid" Foreground="#101010" FontWeight="SemiBold" VerticalAlignment="Center" />
                 </DockPanel>
@@ -1339,7 +1425,7 @@
               <Border Grid.Row="1" Background="#D0D0D0" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Scope Hotspots" Foreground="#101010" FontWeight="SemiBold" />
-                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="4,2">
+                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="*,70,64">
                       <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
                       <Button Grid.Column="1" Content="Total" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:TotalTime" Padding="0" HorizontalContentAlignment="Right" />
@@ -1350,7 +1436,7 @@
                     <ItemsControl ItemsSource="{Binding ScopeHotspots}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="4,2">
+                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="*,70,64">
                               <TextBlock Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                               <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="#101010" TextAlignment="Right" />
@@ -1369,7 +1455,7 @@
               <Border Grid.Row="3" Background="#D0D0D0" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Selected Frame Scopes" Foreground="#101010" FontWeight="SemiBold" />
-                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="4,2">
+                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="110,*,70">
                       <Button Content="Thread" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Thread" Padding="0" HorizontalContentAlignment="Left" />
                       <Button Grid.Column="1" Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Scope" Padding="0" HorizontalContentAlignment="Left" />
@@ -1380,7 +1466,7 @@
                     <ItemsControl ItemsSource="{Binding SelectedFrameScopes}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="4,2">
+                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="110,*,70">
                               <TextBlock Text="{Binding ThreadName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                               <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="#101010" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
@@ -1399,7 +1485,7 @@
               <Border Grid.Row="5" Background="#D0D0D0" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Selected Frame Counters" Foreground="#101010" FontWeight="SemiBold" />
-                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="4,2">
+                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="120,*,70">
                       <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
                       <Button Grid.Column="1" Content="Counter" Command="{Binding SortTableCommand}" CommandParameter="Counter:Counter" Padding="0" HorizontalContentAlignment="Left" />
@@ -1410,7 +1496,7 @@
                     <ItemsControl ItemsSource="{Binding SelectedFrameCounters}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="4,2">
+                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="120,*,70">
                               <TextBlock Text="{Binding GraphName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                               <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
@@ -1427,8 +1513,8 @@
           </Border>
         </Grid>
 
-        <Grid Grid.Row="0" RowDefinitions="139,24,4,*" ColumnDefinitions="34,225,*" Background="#C8C8C8" IsVisible="{Binding IsCoresViewActive}">
-          <Border Grid.Row="0" Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+        <Grid Grid.Row="0" RowDefinitions="139,24,4,*" ColumnDefinitions="34,225,*" Background="#D4D0C8" IsVisible="{Binding IsCoresViewActive}">
+          <Border Grid.Row="0" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
             <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
               <TextBlock.RenderTransform>
                 <RotateTransform Angle="-90" />
@@ -1441,7 +1527,7 @@
                 <Border Background="#D0D0D0" Padding="6,5">
                   <StackPanel Spacing="1">
                     <TextBlock Text="Average Frame" Foreground="#202020" FontFamily="Monaco,Consolas" FontSize="10" />
-                    <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="24" />
+                    <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="12" />
                   </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
@@ -1469,13 +1555,13 @@
               </Border>
             </Grid>
           </Border>
-          <Border Grid.Row="0" Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+          <Border Grid.Row="0" Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
             <stats:ucProfilerStats x:Name="CoresProfilerStatsControl"
                                    IsCompactMode="True" />
           </Border>
 
-          <Border Grid.Row="1" Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
-          <Border Grid.Row="1" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="4,2">
+          <Border Grid.Row="1" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
+          <Border Grid.Row="1" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="3,1">
             <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
               <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
               <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
@@ -1484,27 +1570,27 @@
               <Button Grid.Column="4" Content="▶" Padding="0" Command="{Binding PanTimelineRightCommand}" />
             </Grid>
           </Border>
-          <Border Grid.Row="1" Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="8,4">
+          <Border Grid.Row="1" Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="3,1">
             <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
           </Border>
 
           <GridSplitter Grid.Row="2" Grid.ColumnSpan="3" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
 
-          <Border Grid.Row="3" Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+          <Border Grid.Row="3" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
             <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
               <TextBlock.RenderTransform>
                 <RotateTransform Angle="-90" />
               </TextBlock.RenderTransform>
             </TextBlock>
           </Border>
-          <Border Grid.Row="3" Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+          <Border Grid.Row="3" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
             <Grid RowDefinitions="Auto,Auto,*">
-              <TextBlock Text="Cores" Foreground="#F0F0F0" FontWeight="SemiBold" FontSize="11" />
-              <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+              <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" FontSize="11" />
+              <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
               <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}" Margin="0,5,0,0">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <TextBlock Text="{Binding CoreText}" Foreground="#F0F0F0" FontSize="10" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding CoreText}" Foreground="#202020" FontSize="10" TextTrimming="CharacterEllipsis" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
@@ -1518,21 +1604,21 @@
         <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0" IsVisible="{Binding IsScopesViewActive}">
           <Grid RowDefinitions="196,4,*">
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
-              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Scopes" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
                   </TextBlock.RenderTransform>
                 </TextBlock>
               </Border>
-              <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
-                  <TextBlock Text="Scope Graph" Foreground="#F0F0F0" FontWeight="SemiBold" FontSize="11" />
-                  <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
-                  <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#BDBDBD" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="Scope Graph" Foreground="#202020" FontWeight="SemiBold" FontSize="11" />
+                  <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#505050" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
                 </Grid>
               </Border>
-              <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+              <Border Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
                 <stats:ucProfilerStats x:Name="ScopesProfilerStatsControl"
                                        IsCompactMode="True" />
               </Border>
@@ -1540,15 +1626,15 @@
             <GridSplitter Grid.Row="1" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
             <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" Margin="6">
             <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Scopes View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
+              <TextBlock DockPanel.Dock="Left" Text="Scopes" Foreground="#101010" FontSize="11" FontWeight="SemiBold" />
               <TextBox DockPanel.Dock="Right"
                        Text="{Binding ScopeFilterText}"
                        Width="220"
                        Margin="10,0,0,0"
-                       Watermark="Filter scopes" />
+                       />
               <TextBlock Text="{Binding ScopeHotspotSummaryText}" Foreground="#404040" HorizontalAlignment="Right" />
             </DockPanel>
-            <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,8,0,0" Padding="6,4">
+            <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
               <Grid ColumnDefinitions="*,90,90,90,90,90">
                 <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
                 <Button Grid.Column="1" Content="Total ms" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:TotalTime" Padding="0" HorizontalContentAlignment="Right" />
@@ -1558,11 +1644,11 @@
                 <Button Grid.Column="5" Content="Calls/frame" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:MaxCount" Padding="0" HorizontalContentAlignment="Right" />
               </Grid>
             </Border>
-            <ScrollViewer Grid.Row="2" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="2" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding ScopeHotspots}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="6,3">
+                    <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
                       <Grid ColumnDefinitions="*,90,90,90,90,90">
                         <TextBlock Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                         <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="#101010" TextAlignment="Right" />
@@ -1580,13 +1666,13 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsCustomStatsViewActive}">
+        <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsCustomStatsViewActive}">
           <Grid RowDefinitions="Auto,Auto,*">
             <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Custom Stats View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
-              <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#404040" HorizontalAlignment="Right" />
+              <TextBlock DockPanel.Dock="Left" Text="Custom Stats" Foreground="#101010" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#404040" FontSize="11" HorizontalAlignment="Right" />
             </DockPanel>
-            <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,8,0,0" Padding="6,4">
+            <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
               <Grid ColumnDefinitions="150,*,90,90,80">
                 <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
                 <Button Grid.Column="1" Content="Counter" Command="{Binding SortTableCommand}" CommandParameter="Counter:Counter" Padding="0" HorizontalContentAlignment="Left" />
@@ -1595,11 +1681,11 @@
                 <Button Grid.Column="4" Content="Unit" Command="{Binding SortTableCommand}" CommandParameter="Counter:Unit" Padding="0" HorizontalContentAlignment="Left" />
               </Grid>
             </Border>
-            <ScrollViewer Grid.Row="2" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="2" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding SelectedFrameCounters}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="6,3">
+                    <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
                       <Grid ColumnDefinitions="150,*,90,90,80">
                         <TextBlock Text="{Binding GraphName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
                         <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
@@ -1615,25 +1701,25 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsLogViewActive}">
+        <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsLogViewActive}">
           <Grid RowDefinitions="Auto,*">
             <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Log View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
-              <TextBlock Text="{Binding LogSummaryText}" Foreground="#404040" HorizontalAlignment="Right" />
+              <TextBlock DockPanel.Dock="Left" Text="Log" Foreground="#101010" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding LogSummaryText}" Foreground="#404040" FontSize="11" HorizontalAlignment="Right" />
             </DockPanel>
-            <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="0,8,0,0">
-              <Border Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Padding="6,4">
+            <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="0,4,0,0">
+              <Border Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Padding="3,1">
                 <Grid ColumnDefinitions="58,130,*">
                   <TextBlock Text="#" Foreground="#202020" FontWeight="SemiBold" />
                   <TextBlock Grid.Column="1" Text="Time" Foreground="#202020" FontWeight="SemiBold" />
                   <TextBlock Grid.Column="2" Text="Message" Foreground="#202020" FontWeight="SemiBold" />
                 </Grid>
               </Border>
-              <ScrollViewer Grid.Row="1" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+              <ScrollViewer Grid.Row="1" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding LogRows}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="6,3">
+                      <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
                         <Grid ColumnDefinitions="58,130,*">
                           <TextBlock Text="{Binding Index}" Foreground="#101010" />
                           <TextBlock Grid.Column="1" Text="{Binding TimeText}" Foreground="#101010" />
@@ -1661,7 +1747,7 @@
                     Width="124"
                     Padding="10,0"
                     FontFamily="Monaco,Consolas"
-                    FontSize="18"
+                    FontSize="12"
                     Foreground="{Binding ThreadsViewBrush}"
                     Background="Transparent"
                     BorderThickness="0" />
@@ -1672,7 +1758,7 @@
                     Width="102"
                     Padding="10,0"
                     FontFamily="Monaco,Consolas"
-                    FontSize="18"
+                    FontSize="12"
                     Foreground="{Binding CoresViewBrush}"
                     Background="Transparent"
                     BorderThickness="0" />
@@ -1683,7 +1769,7 @@
                     Width="112"
                     Padding="10,0"
                     FontFamily="Monaco,Consolas"
-                    FontSize="18"
+                    FontSize="12"
                     Foreground="{Binding ScopesViewBrush}"
                     Background="Transparent"
                     BorderThickness="0" />
@@ -1694,52 +1780,51 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Background="#C8C8C8"
+            Background="#D4D0C8"
             IsVisible="{Binding IsStartupPageVisible}">
-      <Grid Margin="28">
+      <Grid Margin="12">
         <Border
-            Width="760"
+            Width="640"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D8D8D8"
+            Background="#D4D0C8"
             BorderBrush="#7D7D7D"
             BorderThickness="1">
-          <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="*,260">
-            <Border Grid.ColumnSpan="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="12,8">
+          <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="*,220">
+            <Border Grid.ColumnSpan="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="10,6">
               <DockPanel>
-                <TextBlock Text="ProfilerStudy" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="ProfilerStudy" FontSize="12" FontWeight="SemiBold" Foreground="#101010" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
                   <TextBlock Text="Startup Page" Foreground="#404040" VerticalAlignment="Center" />
-                  <Button Content="x" Width="24" Height="22" Padding="0" Command="{Binding CloseStartupPageCommand}" />
+                  <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding CloseStartupPageCommand}" />
                 </StackPanel>
               </DockPanel>
             </Border>
 
-            <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#F1F1F1" />
+            <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#8A8A8A" />
 
-            <Grid Grid.Row="2" ColumnDefinitions="*,260">
-              <StackPanel Margin="16" Spacing="10">
-                <TextBlock Text="Open a profiler capture or start from a generated sample." Foreground="#202020" FontSize="13" TextWrapping="Wrap" />
+            <Grid Grid.Row="2" ColumnDefinitions="*,220">
+              <StackPanel Margin="10" Spacing="6">
+                <TextBlock Text="Open a profiler capture." Foreground="#202020" FontSize="11" TextWrapping="Wrap" />
                 <Button Classes="startup-action" Content="Open Profiler Session..." Command="{Binding OpenSessionCommand}" />
                 <Button Classes="startup-action" Content="Load Generated Sample" Command="{Binding LoadSampleCommand}" />
                 <Button Classes="startup-action" Content="Connect to FramePro..." Command="{Binding OpenConnectionCommand}" />
                 <Button Classes="startup-action" Content="Connect to Android..." Command="{Binding OpenAndroidCommand}" />
                 <Button Classes="startup-action" Content="Close Startup Page" Command="{Binding CloseStartupPageCommand}" />
-                <TextBlock Text="Use the View menu and toolbar to switch between Threads, Cores, and Scopes after a session is loaded." Foreground="#505050" TextWrapping="Wrap" Margin="0,6,0,0" />
+                <TextBlock Text="Views are available after a session is loaded." Foreground="#505050" TextWrapping="Wrap" Margin="0,4,0,0" />
               </StackPanel>
 
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#8A8A8A" BorderThickness="1,0,0,0" Padding="12">
+              <Border Grid.Column="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,0,0,0" Padding="6">
                 <Grid RowDefinitions="Auto,*">
                   <TextBlock Text="Recent Files" FontWeight="SemiBold" Foreground="#101010" />
-                  <ScrollViewer Grid.Row="1" Margin="0,8,0,0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="6">
-                      <TextBlock Text="Recently opened captures appear here." Foreground="#505050" TextWrapping="Wrap" />
+                  <ScrollViewer Grid.Row="1" Margin="0,4,0,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="3">
+                      <TextBlock Text="Recent profiler captures." Foreground="#505050" TextWrapping="Wrap" />
                       <ItemsControl ItemsSource="{Binding RecentFiles}">
                         <ItemsControl.ItemTemplate>
                           <DataTemplate>
                             <Button
                                 Classes="startup-action"
-                                Margin="0,3,0,0"
                                 Content="{Binding}"
                                 Command="{Binding $parent[Window].DataContext.OpenRecentSessionCommand}"
                                 CommandParameter="{Binding}" />
@@ -1765,10 +1850,9 @@
             Background="#D4D4D4"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             IsVisible="{Binding IsToolboxFloatingVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="7,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockToolboxCommand}" />
@@ -1778,7 +1862,7 @@
           </DockPanel>
         </Border>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-          <StackPanel Margin="8" Spacing="8">
+          <StackPanel Margin="8" Spacing="6">
             <Border Classes="toolbox-section">
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
@@ -1908,17 +1992,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="500"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsRegistrationPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Registration" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -1929,15 +2012,15 @@
                     Command="{Binding CloseRegistrationCommand}" />
           </DockPanel>
         </Border>
-        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
-          <TextBlock Text="ProfilerStudy Registration" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
+        <Grid Grid.Row="1" Margin="10" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+          <TextBlock Text="ProfilerStudy Registration" FontSize="12" FontWeight="SemiBold" Foreground="#101010" />
+          <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6">
             <StackPanel Spacing="7">
-              <TextBlock Text="This Avalonia port preserves the original FramePro registration entry point." Foreground="#101010" TextWrapping="Wrap" />
+              <TextBlock Text="This viewer preserves the original FramePro registration entry point." Foreground="#101010" TextWrapping="Wrap" />
               <TextBlock Text="No license verification service is bundled with this macOS shell. Existing profiler files and sample data can be opened without registration." Foreground="#404040" TextWrapping="Wrap" />
             </StackPanel>
           </Border>
-          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
             <Button Content="About" Width="86" Command="{Binding OpenAboutCommand}" />
             <Button Content="Close" Width="86" Command="{Binding CloseRegistrationCommand}" />
           </StackPanel>
@@ -1947,17 +2030,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="500"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsUpdateCheckPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Check for Updates" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -1968,19 +2050,19 @@
                     Command="{Binding CloseUpdateCheckCommand}" />
           </DockPanel>
         </Border>
-        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
-          <TextBlock Text="Update Status" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
-            <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="7">
+        <Grid Grid.Row="1" Margin="10" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+          <TextBlock Text="Update Status" FontSize="12" FontWeight="SemiBold" Foreground="#101010" />
+          <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6">
+            <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="7">
               <TextBlock Text="Current version" Foreground="#404040" />
               <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="#101010" />
               <TextBlock Grid.Row="1" Text="Update channel" Foreground="#404040" />
               <TextBlock Grid.Row="1" Grid.Column="1" Text="Manual builds from this workspace" Foreground="#101010" />
               <TextBlock Grid.Row="2" Text="Network check" Foreground="#404040" />
-              <TextBlock Grid.Row="2" Grid.Column="1" Text="Not configured in the Avalonia shell" Foreground="#101010" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="Not configured in this build" Foreground="#101010" />
             </Grid>
           </Border>
-          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
             <Button Content="About" Width="86" Command="{Binding OpenAboutCommand}" />
             <Button Content="Close" Width="86" Command="{Binding CloseUpdateCheckCommand}" />
           </StackPanel>
@@ -1990,17 +2072,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="720"
-            Height="360"
+            Width="560"
+            Height="300"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Background="#D4D4D4"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             IsVisible="{Binding IsMainSessionDockFloatingVisible}">
       <Grid RowDefinitions="Auto,Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="7,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockMainSessionDockCommand}" />
@@ -2011,20 +2092,20 @@
         </Border>
         <Border Grid.Row="1" Background="#D7D7D7" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="4,3">
           <StackPanel Orientation="Horizontal" Spacing="3">
-            <Button Content="Threads" Width="86" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}" />
-            <Button Content="Cores" Width="76" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}" />
-            <Button Content="Scopes" Width="82" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}" />
-            <Button Content="Custom Stats" Width="112" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}" />
-            <Button Content="Log" Width="64" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}" />
+            <Button Content="Threads" Width="70" Padding="3,1" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}" />
+            <Button Content="Cores" Width="58" Padding="3,1" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}" />
+            <Button Content="Scopes" Width="64" Padding="3,1" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}" />
+            <Button Content="Custom Stats" Width="92" Padding="3,1" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}" />
+            <Button Content="Log" Width="44" Padding="3,1" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}" />
           </StackPanel>
         </Border>
-        <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="8" RowSpacing="8">
+        <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="6" RowSpacing="6">
           <Grid ColumnDefinitions="*,Auto">
             <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#101010" FontSize="13" FontWeight="SemiBold" />
             <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" FontSize="11" />
           </Grid>
-          <Border Grid.Row="1" Background="#C8C8C8" BorderBrush="#8A8A8A" BorderThickness="1" Padding="10">
-            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="7">
+          <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1" Padding="6">
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="7">
               <TextBlock Text="Session" Foreground="#505050" FontWeight="SemiBold" />
               <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
               <TextBlock Grid.Row="1" Text="Range" Foreground="#505050" FontWeight="SemiBold" />
@@ -2043,18 +2124,17 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="520"
+            Width="460"
             Height="220"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Margin="0,0,36,36"
-            Background="#D8D8D8"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             IsVisible="{Binding IsOutputWindowFloatingVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BEBEBE" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="7,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockOutputWindowCommand}" />
@@ -2068,26 +2148,25 @@
                  AcceptsReturn="True"
                  IsReadOnly="True"
                  BorderThickness="0"
-                 Background="#EFEFEF"
+                 Background="#FFFFFF"
                  Foreground="#101010"
-                 FontFamily="Menlo,Consolas,monospace"
+                 FontFamily="Microsoft Sans Serif, Segoe UI"
                  FontSize="11" />
       </Grid>
     </Border>
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="560"
+            Width="500"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsHelpPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="ProfilerStudy Help" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -2098,11 +2177,11 @@
                     Command="{Binding CloseHelpCommand}" />
           </DockPanel>
         </Border>
-        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-          <TextBlock Text="Common actions" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
+        <Grid Grid.Row="1" Margin="10" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+          <TextBlock Text="Common actions" FontSize="12" FontWeight="SemiBold" Foreground="#101010" />
 
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
-            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+          <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6">
+            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="6">
               <TextBlock Text="Open session" Foreground="#404040" />
               <TextBlock Grid.Column="1" Text="File > Open or Ctrl+O" Foreground="#101010" />
               <TextBlock Grid.Row="1" Text="Save session" Foreground="#404040" />
@@ -2110,18 +2189,18 @@
               <TextBlock Grid.Row="2" Text="Find scope" Foreground="#404040" />
               <TextBlock Grid.Row="2" Grid.Column="1" Text="Tools > Find or Ctrl+F" Foreground="#101010" />
               <TextBlock Grid.Row="3" Text="Switch views" Foreground="#404040" />
-              <TextBlock Grid.Row="3" Grid.Column="1" Text="Use the View menu, tabs, or Toolbox view buttons" Foreground="#101010" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="Use the View menu, toolbar, or bottom tabs" Foreground="#101010" />
               <TextBlock Grid.Row="4" Text="Timeline" Foreground="#404040" />
               <TextBlock Grid.Row="4" Grid.Column="1" Text="Mouse wheel zooms; drag pans in the ScottPlot timeline controls" Foreground="#101010" TextWrapping="Wrap" />
             </Grid>
           </Border>
 
           <TextBlock Grid.Row="2"
-                     Text="This Avalonia shell reuses the legacy FramePro session core. The toolbar, dock panels, startup page, and TimelineScope controls map to the original profiler entry points."
+                     Text="This viewer reuses the legacy FramePro session core. The toolbar, startup page, and timeline controls map to the original profiler entry points."
                      Foreground="#404040"
                      TextWrapping="Wrap" />
 
-          <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
             <Button Content="Startup Page" Width="104" Command="{Binding ShowStartupPageCommand}" />
             <Button Content="Close" Width="86" Command="{Binding CloseHelpCommand}" />
           </StackPanel>
@@ -2131,17 +2210,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="520"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsSettingsPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Settings" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -2152,17 +2230,17 @@
                     Command="{Binding CloseSettingsCommand}" />
           </DockPanel>
         </Border>
-        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+        <StackPanel Grid.Row="1" Margin="10" Spacing="6">
           <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
           <TextBlock Text="These settings are used when opening captured source paths from profiler scope rows." Foreground="#404040" TextWrapping="Wrap" />
           <TextBlock Text="Captured root" Foreground="#303030" Margin="0,4,0,0" />
           <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
           <TextBlock Text="Local root" Foreground="#303030" />
           <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
-          <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
+          <Border Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6" Margin="0,6,0,0">
             <TextBlock Text="Changes are saved automatically and reused by the source navigation commands." Foreground="#303030" TextWrapping="Wrap" />
           </Border>
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6" Margin="0,4,0,0">
             <Button Content="Close" Width="86" Command="{Binding CloseSettingsCommand}" />
           </StackPanel>
         </StackPanel>
@@ -2171,17 +2249,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="520"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsThreadSettingsPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Thread View Settings" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -2192,7 +2269,7 @@
                     Command="{Binding CloseThreadSettingsCommand}" />
           </DockPanel>
         </Border>
-        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+        <StackPanel Grid.Row="1" Margin="10" Spacing="6">
           <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="#101010" />
           <TextBlock Text="Show or hide the docked panels used by the Threads view. These controls mirror the View menu and toolbar buttons." Foreground="#404040" TextWrapping="Wrap" />
           <UniformGrid Columns="2" RowSpacing="7" ColumnSpacing="7" Margin="0,4,0,0">
@@ -2221,10 +2298,10 @@
                           Command="{Binding ToggleThreadsPanelCommand}"
                           CommandParameter="DataGrid" />
           </UniformGrid>
-          <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
+          <Border Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6" Margin="0,6,0,0">
             <TextBlock Text="Lane context commands still operate from the thread graph right-click menu: Hide, Move Up, Move Down, Collapse All, and Expand All." Foreground="#303030" TextWrapping="Wrap" />
           </Border>
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6" Margin="0,4,0,0">
             <Button Content="Collapse All" Width="92" Command="{Binding CollapseAllThreadsCommand}" />
             <Button Content="Expand All" Width="88" Command="{Binding ExpandAllThreadsCommand}" />
             <Button Content="Close" Width="86" Command="{Binding CloseThreadSettingsCommand}" />
@@ -2235,17 +2312,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="520"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsCallstacksPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Callstacks" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -2256,10 +2332,10 @@
                     Command="{Binding CloseCallstacksCommand}" />
           </DockPanel>
         </Border>
-        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+        <StackPanel Grid.Row="1" Margin="10" Spacing="6">
           <TextBlock Text="Callstack Tools" FontWeight="SemiBold" Foreground="#101010" />
           <TextBlock Text="Enable or disable callstack capture for a live session, then request a module symbol reload for captured sessions." Foreground="#404040" TextWrapping="Wrap" />
-          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
+          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="6" Margin="0,4,0,0">
             <Border Width="42" Height="34" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1">
               <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />
             </Border>
@@ -2268,7 +2344,7 @@
                     Content="Toggle Live Callstack Recording"
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Capture" />
-            <Border Grid.Row="1" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
+            <Border Grid.Row="1" Width="42" Height="34" Background="#D4D0C8" BorderBrush="#606060" BorderThickness="1">
               <TextBlock Text="sym" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
             </Border>
             <Button Grid.Row="1"
@@ -2277,11 +2353,11 @@
                     Content="Reload Module Symbols"
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Resolve" />
-            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6">
               <TextBlock Text="{Binding CallstacksPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
             </Border>
           </Grid>
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6" Margin="0,4,0,0">
             <Button Content="Close" Width="86" Command="{Binding CloseCallstacksCommand}" />
           </StackPanel>
         </StackPanel>
@@ -2290,17 +2366,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="520"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsConnectionPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -2311,19 +2386,19 @@
                     Command="{Binding CloseConnectionCommand}" />
           </DockPanel>
         </Border>
-        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+        <StackPanel Grid.Row="1" Margin="10" Spacing="6">
           <TextBlock Text="FramePro Connection" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="Connection controls are represented here so the Avalonia shell matches the original profiler entry points." Foreground="#404040" TextWrapping="Wrap" />
-          <Grid ColumnDefinitions="84,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
+          <TextBlock Text="Connection controls are represented here to match the original profiler entry points." Foreground="#404040" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="84,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="6" Margin="0,4,0,0">
             <TextBlock Text="Host" Foreground="#303030" VerticalAlignment="Center" />
             <TextBox Grid.Column="1" Text="{Binding ConnectionHost}" Watermark="localhost" />
             <TextBlock Grid.Row="1" Text="Port" Foreground="#303030" VerticalAlignment="Center" />
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConnectionPort}" Watermark="8428" />
-            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6">
               <TextBlock Text="{Binding ConnectionPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
             </Border>
           </Grid>
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6" Margin="0,4,0,0">
             <Button Content="New" Width="74" Command="{Binding ConnectionActionCommand}" CommandParameter="New" />
             <Button Content="Connect" Width="86" Command="{Binding ConnectionActionCommand}" CommandParameter="Connect" />
             <Button Content="Disconnect" Width="92" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" />
@@ -2335,17 +2410,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="520"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsAndroidPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Android" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -2356,10 +2430,10 @@
                     Command="{Binding CloseAndroidCommand}" />
           </DockPanel>
         </Border>
-        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+        <StackPanel Grid.Row="1" Margin="10" Spacing="6">
           <TextBlock Text="Context Switch Tools" FontWeight="SemiBold" Foreground="#101010" />
           <TextBlock Text="Connect to the FramePro socket exposed by the Android app, or load a recorded context switch file into the active session." Foreground="#404040" TextWrapping="Wrap" />
-          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
+          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="6" Margin="0,4,0,0">
             <Border Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
               <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
             </Border>
@@ -2395,7 +2469,7 @@
                       Command="{Binding AndroidActionCommand}"
                       CommandParameter="RecordContextSwitches" />
             </Grid>
-            <Border Grid.Row="3" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
+            <Border Grid.Row="3" Width="42" Height="34" Background="#D4D0C8" BorderBrush="#606060" BorderThickness="1">
               <TextBlock Text="ctx" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
             </Border>
             <Button Grid.Row="3"
@@ -2404,11 +2478,11 @@
                     Content="Load Context Switch File"
                     Command="{Binding AndroidActionCommand}"
                     CommandParameter="LoadContextSwitchFile" />
-            <Border Grid.Row="4" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+            <Border Grid.Row="4" Grid.ColumnSpan="2" Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6">
               <TextBlock Text="{Binding AndroidPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
             </Border>
           </Grid>
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6" Margin="0,4,0,0">
             <Button Content="Close" Width="86" Command="{Binding CloseAndroidCommand}" />
           </StackPanel>
         </StackPanel>
@@ -2417,17 +2491,16 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Width="520"
+            Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
+            Background="#D4D0C8"
             BorderBrush="#676767"
             BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
             Padding="0"
             IsVisible="{Binding IsAboutPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
           <DockPanel LastChildFill="True">
             <TextBlock Text="About" FontWeight="SemiBold" Foreground="#101010" />
             <Button DockPanel.Dock="Right"
@@ -2438,25 +2511,25 @@
                     Command="{Binding CloseAboutCommand}" />
           </DockPanel>
         </Border>
-        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-          <Grid ColumnDefinitions="72,*" ColumnSpacing="14">
-            <Border Width="64" Height="64" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1">
+        <Grid Grid.Row="1" Margin="10" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+          <Grid ColumnDefinitions="50,*" ColumnSpacing="6">
+            <Border Width="42" Height="34" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1">
               <TextBlock Text="FP"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"
-                         FontSize="24"
+                         FontSize="12"
                          FontWeight="Bold"
                          Foreground="#203246" />
             </Border>
             <StackPanel Grid.Column="1" Spacing="4">
-              <TextBlock Text="{Binding AboutProductText}" FontSize="20" FontWeight="SemiBold" Foreground="#101010" />
+              <TextBlock Text="{Binding AboutProductText}" FontSize="12" FontWeight="SemiBold" Foreground="#101010" />
               <TextBlock Text="FramePro profiler viewer" Foreground="#303030" />
               <TextBlock Text="{Binding AboutCopyrightText}" Foreground="#303030" />
             </StackPanel>
           </Grid>
 
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
-            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+          <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#888888" BorderThickness="1" Padding="6">
+            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="6">
               <TextBlock Text="Version" Foreground="#404040" />
               <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="#101010" />
               <TextBlock Grid.Row="1" Text="Website" Foreground="#404040" />
@@ -2467,18 +2540,18 @@
           </Border>
 
           <TextBlock Grid.Row="2"
-                     Text="This Avalonia shell reuses the legacy FramePro session core and preserves the original profiler entry points while bringing the UI to macOS."
+                     Text="This viewer reuses the legacy FramePro session core and preserves the original profiler entry points."
                      Foreground="#404040"
                      TextWrapping="Wrap" />
 
-          <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
             <Button Content="Close" Width="86" Command="{Binding CloseAboutCommand}" />
           </StackPanel>
         </Grid>
       </Grid>
     </Border>
 
-    <Border Grid.Row="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" IsVisible="{Binding IsOutputWindowMinimizedBarVisible}">
+    <Border Grid.Row="3" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" IsVisible="{Binding IsOutputWindowMinimizedBarVisible}">
       <DockPanel LastChildFill="True" Margin="7,3">
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
           <TextBlock Text="{Binding SessionStatusText}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" />
@@ -2489,42 +2562,34 @@
       </DockPanel>
     </Border>
 
-    <Border Grid.Row="3" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowExpanded}">
+    <Border Grid.Row="3" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowExpanded}">
       <TextBox Text="{Binding OutputLogText}"
                AcceptsReturn="True"
                IsReadOnly="True"
                BorderThickness="0"
-               Background="#EFEFEF"
+               Background="#FFFFFF"
                Foreground="#101010"
                FontFamily="Microsoft Sans Serif, Segoe UI"
                FontSize="11"
+               Padding="0"
                TextWrapping="NoWrap"
                ScrollViewer.HorizontalScrollBarVisibility="Auto"
                ScrollViewer.VerticalScrollBarVisibility="Auto" />
     </Border>
 
     <Border Grid.Row="4" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0">
-      <Grid ColumnDefinitions="2*,160,180,180,240">
+      <Grid ColumnDefinitions="*,150,170,170,240">
         <Border Classes="status-cell">
           <TextBlock Text="{Binding StatusText}" Classes="status-value" />
         </Border>
         <Border Grid.Column="1" Classes="status-cell">
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Session:" Classes="status-label" />
-            <TextBlock Text="{Binding StatusBarSessionText}" Classes="status-value" />
-          </StackPanel>
+          <TextBlock Text="{Binding StatusBarSessionText}" Classes="status-value" />
         </Border>
         <Border Grid.Column="2" Classes="status-cell">
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Selected:" Classes="status-label" />
-            <TextBlock Text="{Binding StatusBarSelectedFrameText}" Classes="status-value" />
-          </StackPanel>
+          <TextBlock Text="{Binding StatusBarSelectedFrameText}" Classes="status-value" />
         </Border>
         <Border Grid.Column="3" Classes="status-cell">
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Hovered:" Classes="status-label" />
-            <TextBlock Text="{Binding StatusBarHoveredFrameText}" Classes="status-value" />
-          </StackPanel>
+          <TextBlock Text="{Binding StatusBarHoveredFrameText}" Classes="status-value" />
         </Border>
         <Border Grid.Column="4" Classes="status-cell" BorderThickness="1,1,1,0">
           <TextBlock Text="{Binding TimelineRangeText}" Classes="status-value" TextAlignment="Right" />
