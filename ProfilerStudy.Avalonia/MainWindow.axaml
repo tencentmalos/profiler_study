@@ -300,13 +300,36 @@
           </Grid>
         </Border>
         <Grid Grid.Row="1" RowDefinitions="180,6,*" IsVisible="{Binding IsThreadsViewActive}">
-          <Border Grid.Row="0" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="1" MinHeight="120">
-            <local:FrameTimelineControl
-                Samples="{Binding FrameSamples}"
-                TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
-                Selection="{Binding Selection}"
-                Viewport="{Binding Viewport}" />
-          </Border>
+          <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
+            <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
+              <TextBlock Text="Frame"
+                         Foreground="#202020"
+                         FontWeight="SemiBold"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         TextWrapping="Wrap" />
+            </Border>
+
+            <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+              <StackPanel Spacing="4">
+                <TextBlock Text="Frame Graph" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
+                <Separator Margin="0,4" />
+                <TextBlock Text="{Binding Selection.SelectedFrameLabel}" Foreground="#101010" />
+                <TextBlock Text="{Binding Summary.FrameCountLabel}" Foreground="#404040" />
+                <TextBlock Text="{Binding Summary.DurationLabel}" Foreground="#404040" />
+                <TextBlock Text="{Binding Summary.ThreadCountLabel}" Foreground="#404040" />
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="0,1,1,1" MinHeight="120">
+              <local:FrameTimelineControl
+                  Samples="{Binding FrameSamples}"
+                  TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
+                  Selection="{Binding Selection}"
+                  Viewport="{Binding Viewport}" />
+            </Border>
+          </Grid>
 
           <GridSplitter Grid.Row="1"
                         Background="#9A9A9A"
@@ -315,7 +338,30 @@
                         ResizeDirection="Rows" />
 
           <Grid Grid.Row="2" RowDefinitions="*,6,180,6,160,6,150" Margin="0,8,0,0">
-            <stats:ucProfilerStats x:Name="ProfilerStatsControl" Grid.Row="0" MinHeight="260" />
+            <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
+              <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
+                <TextBlock Text="Stats"
+                           Foreground="#202020"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap" />
+              </Border>
+
+              <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Custom Stats" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+                  <Separator Margin="0,4" />
+                  <TextBlock Text="Scope Hotspots" Foreground="#101010" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding ScopeHotspotSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+
+              <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,1,1">
+                <stats:ucProfilerStats x:Name="ProfilerStatsControl" MinHeight="260" />
+              </Border>
+            </Grid>
 
             <GridSplitter Grid.Row="1"
                           Background="#9A9A9A"
