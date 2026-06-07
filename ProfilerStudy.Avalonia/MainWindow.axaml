@@ -9,60 +9,208 @@
     Height="760"
     MinWidth="860"
     MinHeight="560">
-  <Grid RowDefinitions="Auto,Auto,*,Auto" Background="#C8C8C8">
+  <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Background="#C8C8C8">
     <Border Grid.Row="0" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1">
       <Menu Background="#EFEFEF" FontSize="12" Padding="2,0">
         <MenuItem Header="_File">
-          <MenuItem Header="_Open..." Command="{Binding OpenSessionCommand}" />
-          <MenuItem Header="Open _Recent" Command="{Binding OpenRecentSessionCommand}" />
+          <MenuItem Header="_Open" Command="{Binding OpenSessionCommand}" />
+          <MenuItem Header="_Save" IsEnabled="False" />
+          <MenuItem Header="Save _As..." IsEnabled="False" />
+          <MenuItem Header="_Close" IsEnabled="False" />
+          <MenuItem Header="Close A_ll" IsEnabled="False" />
+          <Separator />
+          <MenuItem Header="_Export to CSV" IsEnabled="False" />
+          <MenuItem Header="Export _Frame Graph to CSV" IsEnabled="False" />
+          <Separator />
+          <MenuItem Header="_Recent Files" Command="{Binding OpenRecentSessionCommand}" />
           <MenuItem Header="Load _Sample" Command="{Binding LoadSampleCommand}" />
           <Separator />
-          <MenuItem Header="E_xit" />
+          <MenuItem Header="E_xit" IsEnabled="False" />
         </MenuItem>
         <MenuItem Header="_View">
-          <MenuItem Header="_Frame Graph" />
           <MenuItem Header="_Threads View" />
+          <MenuItem Header="_Cores View" IsEnabled="False" />
           <MenuItem Header="_Scopes View" />
-          <MenuItem Header="_Custom Stats Graph" />
           <Separator />
-          <MenuItem Header="_Reset Zoom" Command="{Binding ResetTimelineCommand}" />
+          <MenuItem Header="_Threads View">
+            <MenuItem Header="_Info" />
+            <MenuItem Header="_Frame Graph" />
+            <MenuItem Header="_Scope Graph" />
+            <MenuItem Header="_CPU Graph" IsEnabled="False" />
+            <MenuItem Header="_Custom Stats Graph" />
+          </MenuItem>
+          <MenuItem Header="Scope _Colouring">
+            <MenuItem Header="Colour by _Thread" IsEnabled="False" />
+            <MenuItem Header="Colour by _Scope" IsEnabled="False" />
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="_Output Window" />
         </MenuItem>
         <MenuItem Header="_Connection">
           <MenuItem Header="_New Connection..." IsEnabled="False" />
-          <MenuItem Header="_Connect" IsEnabled="False" />
+          <MenuItem Header="_Connect..." IsEnabled="False" />
           <MenuItem Header="_Disconnect" IsEnabled="False" />
         </MenuItem>
         <MenuItem Header="_Tools">
-          <MenuItem Header="_Find Slowest Frame" Command="{Binding SelectSlowestFrameCommand}" />
-          <MenuItem Header="_Create Session From Selection" IsEnabled="False" />
+          <Separator />
+          <MenuItem Header="_Find" IsEnabled="False" />
+          <Separator />
+          <MenuItem Header="_Create Session from Selection" IsEnabled="False" />
+          <Separator />
+          <MenuItem Header="_Android">
+            <MenuItem Header="_Start Recording Context Switches..." IsEnabled="False" />
+            <MenuItem Header="_Load Context Switch File" IsEnabled="False" />
+          </MenuItem>
           <Separator />
           <MenuItem Header="_Settings" IsEnabled="False" />
         </MenuItem>
         <MenuItem Header="_Help">
-          <MenuItem Header="_About ProfilerStudy" IsEnabled="False" />
+          <MenuItem Header="_Registration..." IsEnabled="False" />
+          <MenuItem Header="_Check for Updates" IsEnabled="False" />
+          <Separator />
+          <MenuItem Header="_Demo">
+            <MenuItem Header="_Launch FramePro Game Simulator" IsEnabled="False" />
+            <MenuItem Header="_Playback Recording File..." IsEnabled="False" />
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="_About" IsEnabled="False" />
         </MenuItem>
       </Menu>
     </Border>
 
-    <Border Grid.Row="1" Background="#E3E3E3" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="4,3">
-      <DockPanel LastChildFill="True">
-        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="3">
-          <Button Command="{Binding OpenSessionCommand}" Padding="8,2" MinHeight="22">Open</Button>
-          <Button Command="{Binding OpenRecentSessionCommand}" Padding="8,2" MinHeight="22">Recent</Button>
-          <Button Command="{Binding LoadSampleCommand}" Padding="8,2" MinHeight="22">Sample</Button>
-          <Border Width="1" Margin="4,1" Background="#9A9A9A" />
-          <Button Command="{Binding SelectSlowestFrameCommand}" Padding="8,2" MinHeight="22">Find Max</Button>
-          <Button Command="{Binding ResetTimelineCommand}" Padding="8,2" MinHeight="22">Reset Zoom</Button>
-          <Border Width="1" Margin="4,1" Background="#9A9A9A" />
-          <TextBlock Text="Recent:" Foreground="#303030" VerticalAlignment="Center" Margin="3,0,0,0" />
-          <ComboBox ItemsSource="{Binding RecentFiles}"
-                    SelectedItem="{Binding SelectedRecentFile}"
-                    Width="260"
-                    MinHeight="22"
-                    PlaceholderText="Recent files" />
+    <Border Grid.Row="1" Background="#D5D5D5" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" MinHeight="120">
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <StackPanel Orientation="Horizontal" Spacing="0">
+          <Button Command="{Binding OpenSessionCommand}" Width="88" MinHeight="118" Padding="4">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#E9D08A" BorderBrush="#6E5B23" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Open" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#9EB8D8" BorderBrush="#3F5F85" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Connect" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#8FAF8D" BorderBrush="#3F6B3D" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Android" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#B96B62" BorderBrush="#72342E" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Disconnect" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}">
+            <StackPanel Spacing="5">
+              <Border Width="28" Height="30" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Start" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="74" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="28" Height="30" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Track" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="74" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="28" Height="30" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="End" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Info" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Frames" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Scope" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Cores" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="104" MinHeight="118" Padding="4">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+          </Button>
+          <Button Width="88" MinHeight="118" Padding="4">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Details" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="74" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="28" Height="30" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Prev" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}">
+            <StackPanel Spacing="5">
+              <Border Width="28" Height="30" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Max" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Width="74" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="28" Height="30" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Next" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Border Width="300" MinHeight="118" Background="#CCCCCC" BorderBrush="#8A8A8A" BorderThickness="1,0" Padding="8">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
+              <TextBlock Text="Find" FontWeight="SemiBold" />
+              <TextBox Grid.Row="1" Watermark="Scope text" />
+              <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4">
+                <Button Content="Prev" Width="58" IsEnabled="False" />
+                <Button Content="Next" Width="58" IsEnabled="False" />
+                <Button Content="Clear" Width="58" IsEnabled="False" />
+              </StackPanel>
+            </Grid>
+          </Border>
+          <Button Width="104" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#BCA0C8" BorderBrush="#6B4878" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Colour Mode" TextAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+          </Button>
+          <Border Width="220" MinHeight="118" Background="#CCCCCC" BorderBrush="#8A8A8A" BorderThickness="1,0" Padding="8">
+            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="5">
+              <TextBlock Text="Conditional Scope Time" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="1" Text="Filter threshold" Foreground="#404040" />
+              <Border Grid.Row="2" Height="18" Background="#B8B8B8" BorderBrush="#808080" BorderThickness="1">
+                <Border Width="82" Background="#909090" HorizontalAlignment="Left" />
+              </Border>
+            </Grid>
+          </Border>
+          <Button Width="104" MinHeight="118" Padding="4" IsEnabled="False">
+            <StackPanel Spacing="5">
+              <Border Width="34" Height="30" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center" />
+              <TextBlock Text="Callstacks" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
         </StackPanel>
-        <TextBlock Text="{Binding StatusText}" Foreground="#202020" VerticalAlignment="Center" Margin="12,0,0,0" />
-      </DockPanel>
+      </ScrollViewer>
     </Border>
 
     <Grid Grid.Row="2" ColumnDefinitions="240,4,*">
@@ -328,7 +476,24 @@
       </Grid>
     </Grid>
 
-    <Border Grid.Row="3" Background="#E6E6E6" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0">
+    <Border Grid.Row="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="7,3">
+          <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="#101010" />
+        </Border>
+        <TextBox Grid.Row="1"
+                 Text="{Binding StatusText}"
+                 AcceptsReturn="True"
+                 IsReadOnly="True"
+                 BorderThickness="0"
+                 Background="#EFEFEF"
+                 Foreground="#101010"
+                 FontFamily="Menlo,Consolas,monospace"
+                 FontSize="11" />
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="4" Background="#E6E6E6" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0">
       <Grid ColumnDefinitions="2*,*,*,2*" MinHeight="24">
         <Border BorderBrush="#A0A0A0" BorderThickness="0,0,1,0" Padding="7,3">
           <TextBlock Text="{Binding StatusText}" Foreground="#202020" TextTrimming="CharacterEllipsis" />
