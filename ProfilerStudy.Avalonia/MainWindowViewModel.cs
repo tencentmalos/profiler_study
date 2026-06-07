@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using FramePro;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -37,6 +38,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<ScopeHotspotRow> m_ScopeHotspots = Array.Empty<ScopeHotspotRow>();
 	private IReadOnlyList<ScopeFrameDetailRow> m_SelectedFrameScopes = Array.Empty<ScopeFrameDetailRow>();
 	private IReadOnlyList<SelectedFrameCounterRow> m_SelectedFrameCounters = Array.Empty<SelectedFrameCounterRow>();
+	private IReadOnlyList<LogMessageRow> m_LogRows = Array.Empty<LogMessageRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
@@ -44,6 +46,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
 	private string m_SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
+	private string m_LogSummaryText = "No profiler log messages loaded.";
 	private string m_ActiveSessionView = "Threads";
 	private string m_ScopeHotspotSortKey = "TotalTime";
 	private bool m_ScopeHotspotSortDescending = true;
@@ -265,6 +268,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_SelectedFrameCounterSummaryText;
 		private set => SetProperty(ref m_SelectedFrameCounterSummaryText, value);
+	}
+
+	public IReadOnlyList<LogMessageRow> LogRows
+	{
+		get => m_LogRows;
+		private set => SetProperty(ref m_LogRows, value);
+	}
+
+	public string LogSummaryText
+	{
+		get => m_LogSummaryText;
+		private set => SetProperty(ref m_LogSummaryText, value);
 	}
 
 	public string ActiveSessionView
@@ -518,9 +533,29 @@ internal sealed class MainWindowViewModel : ObservableObject
 		ApplyScopeHotspots(document);
 		ApplySelectedFrameScopes();
 		ApplySelectedFrameCounters();
+		ApplyLogMessages(document);
 		AttachTimelineState(Selection, Viewport);
 		UpdateTimelineText();
 		UpdateFooterText();
+	}
+
+	private void ApplyLogMessages(SessionDocument document)
+	{
+		if (document?.Session == null)
+		{
+			LogRows = Array.Empty<LogMessageRow>();
+			LogSummaryText = "Generated sample has no profiler log stream.";
+			return;
+		}
+
+		List<LogMessage> messages = new List<LogMessage>();
+		document.Session.GetLogMessages(0, messages);
+		LogRows = messages
+			.Select((message, index) => new LogMessageRow(index, message.Time, message.Message))
+			.ToArray();
+		LogSummaryText = LogRows.Count == 0
+			? "No log messages found in this session."
+			: $"{LogRows.Count} log messages";
 	}
 
 	private void ApplyScopeHotspots(SessionDocument document)
