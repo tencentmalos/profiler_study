@@ -122,7 +122,9 @@
       <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="5" />
-      <Setter Property="Padding" Value="7,4" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Width" Value="30" />
+      <Setter Property="Height" Value="30" />
       <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="12" />
     </Style>
@@ -335,33 +337,21 @@
         <Border Grid.Column="1" Width="1" Background="{DynamicResource SukiBorderBrush}" Margin="2,6" />
         <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="Tools" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Connect" VerticalAlignment="Center" />
-              </StackPanel>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Connect to FramePro">
+              <material:MaterialIcon Kind="LanConnect" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
-            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="Android" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Android" VerticalAlignment="Center" />
-              </StackPanel>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Android profiler tools">
+              <material:MaterialIcon Kind="Android" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
-            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="AlertCircle" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Disconnect" VerticalAlignment="Center" />
-              </StackPanel>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect active session">
+              <material:MaterialIcon Kind="LanDisconnect" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
             <Border Classes="toolbar-gap" Width="1" Margin="6,8" />
             <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
               <material:MaterialIcon Kind="FirstPage" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
-            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track the currently selected frame in the visible timeline">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="Timer" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Track" VerticalAlignment="Center" />
-              </StackPanel>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track selected frame">
+              <material:MaterialIcon Kind="CrosshairsGps" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
             <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding SelectLastFrameCommand}" ToolTip.Tip="Jump to the latest frame in the session">
               <material:MaterialIcon Kind="LastPage" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -369,52 +359,31 @@
             <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
               <material:MaterialIcon Kind="Undo" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
-            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select the slowest frame in the current session">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="Speedometer" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Max" VerticalAlignment="Center" />
-              </StackPanel>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select slowest frame">
+              <material:MaterialIcon Kind="SpeedometerSlow" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
             <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding SelectNextSpikeCommand}" ToolTip.Tip="Select the next frame spike">
               <material:MaterialIcon Kind="Redo" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
             <Border Classes="toolbar-gap" Width="1" Margin="6,8" />
-            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="Information" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Info" VerticalAlignment="Center" />
-              </StackPanel>
+            <ToggleButton Classes="toolbar-button" Height="40" Width="40" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Thread info panel">
+              <material:MaterialIcon Kind="InformationOutline" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </ToggleButton>
-            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the frame graph">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="ChartBar" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Frames" VerticalAlignment="Center" />
-              </StackPanel>
+            <ToggleButton Classes="toolbar-button" Height="40" Width="40" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Frame graph panel">
+              <material:MaterialIcon Kind="ChartTimelineVariant" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </ToggleButton>
-            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the CPU core graph">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="Cpu64Bit" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Cores" VerticalAlignment="Center" />
-              </StackPanel>
+            <ToggleButton Classes="toolbar-button" Height="40" Width="40" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="CPU core graph panel">
+              <material:MaterialIcon Kind="Cpu64Bit" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </ToggleButton>
-            <ToggleButton Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the profiler data grids">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="DatabaseEdit" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Details" VerticalAlignment="Center" />
-              </StackPanel>
+            <ToggleButton Classes="toolbar-button" Height="40" Width="40" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Profiler data grids">
+              <material:MaterialIcon Kind="Table" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </ToggleButton>
             <Border Classes="toolbar-gap" Width="1" Margin="6,8" />
-            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="Theme" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding ScopeColorModeText}" VerticalAlignment="Center" />
-              </StackPanel>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring mode">
+              <material:MaterialIcon Kind="Palette" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
-            <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Open callstack capture and symbol tools">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <material:MaterialIcon Kind="CodeBraces" Width="18" Height="18" VerticalAlignment="Center" />
-                <TextBlock Text="Callstacks" VerticalAlignment="Center" />
-              </StackPanel>
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Callstack capture and symbols">
+              <material:MaterialIcon Kind="SourceBranch" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
           </StackPanel>
         </ScrollViewer>
@@ -422,9 +391,15 @@
           <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="6">
             <material:MaterialIcon Kind="Magnify" Width="18" Height="18" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
             <TextBox Grid.Column="1" Text="{Binding ScopeFilterText}" Watermark="Find scope" MinWidth="110" />
-            <Button Grid.Column="2" Classes="panel-command" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
-            <Button Grid.Column="3" Classes="panel-command" Content="Next" Command="{Binding FindNextScopeCommand}" />
-            <Button Grid.Column="4" Classes="panel-command" Content="Clear" Command="{Binding ClearScopeFindCommand}" />
+            <Button Grid.Column="2" Classes="panel-command" Command="{Binding FindPreviousScopeCommand}" ToolTip.Tip="Previous match">
+              <material:MaterialIcon Kind="ChevronLeft" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Button Grid.Column="3" Classes="panel-command" Command="{Binding FindNextScopeCommand}" ToolTip.Tip="Next match">
+              <material:MaterialIcon Kind="ChevronRight" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Button Grid.Column="4" Classes="panel-command" Command="{Binding ClearScopeFindCommand}" ToolTip.Tip="Clear search">
+              <material:MaterialIcon Kind="CloseCircleOutline" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
           </Grid>
         </Border>
       </Grid>
