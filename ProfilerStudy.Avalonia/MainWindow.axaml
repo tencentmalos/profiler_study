@@ -341,7 +341,7 @@
             </StackPanel>
           </Button>
           <Border Width="18" Background="#D1D1D1" />
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}">
+          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="i" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="#203246" />
@@ -349,7 +349,7 @@
               <TextBlock Text="Info" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}">
+          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the frame graph">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="ms" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
@@ -357,7 +357,7 @@
               <TextBlock Text="Frames" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}">
+          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread scope graph">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="{}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#203246" />
@@ -365,7 +365,7 @@
               <TextBlock Text="Scope" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}">
+          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the CPU core graph">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="CPU" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
@@ -373,7 +373,7 @@
               <TextBlock Text="Cores" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}">
+          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the custom stats graph">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="#" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#203246" />
@@ -381,7 +381,7 @@
               <TextBlock Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}">
+          <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the profiler data grids">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
@@ -429,7 +429,7 @@
             </Grid>
           </Border>
           <Border Width="47" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}">
+          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#BCA0C8" BorderBrush="#6B4878" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="RGB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#33203C" />
@@ -453,7 +453,7 @@
               </Border>
             </Grid>
           </Border>
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenCallstacksCommand}">
+          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Open callstack capture and symbol tools">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />
