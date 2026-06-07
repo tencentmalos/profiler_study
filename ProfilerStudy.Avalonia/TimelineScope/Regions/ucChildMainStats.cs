@@ -31,10 +31,15 @@ public class ucChildMainStats
     public AvaPlot Plot => _timelinePlot;
 
     public List<ucVerticalLine> VLineList { get; internal set; } = new List<ucVerticalLine>();
+
+    public event Action<double, double> AxisRangeChanged;
+    public event Action AxisRangeChangedByUi;
     
     public ucChildMainStats(AvaPlot timelinePlot)
     {
         _timelinePlot = timelinePlot;
+        _timelinePlot.PointerMoved += TimelinePlotOnPointerMoved;
+        _timelinePlot.PointerWheelChanged += TimelinePlotOnPointerWheelChanged;
         InitializeDetailPlot();
     }
     
@@ -148,5 +153,27 @@ public class ucChildMainStats
     {
         _timelinePlot.Plot.Remove<VerticalLine>();
         VLineList.Clear();
+    }
+
+    private void TimelinePlotOnPointerMoved(object sender, PointerEventArgs e)
+    {
+        var properties = e.GetCurrentPoint(null).Properties;
+        if (properties.IsLeftButtonPressed)
+        {
+            NotifyAxisRangeChangedByUi();
+        }
+    }
+
+    private void TimelinePlotOnPointerWheelChanged(object sender, PointerWheelEventArgs e)
+    {
+        NotifyAxisRangeChangedByUi();
+    }
+
+    private void NotifyAxisRangeChangedByUi()
+    {
+        double scopeStart = _timelinePlot.Plot.Axes.Bottom.Min;
+        double scopeEnd = _timelinePlot.Plot.Axes.Bottom.Max;
+        AxisRangeChanged?.Invoke(scopeStart, scopeEnd);
+        AxisRangeChangedByUi?.Invoke();
     }
 }

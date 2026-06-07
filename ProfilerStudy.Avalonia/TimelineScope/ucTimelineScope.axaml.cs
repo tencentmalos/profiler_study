@@ -83,6 +83,8 @@ public partial class ucTimelineScope : UserControl
     {
         // Initialize timeline manager
         _mainStatsRegion = new ucChildMainStats(TimelinePlot);
+        _mainStatsRegion.AxisRangeChanged += XRangeChangedByMainStatsOperate;
+        _mainStatsRegion.AxisRangeChangedByUi += ScopeRangedChangedByUi;
         
         // Initialize scope manager and connect events
         _scopeRegion = new ucChildSelectScope(TimelinePlot);
@@ -114,6 +116,13 @@ public partial class ucTimelineScope : UserControl
         
         // Update detail views and shared axis
         NotifyXRangeChanged(_scopeRegion.ScopeStart, _scopeRegion.ScopeEnd);
+    }
+
+    private void XRangeChangedByMainStatsOperate(double scopeStart, double scopeEnd)
+    {
+        _scopeRegion.UpdateXRange(scopeStart, scopeEnd, false);
+        _sharedXAxisRegion.UpdateXRange(scopeStart, scopeEnd);
+        _detailsRegion.UpdateXRange(scopeStart, scopeEnd, EnableAutoScaleY);
     }
 
     private void XRangeChangedBySharedAxisOperate(double scopeStart, double scopeEnd)
