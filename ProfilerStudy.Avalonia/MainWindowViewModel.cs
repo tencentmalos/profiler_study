@@ -1580,17 +1580,57 @@ internal sealed class MainWindowViewModel : ObservableObject
 		string actionName = parameter as string;
 		if (string.Equals(actionName, "Capture", StringComparison.Ordinal))
 		{
-			CallstacksPanelStatusText = "Callstack capture entry point is visible in the Avalonia shell; native stack capture is not implemented yet.";
+			ToggleCallstackRecording();
 		}
 		else if (string.Equals(actionName, "Resolve", StringComparison.Ordinal))
 		{
-			CallstacksPanelStatusText = "Symbol resolution entry point is visible in the Avalonia shell; resolver integration is not implemented yet.";
+			ReloadCallstackSymbols();
 		}
 		else
 		{
 			CallstacksPanelStatusText = "No callstack capture loaded.";
+			StatusText = CallstacksPanelStatusText;
+		}
+	}
+
+	private void ToggleCallstackRecording()
+	{
+		Session session = CurrentDocument?.Session ?? m_LiveConnectionSession;
+		if (session == null)
+		{
+			CallstacksPanelStatusText = "Open or connect a profiler session before changing callstack recording.";
+			StatusText = CallstacksPanelStatusText;
+			return;
 		}
 
+		if (!session.Connected)
+		{
+			CallstacksPanelStatusText = "Callstack recording can only be changed while a live session is connected.";
+			StatusText = CallstacksPanelStatusText;
+			return;
+		}
+
+		bool enabled = !session.RecordCallstacks;
+		session.RecordCallstacks = enabled;
+		CallstacksPanelStatusText = enabled
+			? "Callstack recording enabled for the live session."
+			: "Callstack recording disabled for the live session.";
+		StatusText = CallstacksPanelStatusText;
+	}
+
+	private void ReloadCallstackSymbols()
+	{
+		Session session = CurrentDocument?.Session ?? m_LiveConnectionSession;
+		if (session == null)
+		{
+			CallstacksPanelStatusText = "Open or connect a profiler session before reloading callstack symbols.";
+			StatusText = CallstacksPanelStatusText;
+			return;
+		}
+
+		session.ReloadSymbols();
+		session.LoadModuleSymbols();
+		CallstacksPanelStatusText = "Requested module symbol reload for the current session.";
 		StatusText = CallstacksPanelStatusText;
 	}
 

@@ -1257,14 +1257,14 @@
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
           <TextBlock Text="Callstack Tools" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="Callstack controls are represented here so the Avalonia toolbar has the same entry point as the original profiler." Foreground="#404040" TextWrapping="Wrap" />
+          <TextBlock Text="Enable or disable callstack capture for a live session, then request a module symbol reload for captured sessions." Foreground="#404040" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <Border Width="42" Height="34" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1">
               <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />
             </Border>
             <Button Grid.Column="1"
                     HorizontalContentAlignment="Left"
-                    Content="Capture Callstacks"
+                    Content="Toggle Live Callstack Recording"
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Capture" />
             <Border Grid.Row="1" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
@@ -1273,7 +1273,7 @@
             <Button Grid.Row="1"
                     Grid.Column="1"
                     HorizontalContentAlignment="Left"
-                    Content="Resolve Symbols"
+                    Content="Reload Module Symbols"
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Resolve" />
             <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
