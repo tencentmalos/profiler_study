@@ -35,11 +35,13 @@
           <MenuItem Header="_Log View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
           <Separator />
           <MenuItem Header="_Threads View">
-            <MenuItem Header="_Info" />
-            <MenuItem Header="_Frame Graph" />
-            <MenuItem Header="_Scope Graph" />
+            <MenuItem Header="_Info" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
+            <MenuItem Header="_Frame Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
+            <MenuItem Header="_Scope Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
             <MenuItem Header="_CPU Graph" IsEnabled="False" />
-            <MenuItem Header="_Custom Stats Graph" />
+            <MenuItem Header="_Custom Stats Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
+            <MenuItem Header="_Core Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
+            <MenuItem Header="_Data Grid" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" />
           </MenuItem>
           <MenuItem Header="Scope _Colouring">
             <MenuItem Header="Colour by _Thread" IsEnabled="False" />
@@ -125,37 +127,37 @@
               <TextBlock Text="End" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Info" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Frames" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Scope" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Cores" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="104" MinHeight="118" Padding="4" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats">
+          <Button Width="104" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
           </Button>
-          <Button Width="88" MinHeight="118" Padding="4">
+          <Button Width="88" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid">
             <StackPanel Spacing="5">
               <Border Width="34" Height="30" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center" />
               <TextBlock Text="Details" TextAlignment="Center" />
@@ -251,12 +253,12 @@
                     <TextBlock Text="Views" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="7" Spacing="4">
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Frame Graph</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Profiler Scopes</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" Foreground="{Binding ThreadsViewBrush}">Frame Graph</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" Foreground="{Binding ThreadsViewBrush}">Profiler Scopes</Button>
                     <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}">Scope Hotspots</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Selected Frame</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}">Counters</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}">Cores</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" Foreground="{Binding ThreadsViewBrush}">Selected Frame</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" Foreground="{Binding CustomStatsViewBrush}">Counters</Button>
+                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" Foreground="{Binding CoresViewBrush}">Cores</Button>
                     <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}">Log</Button>
                   </StackPanel>
                 </Grid>
@@ -304,7 +306,7 @@
           </Grid>
         </Border>
         <Grid Grid.Row="1" RowDefinitions="180,6,*" IsVisible="{Binding IsThreadsViewActive}">
-          <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
+          <Grid Grid.Row="0" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
                          Foreground="#202020"
@@ -314,7 +316,7 @@
                          TextWrapping="Wrap" />
             </Border>
 
-            <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+            <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsInfoPanelVisible}">
               <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" ColumnDefinitions="*,46">
                 <Button Grid.Column="0"
                         Content="Filter Threads..."
@@ -356,10 +358,11 @@
                         Background="#9A9A9A"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        ResizeDirection="Rows" />
+                        ResizeDirection="Rows"
+                        IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
           <Grid Grid.Row="2" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,8,0,0">
-            <Grid Grid.Row="0" ColumnDefinitions="34,225,*,17">
+            <Grid Grid.Row="0" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
                            Foreground="#202020"
@@ -428,9 +431,10 @@
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          ResizeDirection="Rows" />
+                          ResizeDirection="Rows"
+                          IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-            <Grid Grid.Row="2" ColumnDefinitions="34,225,*">
+            <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
               <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
                 <TextBlock Text="Cores"
                            Foreground="#202020"
@@ -458,9 +462,10 @@
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          ResizeDirection="Rows" />
+                          ResizeDirection="Rows"
+                          IsVisible="{Binding IsThreadsCoreGraphVisible}" />
 
-            <Grid Grid.Row="4" ColumnDefinitions="34,225,*">
+            <Grid Grid.Row="4" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
               <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
                 <TextBlock Text="Stats"
                            Foreground="#202020"
@@ -489,9 +494,10 @@
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          ResizeDirection="Rows" />
+                          ResizeDirection="Rows"
+                          IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="8" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+            <Border Grid.Row="8" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,96,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -545,9 +551,10 @@
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          ResizeDirection="Rows" />
+                          ResizeDirection="Rows"
+                          IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="6" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+            <Border Grid.Row="6" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -606,9 +613,10 @@
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          ResizeDirection="Rows" />
+                          ResizeDirection="Rows"
+                          IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="10" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+            <Border Grid.Row="10" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"

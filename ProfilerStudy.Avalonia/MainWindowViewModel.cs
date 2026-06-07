@@ -36,6 +36,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_CollapseAllThreadsCommand;
 	private readonly RelayCommand m_ExpandAllThreadsCommand;
 	private readonly RelayCommand m_ThreadSettingsCommand;
+	private readonly RelayCommand m_ToggleThreadsPanelCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -72,6 +73,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private int m_MaxVisibleThreadTimelineThreads = DefaultVisibleThreadTimelineThreads;
 	private string m_FocusedThreadName;
 	private bool m_AreThreadScopesCollapsed;
+	private bool m_IsThreadsInfoPanelVisible = true;
+	private bool m_IsThreadsFrameGraphVisible = true;
+	private bool m_IsThreadsScopeGraphVisible = true;
+	private bool m_IsThreadsCoreGraphVisible = true;
+	private bool m_IsThreadsCustomStatsVisible = true;
+	private bool m_IsThreadsDataGridVisible = true;
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
 	private string m_ScopeHotspotSortKey = "TotalTime";
@@ -111,6 +118,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_CollapseAllThreadsCommand = new RelayCommand(_ => SetThreadScopeCollapseState(true));
 		m_ExpandAllThreadsCommand = new RelayCommand(_ => SetThreadScopeCollapseState(false));
 		m_ThreadSettingsCommand = new RelayCommand(_ => ShowThreadSettingsStatus());
+		m_ToggleThreadsPanelCommand = new RelayCommand(ToggleThreadsPanel);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -172,6 +180,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ExpandAllThreadsCommand => m_ExpandAllThreadsCommand;
 
 	public RelayCommand ThreadSettingsCommand => m_ThreadSettingsCommand;
+
+	public RelayCommand ToggleThreadsPanelCommand => m_ToggleThreadsPanelCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -450,6 +460,42 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public bool IsLogViewActive => ActiveSessionView == "Log";
 
+	public bool IsThreadsInfoPanelVisible
+	{
+		get => m_IsThreadsInfoPanelVisible;
+		private set => SetProperty(ref m_IsThreadsInfoPanelVisible, value);
+	}
+
+	public bool IsThreadsFrameGraphVisible
+	{
+		get => m_IsThreadsFrameGraphVisible;
+		private set => SetProperty(ref m_IsThreadsFrameGraphVisible, value);
+	}
+
+	public bool IsThreadsScopeGraphVisible
+	{
+		get => m_IsThreadsScopeGraphVisible;
+		private set => SetProperty(ref m_IsThreadsScopeGraphVisible, value);
+	}
+
+	public bool IsThreadsCoreGraphVisible
+	{
+		get => m_IsThreadsCoreGraphVisible;
+		private set => SetProperty(ref m_IsThreadsCoreGraphVisible, value);
+	}
+
+	public bool IsThreadsCustomStatsVisible
+	{
+		get => m_IsThreadsCustomStatsVisible;
+		private set => SetProperty(ref m_IsThreadsCustomStatsVisible, value);
+	}
+
+	public bool IsThreadsDataGridVisible
+	{
+		get => m_IsThreadsDataGridVisible;
+		private set => SetProperty(ref m_IsThreadsDataGridVisible, value);
+	}
+
 	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
 
 	public IBrush CoresViewBrush => IsCoresViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
@@ -477,6 +523,46 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			ActiveSessionView = viewName;
 		}
+	}
+
+	private void ToggleThreadsPanel(object parameter)
+	{
+		string panelName = parameter as string;
+		if (string.Equals(panelName, "Info", StringComparison.Ordinal))
+		{
+			IsThreadsInfoPanelVisible = !IsThreadsInfoPanelVisible;
+			StatusText = FormatThreadsPanelStatus("Info", IsThreadsInfoPanelVisible);
+		}
+		else if (string.Equals(panelName, "FrameGraph", StringComparison.Ordinal))
+		{
+			IsThreadsFrameGraphVisible = !IsThreadsFrameGraphVisible;
+			StatusText = FormatThreadsPanelStatus("Frame Graph", IsThreadsFrameGraphVisible);
+		}
+		else if (string.Equals(panelName, "ScopeGraph", StringComparison.Ordinal))
+		{
+			IsThreadsScopeGraphVisible = !IsThreadsScopeGraphVisible;
+			StatusText = FormatThreadsPanelStatus("Scope Graph", IsThreadsScopeGraphVisible);
+		}
+		else if (string.Equals(panelName, "CoreGraph", StringComparison.Ordinal))
+		{
+			IsThreadsCoreGraphVisible = !IsThreadsCoreGraphVisible;
+			StatusText = FormatThreadsPanelStatus("Core Graph", IsThreadsCoreGraphVisible);
+		}
+		else if (string.Equals(panelName, "CustomStats", StringComparison.Ordinal))
+		{
+			IsThreadsCustomStatsVisible = !IsThreadsCustomStatsVisible;
+			StatusText = FormatThreadsPanelStatus("Custom Stats", IsThreadsCustomStatsVisible);
+		}
+		else if (string.Equals(panelName, "DataGrid", StringComparison.Ordinal))
+		{
+			IsThreadsDataGridVisible = !IsThreadsDataGridVisible;
+			StatusText = FormatThreadsPanelStatus("Data Grid", IsThreadsDataGridVisible);
+		}
+	}
+
+	private static string FormatThreadsPanelStatus(string panelName, bool isVisible)
+	{
+		return panelName + (isVisible ? " panel visible." : " panel hidden.");
 	}
 
 	public void SelectFrameFromProfilerStats(int frameIndex)
