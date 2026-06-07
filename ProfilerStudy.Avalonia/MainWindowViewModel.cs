@@ -110,7 +110,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private Process m_GameSimulatorProcess;
 	private Process m_RecordingPlayerProcess;
 	private SessionDocument m_CurrentDocument;
-	private bool m_IsStartupPageVisible = true;
+	private bool m_IsStartupPageVisible;
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
 	private IReadOnlyList<string> m_RecentFiles = Array.Empty<string>();
 	private string m_SelectedRecentFile;
