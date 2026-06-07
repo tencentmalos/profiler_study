@@ -810,7 +810,7 @@
             </Grid>
           </Grid>
         </Border>
-        <Grid Grid.Row="1" RowDefinitions="118,150,24,4,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+        <Grid Grid.Row="1" RowDefinitions="118,24,150,4,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
           <Grid Grid.Row="0" ColumnDefinitions="32,*" IsVisible="{Binding IsThreadsInfoPanelVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="INFO"
@@ -866,7 +866,7 @@
             </Grid>
           </Border>
 
-          <Grid Grid.Row="1" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+          <Grid Grid.Row="2" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
                          Foreground="#202020"
@@ -940,7 +940,7 @@
             </Border>
           </Grid>
 
-          <Border Grid.Row="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+          <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                 <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -953,7 +953,7 @@
             </Grid>
           </Border>
 
-          <Grid Grid.Row="2" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+          <Grid Grid.Row="1" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
             <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="4,2">
               <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
@@ -970,13 +970,14 @@
             </Grid>
           </Border>
 
-          <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
-            <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
-          </Border>
             <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="8,4">
               <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
             </Border>
           </Grid>
+
+          <Border Grid.Row="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+            <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+          </Border>
 
           <GridSplitter Grid.Row="3"
                         Background="#9A9A9A"
