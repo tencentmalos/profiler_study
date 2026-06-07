@@ -88,6 +88,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_CallstacksActionCommand;
 	private readonly RelayCommand m_OpenHelpCommand;
 	private readonly RelayCommand m_CloseHelpCommand;
+	private readonly RelayCommand m_OpenRegistrationCommand;
+	private readonly RelayCommand m_CloseRegistrationCommand;
+	private readonly RelayCommand m_OpenUpdateCheckCommand;
+	private readonly RelayCommand m_CloseUpdateCheckCommand;
 	private readonly RelayCommand m_OpenAboutCommand;
 	private readonly RelayCommand m_CloseAboutCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
@@ -164,6 +168,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsCallstacksPanelVisible;
 	private string m_CallstacksPanelStatusText = "No callstack capture loaded.";
 	private bool m_IsHelpPanelVisible;
+	private bool m_IsRegistrationPanelVisible;
+	private bool m_IsUpdateCheckPanelVisible;
 	private bool m_IsAboutPanelVisible;
 	private string m_ScopeColorMode = "Thread";
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
@@ -267,6 +273,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_CallstacksActionCommand = new RelayCommand(ShowCallstacksActionStatus);
 		m_OpenHelpCommand = new RelayCommand(_ => OpenHelpPanel());
 		m_CloseHelpCommand = new RelayCommand(_ => CloseHelpPanel());
+		m_OpenRegistrationCommand = new RelayCommand(_ => OpenRegistrationPanel());
+		m_CloseRegistrationCommand = new RelayCommand(_ => CloseRegistrationPanel());
+		m_OpenUpdateCheckCommand = new RelayCommand(_ => OpenUpdateCheckPanel());
+		m_CloseUpdateCheckCommand = new RelayCommand(_ => CloseUpdateCheckPanel());
 		m_OpenAboutCommand = new RelayCommand(_ => OpenAboutPanel());
 		m_CloseAboutCommand = new RelayCommand(_ => CloseAboutPanel());
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
@@ -428,6 +438,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand OpenHelpCommand => m_OpenHelpCommand;
 
 	public RelayCommand CloseHelpCommand => m_CloseHelpCommand;
+
+	public RelayCommand OpenRegistrationCommand => m_OpenRegistrationCommand;
+
+	public RelayCommand CloseRegistrationCommand => m_CloseRegistrationCommand;
+
+	public RelayCommand OpenUpdateCheckCommand => m_OpenUpdateCheckCommand;
+
+	public RelayCommand CloseUpdateCheckCommand => m_CloseUpdateCheckCommand;
 
 	public RelayCommand OpenAboutCommand => m_OpenAboutCommand;
 
@@ -1041,6 +1059,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_IsHelpPanelVisible, value);
 	}
 
+	public bool IsRegistrationPanelVisible
+	{
+		get => m_IsRegistrationPanelVisible;
+		private set => SetProperty(ref m_IsRegistrationPanelVisible, value);
+	}
+
+	public bool IsUpdateCheckPanelVisible
+	{
+		get => m_IsUpdateCheckPanelVisible;
+		private set => SetProperty(ref m_IsUpdateCheckPanelVisible, value);
+	}
+
 	public string AboutVersionText => FrameProCore.Version;
 
 	public string AboutProductText => "ProfilerStudy";
@@ -1460,6 +1490,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
 		IsHelpPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
 		IsAboutPanelVisible = false;
 		IsSettingsPanelVisible = true;
 		StatusText = "Settings panel opened.";
@@ -1477,6 +1509,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
 		IsHelpPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
 		IsAboutPanelVisible = false;
 		IsAndroidPanelVisible = true;
 		StatusText = "Android panel opened.";
@@ -1789,6 +1823,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsAndroidPanelVisible = false;
 		IsCallstacksPanelVisible = false;
 		IsHelpPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
 		IsAboutPanelVisible = false;
 		IsConnectionPanelVisible = true;
 		StatusText = "Connection panel opened.";
@@ -2006,6 +2042,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
 		IsHelpPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
 		IsAboutPanelVisible = false;
 		IsCallstacksPanelVisible = true;
 		StatusText = "Callstacks panel opened.";
@@ -2024,6 +2062,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
 		IsAboutPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
 		IsHelpPanelVisible = true;
 		StatusText = "Help panel opened.";
 	}
@@ -2034,6 +2074,44 @@ internal sealed class MainWindowViewModel : ObservableObject
 		StatusText = "Help panel closed.";
 	}
 
+	private void OpenRegistrationPanel()
+	{
+		IsSettingsPanelVisible = false;
+		IsAndroidPanelVisible = false;
+		IsConnectionPanelVisible = false;
+		IsCallstacksPanelVisible = false;
+		IsHelpPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
+		IsAboutPanelVisible = false;
+		IsRegistrationPanelVisible = true;
+		StatusText = "Registration panel opened.";
+	}
+
+	private void CloseRegistrationPanel()
+	{
+		IsRegistrationPanelVisible = false;
+		StatusText = "Registration panel closed.";
+	}
+
+	private void OpenUpdateCheckPanel()
+	{
+		IsSettingsPanelVisible = false;
+		IsAndroidPanelVisible = false;
+		IsConnectionPanelVisible = false;
+		IsCallstacksPanelVisible = false;
+		IsHelpPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsAboutPanelVisible = false;
+		IsUpdateCheckPanelVisible = true;
+		StatusText = "Check for Updates panel opened.";
+	}
+
+	private void CloseUpdateCheckPanel()
+	{
+		IsUpdateCheckPanelVisible = false;
+		StatusText = "Check for Updates panel closed.";
+	}
+
 	private void OpenAboutPanel()
 	{
 		IsSettingsPanelVisible = false;
@@ -2041,6 +2119,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
 		IsHelpPanelVisible = false;
+		IsRegistrationPanelVisible = false;
+		IsUpdateCheckPanelVisible = false;
 		IsAboutPanelVisible = true;
 		StatusText = "About panel opened.";
 	}

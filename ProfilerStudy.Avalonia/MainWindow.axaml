@@ -241,8 +241,8 @@
         </MenuItem>
         <MenuItem Header="_Help">
           <MenuItem Header="_Help" Command="{Binding OpenHelpCommand}" />
-          <MenuItem Header="_Registration..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Registration" />
-          <MenuItem Header="_Check for Updates" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Check for Updates" />
+          <MenuItem Header="_Registration..." Command="{Binding OpenRegistrationCommand}" />
+          <MenuItem Header="_Check for Updates" Command="{Binding OpenUpdateCheckCommand}" />
           <Separator />
           <MenuItem Header="_Demo">
             <MenuItem Header="_Launch FramePro Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
@@ -1487,6 +1487,88 @@
             </StackPanel>
           </Border>
         </StackPanel>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="500"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D2D2D2"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            Padding="0"
+            IsVisible="{Binding IsRegistrationPanelVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+          <DockPanel LastChildFill="True">
+            <TextBlock Text="Registration" FontWeight="SemiBold" Foreground="#101010" />
+            <Button DockPanel.Dock="Right"
+                    Content="x"
+                    Width="24"
+                    Height="22"
+                    Padding="0"
+                    Command="{Binding CloseRegistrationCommand}" />
+          </DockPanel>
+        </Border>
+        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+          <TextBlock Text="ProfilerStudy Registration" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
+          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
+            <StackPanel Spacing="7">
+              <TextBlock Text="This Avalonia port preserves the original FramePro registration entry point." Foreground="#101010" TextWrapping="Wrap" />
+              <TextBlock Text="No license verification service is bundled with this macOS shell. Existing profiler files and sample data can be opened without registration." Foreground="#404040" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="About" Width="86" Command="{Binding OpenAboutCommand}" />
+            <Button Content="Close" Width="86" Command="{Binding CloseRegistrationCommand}" />
+          </StackPanel>
+        </Grid>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="500"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D2D2D2"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            Padding="0"
+            IsVisible="{Binding IsUpdateCheckPanelVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+          <DockPanel LastChildFill="True">
+            <TextBlock Text="Check for Updates" FontWeight="SemiBold" Foreground="#101010" />
+            <Button DockPanel.Dock="Right"
+                    Content="x"
+                    Width="24"
+                    Height="22"
+                    Padding="0"
+                    Command="{Binding CloseUpdateCheckCommand}" />
+          </DockPanel>
+        </Border>
+        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+          <TextBlock Text="Update Status" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
+          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
+            <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="7">
+              <TextBlock Text="Current version" Foreground="#404040" />
+              <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="#101010" />
+              <TextBlock Grid.Row="1" Text="Update channel" Foreground="#404040" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="Manual builds from this workspace" Foreground="#101010" />
+              <TextBlock Grid.Row="2" Text="Network check" Foreground="#404040" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="Not configured in the Avalonia shell" Foreground="#101010" />
+            </Grid>
+          </Border>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="About" Width="86" Command="{Binding OpenAboutCommand}" />
+            <Button Content="Close" Width="86" Command="{Binding CloseUpdateCheckCommand}" />
+          </StackPanel>
+        </Grid>
       </Grid>
     </Border>
 
