@@ -276,23 +276,23 @@ public partial class ucTimelineScope : UserControl
             FontSize = 12,
             Margin = new Thickness(0, 0, 0, 4),
         };
+        _tooltipTitle.Classes.Add("timeline-popup-tooltip-title");
         _tooltipContent = new TextBlock
         {
             FontSize = 11,
             FontFamily = "Consolas",
             TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
         };
+        _tooltipContent.Classes.Add("timeline-popup-tooltip-content");
 
         _tooltipContainer.Children.Add(_tooltipTitle);
         _tooltipContainer.Children.Add(_tooltipContent);
 
         _tooltipBorder = new Border
         {
-            CornerRadius = new CornerRadius(3),
-            Padding = new Thickness(5),
-            BorderThickness = new Thickness(1),
             Child = _tooltipContainer
         };
+        _tooltipBorder.Classes.Add("timeline-popup-tooltip");
         TimelineScopeThemeHelper.ApplyTooltipTheme(_tooltipBorder, _tooltipTitle, _tooltipContent);
 
         _popupTooltip = new Popup
