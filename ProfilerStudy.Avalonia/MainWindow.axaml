@@ -469,7 +469,7 @@
       </Border>
       <Border Grid.Row="1" Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxExpanded}">
         <Grid RowDefinitions="Auto,*">
-          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3">
+          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3" IsVisible="False">
             <DockPanel LastChildFill="True">
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
                 <TextBlock Text="{Binding ActiveSessionView}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
@@ -627,10 +627,10 @@
                     BorderThickness="1,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    IsVisible="{Binding IsToolboxExpanded}"
+                    IsVisible="False"
                     ResizeDirection="Columns" />
 
-      <Border Grid.Row="1" Grid.Column="2" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="1" Height="28" VerticalAlignment="Top" IsVisible="{Binding IsMainSessionDockMinimizedBarVisible}">
+      <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="1" Height="28" VerticalAlignment="Top" IsVisible="{Binding IsMainSessionDockMinimizedBarVisible}">
         <DockPanel LastChildFill="True" Margin="7,3">
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
             <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" />
@@ -641,7 +641,7 @@
         </DockPanel>
       </Border>
 
-      <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="*,31" Margin="0" Background="#C8C8C8" IsVisible="{Binding IsMainSessionDockExpanded}">
+      <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*,31" Margin="0" Background="#C8C8C8" IsVisible="{Binding IsMainSessionDockExpanded}">
         <Grid Grid.Row="0" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
           <Grid.RowDefinitions>
             <RowDefinition Height="{Binding ThreadsInfoPanelHeight}" />
