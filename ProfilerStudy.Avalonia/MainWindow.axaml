@@ -261,20 +261,23 @@
       </ScrollViewer>
     </Border>
 
-    <Grid Grid.Row="2" ColumnDefinitions="240,4,*">
-      <Border Grid.Column="0" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,0,1,0">
+    <Grid Grid.Row="2" ColumnDefinitions="220,4,*" Background="#BEBEBE">
+      <Border Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0">
         <Grid RowDefinitions="Auto,*">
-          <Border Grid.Row="0" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="7,4">
-            <TextBlock Text="Toolbox" Foreground="#101010" FontSize="13" FontWeight="SemiBold" />
+          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3">
+            <DockPanel LastChildFill="True">
+              <TextBlock DockPanel.Dock="Left" Text="Toolbox" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
+              <TextBlock DockPanel.Dock="Right" Text="x" Foreground="#303030" FontSize="11" Margin="6,0,0,0" />
+            </DockPanel>
           </Border>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="7" Spacing="7">
-              <Border Background="#CFCFCF" BorderBrush="#8A8A8A" BorderThickness="1">
+            <StackPanel Margin="5" Spacing="5">
+              <Border Background="#D0D0D0" BorderBrush="#858585" BorderThickness="1">
                 <Grid RowDefinitions="Auto,*">
-                  <Border Background="#B8B8B8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="6,3">
-                    <TextBlock Text="Session" FontWeight="SemiBold" Foreground="#101010" />
+                  <Border Background="#BCBCBC" BorderBrush="#858585" BorderThickness="0,0,0,1" Padding="5,2">
+                    <TextBlock Text="Session Info" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
-                  <Grid Grid.Row="1" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="5" ColumnSpacing="8" Margin="7">
+                  <Grid Grid.Row="1" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="7" Margin="6">
                     <TextBlock Text="Frames" Foreground="#404040" />
                     <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="#101010" />
                     <TextBlock Grid.Row="1" Text="Average" Foreground="#404040" />
@@ -291,12 +294,12 @@
                 </Grid>
               </Border>
 
-              <Border Background="#CFCFCF" BorderBrush="#8A8A8A" BorderThickness="1">
+              <Border Background="#D0D0D0" BorderBrush="#858585" BorderThickness="1">
                 <Grid RowDefinitions="Auto,*">
-                  <Border Background="#B8B8B8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="6,3">
-                    <TextBlock Text="Views" FontWeight="SemiBold" Foreground="#101010" />
+                  <Border Background="#BCBCBC" BorderBrush="#858585" BorderThickness="0,0,0,1" Padding="5,2">
+                    <TextBlock Text="Window Layout" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
-                  <StackPanel Grid.Row="1" Margin="7" Spacing="4">
+                  <StackPanel Grid.Row="1" Margin="6" Spacing="3">
                     <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" Foreground="{Binding ThreadsViewBrush}">Frame Graph</Button>
                     <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" Foreground="{Binding ThreadsViewBrush}">Profiler Scopes</Button>
                     <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}">Scope Hotspots</Button>
@@ -308,12 +311,12 @@
                 </Grid>
               </Border>
 
-              <Border Background="#CFCFCF" BorderBrush="#8A8A8A" BorderThickness="1">
+              <Border Background="#D0D0D0" BorderBrush="#858585" BorderThickness="1">
                 <Grid RowDefinitions="Auto,*">
-                  <Border Background="#B8B8B8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="6,3">
+                  <Border Background="#BCBCBC" BorderBrush="#858585" BorderThickness="0,0,0,1" Padding="5,2">
                     <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
-                  <StackPanel Grid.Row="1" Margin="7" Spacing="5">
+                  <StackPanel Grid.Row="1" Margin="6" Spacing="4">
                     <TextBlock Text="Captured root" Foreground="#404040" />
                     <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
                     <TextBlock Text="Local root" Foreground="#404040" Margin="0,4,0,0" />
@@ -328,6 +331,8 @@
 
       <GridSplitter Grid.Column="1"
                     Background="#9A9A9A"
+                    BorderBrush="#767676"
+                    BorderThickness="1,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     ResizeDirection="Columns" />
