@@ -14,23 +14,27 @@ public sealed class ThreadTimelineLaneControl : Control
 {
 	private const double LeftPadding = 8.0;
 	private const double RightPadding = 8.0;
-	private const double TopPadding = 8.0;
-	private const double BottomPadding = 8.0;
-	private const double ThreadLabelWidth = 160.0;
+	private const double TopPadding = 5.0;
+	private const double BottomPadding = 5.0;
+	private const double ThreadLabelWidth = 150.0;
 	private const double AxisHeight = 18.0;
 	private const double LaneHeight = 16.0;
-	private const double LaneGap = 6.0;
+	private const double LaneGap = 3.0;
 	private const double MinBarWidth = 1.5;
 
-	private static readonly IBrush BackgroundBrush = new SolidColorBrush(Color.FromRgb(207, 207, 207));
-	private static readonly IBrush LabelBackgroundBrush = new SolidColorBrush(Color.FromRgb(190, 190, 190));
-	private static readonly IBrush EmptyTextBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80));
+	private static readonly IBrush BackgroundBrush = new SolidColorBrush(Color.FromRgb(99, 99, 99));
+	private static readonly IBrush LabelBackgroundBrush = new SolidColorBrush(Color.FromRgb(84, 84, 84));
+	private static readonly IBrush EmptyTextBrush = new SolidColorBrush(Color.FromRgb(230, 230, 230));
 	private static readonly IBrush TextBrush = new SolidColorBrush(Color.FromRgb(16, 16, 16));
-	private static readonly IBrush MutedTextBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64));
-	private static readonly Pen BorderPen = new Pen(new SolidColorBrush(Color.FromRgb(124, 124, 124)), 1.0);
-	private static readonly Pen LanePen = new Pen(new SolidColorBrush(Color.FromRgb(150, 150, 150)), 1.0);
-	private static readonly Pen AxisPen = new Pen(new SolidColorBrush(Color.FromRgb(112, 112, 112)), 1.0);
-	private static readonly Pen HoverPen = new Pen(new SolidColorBrush(Color.FromRgb(32, 32, 32)), 2.0);
+	private static readonly IBrush LabelTextBrush = new SolidColorBrush(Color.FromRgb(245, 245, 245));
+	private static readonly IBrush MutedTextBrush = new SolidColorBrush(Color.FromRgb(220, 220, 220));
+	private static readonly Pen BorderPen = new Pen(new SolidColorBrush(Color.FromRgb(42, 42, 42)), 1.0);
+	private static readonly Pen LanePen = new Pen(new SolidColorBrush(Color.FromRgb(72, 72, 72)), 1.0);
+	private static readonly Pen AxisPen = new Pen(new SolidColorBrush(Color.FromRgb(0, 0, 0)), 1.0);
+	private static readonly Pen TimeLinePen = new Pen(new SolidColorBrush(Color.FromRgb(104, 151, 170)), 1.0);
+	private static readonly Pen FramePen = new Pen(new SolidColorBrush(Color.FromRgb(255, 255, 255)), 1.0);
+	private static readonly Pen HoverPen = new Pen(new SolidColorBrush(Color.FromRgb(255, 0, 0)), 2.0);
+	private static readonly Pen SelectedPen = new Pen(new SolidColorBrush(Color.FromRgb(255, 255, 255)), 2.0);
 
 	private ThreadTimelineScopeRow m_HoveredScope;
 	private bool m_IsPanning;
@@ -257,6 +261,7 @@ public sealed class ThreadTimelineLaneControl : Control
 		double axisLeft = LeftPadding + ThreadLabelWidth;
 		double axisRight = Math.Max(axisLeft + 1.0, bounds.Width - RightPadding);
 		double plotWidth = Math.Max(1.0, axisRight - axisLeft);
+		DrawTimeGrid(context, axisLeft, axisRight, TopPadding + AxisHeight, bounds.Height - BottomPadding, startFrame, endFrame);
 		DrawAxis(context, axisLeft, axisRight, TopPadding, startFrame, endFrame);
 		DrawSelection(context, axisLeft, axisRight, TopPadding + AxisHeight, bounds.Height - BottomPadding, startFrame, endFrame);
 
@@ -280,7 +285,7 @@ public sealed class ThreadTimelineLaneControl : Control
 			var labelRect = new Rect(LeftPadding, y, ThreadLabelWidth - 4.0, LaneHeight);
 			context.FillRectangle(LabelBackgroundBrush, labelRect);
 			context.DrawRectangle(null, LanePen, labelRect);
-			DrawText(context, threadRows.Key, TextBrush, 10.0, labelRect.X + 4.0, labelRect.Y + 1.0);
+			DrawText(context, threadRows.Key, LabelTextBrush, 10.0, labelRect.X + 4.0, labelRect.Y + 1.0);
 
 			var laneRect = new Rect(axisLeft, y, plotWidth, LaneHeight);
 			context.DrawRectangle(null, LanePen, laneRect);
@@ -322,8 +327,7 @@ public sealed class ThreadTimelineLaneControl : Control
 		}
 
 		double x = left + ((selectedFrame - startFrame) / Math.Max(1.0, endFrame - startFrame + 1.0) * (right - left));
-		var pen = new Pen(new SolidColorBrush(Color.FromRgb(60, 60, 60)), 1.0);
-		context.DrawLine(pen, new Point(x, top), new Point(x, bottom));
+		context.DrawLine(SelectedPen, new Point(x, top), new Point(x, bottom));
 	}
 
 	private bool TryGetFrameAtPoint(Point point, out FrameSample frame)
@@ -505,16 +509,33 @@ public sealed class ThreadTimelineLaneControl : Control
 		}
 	}
 
+	private static void DrawTimeGrid(DrawingContext context, double left, double right, double top, double bottom, int startFrame, int endFrame)
+	{
+		int frameSpan = Math.Max(1, endFrame - startFrame);
+		int frameStep = Math.Max(1, frameSpan / 12);
+		for (int frame = startFrame; frame <= endFrame; frame += frameStep)
+		{
+			double x = left + ((frame - startFrame) / Math.Max(1.0, endFrame - startFrame + 1.0) * (right - left));
+			context.DrawLine(TimeLinePen, new Point(x, top), new Point(x, bottom));
+		}
+
+		for (int frame = startFrame; frame <= endFrame; frame += Math.Max(1, frameStep * 4))
+		{
+			double x = left + ((frame - startFrame) / Math.Max(1.0, endFrame - startFrame + 1.0) * (right - left));
+			context.DrawLine(FramePen, new Point(x, top), new Point(x, bottom));
+		}
+	}
+
 	private static Color GetScopeColor(int depth)
 	{
 		Color[] palette =
 		{
-			Color.FromRgb(115, 181, 255),
-			Color.FromRgb(99, 215, 155),
-			Color.FromRgb(255, 180, 79),
-			Color.FromRgb(255, 126, 139),
-			Color.FromRgb(192, 162, 255),
-			Color.FromRgb(122, 218, 218),
+			Color.FromRgb(122, 182, 255),
+			Color.FromRgb(82, 220, 130),
+			Color.FromRgb(255, 184, 70),
+			Color.FromRgb(255, 120, 134),
+			Color.FromRgb(184, 152, 255),
+			Color.FromRgb(92, 218, 218),
 		};
 		return palette[Math.Abs(depth) % palette.Length];
 	}

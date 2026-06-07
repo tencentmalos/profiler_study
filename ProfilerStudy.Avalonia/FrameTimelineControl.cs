@@ -13,15 +13,15 @@ namespace ProfilerStudy.Avalonia;
 
 public sealed class FrameTimelineControl : UserControl
 {
-	private static readonly ScottPlotColor PlotBackground = new(200, 200, 200);
-	private static readonly ScottPlotColor DataBackground = new(211, 211, 211);
+	private static readonly ScottPlotColor PlotBackground = new(120, 120, 120);
+	private static readonly ScottPlotColor DataBackground = new(105, 105, 105);
 	private static readonly ScottPlotColor FrameLineColor = new(0, 128, 0);
-	private static readonly ScottPlotColor WarningFrameLineColor = new(210, 126, 0);
+	private static readonly ScottPlotColor WarningFrameLineColor = new(255, 165, 0);
 	private static readonly ScottPlotColor TargetLineColor = new(182, 82, 0, 150);
-	private static readonly ScottPlotColor SelectionLineColor = new(64, 130, 210, 220);
-	private static readonly ScottPlotColor HoverLineColor = new(255, 255, 255, 190);
-	private static readonly ScottPlotColor AxisColor = new(30, 30, 30);
-	private static readonly ScottPlotColor GridColor = new(155, 155, 155, 120);
+	private static readonly ScottPlotColor SelectionLineColor = new(64, 170, 255, 220);
+	private static readonly ScottPlotColor HoverLineColor = new(255, 0, 0, 220);
+	private static readonly ScottPlotColor AxisColor = new(0, 0, 0);
+	private static readonly ScottPlotColor GridColor = new(160, 160, 160, 90);
 
 	public static readonly StyledProperty<IReadOnlyList<FrameSample>> SamplesProperty =
 		AvaloniaProperty.Register<FrameTimelineControl, IReadOnlyList<FrameSample>>(nameof(Samples));
