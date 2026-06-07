@@ -35,13 +35,13 @@
           <MenuItem Header="_Log View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
           <Separator />
           <MenuItem Header="_Threads View">
-            <MenuItem Header="_Info" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
-            <MenuItem Header="_Frame Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
-            <MenuItem Header="_Scope Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
+            <MenuItem Header="_Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
+            <MenuItem Header="_Frame Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsFrameGraphVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
+            <MenuItem Header="_Scope Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsScopeGraphVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
             <MenuItem Header="_CPU Graph" IsEnabled="False" />
-            <MenuItem Header="_Custom Stats Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
-            <MenuItem Header="_Core Graph" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
-            <MenuItem Header="_Data Grid" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" />
+            <MenuItem Header="_Custom Stats Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCustomStatsVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
+            <MenuItem Header="_Core Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCoreGraphVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
+            <MenuItem Header="_Data Grid" ToggleType="CheckBox" IsChecked="{Binding IsThreadsDataGridVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" />
           </MenuItem>
           <MenuItem Header="Scope _Colouring">
             <MenuItem Header="Colour by _Thread" IsEnabled="False" />
