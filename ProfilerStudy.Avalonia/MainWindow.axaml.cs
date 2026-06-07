@@ -150,7 +150,9 @@ public sealed partial class MainWindow : Window
 	private void OnSelectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 	{
 		if (e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
-			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs))
+			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs) ||
+			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex) ||
+			e.PropertyName == nameof(TimelineSelection.HoveredFrameTimeMs))
 		{
 			ProfilerStatsControl?.ApplySelection(m_ViewModel?.Selection);
 		}

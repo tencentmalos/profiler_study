@@ -217,25 +217,38 @@ internal sealed class ProfilerStatsController : ObservableObject
 		}
 
 		Timeline.ChildMainStats.ClearAllVLines();
-		if (selection == null || selection.SelectedFrameIndex < 0 || m_TimelineAdapter.FrameSamples.Length == 0)
+		if (selection == null || m_TimelineAdapter.FrameSamples.Length == 0)
 		{
 			Timeline.ChildMainStats.Refresh();
 			return;
 		}
 
-		int displaySampleIndex = m_TimelineAdapter.GetDisplaySampleIndex(selection.SelectedFrameIndex);
+		AddSelectionMarker(selection.SelectedFrameIndex, selection.SelectedFrameTimeMs, "Frame", ScottPlotColorUtil.GetMutedColor(0));
+		if (selection.HoveredFrameIndex != selection.SelectedFrameIndex)
+		{
+			AddSelectionMarker(selection.HoveredFrameIndex, selection.HoveredFrameTimeMs, "Hover", ScottPlotColorUtil.GetMutedColor(2));
+		}
+		Timeline.ChildMainStats.Refresh();
+	}
+
+	private void AddSelectionMarker(int frameIndex, double frameTimeMs, string prefix, ScottPlot.Color color)
+	{
+		if (frameIndex < 0)
+		{
+			return;
+		}
+
+		int displaySampleIndex = m_TimelineAdapter.GetDisplaySampleIndex(frameIndex);
 		if (displaySampleIndex < 0 || displaySampleIndex >= m_TimelineAdapter.FrameSamples.Length)
 		{
-			Timeline.ChildMainStats.Refresh();
 			return;
 		}
 
 		double x = m_TimelineAdapter.FrameSamples[displaySampleIndex].Index;
-		string label = selection.SelectedFrameTimeMs > 0.0
-			? $"Frame {selection.SelectedFrameIndex} ({selection.SelectedFrameTimeMs:0.###} ms)"
-			: $"Frame {selection.SelectedFrameIndex}";
-		Timeline.ChildMainStats.AddVLine(x, selection.SelectedFrameIndex, label, ScottPlotColorUtil.GetMutedColor(0));
-		Timeline.ChildMainStats.Refresh();
+		string label = frameTimeMs > 0.0
+			? $"{prefix} {frameIndex} ({frameTimeMs:0.###} ms)"
+			: $"{prefix} {frameIndex}";
+		Timeline.ChildMainStats.AddVLine(x, frameIndex, label, color);
 	}
 
 	private void BuildPlots()
