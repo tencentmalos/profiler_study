@@ -883,31 +883,11 @@
             </Border>
 
             <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
-              <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" ColumnDefinitions="*,46">
-                <Button Grid.Column="0"
-                        Content="Filter Threads..."
-                        HorizontalContentAlignment="Left"
-                        Padding="6,2"
-                        Command="{Binding SelectSessionViewCommand}"
-                        CommandParameter="Threads" />
-                <Button Grid.Column="1"
-                        Content="Name"
-                        Padding="0"
-                        ToolTip.Tip="Show threads by name or by id" />
-                <TextBox Grid.Row="1"
-                         Grid.Column="0"
-                         Text="{Binding ThreadFilterText}"
-                         Watermark="thread or scope text"
-                         Margin="0,3,2,0" />
-                <Button Grid.Row="1"
-                        Grid.Column="1"
-                        Content="X"
-                        Padding="0"
-                        Margin="0,3,0,0"
-                        Command="{Binding ClearThreadFilterCommand}" />
-                <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,6,0,4" />
-                <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#404040" TextWrapping="Wrap" />
-                <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
+              <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="4">
+                <TextBlock Text="{Binding SelectedFrameStatusText}" Foreground="#101010" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#404040" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="2" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="3" Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
               </Grid>
             </Border>
 
@@ -988,8 +968,55 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
-          <Grid Grid.Row="4" RowDefinitions="260,4,88,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
-            <Grid Grid.Row="0" ColumnDefinitions="32,210,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
+          <Grid Grid.Row="4" RowDefinitions="69,4,260,4,88,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
+            <Grid Grid.Row="0" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
+              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
+
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
+                <Grid RowDefinitions="39,30" ColumnDefinitions="*,46">
+                  <Button Grid.Column="0"
+                          Content="Filter Threads..."
+                          HorizontalContentAlignment="Left"
+                          Padding="6,2"
+                          Command="{Binding SelectSessionViewCommand}"
+                          CommandParameter="Threads" />
+                  <Button Grid.Column="1"
+                          Content="Name"
+                          Padding="0"
+                          ToolTip.Tip="Show threads by name or by id" />
+                  <TextBox Grid.Row="1"
+                           Grid.Column="0"
+                           Text="{Binding ThreadFilterText}"
+                           Watermark="thread or scope text"
+                           Margin="0,2,1,0" />
+                  <Button Grid.Row="1"
+                          Grid.Column="1"
+                          Content="X"
+                          Padding="0"
+                          Margin="0,2,0,0"
+                          Command="{Binding ClearThreadFilterCommand}" />
+                </Grid>
+              </Border>
+
+              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+                <local:FrameTimelineControl
+                    Samples="{Binding FrameSamples}"
+                    TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
+                    Selection="{Binding Selection}"
+                    Viewport="{Binding Viewport}" />
+              </Border>
+            </Grid>
+
+            <GridSplitter Grid.Row="1"
+                          Background="#9A9A9A"
+                          BorderBrush="#767676"
+                          BorderThickness="0,1"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          ResizeDirection="Rows"
+                          IsVisible="{Binding IsThreadsScopeGraphVisible}" />
+
+            <Grid Grid.Row="2" ColumnDefinitions="32,210,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
                            Foreground="#202020"
@@ -1061,7 +1088,7 @@
               </Border>
             </Grid>
 
-            <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
+            <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Threads" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1074,7 +1101,7 @@
               </Grid>
             </Border>
 
-            <GridSplitter Grid.Row="1"
+            <GridSplitter Grid.Row="3"
                           Background="#9A9A9A"
                           BorderBrush="#767676"
                           BorderThickness="0,1"
@@ -1083,7 +1110,7 @@
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-            <Grid Grid.Row="2" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
+            <Grid Grid.Row="4" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Cores"
                            Foreground="#202020"
@@ -1113,7 +1140,7 @@
               </Border>
             </Grid>
 
-            <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
+            <Border Grid.Row="4" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1126,14 +1153,14 @@
               </Grid>
             </Border>
 
-            <GridSplitter Grid.Row="3"
+            <GridSplitter Grid.Row="5"
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsCoreGraphVisible}" />
 
-            <Grid Grid.Row="4" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
+            <Grid Grid.Row="6" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Stats"
                            Foreground="#202020"
@@ -1164,7 +1191,7 @@
               </Border>
             </Grid>
 
-            <Border Grid.Row="4" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
+            <Border Grid.Row="6" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Stats" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1177,14 +1204,14 @@
               </Grid>
             </Border>
 
-            <GridSplitter Grid.Row="7"
+            <GridSplitter Grid.Row="9"
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="8" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
+            <Border Grid.Row="10" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,96,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -1234,14 +1261,14 @@
               </Grid>
             </Border>
 
-            <GridSplitter Grid.Row="5"
+            <GridSplitter Grid.Row="7"
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="6" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
+            <Border Grid.Row="8" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -1296,7 +1323,7 @@
               </Grid>
             </Border>
 
-            <Border Grid.Row="6" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsDataGridCollapsed}">
+            <Border Grid.Row="8" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsDataGridCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                   <TextBlock Text="Data" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -1309,14 +1336,14 @@
               </Grid>
             </Border>
 
-            <GridSplitter Grid.Row="9"
+            <GridSplitter Grid.Row="11"
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="10" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
+            <Border Grid.Row="12" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
