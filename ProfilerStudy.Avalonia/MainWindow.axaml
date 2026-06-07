@@ -362,6 +362,7 @@
               <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,1,1">
                 <local:ThreadTimelineLaneControl
                     Rows="{Binding VisibleThreadScopes}"
+                    Samples="{Binding FrameSamples}"
                     Viewport="{Binding Viewport}"
                     Selection="{Binding Selection}" />
               </Border>

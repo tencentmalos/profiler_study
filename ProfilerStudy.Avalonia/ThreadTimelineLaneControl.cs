@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 
 namespace ProfilerStudy.Avalonia;
@@ -32,6 +33,9 @@ public sealed class ThreadTimelineLaneControl : Control
 	public static readonly StyledProperty<IReadOnlyList<ThreadTimelineScopeRow>> RowsProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, IReadOnlyList<ThreadTimelineScopeRow>>(nameof(Rows));
 
+	public static readonly StyledProperty<IReadOnlyList<FrameSample>> SamplesProperty =
+		AvaloniaProperty.Register<ThreadTimelineLaneControl, IReadOnlyList<FrameSample>>(nameof(Samples));
+
 	public static readonly StyledProperty<TimelineViewport> ViewportProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, TimelineViewport>(nameof(Viewport));
 
@@ -40,13 +44,19 @@ public sealed class ThreadTimelineLaneControl : Control
 
 	static ThreadTimelineLaneControl()
 	{
-		AffectsRender<ThreadTimelineLaneControl>(RowsProperty, ViewportProperty, SelectionProperty);
+		AffectsRender<ThreadTimelineLaneControl>(RowsProperty, SamplesProperty, ViewportProperty, SelectionProperty);
 	}
 
 	public IReadOnlyList<ThreadTimelineScopeRow> Rows
 	{
 		get => GetValue(RowsProperty);
 		set => SetValue(RowsProperty, value);
+	}
+
+	public IReadOnlyList<FrameSample> Samples
+	{
+		get => GetValue(SamplesProperty);
+		set => SetValue(SamplesProperty, value);
 	}
 
 	public TimelineViewport Viewport
@@ -59,6 +69,51 @@ public sealed class ThreadTimelineLaneControl : Control
 	{
 		get => GetValue(SelectionProperty);
 		set => SetValue(SelectionProperty, value);
+	}
+
+	protected override void OnPointerPressed(PointerPressedEventArgs e)
+	{
+		base.OnPointerPressed(e);
+		if (Selection == null)
+		{
+			return;
+		}
+
+		if (TryGetFrameAtPoint(e.GetPosition(this), out FrameSample frame))
+		{
+			Selection.SelectedFrameIndex = frame.Index;
+			Selection.SelectedFrameTimeMs = frame.DurationMs;
+		}
+	}
+
+	protected override void OnPointerMoved(PointerEventArgs e)
+	{
+		base.OnPointerMoved(e);
+		if (Selection == null)
+		{
+			return;
+		}
+
+		if (TryGetFrameAtPoint(e.GetPosition(this), out FrameSample frame))
+		{
+			Selection.HoveredFrameIndex = frame.Index;
+			Selection.HoveredFrameTimeMs = frame.DurationMs;
+		}
+		else
+		{
+			Selection.HoveredFrameIndex = -1;
+			Selection.HoveredFrameTimeMs = 0.0;
+		}
+	}
+
+	protected override void OnPointerExited(PointerEventArgs e)
+	{
+		base.OnPointerExited(e);
+		if (Selection != null)
+		{
+			Selection.HoveredFrameIndex = -1;
+			Selection.HoveredFrameTimeMs = 0.0;
+		}
 	}
 
 	protected override Size MeasureOverride(Size availableSize)
@@ -148,6 +203,47 @@ public sealed class ThreadTimelineLaneControl : Control
 		double x = left + ((selectedFrame - startFrame) / Math.Max(1.0, endFrame - startFrame + 1.0) * (right - left));
 		var pen = new Pen(new SolidColorBrush(Color.FromRgb(60, 60, 60)), 1.0);
 		context.DrawLine(pen, new Point(x, top), new Point(x, bottom));
+	}
+
+	private bool TryGetFrameAtPoint(Point point, out FrameSample frame)
+	{
+		frame = default;
+		IReadOnlyList<FrameSample> samples = Samples ?? Array.Empty<FrameSample>();
+		if (samples.Count == 0 || Viewport == null)
+		{
+			return false;
+		}
+
+		double axisLeft = LeftPadding + ThreadLabelWidth;
+		double axisRight = Math.Max(axisLeft + 1.0, Bounds.Width - RightPadding);
+		if (point.X < axisLeft || point.X > axisRight)
+		{
+			return false;
+		}
+
+		int startFrame = Viewport.StartFrame;
+		int endFrame = Math.Max(startFrame, Viewport.EndFrame);
+		double ratio = Math.Clamp((point.X - axisLeft) / Math.Max(1.0, axisRight - axisLeft), 0.0, 1.0);
+		double targetFrame = startFrame + ((endFrame - startFrame + 1.0) * ratio);
+		bool found = false;
+		double bestDistance = double.MaxValue;
+		foreach (FrameSample sample in samples)
+		{
+			if (sample.Index < startFrame || sample.Index > endFrame)
+			{
+				continue;
+			}
+
+			double distance = Math.Abs(sample.Index - targetFrame);
+			if (distance < bestDistance)
+			{
+				frame = sample;
+				bestDistance = distance;
+				found = true;
+			}
+		}
+
+		return found;
 	}
 
 	private static void DrawAxis(DrawingContext context, double left, double right, double top, int startFrame, int endFrame)
