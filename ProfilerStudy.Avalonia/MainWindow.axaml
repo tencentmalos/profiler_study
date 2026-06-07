@@ -552,7 +552,7 @@
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
                 <TextBlock Text="{Binding ActiveSessionView}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
                 <Button Content="_" Width="22" Height="20" Padding="0" FontSize="10" Command="{Binding MinimizeToolboxCommand}" ToolTip.Tip="Minimize toolbox" />
-                <Button Content="□" Width="22" Height="20" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Float Toolbox" ToolTip.Tip="Float toolbox" />
+                <Button Content="□" Width="22" Height="20" Padding="0" FontSize="10" Command="{Binding FloatToolboxCommand}" ToolTip.Tip="Float toolbox" />
                 <Button Content="x" Width="22" Height="20" Padding="0" FontSize="11" Command="{Binding ToggleToolboxCommand}" ToolTip.Tip="Close toolbox" />
               </StackPanel>
               <TextBlock Text="Toolbox" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
@@ -1440,6 +1440,92 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
+            Width="330"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="36,38,0,0"
+            Background="#D4D4D4"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            IsVisible="{Binding IsToolboxFloatingVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="7,4">
+          <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+              <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockToolboxCommand}" />
+              <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleToolboxCommand}" />
+            </StackPanel>
+            <TextBlock Text="Toolbox" FontWeight="SemiBold" Foreground="#101010" />
+          </DockPanel>
+        </Border>
+        <StackPanel Grid.Row="1" Margin="8" Spacing="8">
+          <Border Classes="toolbox-section">
+            <StackPanel>
+              <Border Classes="toolbox-section-header">
+                <TextBlock Text="Session" FontWeight="SemiBold" Foreground="#101010" />
+              </Border>
+              <UniformGrid Columns="2" Margin="6" RowSpacing="5" ColumnSpacing="5">
+                <Button Classes="toolbox-action" Content="Open..." Command="{Binding OpenSessionCommand}" />
+                <Button Classes="toolbox-action" Content="Sample" Command="{Binding LoadSampleCommand}" />
+                <Button Classes="toolbox-action" Content="Connect..." Command="{Binding OpenConnectionCommand}" />
+                <Button Classes="toolbox-action" Content="Android..." Command="{Binding OpenAndroidCommand}" />
+              </UniformGrid>
+            </StackPanel>
+          </Border>
+          <Border Classes="toolbox-section">
+            <StackPanel>
+              <Border Classes="toolbox-section-header">
+                <TextBlock Text="Views" FontWeight="SemiBold" Foreground="#101010" />
+              </Border>
+              <UniformGrid Columns="2" Margin="6" RowSpacing="5" ColumnSpacing="5">
+                <Button Classes="toolbox-action" Content="Threads" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
+                <Button Classes="toolbox-action" Content="Cores" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
+                <Button Classes="toolbox-action" Content="Scopes" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
+                <Button Classes="toolbox-action" Content="Log" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
+              </UniformGrid>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="520"
+            Height="220"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="0,0,36,36"
+            Background="#D8D8D8"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            IsVisible="{Binding IsOutputWindowFloatingVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BEBEBE" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="7,4">
+          <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+              <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockOutputWindowCommand}" />
+              <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleOutputWindowCommand}" />
+            </StackPanel>
+            <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="#101010" />
+          </DockPanel>
+        </Border>
+        <TextBox Grid.Row="1"
+                 Text="{Binding OutputLogText}"
+                 AcceptsReturn="True"
+                 IsReadOnly="True"
+                 BorderThickness="0"
+                 Background="#EFEFEF"
+                 Foreground="#101010"
+                 FontFamily="Menlo,Consolas,monospace"
+                 FontSize="11" />
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -1741,7 +1827,7 @@
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
               <TextBlock Text="{Binding SessionStatusText}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0" />
               <Button Content="_" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding MinimizeOutputWindowCommand}" ToolTip.Tip="Minimize output window" />
-              <Button Content="□" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Float Output Window" ToolTip.Tip="Float output window" />
+              <Button Content="□" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding FloatOutputWindowCommand}" ToolTip.Tip="Float output window" />
               <Button Content="x" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ToggleOutputWindowCommand}" ToolTip.Tip="Close output window" />
             </StackPanel>
             <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="#101010" />

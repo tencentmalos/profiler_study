@@ -61,6 +61,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_RestoreOutputWindowCommand;
 	private readonly RelayCommand m_MinimizeToolboxCommand;
 	private readonly RelayCommand m_RestoreToolboxCommand;
+	private readonly RelayCommand m_FloatOutputWindowCommand;
+	private readonly RelayCommand m_DockOutputWindowCommand;
+	private readonly RelayCommand m_FloatToolboxCommand;
+	private readonly RelayCommand m_DockToolboxCommand;
 	private readonly RelayCommand m_FindPreviousScopeCommand;
 	private readonly RelayCommand m_FindNextScopeCommand;
 	private readonly RelayCommand m_ClearScopeFindCommand;
@@ -140,8 +144,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsDataGridVisible = true;
 	private bool m_IsOutputWindowVisible = true;
 	private bool m_IsOutputWindowMinimized;
+	private bool m_IsOutputWindowFloating;
 	private bool m_IsToolboxVisible = true;
 	private bool m_IsToolboxMinimized;
+	private bool m_IsToolboxFloating;
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
@@ -230,6 +236,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_RestoreOutputWindowCommand = new RelayCommand(_ => RestoreOutputWindow());
 		m_MinimizeToolboxCommand = new RelayCommand(_ => MinimizeToolbox());
 		m_RestoreToolboxCommand = new RelayCommand(_ => RestoreToolbox());
+		m_FloatOutputWindowCommand = new RelayCommand(_ => FloatOutputWindow());
+		m_DockOutputWindowCommand = new RelayCommand(_ => DockOutputWindow());
+		m_FloatToolboxCommand = new RelayCommand(_ => FloatToolbox());
+		m_DockToolboxCommand = new RelayCommand(_ => DockToolbox());
 		m_FindPreviousScopeCommand = new RelayCommand(_ => FindScope(-1), _ => CanFindScope());
 		m_FindNextScopeCommand = new RelayCommand(_ => FindScope(1), _ => CanFindScope());
 		m_ClearScopeFindCommand = new RelayCommand(_ => ScopeFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ScopeFilterText));
@@ -357,6 +367,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand MinimizeToolboxCommand => m_MinimizeToolboxCommand;
 
 	public RelayCommand RestoreToolboxCommand => m_RestoreToolboxCommand;
+
+	public RelayCommand FloatOutputWindowCommand => m_FloatOutputWindowCommand;
+
+	public RelayCommand DockOutputWindowCommand => m_DockOutputWindowCommand;
+
+	public RelayCommand FloatToolboxCommand => m_FloatToolboxCommand;
+
+	public RelayCommand DockToolboxCommand => m_DockToolboxCommand;
 
 	public RelayCommand FindPreviousScopeCommand => m_FindPreviousScopeCommand;
 
@@ -855,6 +873,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 				RaisePropertyChanged(nameof(OutputWindowHeight));
 				RaisePropertyChanged(nameof(IsOutputWindowExpanded));
 				RaisePropertyChanged(nameof(IsOutputWindowMinimizedBarVisible));
+				RaisePropertyChanged(nameof(IsOutputWindowFloatingVisible));
 			}
 		}
 	}
@@ -869,15 +888,33 @@ internal sealed class MainWindowViewModel : ObservableObject
 				RaisePropertyChanged(nameof(OutputWindowHeight));
 				RaisePropertyChanged(nameof(IsOutputWindowExpanded));
 				RaisePropertyChanged(nameof(IsOutputWindowMinimizedBarVisible));
+				RaisePropertyChanged(nameof(IsOutputWindowFloatingVisible));
 			}
 		}
 	}
 
-	public bool IsOutputWindowExpanded => IsOutputWindowVisible && !IsOutputWindowMinimized;
+	public bool IsOutputWindowFloating
+	{
+		get => m_IsOutputWindowFloating;
+		private set
+		{
+			if (SetProperty(ref m_IsOutputWindowFloating, value))
+			{
+				RaisePropertyChanged(nameof(OutputWindowHeight));
+				RaisePropertyChanged(nameof(IsOutputWindowExpanded));
+				RaisePropertyChanged(nameof(IsOutputWindowMinimizedBarVisible));
+				RaisePropertyChanged(nameof(IsOutputWindowFloatingVisible));
+			}
+		}
+	}
 
-	public bool IsOutputWindowMinimizedBarVisible => IsOutputWindowVisible && IsOutputWindowMinimized;
+	public bool IsOutputWindowExpanded => IsOutputWindowVisible && !IsOutputWindowMinimized && !IsOutputWindowFloating;
 
-	public GridLength OutputWindowHeight => !IsOutputWindowVisible ? new GridLength(0) : IsOutputWindowMinimized ? new GridLength(26) : new GridLength(150);
+	public bool IsOutputWindowMinimizedBarVisible => IsOutputWindowVisible && IsOutputWindowMinimized && !IsOutputWindowFloating;
+
+	public bool IsOutputWindowFloatingVisible => IsOutputWindowVisible && IsOutputWindowFloating;
+
+	public GridLength OutputWindowHeight => !IsOutputWindowVisible || IsOutputWindowFloating ? new GridLength(0) : IsOutputWindowMinimized ? new GridLength(26) : new GridLength(150);
 
 	public bool IsToolboxVisible
 	{
@@ -890,6 +927,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 				RaisePropertyChanged(nameof(ToolboxSplitterWidth));
 				RaisePropertyChanged(nameof(IsToolboxExpanded));
 				RaisePropertyChanged(nameof(IsToolboxMinimizedTabVisible));
+				RaisePropertyChanged(nameof(IsToolboxFloatingVisible));
 			}
 		}
 	}
@@ -905,15 +943,34 @@ internal sealed class MainWindowViewModel : ObservableObject
 				RaisePropertyChanged(nameof(ToolboxSplitterWidth));
 				RaisePropertyChanged(nameof(IsToolboxExpanded));
 				RaisePropertyChanged(nameof(IsToolboxMinimizedTabVisible));
+				RaisePropertyChanged(nameof(IsToolboxFloatingVisible));
 			}
 		}
 	}
 
-	public bool IsToolboxExpanded => IsToolboxVisible && !IsToolboxMinimized;
+	public bool IsToolboxFloating
+	{
+		get => m_IsToolboxFloating;
+		private set
+		{
+			if (SetProperty(ref m_IsToolboxFloating, value))
+			{
+				RaisePropertyChanged(nameof(ToolboxColumnWidth));
+				RaisePropertyChanged(nameof(ToolboxSplitterWidth));
+				RaisePropertyChanged(nameof(IsToolboxExpanded));
+				RaisePropertyChanged(nameof(IsToolboxMinimizedTabVisible));
+				RaisePropertyChanged(nameof(IsToolboxFloatingVisible));
+			}
+		}
+	}
 
-	public bool IsToolboxMinimizedTabVisible => IsToolboxVisible && IsToolboxMinimized;
+	public bool IsToolboxExpanded => IsToolboxVisible && !IsToolboxMinimized && !IsToolboxFloating;
 
-	public GridLength ToolboxColumnWidth => !IsToolboxVisible ? new GridLength(0) : IsToolboxMinimized ? new GridLength(28) : new GridLength(220);
+	public bool IsToolboxMinimizedTabVisible => IsToolboxVisible && IsToolboxMinimized && !IsToolboxFloating;
+
+	public bool IsToolboxFloatingVisible => IsToolboxVisible && IsToolboxFloating;
+
+	public GridLength ToolboxColumnWidth => !IsToolboxVisible || IsToolboxFloating ? new GridLength(0) : IsToolboxMinimized ? new GridLength(28) : new GridLength(220);
 
 	public GridLength ToolboxSplitterWidth => IsToolboxExpanded ? new GridLength(4) : new GridLength(0);
 
@@ -1083,6 +1140,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		if (!IsOutputWindowVisible)
 		{
 			IsOutputWindowMinimized = false;
+			IsOutputWindowFloating = false;
 		}
 		StatusText = IsOutputWindowVisible ? "Output Window visible." : "Output Window hidden.";
 	}
@@ -1090,6 +1148,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void MinimizeOutputWindow()
 	{
 		IsOutputWindowVisible = true;
+		IsOutputWindowFloating = false;
 		IsOutputWindowMinimized = true;
 		StatusText = "Output Window minimized.";
 	}
@@ -1097,8 +1156,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void RestoreOutputWindow()
 	{
 		IsOutputWindowVisible = true;
+		IsOutputWindowFloating = false;
 		IsOutputWindowMinimized = false;
 		StatusText = "Output Window restored.";
+	}
+
+	private void FloatOutputWindow()
+	{
+		IsOutputWindowVisible = true;
+		IsOutputWindowMinimized = false;
+		IsOutputWindowFloating = true;
+		StatusText = "Output Window floating.";
+	}
+
+	private void DockOutputWindow()
+	{
+		IsOutputWindowVisible = true;
+		IsOutputWindowFloating = false;
+		IsOutputWindowMinimized = false;
+		StatusText = "Output Window docked.";
 	}
 
 	private void AppendOutputLog(string message)
@@ -1119,6 +1195,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		if (!IsToolboxVisible)
 		{
 			IsToolboxMinimized = false;
+			IsToolboxFloating = false;
 		}
 		StatusText = IsToolboxVisible ? "Toolbox visible." : "Toolbox hidden.";
 	}
@@ -1126,6 +1203,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void MinimizeToolbox()
 	{
 		IsToolboxVisible = true;
+		IsToolboxFloating = false;
 		IsToolboxMinimized = true;
 		StatusText = "Toolbox minimized.";
 	}
@@ -1133,8 +1211,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void RestoreToolbox()
 	{
 		IsToolboxVisible = true;
+		IsToolboxFloating = false;
 		IsToolboxMinimized = false;
 		StatusText = "Toolbox restored.";
+	}
+
+	private void FloatToolbox()
+	{
+		IsToolboxVisible = true;
+		IsToolboxMinimized = false;
+		IsToolboxFloating = true;
+		StatusText = "Toolbox floating.";
+	}
+
+	private void DockToolbox()
+	{
+		IsToolboxVisible = true;
+		IsToolboxFloating = false;
+		IsToolboxMinimized = false;
+		StatusText = "Toolbox docked.";
 	}
 
 	private void SetScopeColorMode(object parameter)
