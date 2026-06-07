@@ -525,7 +525,7 @@
                 </StackPanel>
               </Border>
 
-              <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,1,1">
+              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
                 <local:CoreTimelineStripControl
                     Rows="{Binding CoreRows}"
                     SummaryText="{Binding CoreSummaryText}" />
@@ -539,8 +539,8 @@
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsCoreGraphVisible}" />
 
-            <Grid Grid.Row="4" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
-              <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
+            <Grid Grid.Row="4" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
+              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Stats"
                            Foreground="#202020"
                            FontWeight="SemiBold"
@@ -549,7 +549,7 @@
                            TextWrapping="Wrap" />
               </Border>
 
-              <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
                 <StackPanel Spacing="4">
                   <TextBlock Text="Custom Stats" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
                   <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
@@ -559,7 +559,7 @@
                 </StackPanel>
               </Border>
 
-              <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,1,1">
+              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
                 <stats:ucProfilerStats x:Name="ProfilerStatsControl" MinHeight="260" />
               </Border>
             </Grid>
@@ -571,7 +571,7 @@
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="8" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsDataGridVisible}">
+            <Border Grid.Row="8" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,96,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -628,7 +628,7 @@
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="6" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsDataGridVisible}">
+            <Border Grid.Row="6" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -641,7 +641,7 @@
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
-                <Border Grid.Row="1" Background="#CFCFCF" BorderBrush="#808080" BorderThickness="1" Margin="0,7,0,7">
+                <Border Grid.Row="1" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,7,0,7">
                   <local:SelectedFrameThreadLaneControl Rows="{Binding SelectedFrameScopes}" />
                 </Border>
 
@@ -690,7 +690,7 @@
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsDataGridVisible}" />
 
-            <Border Grid.Row="10" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsDataGridVisible}">
+            <Border Grid.Row="10" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsDataGridVisible}">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -735,7 +735,7 @@
           </Grid>
         </Grid>
 
-        <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="12" IsVisible="{Binding IsCoresViewActive}">
+        <Border Grid.Row="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsCoresViewActive}">
           <Grid RowDefinitions="Auto,Auto,*">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Cores View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
@@ -764,7 +764,7 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="12" IsVisible="{Binding IsScopesViewActive}">
+        <Border Grid.Row="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsScopesViewActive}">
           <Grid RowDefinitions="Auto,Auto,*">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Scopes View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
@@ -806,7 +806,7 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="12" IsVisible="{Binding IsCustomStatsViewActive}">
+        <Border Grid.Row="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsCustomStatsViewActive}">
           <Grid RowDefinitions="Auto,Auto,*">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Custom Stats View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
@@ -841,7 +841,7 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="12" IsVisible="{Binding IsLogViewActive}">
+        <Border Grid.Row="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsLogViewActive}">
           <Grid RowDefinitions="Auto,*">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Log View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
