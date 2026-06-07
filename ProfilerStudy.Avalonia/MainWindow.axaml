@@ -32,7 +32,7 @@
           <MenuItem Header="_Recent Files" Command="{Binding OpenRecentSessionCommand}" />
           <MenuItem Header="Load _Sample" Command="{Binding LoadSampleCommand}" />
           <Separator />
-          <MenuItem Header="E_xit" IsEnabled="False" />
+          <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
         </MenuItem>
         <MenuItem Header="_View">
           <MenuItem Header="_Threads View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
@@ -58,33 +58,33 @@
           <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
         <MenuItem Header="_Connection">
-          <MenuItem Header="_New Connection..." IsEnabled="False" />
-          <MenuItem Header="_Connect..." IsEnabled="False" />
-          <MenuItem Header="_Disconnect" IsEnabled="False" />
+          <MenuItem Header="_New Connection..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="New Connection" />
+          <MenuItem Header="_Connect..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Connect" />
+          <MenuItem Header="_Disconnect" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Disconnect" />
         </MenuItem>
         <MenuItem Header="_Tools">
           <Separator />
           <MenuItem Header="_Find" Command="{Binding OpenFindScopeCommand}" />
           <Separator />
-          <MenuItem Header="_Create Session from Selection" IsEnabled="False" />
+          <MenuItem Header="_Create Session from Selection" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Create Session from Selection" />
           <Separator />
           <MenuItem Header="_Android">
-            <MenuItem Header="_Start Recording Context Switches..." IsEnabled="False" />
-            <MenuItem Header="_Load Context Switch File" IsEnabled="False" />
+            <MenuItem Header="_Start Recording Context Switches..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Android context switch recording" />
+            <MenuItem Header="_Load Context Switch File" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Android context switch loading" />
           </MenuItem>
           <Separator />
-          <MenuItem Header="_Settings" IsEnabled="False" />
+          <MenuItem Header="_Settings" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Settings" />
         </MenuItem>
         <MenuItem Header="_Help">
-          <MenuItem Header="_Registration..." IsEnabled="False" />
-          <MenuItem Header="_Check for Updates" IsEnabled="False" />
+          <MenuItem Header="_Registration..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Registration" />
+          <MenuItem Header="_Check for Updates" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Check for Updates" />
           <Separator />
           <MenuItem Header="_Demo">
-            <MenuItem Header="_Launch FramePro Game Simulator" IsEnabled="False" />
-            <MenuItem Header="_Playback Recording File..." IsEnabled="False" />
+            <MenuItem Header="_Launch FramePro Game Simulator" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="FramePro Game Simulator" />
+            <MenuItem Header="_Playback Recording File..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Playback Recording File" />
           </MenuItem>
           <Separator />
-          <MenuItem Header="_About" IsEnabled="False" />
+          <MenuItem Header="_About" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="About" />
         </MenuItem>
       </Menu>
     </Border>
@@ -92,7 +92,7 @@
     <Border Grid.Row="1" Background="#D1D1D1" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" MinHeight="120">
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
         <StackPanel Orientation="Horizontal" Spacing="0" Margin="0">
-          <Button Width="119" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Connect">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9FB6D5" BorderBrush="#4F6584" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="TCP" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#243244" />
@@ -100,7 +100,7 @@
               <TextBlock Text="Connect" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="31" MinHeight="118" Padding="2" IsEnabled="False">
+          <Button Width="31" MinHeight="118" Padding="2" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Connection Settings">
             <StackPanel Spacing="4">
               <Border Width="19" Height="36" Background="#B8B8B8" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
@@ -108,7 +108,7 @@
             </StackPanel>
           </Button>
           <Border Width="10" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
-          <Button Width="119" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Android">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
@@ -117,7 +117,7 @@
             </StackPanel>
           </Button>
           <Border Width="10" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
-          <Button Width="119" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Disconnect">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#C16B62" BorderBrush="#73342E" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#3A1111" />
@@ -200,7 +200,7 @@
             </StackPanel>
           </ToggleButton>
           <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
-          <Button Width="74" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&lt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#3A2818" />
@@ -216,7 +216,7 @@
               <TextBlock Text="Max" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="74" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&gt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#3A2818" />
@@ -257,7 +257,7 @@
               </Border>
             </Grid>
           </Border>
-          <Button Width="119" MinHeight="118" Padding="4" IsEnabled="False">
+          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Callstacks">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />

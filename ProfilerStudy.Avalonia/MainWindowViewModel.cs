@@ -54,6 +54,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenFindScopeCommand;
 	private readonly RelayCommand m_SetScopeColorModeCommand;
 	private readonly RelayCommand m_ToggleScopeColorModeCommand;
+	private readonly RelayCommand m_ExitCommand;
+	private readonly RelayCommand m_ShowFeatureStatusCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -74,7 +76,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<LogMessageRow> m_LogRows = Array.Empty<LogMessageRow>();
 	private IReadOnlyList<CoreSummaryRow> m_CoreRows = Array.Empty<CoreSummaryRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
-	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
+	private string m_FooterText = "No session";
 	private string m_TimelineRangeText = string.Empty;
 	private string m_ScopeFilterText = string.Empty;
 	private string m_ThreadFilterText = string.Empty;
@@ -155,6 +157,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenFindScopeCommand = new RelayCommand(_ => OpenFindScope());
 		m_SetScopeColorModeCommand = new RelayCommand(SetScopeColorMode);
 		m_ToggleScopeColorModeCommand = new RelayCommand(_ => ToggleScopeColorMode());
+		m_ExitCommand = new RelayCommand(_ => ExitApplication());
+		m_ShowFeatureStatusCommand = new RelayCommand(ShowFeatureStatus);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -253,6 +257,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand ToggleScopeColorModeCommand => m_ToggleScopeColorModeCommand;
 
+	public RelayCommand ExitCommand => m_ExitCommand;
+
+	public RelayCommand ShowFeatureStatusCommand => m_ShowFeatureStatusCommand;
+
 	public SessionSummaryViewModel Summary { get; }
 
 	public SessionDocument CurrentDocument
@@ -276,6 +284,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 				m_ZoomTimelineOutCommand.RaiseCanExecuteChanged();
 				m_FindPreviousScopeCommand.RaiseCanExecuteChanged();
 				m_FindNextScopeCommand.RaiseCanExecuteChanged();
+				FooterText = value == null
+					? "No session"
+					: $"{value.Summary.FrameCount} frames";
 			}
 		}
 	}
@@ -762,6 +773,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void ToggleScopeColorMode()
 	{
 		SetScopeColorMode(IsScopeColorModeThread ? "Scope" : "Thread");
+	}
+
+	private void ExitApplication()
+	{
+		if (global::Avalonia.Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+		{
+			desktop.Shutdown();
+		}
+	}
+
+	private void ShowFeatureStatus(object parameter)
+	{
+		string featureName = parameter as string;
+		if (string.IsNullOrWhiteSpace(featureName))
+		{
+			featureName = "Feature";
+		}
+
+		StatusText = featureName + " is visible in the Avalonia shell but is not implemented yet.";
 	}
 
 	public void SelectFrameFromProfilerStats(int frameIndex)
