@@ -134,7 +134,7 @@
               <TextBlock Text="Start" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}">
+          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="||" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />
@@ -142,7 +142,7 @@
               <TextBlock Text="Track" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}">
+          <Button Width="74" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&gt;|" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />

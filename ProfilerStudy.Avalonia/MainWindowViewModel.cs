@@ -21,6 +21,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
+	private readonly RelayCommand m_TrackSelectedFrameCommand;
+	private readonly RelayCommand m_SelectLastFrameCommand;
 	private readonly RelayCommand m_SelectSlowestFrameCommand;
 	private readonly RelayCommand m_SelectPreviousSpikeCommand;
 	private readonly RelayCommand m_SelectNextSpikeCommand;
@@ -114,6 +116,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
+		m_TrackSelectedFrameCommand = new RelayCommand(_ => TrackSelectedFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
+		m_SelectLastFrameCommand = new RelayCommand(_ => SelectLastFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_SelectSlowestFrameCommand = new RelayCommand(_ => SelectSlowestFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_SelectPreviousSpikeCommand = new RelayCommand(_ => SelectAdjacentSpike(-1), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_SelectNextSpikeCommand = new RelayCommand(_ => SelectAdjacentSpike(1), _ => CurrentDocument?.FrameSamples?.Length > 0);
@@ -171,6 +175,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
 
 	public RelayCommand ResetTimelineCommand => m_ResetTimelineCommand;
+
+	public RelayCommand TrackSelectedFrameCommand => m_TrackSelectedFrameCommand;
+
+	public RelayCommand SelectLastFrameCommand => m_SelectLastFrameCommand;
 
 	public RelayCommand SelectSlowestFrameCommand => m_SelectSlowestFrameCommand;
 
@@ -234,6 +242,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
 				m_ResetTimelineCommand.RaiseCanExecuteChanged();
+				m_TrackSelectedFrameCommand.RaiseCanExecuteChanged();
+				m_SelectLastFrameCommand.RaiseCanExecuteChanged();
 				m_SelectSlowestFrameCommand.RaiseCanExecuteChanged();
 				m_SelectPreviousSpikeCommand.RaiseCanExecuteChanged();
 				m_SelectNextSpikeCommand.RaiseCanExecuteChanged();
@@ -1030,6 +1040,40 @@ internal sealed class MainWindowViewModel : ObservableObject
 		FrameSample slowestFrame = CurrentDocument.FrameSamples.OrderByDescending(item => item.DurationMs).First();
 		SelectAndCenterFrame(slowestFrame);
 		StatusText = $"Selected slowest frame {slowestFrame.Index} ({slowestFrame.DurationMs:0.###} ms).";
+	}
+
+	private void TrackSelectedFrame()
+	{
+		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
+		{
+			StatusText = "No frame samples loaded.";
+			return;
+		}
+
+		int frameIndex = Selection.SelectedFrameIndex >= 0
+			? Selection.SelectedFrameIndex
+			: Math.Min(CurrentDocument.Summary.FrameCount - 1, Math.Max(0, Viewport.StartFrame));
+		FrameSample frame = CurrentDocument.FrameSamples.FirstOrDefault(item => item.Index == frameIndex);
+		if (frame.Index != frameIndex)
+		{
+			frame = CurrentDocument.FrameSamples.OrderBy(item => Math.Abs(item.Index - frameIndex)).First();
+		}
+
+		SelectAndCenterFrame(frame);
+		StatusText = $"Tracking frame {frame.Index} ({frame.DurationMs:0.###} ms).";
+	}
+
+	private void SelectLastFrame()
+	{
+		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
+		{
+			StatusText = "No frame samples loaded.";
+			return;
+		}
+
+		FrameSample frame = CurrentDocument.FrameSamples.OrderByDescending(item => item.Index).First();
+		SelectAndCenterFrame(frame);
+		StatusText = $"Selected last frame {frame.Index} ({frame.DurationMs:0.###} ms).";
 	}
 
 	private bool CanFindScope()
