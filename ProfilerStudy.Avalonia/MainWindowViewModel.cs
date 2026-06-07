@@ -57,6 +57,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ToggleThreadsPanelCommand;
 	private readonly RelayCommand m_ToggleOutputWindowCommand;
 	private readonly RelayCommand m_ToggleToolboxCommand;
+	private readonly RelayCommand m_MinimizeOutputWindowCommand;
+	private readonly RelayCommand m_RestoreOutputWindowCommand;
+	private readonly RelayCommand m_MinimizeToolboxCommand;
+	private readonly RelayCommand m_RestoreToolboxCommand;
 	private readonly RelayCommand m_FindPreviousScopeCommand;
 	private readonly RelayCommand m_FindNextScopeCommand;
 	private readonly RelayCommand m_ClearScopeFindCommand;
@@ -135,7 +139,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsCustomStatsVisible = true;
 	private bool m_IsThreadsDataGridVisible = true;
 	private bool m_IsOutputWindowVisible = true;
-    private bool m_IsToolboxVisible = true;
+	private bool m_IsOutputWindowMinimized;
+	private bool m_IsToolboxVisible = true;
+	private bool m_IsToolboxMinimized;
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
@@ -220,6 +226,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ToggleThreadsPanelCommand = new RelayCommand(ToggleThreadsPanel);
 		m_ToggleOutputWindowCommand = new RelayCommand(_ => ToggleOutputWindow());
 		m_ToggleToolboxCommand = new RelayCommand(_ => ToggleToolbox());
+		m_MinimizeOutputWindowCommand = new RelayCommand(_ => MinimizeOutputWindow());
+		m_RestoreOutputWindowCommand = new RelayCommand(_ => RestoreOutputWindow());
+		m_MinimizeToolboxCommand = new RelayCommand(_ => MinimizeToolbox());
+		m_RestoreToolboxCommand = new RelayCommand(_ => RestoreToolbox());
 		m_FindPreviousScopeCommand = new RelayCommand(_ => FindScope(-1), _ => CanFindScope());
 		m_FindNextScopeCommand = new RelayCommand(_ => FindScope(1), _ => CanFindScope());
 		m_ClearScopeFindCommand = new RelayCommand(_ => ScopeFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ScopeFilterText));
@@ -339,6 +349,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ToggleOutputWindowCommand => m_ToggleOutputWindowCommand;
 
 	public RelayCommand ToggleToolboxCommand => m_ToggleToolboxCommand;
+
+	public RelayCommand MinimizeOutputWindowCommand => m_MinimizeOutputWindowCommand;
+
+	public RelayCommand RestoreOutputWindowCommand => m_RestoreOutputWindowCommand;
+
+	public RelayCommand MinimizeToolboxCommand => m_MinimizeToolboxCommand;
+
+	public RelayCommand RestoreToolboxCommand => m_RestoreToolboxCommand;
 
 	public RelayCommand FindPreviousScopeCommand => m_FindPreviousScopeCommand;
 
@@ -835,11 +853,31 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_IsOutputWindowVisible, value))
 			{
 				RaisePropertyChanged(nameof(OutputWindowHeight));
+				RaisePropertyChanged(nameof(IsOutputWindowExpanded));
+				RaisePropertyChanged(nameof(IsOutputWindowMinimizedBarVisible));
 			}
 		}
 	}
 
-	public GridLength OutputWindowHeight => IsOutputWindowVisible ? new GridLength(150) : new GridLength(0);
+	public bool IsOutputWindowMinimized
+	{
+		get => m_IsOutputWindowMinimized;
+		private set
+		{
+			if (SetProperty(ref m_IsOutputWindowMinimized, value))
+			{
+				RaisePropertyChanged(nameof(OutputWindowHeight));
+				RaisePropertyChanged(nameof(IsOutputWindowExpanded));
+				RaisePropertyChanged(nameof(IsOutputWindowMinimizedBarVisible));
+			}
+		}
+	}
+
+	public bool IsOutputWindowExpanded => IsOutputWindowVisible && !IsOutputWindowMinimized;
+
+	public bool IsOutputWindowMinimizedBarVisible => IsOutputWindowVisible && IsOutputWindowMinimized;
+
+	public GridLength OutputWindowHeight => !IsOutputWindowVisible ? new GridLength(0) : IsOutputWindowMinimized ? new GridLength(26) : new GridLength(150);
 
 	public bool IsToolboxVisible
 	{
@@ -850,13 +888,34 @@ internal sealed class MainWindowViewModel : ObservableObject
 			{
 				RaisePropertyChanged(nameof(ToolboxColumnWidth));
 				RaisePropertyChanged(nameof(ToolboxSplitterWidth));
+				RaisePropertyChanged(nameof(IsToolboxExpanded));
+				RaisePropertyChanged(nameof(IsToolboxMinimizedTabVisible));
 			}
 		}
 	}
 
-	public GridLength ToolboxColumnWidth => IsToolboxVisible ? new GridLength(220) : new GridLength(0);
+	public bool IsToolboxMinimized
+	{
+		get => m_IsToolboxMinimized;
+		private set
+		{
+			if (SetProperty(ref m_IsToolboxMinimized, value))
+			{
+				RaisePropertyChanged(nameof(ToolboxColumnWidth));
+				RaisePropertyChanged(nameof(ToolboxSplitterWidth));
+				RaisePropertyChanged(nameof(IsToolboxExpanded));
+				RaisePropertyChanged(nameof(IsToolboxMinimizedTabVisible));
+			}
+		}
+	}
 
-	public GridLength ToolboxSplitterWidth => IsToolboxVisible ? new GridLength(4) : new GridLength(0);
+	public bool IsToolboxExpanded => IsToolboxVisible && !IsToolboxMinimized;
+
+	public bool IsToolboxMinimizedTabVisible => IsToolboxVisible && IsToolboxMinimized;
+
+	public GridLength ToolboxColumnWidth => !IsToolboxVisible ? new GridLength(0) : IsToolboxMinimized ? new GridLength(28) : new GridLength(220);
+
+	public GridLength ToolboxSplitterWidth => IsToolboxExpanded ? new GridLength(4) : new GridLength(0);
 
 	public bool IsSettingsPanelVisible
 	{
@@ -1021,7 +1080,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void ToggleOutputWindow()
 	{
 		IsOutputWindowVisible = !IsOutputWindowVisible;
+		if (!IsOutputWindowVisible)
+		{
+			IsOutputWindowMinimized = false;
+		}
 		StatusText = IsOutputWindowVisible ? "Output Window visible." : "Output Window hidden.";
+	}
+
+	private void MinimizeOutputWindow()
+	{
+		IsOutputWindowVisible = true;
+		IsOutputWindowMinimized = true;
+		StatusText = "Output Window minimized.";
+	}
+
+	private void RestoreOutputWindow()
+	{
+		IsOutputWindowVisible = true;
+		IsOutputWindowMinimized = false;
+		StatusText = "Output Window restored.";
 	}
 
 	private void AppendOutputLog(string message)
@@ -1039,7 +1116,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void ToggleToolbox()
 	{
 		IsToolboxVisible = !IsToolboxVisible;
+		if (!IsToolboxVisible)
+		{
+			IsToolboxMinimized = false;
+		}
 		StatusText = IsToolboxVisible ? "Toolbox visible." : "Toolbox hidden.";
+	}
+
+	private void MinimizeToolbox()
+	{
+		IsToolboxVisible = true;
+		IsToolboxMinimized = true;
+		StatusText = "Toolbox minimized.";
+	}
+
+	private void RestoreToolbox()
+	{
+		IsToolboxVisible = true;
+		IsToolboxMinimized = false;
+		StatusText = "Toolbox restored.";
 	}
 
 	private void SetScopeColorMode(object parameter)
