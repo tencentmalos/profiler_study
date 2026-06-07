@@ -1414,6 +1414,69 @@
       </Grid>
     </Border>
 
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="520"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D2D2D2"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            Padding="0"
+            IsVisible="{Binding IsAboutPanelVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+          <DockPanel LastChildFill="True">
+            <TextBlock Text="About" FontWeight="SemiBold" Foreground="#101010" />
+            <Button DockPanel.Dock="Right"
+                    Content="x"
+                    Width="24"
+                    Height="22"
+                    Padding="0"
+                    Command="{Binding CloseAboutCommand}" />
+          </DockPanel>
+        </Border>
+        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+          <Grid ColumnDefinitions="72,*" ColumnSpacing="14">
+            <Border Width="64" Height="64" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1">
+              <TextBlock Text="FP"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         FontSize="24"
+                         FontWeight="Bold"
+                         Foreground="#203246" />
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="{Binding AboutProductText}" FontSize="20" FontWeight="SemiBold" Foreground="#101010" />
+              <TextBlock Text="FramePro profiler viewer" Foreground="#303030" />
+              <TextBlock Text="{Binding AboutCopyrightText}" Foreground="#303030" />
+            </StackPanel>
+          </Grid>
+
+          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
+            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+              <TextBlock Text="Version" Foreground="#404040" />
+              <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="#101010" />
+              <TextBlock Grid.Row="1" Text="Website" Foreground="#404040" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AboutWebsiteText}" Foreground="#101010" />
+              <TextBlock Grid.Row="2" Text="E-mail" Foreground="#404040" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AboutEmailText}" Foreground="#101010" />
+            </Grid>
+          </Border>
+
+          <TextBlock Grid.Row="2"
+                     Text="This Avalonia shell reuses the legacy FramePro session core and preserves the original profiler entry points while bringing the UI to macOS."
+                     Foreground="#404040"
+                     TextWrapping="Wrap" />
+
+          <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Close" Width="86" Command="{Binding CloseAboutCommand}" />
+          </StackPanel>
+        </Grid>
+      </Grid>
+    </Border>
+
     <Border Grid.Row="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowVisible}">
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="7,3">

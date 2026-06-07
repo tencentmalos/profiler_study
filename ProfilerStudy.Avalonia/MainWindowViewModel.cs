@@ -72,6 +72,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenCallstacksCommand;
 	private readonly RelayCommand m_CloseCallstacksCommand;
 	private readonly RelayCommand m_CallstacksActionCommand;
+	private readonly RelayCommand m_CloseAboutCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -138,6 +139,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_ConnectionPanelStatusText = "Not connected.";
 	private bool m_IsCallstacksPanelVisible;
 	private string m_CallstacksPanelStatusText = "No callstack capture loaded.";
+	private bool m_IsAboutPanelVisible;
 	private string m_ScopeColorMode = "Thread";
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
@@ -224,6 +226,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenCallstacksCommand = new RelayCommand(_ => OpenCallstacksPanel());
 		m_CloseCallstacksCommand = new RelayCommand(_ => CloseCallstacksPanel());
 		m_CallstacksActionCommand = new RelayCommand(ShowCallstacksActionStatus);
+		m_CloseAboutCommand = new RelayCommand(_ => CloseAboutPanel());
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -351,6 +354,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand CloseCallstacksCommand => m_CloseCallstacksCommand;
 
 	public RelayCommand CallstacksActionCommand => m_CallstacksActionCommand;
+
+	public RelayCommand CloseAboutCommand => m_CloseAboutCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -858,6 +863,22 @@ internal sealed class MainWindowViewModel : ObservableObject
 		set => SetProperty(ref m_ConnectionHost, value ?? string.Empty);
 	}
 
+	public bool IsAboutPanelVisible
+	{
+		get => m_IsAboutPanelVisible;
+		private set => SetProperty(ref m_IsAboutPanelVisible, value);
+	}
+
+	public string AboutVersionText => FrameProCore.Version;
+
+	public string AboutProductText => "ProfilerStudy";
+
+	public string AboutCopyrightText => "Copyright (C) PureDev Software Ltd";
+
+	public string AboutWebsiteText => "www.puredevsoftware.com";
+
+	public string AboutEmailText => "slynch@puredevsoftware.com";
+
 	public string ConnectionPort
 	{
 		get => m_ConnectionPort;
@@ -1017,6 +1038,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 			featureName = "Feature";
 		}
 
+		if (string.Equals(featureName, "About", StringComparison.Ordinal))
+		{
+			OpenAboutPanel();
+			return;
+		}
+
 		StatusText = featureName + " is visible in the Avalonia shell but is not implemented yet.";
 	}
 
@@ -1025,6 +1052,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
+		IsAboutPanelVisible = false;
 		IsSettingsPanelVisible = true;
 		StatusText = "Settings panel opened.";
 	}
@@ -1040,6 +1068,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsSettingsPanelVisible = false;
 		IsConnectionPanelVisible = false;
 		IsCallstacksPanelVisible = false;
+		IsAboutPanelVisible = false;
 		IsAndroidPanelVisible = true;
 		StatusText = "Android panel opened.";
 	}
@@ -1350,6 +1379,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsCallstacksPanelVisible = false;
+		IsAboutPanelVisible = false;
 		IsConnectionPanelVisible = true;
 		StatusText = "Connection panel opened.";
 	}
@@ -1565,6 +1595,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		IsSettingsPanelVisible = false;
 		IsAndroidPanelVisible = false;
 		IsConnectionPanelVisible = false;
+		IsAboutPanelVisible = false;
 		IsCallstacksPanelVisible = true;
 		StatusText = "Callstacks panel opened.";
 	}
@@ -1573,6 +1604,22 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		IsCallstacksPanelVisible = false;
 		StatusText = "Callstacks panel closed.";
+	}
+
+	private void OpenAboutPanel()
+	{
+		IsSettingsPanelVisible = false;
+		IsAndroidPanelVisible = false;
+		IsConnectionPanelVisible = false;
+		IsCallstacksPanelVisible = false;
+		IsAboutPanelVisible = true;
+		StatusText = "About panel opened.";
+	}
+
+	private void CloseAboutPanel()
+	{
+		IsAboutPanelVisible = false;
+		StatusText = "About panel closed.";
 	}
 
 	private void ShowCallstacksActionStatus(object parameter)
