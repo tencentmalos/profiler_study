@@ -24,6 +24,9 @@
       <Setter Property="Background" Value="#E3E3E3" />
       <Setter Property="BorderBrush" Value="#E3E3E3" />
     </Style>
+    <Style Selector="Button.toolbar-button StackPanel">
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
     <Style Selector="ToggleButton.toolbar-button">
       <Setter Property="Background" Value="#D1D1D1" />
       <Setter Property="BorderBrush" Value="#D1D1D1" />
@@ -41,6 +44,9 @@
     <Style Selector="ToggleButton.toolbar-button:checked">
       <Setter Property="Background" Value="#BFCBE0" />
       <Setter Property="BorderBrush" Value="#BFCBE0" />
+    </Style>
+    <Style Selector="ToggleButton.toolbar-button StackPanel">
+      <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
   </Window.Styles>
   <Grid Background="#C8C8C8">
@@ -142,7 +148,7 @@
               </Border>
             </StackPanel>
           </Button>
-          <Border Width="10" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
+          <Border Width="42" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1" HorizontalAlignment="Center">
@@ -151,7 +157,7 @@
               <TextBlock Text="Android" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="10" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
+          <Border Width="42" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#C16B62" BorderBrush="#73342E" BorderThickness="1" HorizontalAlignment="Center">
@@ -160,7 +166,7 @@
               <TextBlock Text="Disconnect" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="42" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
+          <Border Width="42" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
@@ -185,7 +191,7 @@
               <TextBlock Text="End" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
+          <Border Width="24" Background="#D1D1D1" />
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
@@ -234,7 +240,7 @@
               <TextBlock Text="Details" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
+          <Border Width="49" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="74" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
@@ -259,13 +265,13 @@
               <TextBlock Text="Next" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="629" MinHeight="118" Background="#CCCCCC" BorderBrush="#8A8A8A" BorderThickness="1,0" Padding="8,7">
-            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="5">
+          <Border Width="629" MinHeight="118" Background="#D1D1D1" Padding="8,9">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="6">
               <DockPanel>
-                <TextBlock Text="Find" FontWeight="SemiBold" Foreground="#101010" />
+                <TextBlock Text="Find" Foreground="#101010" />
                 <TextBlock Text="Find Scope" DockPanel.Dock="Right" Foreground="#505050" />
               </DockPanel>
-              <TextBox Grid.Row="1" Watermark="Scope text" Text="{Binding ScopeFilterText}" />
+              <TextBox Grid.Row="1" Watermark="Scope text" Text="{Binding ScopeFilterText}" Background="#E6E6E6" BorderBrush="#8A8A8A" BorderThickness="1" />
               <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6">
                 <Button Content="Prev" Width="68" Command="{Binding FindPreviousScopeCommand}" />
                 <Button Content="Next" Width="68" Command="{Binding FindNextScopeCommand}" />
@@ -273,7 +279,7 @@
               </StackPanel>
             </Grid>
           </Border>
-          <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
+          <Border Width="47" Background="#D1D1D1" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#BCA0C8" BorderBrush="#6B4878" BorderThickness="1" HorizontalAlignment="Center">
@@ -283,9 +289,9 @@
               <TextBlock Text="{Binding ScopeColorModeText}" TextAlignment="Center" FontSize="10" Foreground="#505050" />
             </StackPanel>
           </Button>
-          <Border Width="358" MinHeight="118" Background="#CCCCCC" BorderBrush="#8A8A8A" BorderThickness="1,0" Padding="8,7">
-            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="5">
-              <TextBlock Text="Conditional Scope Time" FontWeight="SemiBold" />
+          <Border Width="358" MinHeight="118" Background="#D1D1D1" Padding="8,9">
+            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+              <TextBlock Text="Conditional Scope Time" Foreground="#101010" />
               <DockPanel Grid.Row="1">
                 <TextBlock Text="{Binding ConditionalScopeTimeText}" Foreground="#404040" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
@@ -293,8 +299,8 @@
                   <Button Content="+" Width="26" Padding="0" Command="{Binding AdjustConditionalScopeTimeCommand}" CommandParameter="Up" />
                 </StackPanel>
               </DockPanel>
-              <Border Grid.Row="2" Height="18" Background="#B8B8B8" BorderBrush="#808080" BorderThickness="1">
-                <Border Width="{Binding ConditionalScopeTimeWidth}" Background="#909090" HorizontalAlignment="Left" />
+              <Border Grid.Row="2" Height="18" Background="#C2C2C2" BorderBrush="#8A8A8A" BorderThickness="1">
+                <Border Width="{Binding ConditionalScopeTimeWidth}" Background="#8F8F8F" HorizontalAlignment="Left" />
               </Border>
             </Grid>
           </Border>
