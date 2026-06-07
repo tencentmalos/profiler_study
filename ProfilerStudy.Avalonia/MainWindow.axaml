@@ -233,6 +233,12 @@
           <Separator />
           <MenuItem Header="_Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
           <Separator />
+          <MenuItem Header="_Callstacks">
+            <MenuItem Header="_Open Callstacks..." Command="{Binding OpenCallstacksCommand}" />
+            <MenuItem Header="_Toggle Live Callstack Recording" Command="{Binding CallstacksActionCommand}" CommandParameter="Capture" />
+            <MenuItem Header="_Reload Module Symbols" Command="{Binding CallstacksActionCommand}" CommandParameter="Resolve" />
+          </MenuItem>
+          <Separator />
           <MenuItem Header="_Android">
             <MenuItem Header="_Start Recording Context Switches..." Command="{Binding AndroidActionCommand}" CommandParameter="RecordContextSwitches" />
             <MenuItem Header="_Load Context Switch File" Command="{Binding AndroidActionCommand}" CommandParameter="LoadContextSwitchFile" />
