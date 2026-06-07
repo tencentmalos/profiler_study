@@ -59,6 +59,8 @@ public partial class ucTimelineScope : UserControl
         RootGrid.RowDefinitions = isCompact
             ? new RowDefinitions("*,0,0")
             : new RowDefinitions("200,60,*");
+        TimelineBorder.Margin = isCompact ? new Thickness(0) : new Thickness(0, 0, 0, 8);
+        TimelineTitleTextBlock.IsVisible = !isCompact;
         SharedXAxisBorder.IsVisible = !isCompact;
         DetailViewArea.IsVisible = !isCompact;
     }
