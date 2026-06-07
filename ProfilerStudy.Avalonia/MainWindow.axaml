@@ -295,6 +295,36 @@
           <Separator />
           <MenuItem Header="Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
+        <MenuItem Header="Theme">
+          <MenuItem Header="Base Skin">
+            <MenuItem Header="Light" ToggleType="Radio" IsChecked="{Binding IsLightThemeActive, Mode=OneWay}" Command="{Binding SetLightThemeCommand}">
+              <MenuItem.Icon>
+                <material:MaterialIcon Kind="Lightbulb" />
+              </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Dark" ToggleType="Radio" IsChecked="{Binding IsDarkThemeActive, Mode=OneWay}" Command="{Binding SetDarkThemeCommand}">
+              <MenuItem.Icon>
+                <material:MaterialIcon Kind="MoonWaningCrescent" />
+              </MenuItem.Icon>
+            </MenuItem>
+          </MenuItem>
+          <MenuItem Header="Color Theme" ItemsSource="{Binding ThemeColorOptions}">
+            <MenuItem.Icon>
+              <material:MaterialIcon Kind="Palette" />
+            </MenuItem.Icon>
+            <MenuItem.ItemTemplate>
+              <DataTemplate>
+                <MenuItem Header="{Binding Name}"
+                          Command="{Binding $parent[Window].DataContext.SetThemeColorCommand}"
+                          CommandParameter="{Binding}">
+                  <MenuItem.Icon>
+                    <Border Width="12" Height="12" CornerRadius="6" Background="{Binding PrimaryBrush}" />
+                  </MenuItem.Icon>
+                </MenuItem>
+              </DataTemplate>
+            </MenuItem.ItemTemplate>
+          </MenuItem>
+        </MenuItem>
         <MenuItem Header="Connection">
           <MenuItem Header="New Connection..." Command="{Binding OpenConnectionCommand}" />
           <MenuItem Header="Connect..." Command="{Binding OpenConnectionCommand}" />

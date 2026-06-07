@@ -110,6 +110,11 @@ internal sealed class ProfilerStatsController : ObservableObject
 		Timeline.ApplyTheme();
 	}
 
+	public void ApplyTheme()
+	{
+		Timeline.ApplyTheme();
+	}
+
 	public void SetAutoFollow(bool isChecked)
 	{
 		if (m_IsAutoFollow == isChecked)

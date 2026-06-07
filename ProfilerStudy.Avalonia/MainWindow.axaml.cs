@@ -29,6 +29,9 @@ public sealed partial class MainWindow : SukiWindow
 	private NativeMenuItem m_ScopeColorThreadMenuItem;
 	private NativeMenuItem m_ScopeColorScopeMenuItem;
 	private NativeMenuItem m_OutputWindowMenuItem;
+	private NativeMenuItem m_LightThemeMenuItem;
+	private NativeMenuItem m_DarkThemeMenuItem;
+	private readonly System.Collections.Generic.List<NativeMenuItem> m_ColorThemeMenuItems = new System.Collections.Generic.List<NativeMenuItem>();
 	private bool m_IsApplyingProfilerStatsViewport;
 
 	public MainWindow()
@@ -117,6 +120,10 @@ public sealed partial class MainWindow : SukiWindow
 		{
 			UpdateRecentFilesNativeMenu();
 		}
+		else if (e.PropertyName == nameof(MainWindowViewModel.ThemeRevision))
+		{
+			ApplyVisualTheme();
+		}
 
 		if (IsNativeMenuStateProperty(e.PropertyName))
 		{
@@ -161,6 +168,11 @@ public sealed partial class MainWindow : SukiWindow
 				m_ScopeColorScopeMenuItem = Item("Colour by _Scope", viewModel.SetScopeColorModeCommand, "Scope", toggleType: NativeMenuItemToggleType.Radio)),
 			Separator(),
 			m_OutputWindowMenuItem = Item("_Output Window", viewModel.ToggleOutputWindowCommand, toggleType: NativeMenuItemToggleType.CheckBox)));
+		menu.Add(SubMenu("Theme",
+			SubMenu("Base Skin",
+				m_LightThemeMenuItem = Item("Light", viewModel.SetLightThemeCommand, toggleType: NativeMenuItemToggleType.Radio),
+				m_DarkThemeMenuItem = Item("Dark", viewModel.SetDarkThemeCommand, toggleType: NativeMenuItemToggleType.Radio)),
+			CreateColorThemeMenu(viewModel)));
 		menu.Add(SubMenu("_Connection",
 			Item("_New Connection...", viewModel.OpenConnectionCommand),
 			Item("_Connect...", viewModel.OpenConnectionCommand),
@@ -232,6 +244,12 @@ public sealed partial class MainWindow : SukiWindow
 		SetChecked(m_ScopeColorThreadMenuItem, m_ViewModel.IsScopeColorModeThread);
 		SetChecked(m_ScopeColorScopeMenuItem, m_ViewModel.IsScopeColorModeScope);
 		SetChecked(m_OutputWindowMenuItem, m_ViewModel.IsOutputWindowVisible);
+		SetChecked(m_LightThemeMenuItem, m_ViewModel.IsLightThemeActive);
+		SetChecked(m_DarkThemeMenuItem, m_ViewModel.IsDarkThemeActive);
+		foreach (var item in m_ColorThemeMenuItems)
+		{
+			SetChecked(item, string.Equals(item.CommandParameter as string, m_ViewModel.ActiveColorThemeName, StringComparison.Ordinal));
+		}
 	}
 
 	private static bool IsNativeMenuStateProperty(string propertyName)
@@ -246,7 +264,25 @@ public sealed partial class MainWindow : SukiWindow
 			propertyName == nameof(MainWindowViewModel.IsThreadsCustomStatsVisible) ||
 			propertyName == nameof(MainWindowViewModel.IsScopeColorModeThread) ||
 			propertyName == nameof(MainWindowViewModel.IsScopeColorModeScope) ||
-			propertyName == nameof(MainWindowViewModel.IsOutputWindowVisible);
+			propertyName == nameof(MainWindowViewModel.IsOutputWindowVisible) ||
+			propertyName == nameof(MainWindowViewModel.IsLightThemeActive) ||
+			propertyName == nameof(MainWindowViewModel.IsDarkThemeActive) ||
+			propertyName == nameof(MainWindowViewModel.ActiveColorThemeName) ||
+			propertyName == nameof(MainWindowViewModel.ThemeRevision);
+	}
+
+	private NativeMenuItem CreateColorThemeMenu(MainWindowViewModel viewModel)
+	{
+		m_ColorThemeMenuItems.Clear();
+		var colorMenu = SubMenu("Color Theme");
+		foreach (var theme in viewModel.ThemeColorOptions)
+		{
+			var item = Item(theme.Name, viewModel.SetThemeColorCommand, theme.Name, toggleType: NativeMenuItemToggleType.Radio);
+			m_ColorThemeMenuItems.Add(item);
+			colorMenu.Menu.Add(item);
+		}
+
+		return colorMenu;
 	}
 
 	private static NativeMenuItem SubMenu(string header, params NativeMenuItemBase[] children)
@@ -419,5 +455,14 @@ public sealed partial class MainWindow : SukiWindow
 		ThreadsProfilerStatsControl?.ApplySelection(selection);
 		CoresProfilerStatsControl?.ApplySelection(selection);
 		ScopesProfilerStatsControl?.ApplySelection(selection);
+	}
+
+	private void ApplyVisualTheme()
+	{
+		ProfilerStatsControl?.ApplyTheme();
+		ThreadsProfilerStatsControl?.ApplyTheme();
+		CoresProfilerStatsControl?.ApplyTheme();
+		ScopesProfilerStatsControl?.ApplyTheme();
+		InvalidateVisual();
 	}
 }

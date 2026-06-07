@@ -9,4 +9,8 @@ internal sealed class AppSettings
 	public string CapturedSourceRoot { get; set; } = string.Empty;
 
 	public string LocalSourceRoot { get; set; } = string.Empty;
+
+	public string BaseTheme { get; set; } = "Light";
+
+	public string ColorTheme { get; set; } = "Blue";
 }

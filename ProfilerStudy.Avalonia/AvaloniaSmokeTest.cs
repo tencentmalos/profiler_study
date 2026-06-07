@@ -49,6 +49,7 @@ internal static class AvaloniaSmokeTest
 			Assert(plotModel.Metadata.PlotList.Any(item => item.IsMainPlot), "profiler timeline main plot");
 			AssertProfilerScopeFlameConfig(adapter, document);
 			AssertSourcePathMapping();
+			AssertThemeSettings();
 			AssertTableSorting();
 			AssertFlameChartControl();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
@@ -109,6 +110,26 @@ internal static class AvaloniaSmokeTest
 				Directory.Delete(tempRoot, true);
 			}
 		}
+	}
+
+	private static void AssertThemeSettings()
+	{
+		var settings = new AppSettings();
+		var themeHost = new AppThemeService.TestThemeHost();
+		var themeService = new AppThemeService(settings, themeHost, _ => { });
+		Assert(themeService.IsLightThemeActive, "default light theme");
+		Assert(!themeService.IsDarkThemeActive, "default dark theme");
+		Assert(themeService.ActiveColorThemeName == "Blue", "default color theme");
+
+		themeService.ChangeBaseTheme("Dark");
+		Assert(settings.BaseTheme == "Dark", "saved dark theme");
+		Assert(themeHost.RequestedBaseTheme == "Dark", "applied dark theme");
+		Assert(themeService.IsDarkThemeActive, "dark theme active");
+
+		themeService.ChangeColorTheme("Green");
+		Assert(settings.ColorTheme == "Green", "saved color theme");
+		Assert(themeHost.RequestedColorTheme == "Green", "applied color theme");
+		Assert(themeService.ActiveColorThemeName == "Green", "active color theme");
 	}
 
 	private static void AssertProfilerScopeFlameConfig(ProfilerTimelineAdapter adapter, SessionDocument document)

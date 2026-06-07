@@ -100,9 +100,13 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_CloseUpdateCheckCommand;
 	private readonly RelayCommand m_OpenAboutCommand;
 	private readonly RelayCommand m_CloseAboutCommand;
+	private readonly RelayCommand m_SetLightThemeCommand;
+	private readonly RelayCommand m_SetDarkThemeCommand;
+	private readonly RelayCommand m_SetThemeColorCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
+	private readonly AppThemeService m_AppThemeService;
 	private CancellationTokenSource m_LoadCancellation;
 	private Session m_LiveConnectionSession;
 	private DispatcherTimer m_LiveConnectionRefreshTimer;
@@ -184,6 +188,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsRegistrationPanelVisible;
 	private bool m_IsUpdateCheckPanelVisible;
 	private bool m_IsAboutPanelVisible;
+	private int m_ThemeRevision;
 	private string m_ScopeColorMode = "Thread";
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
@@ -218,6 +223,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_SourceViewerLauncher = sourceViewerLauncher ?? new SourceViewerLauncher();
 		m_AppSettingsService = appSettingsService ?? new AppSettingsService();
 		m_AppSettings = m_AppSettingsService.Load() ?? new AppSettings();
+		m_AppThemeService = AppThemeService.Create(m_AppSettings, SaveAppSettings);
+		m_AppThemeService.Changed += OnThemeServiceChanged;
 		Summary = new SessionSummaryViewModel();
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
@@ -297,6 +304,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_CloseUpdateCheckCommand = new RelayCommand(_ => CloseUpdateCheckPanel());
 		m_OpenAboutCommand = new RelayCommand(_ => OpenAboutPanel());
 		m_CloseAboutCommand = new RelayCommand(_ => CloseAboutPanel());
+		m_SetLightThemeCommand = new RelayCommand(_ => SetBaseTheme("Light"));
+		m_SetDarkThemeCommand = new RelayCommand(_ => SetBaseTheme("Dark"));
+		m_SetThemeColorCommand = new RelayCommand(SetThemeColor);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -478,6 +488,26 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand OpenAboutCommand => m_OpenAboutCommand;
 
 	public RelayCommand CloseAboutCommand => m_CloseAboutCommand;
+
+	public RelayCommand SetLightThemeCommand => m_SetLightThemeCommand;
+
+	public RelayCommand SetDarkThemeCommand => m_SetDarkThemeCommand;
+
+	public RelayCommand SetThemeColorCommand => m_SetThemeColorCommand;
+
+	public IReadOnlyList<AppThemeColorOption> ThemeColorOptions => m_AppThemeService.ColorThemes;
+
+	public bool IsLightThemeActive => m_AppThemeService.IsLightThemeActive;
+
+	public bool IsDarkThemeActive => m_AppThemeService.IsDarkThemeActive;
+
+	public string ActiveColorThemeName => m_AppThemeService.ActiveColorThemeName;
+
+	public int ThemeRevision
+	{
+		get => m_ThemeRevision;
+		private set => SetProperty(ref m_ThemeRevision, value);
+	}
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -1684,6 +1714,32 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		IsSettingsPanelVisible = false;
 		StatusText = "Settings saved.";
+	}
+
+	private void SetBaseTheme(string themeName)
+	{
+		m_AppThemeService.ChangeBaseTheme(themeName);
+		StatusText = "Theme changed to " + m_AppThemeService.ActiveBaseThemeName + ".";
+	}
+
+	private void SetThemeColor(object parameter)
+	{
+		string themeName = parameter is AppThemeColorOption option ? option.Name : parameter as string;
+		if (string.IsNullOrWhiteSpace(themeName))
+		{
+			return;
+		}
+
+		m_AppThemeService.ChangeColorTheme(themeName);
+		StatusText = "Theme color changed to " + m_AppThemeService.ActiveColorThemeName + ".";
+	}
+
+	private void OnThemeServiceChanged(object sender, EventArgs e)
+	{
+		RaisePropertyChanged(nameof(IsLightThemeActive));
+		RaisePropertyChanged(nameof(IsDarkThemeActive));
+		RaisePropertyChanged(nameof(ActiveColorThemeName));
+		ThemeRevision++;
 	}
 
 	private void OpenAndroidPanel()
@@ -2905,14 +2961,19 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void SaveRecentFiles()
 	{
 		m_AppSettings.RecentFiles = RecentFiles.ToList();
-		m_AppSettingsService.Save(m_AppSettings);
+		SaveAppSettings(m_AppSettings);
 	}
 
 	private void SaveSourcePathSettings()
 	{
 		m_AppSettings.CapturedSourceRoot = CapturedSourceRoot ?? string.Empty;
 		m_AppSettings.LocalSourceRoot = LocalSourceRoot ?? string.Empty;
-		m_AppSettingsService.Save(m_AppSettings);
+		SaveAppSettings(m_AppSettings);
+	}
+
+	private void SaveAppSettings(AppSettings settings)
+	{
+		m_AppSettingsService.Save(settings);
 	}
 
 	private void ApplyDocument(SessionDocument document)

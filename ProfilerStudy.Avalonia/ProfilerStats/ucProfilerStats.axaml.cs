@@ -62,6 +62,11 @@ public partial class ucProfilerStats : UserControl
 		m_Controller.ApplySelection(selection);
 	}
 
+	internal void ApplyTheme()
+	{
+		m_Controller.ApplyTheme();
+	}
+
 	internal void NotifyViewportChangedByUser(int startFrame, int endFrame)
 	{
 		ViewportChangedByUser?.Invoke(startFrame, endFrame);
