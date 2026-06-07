@@ -281,7 +281,10 @@ public sealed class FrameTimelineControl : UserControl
 		}
 		else
 		{
-			double anchorRatio = m_Plot.Bounds.Width <= 0.0 ? 0.5 : e.GetPosition(m_Plot).X / m_Plot.Bounds.Width;
+			double anchorFrame = PointToFrameCoordinate(e.GetPosition(m_Plot));
+			double anchorRatio = Viewport.VisibleFrameCount <= 1
+				? 0.5
+				: (anchorFrame - Viewport.StartFrame) / Math.Max(1, Viewport.VisibleFrameCount - 1);
 			Viewport.Zoom(e.Delta.Y > 0 ? 1.25 : 0.8, anchorRatio);
 		}
 		e.Handled = true;
@@ -344,9 +347,18 @@ public sealed class FrameTimelineControl : UserControl
 			return 0;
 		}
 
-		double plotWidth = Math.Max(1.0, m_Plot.Bounds.Width);
-		double ratio = Math.Clamp(position.X / plotWidth, 0.0, 1.0);
-		return Viewport.StartFrame + (int)Math.Round(ratio * Math.Max(0, Viewport.VisibleFrameCount - 1));
+		return (int)Math.Round(PointToFrameCoordinate(position));
+	}
+
+	private double PointToFrameCoordinate(Point position)
+	{
+		if (Viewport == null)
+		{
+			return 0.0;
+		}
+
+		Coordinates coordinates = m_Plot.Plot.GetCoordinates((float)position.X, (float)position.Y);
+		return Math.Clamp(coordinates.X, Viewport.StartFrame, Viewport.EndFrame);
 	}
 
 	private static bool TryGetSample(IReadOnlyList<FrameSample> samples, int frameIndex, out FrameSample sample)
