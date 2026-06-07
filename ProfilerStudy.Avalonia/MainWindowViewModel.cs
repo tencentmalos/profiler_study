@@ -9,6 +9,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using FramePro;
+using SCLCoreCLR;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -73,6 +74,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
 	private CancellationTokenSource m_LoadCancellation;
+	private Session m_LiveConnectionSession;
 	private SessionDocument m_CurrentDocument;
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
 	private IReadOnlyList<string> m_RecentFiles = Array.Empty<string>();
@@ -123,6 +125,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
 	private bool m_IsConnectionPanelVisible;
+	private bool m_IsConnecting;
 	private string m_ConnectionHost = "localhost";
 	private string m_ConnectionPort = "8428";
 	private string m_ConnectionPanelStatusText = "Not connected.";
@@ -197,7 +200,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_AndroidActionCommand = new RelayCommand(ShowAndroidActionStatus);
 		m_OpenConnectionCommand = new RelayCommand(_ => OpenConnectionPanel());
 		m_CloseConnectionCommand = new RelayCommand(_ => CloseConnectionPanel());
-		m_ConnectionActionCommand = new RelayCommand(ShowConnectionActionStatus);
+		m_ConnectionActionCommand = new RelayCommand(parameter => _ = HandleConnectionActionAsync(parameter));
 		m_OpenCallstacksCommand = new RelayCommand(_ => OpenCallstacksPanel());
 		m_CloseCallstacksCommand = new RelayCommand(_ => CloseCallstacksPanel());
 		m_CallstacksActionCommand = new RelayCommand(ShowCallstacksActionStatus);
@@ -1049,23 +1052,103 @@ internal sealed class MainWindowViewModel : ObservableObject
 		StatusText = "Connection panel closed.";
 	}
 
-	private void ShowConnectionActionStatus(object parameter)
+	private async Task HandleConnectionActionAsync(object parameter)
 	{
 		string actionName = parameter as string;
 		if (string.Equals(actionName, "Connect", StringComparison.Ordinal))
 		{
-			ConnectionPanelStatusText = $"Connection to {ConnectionHost}:{ConnectionPort} is visible in the Avalonia shell; live FramePro transport is not implemented yet.";
+			await ConnectToFrameProAsync();
 		}
 		else if (string.Equals(actionName, "Disconnect", StringComparison.Ordinal))
 		{
-			ConnectionPanelStatusText = "Disconnected from the visible Avalonia shell connection state.";
+			DisconnectFromFramePro();
 		}
 		else
 		{
-			ConnectionPanelStatusText = "Connection profile editing is visible in the Avalonia shell.";
+			OpenConnectionPanel();
+			ConnectionPanelStatusText = "Edit the connection profile, then press Connect.";
+			StatusText = ConnectionPanelStatusText;
+		}
+	}
+
+	private async Task ConnectToFrameProAsync()
+	{
+		if (m_IsConnecting)
+		{
+			ConnectionPanelStatusText = "Connection attempt is already in progress.";
+			StatusText = ConnectionPanelStatusText;
+			return;
 		}
 
+		string host = (ConnectionHost ?? string.Empty).Trim();
+		if (string.IsNullOrWhiteSpace(host))
+		{
+			ConnectionPanelStatusText = "Connection host is required.";
+			StatusText = ConnectionPanelStatusText;
+			return;
+		}
+
+		if (!int.TryParse((ConnectionPort ?? string.Empty).Trim(), out int port) || port <= 0 || port > 65535)
+		{
+			ConnectionPanelStatusText = "Connection port must be between 1 and 65535.";
+			StatusText = ConnectionPanelStatusText;
+			return;
+		}
+
+		DisconnectFromFramePro(updateStatus: false);
+		m_IsConnecting = true;
+		ConnectionPanelStatusText = "Connecting to " + host + ":" + port + "...";
 		StatusText = ConnectionPanelStatusText;
+		Session session = new Session(new CoreSettings(), new NullLog());
+		bool connected = false;
+		try
+		{
+			connected = await Task.Run(() => session.ConnectToTcp(host, port, host + ":" + port, interactive: true, recordContextSwitches: false));
+		}
+		catch (Exception ex)
+		{
+			ConnectionPanelStatusText = "Connection failed: " + ex.Message;
+			StatusText = ConnectionPanelStatusText;
+		}
+		finally
+		{
+			m_IsConnecting = false;
+		}
+
+		if (connected)
+		{
+			m_LiveConnectionSession = session;
+			ConnectionPanelStatusText = "Connected to " + host + ":" + port + ". Waiting for profiler packets.";
+			SessionStatusText = "Session: live connection";
+			StatusText = ConnectionPanelStatusText;
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(ConnectionPanelStatusText) || ConnectionPanelStatusText.StartsWith("Connecting", StringComparison.Ordinal))
+		{
+			ConnectionPanelStatusText = string.IsNullOrWhiteSpace(session.LastConnectionError)
+				? "Connection failed: " + host + ":" + port
+				: session.LastConnectionError;
+			StatusText = ConnectionPanelStatusText;
+		}
+
+		session.Disconnect(DisconnectReason.Requested);
+	}
+
+	private void DisconnectFromFramePro(bool updateStatus = true)
+	{
+		if (m_LiveConnectionSession != null)
+		{
+			m_LiveConnectionSession.Disconnect(DisconnectReason.Requested);
+			m_LiveConnectionSession = null;
+		}
+
+		if (updateStatus)
+		{
+			ConnectionPanelStatusText = "Disconnected from FramePro transport.";
+			UpdateShellStatusSegments();
+			StatusText = ConnectionPanelStatusText;
+		}
 	}
 
 	private void OpenCallstacksPanel()
