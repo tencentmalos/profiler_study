@@ -10,8 +10,10 @@ public sealed partial class MainWindow : Window
 {
 	private MainWindowViewModel m_ViewModel;
 	private TimelineViewport m_AttachedViewport;
+	private TimelineSelection m_AttachedSelection;
 	private readonly PropertyChangedEventHandler m_ViewModelPropertyChanged;
 	private readonly PropertyChangedEventHandler m_ViewportPropertyChanged;
+	private readonly PropertyChangedEventHandler m_SelectionPropertyChanged;
 	private bool m_IsApplyingProfilerStatsViewport;
 
 	public MainWindow()
@@ -20,6 +22,7 @@ public sealed partial class MainWindow : Window
 
 		m_ViewModelPropertyChanged = OnViewModelPropertyChanged;
 		m_ViewportPropertyChanged = OnViewportPropertyChanged;
+		m_SelectionPropertyChanged = OnSelectionPropertyChanged;
 		ProfilerStatsControl.ViewportChangedByUser += OnProfilerStatsViewportChangedByUser;
 		ProfilerStatsControl.FrameSelectedByUser += OnProfilerStatsFrameSelectedByUser;
 		DataContextChanged += OnDataContextChanged;
@@ -54,11 +57,13 @@ public sealed partial class MainWindow : Window
 		{
 			m_ViewModel.PropertyChanged -= m_ViewModelPropertyChanged;
 			AttachViewport(null);
+			AttachSelection(null);
 		}
 
 		m_ViewModel = viewModel;
 		m_ViewModel.PropertyChanged += m_ViewModelPropertyChanged;
 		AttachViewport(m_ViewModel.Viewport);
+		AttachSelection(m_ViewModel.Selection);
 		ApplyProfilerStatsDocumentAndViewport();
 	}
 
@@ -68,6 +73,7 @@ public sealed partial class MainWindow : Window
 		{
 			m_ViewModel.PropertyChanged -= m_ViewModelPropertyChanged;
 			AttachViewport(null);
+			AttachSelection(null);
 			m_ViewModel = null;
 		}
 	}
@@ -82,6 +88,11 @@ public sealed partial class MainWindow : Window
 		{
 			AttachViewport(m_ViewModel?.Viewport);
 			ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
+		}
+		else if (e.PropertyName == nameof(MainWindowViewModel.Selection))
+		{
+			AttachSelection(m_ViewModel?.Selection);
+			ProfilerStatsControl?.ApplySelection(m_ViewModel?.Selection);
 		}
 	}
 
@@ -104,6 +115,25 @@ public sealed partial class MainWindow : Window
 		}
 	}
 
+	private void AttachSelection(TimelineSelection selection)
+	{
+		if (ReferenceEquals(m_AttachedSelection, selection))
+		{
+			return;
+		}
+
+		if (m_AttachedSelection != null)
+		{
+			m_AttachedSelection.PropertyChanged -= m_SelectionPropertyChanged;
+		}
+
+		m_AttachedSelection = selection;
+		if (m_AttachedSelection != null)
+		{
+			m_AttachedSelection.PropertyChanged += m_SelectionPropertyChanged;
+		}
+	}
+
 	private void OnViewportPropertyChanged(object sender, PropertyChangedEventArgs e)
 	{
 		if (e.PropertyName == nameof(TimelineViewport.StartFrame) ||
@@ -113,6 +143,15 @@ public sealed partial class MainWindow : Window
 			{
 				ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
 			}
+		}
+	}
+
+	private void OnSelectionPropertyChanged(object sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
+			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs))
+		{
+			ProfilerStatsControl?.ApplySelection(m_ViewModel?.Selection);
 		}
 	}
 
@@ -143,5 +182,6 @@ public sealed partial class MainWindow : Window
 	{
 		ProfilerStatsControl?.ApplyDocument(m_ViewModel?.CurrentDocument);
 		ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
+		ProfilerStatsControl?.ApplySelection(m_ViewModel?.Selection);
 	}
 }

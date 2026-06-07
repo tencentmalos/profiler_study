@@ -199,6 +199,41 @@ internal sealed class ProfilerStatsController : ObservableObject
 		ApplyExplicitRange(xStart, xEnd);
 	}
 
+	public void ApplySelection(TimelineSelection selection)
+	{
+		if (Dispatcher.UIThread.CheckAccess() is false)
+		{
+			Dispatcher.UIThread.Post(() => ApplySelection(selection));
+			return;
+		}
+
+		if (Timeline == null)
+		{
+			return;
+		}
+
+		Timeline.ChildMainStats.ClearAllVLines();
+		if (selection == null || selection.SelectedFrameIndex < 0 || m_TimelineAdapter.FrameSamples.Length == 0)
+		{
+			Timeline.ChildMainStats.Refresh();
+			return;
+		}
+
+		int displaySampleIndex = m_TimelineAdapter.GetDisplaySampleIndex(selection.SelectedFrameIndex);
+		if (displaySampleIndex < 0 || displaySampleIndex >= m_TimelineAdapter.FrameSamples.Length)
+		{
+			Timeline.ChildMainStats.Refresh();
+			return;
+		}
+
+		double x = m_TimelineAdapter.FrameSamples[displaySampleIndex].Index;
+		string label = selection.SelectedFrameTimeMs > 0.0
+			? $"Frame {selection.SelectedFrameIndex} ({selection.SelectedFrameTimeMs:0.###} ms)"
+			: $"Frame {selection.SelectedFrameIndex}";
+		Timeline.ChildMainStats.AddVLine(x, selection.SelectedFrameIndex, label, ScottPlotColorUtil.GetMutedColor(0));
+		Timeline.ChildMainStats.Refresh();
+	}
+
 	private void BuildPlots()
 	{
 		Timeline.ChildDetails.ClearAll();

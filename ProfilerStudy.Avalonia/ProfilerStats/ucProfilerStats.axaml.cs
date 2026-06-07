@@ -46,6 +46,11 @@ public partial class ucProfilerStats : UserControl
 		m_Controller.ApplyViewport(viewport);
 	}
 
+	internal void ApplySelection(TimelineSelection selection)
+	{
+		m_Controller.ApplySelection(selection);
+	}
+
 	internal void NotifyViewportChangedByUser(int startFrame, int endFrame)
 	{
 		ViewportChangedByUser?.Invoke(startFrame, endFrame);
