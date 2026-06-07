@@ -30,6 +30,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 	private PlotHeight m_SelectedPlotHeight = PlotHeight.Medium;
 	private bool m_IsInitialized;
 	private bool m_IsAutoFollowByUi;
+	private bool m_IsCompactMode;
 
 	internal ProfilerStatsController(ucProfilerStats view)
 	{
@@ -95,8 +96,11 @@ internal sealed class ProfilerStatsController : ObservableObject
 		}
 
 		m_TimelineAdapter.FillFrameSeries(m_MainStatsBridge);
-		m_TimelineAdapter.FillCustomStatSeries(m_PlotModel.CustomStats, m_PlotBridges);
-		ApplyScopeFlamePlot(document);
+		if (m_IsCompactMode is false)
+		{
+			m_TimelineAdapter.FillCustomStatSeries(m_PlotModel.CustomStats, m_PlotBridges);
+			ApplyScopeFlamePlot(document);
+		}
 
 		Timeline.UpdateMainStatsAndAllDetailPlots();
 		ApplyRangeAndViewport();
@@ -142,6 +146,21 @@ internal sealed class ProfilerStatsController : ObservableObject
 
 		m_ShowDetailPlots = isChecked;
 		ApplyDetailPlotVisibility();
+	}
+
+	public void SetCompactMode(bool isCompact)
+	{
+		if (m_IsCompactMode == isCompact)
+		{
+			return;
+		}
+
+		m_IsCompactMode = isCompact;
+		if (m_IsCompactMode)
+		{
+			m_ShowDetailPlots = false;
+			ApplyDetailPlotVisibility();
+		}
 	}
 
 	public void ShowAllDetailPlots()
@@ -267,6 +286,11 @@ internal sealed class ProfilerStatsController : ObservableObject
 
 		foreach (var plotMeta in m_PlotModel.Metadata.PlotList)
 		{
+			if (m_IsCompactMode && plotMeta.IsMainPlot is false)
+			{
+				continue;
+			}
+
 			var bridge = CreateBridgeFromPlotMetadata(plotMeta);
 			m_AllBridges.Add(bridge);
 			m_PlotBridges[plotMeta.PropertyName] = bridge;

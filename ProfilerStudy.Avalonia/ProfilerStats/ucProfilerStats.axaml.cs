@@ -100,6 +100,7 @@ public partial class ucProfilerStats : UserControl
 			: new RowDefinitions("Auto,*");
 		ControlsPanel.IsVisible = !isCompact;
 		TimelineScope.SetCompactTimelineMode(isCompact);
+		m_Controller?.SetCompactMode(isCompact);
 		if (isCompact)
 		{
 			m_Controller?.SetShowDetails(false);
