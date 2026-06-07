@@ -71,6 +71,15 @@ scripts/avalonia/package_macos_app.sh osx-arm64 --verify-only
 scripts/avalonia/validate_release.sh --verify-bundle osx-arm64
 ```
 
+If `dotnet publish` is blocked by the local environment but `Release` build succeeds, the script can create a fallback `.app` from `bin/Release/net8.0`:
+
+```bash
+/Users/bytedance/.dotnet/dotnet build ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -c Release --no-restore
+scripts/avalonia/package_macos_app.sh osx-arm64 --from-build-output
+```
+
+This fallback verifies bundle structure and executable launch shape only. It does not replace a successful RID-specific `dotnet publish` for external distribution.
+
 The script creates `ProfilerStudy.Avalonia/bin/Release/net8.0/publish/<rid>/ProfilerStudy.app` with:
 
 - `Contents/Info.plist`

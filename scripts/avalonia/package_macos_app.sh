@@ -4,9 +4,10 @@ set -euo pipefail
 RID="osx-arm64"
 SKIP_PUBLISH=0
 VERIFY_ONLY=0
+FROM_BUILD_OUTPUT=0
 
 usage() {
-  echo "Usage: $0 [osx-arm64|osx-x64] [--skip-publish] [--verify-only]" >&2
+  echo "Usage: $0 [osx-arm64|osx-x64] [--skip-publish] [--verify-only] [--from-build-output]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -20,6 +21,10 @@ while [[ $# -gt 0 ]]; do
     --verify-only)
       SKIP_PUBLISH=1
       VERIFY_ONLY=1
+      ;;
+    --from-build-output)
+      SKIP_PUBLISH=1
+      FROM_BUILD_OUTPUT=1
       ;;
     -h|--help)
       usage
@@ -50,6 +55,7 @@ if [[ ! -x "$DOTNET_BIN" ]]; then
 fi
 
 PUBLISH_DIR="$REPO_ROOT/ProfilerStudy.Avalonia/bin/Release/net8.0/publish/$RID"
+BUILD_OUTPUT_DIR="$REPO_ROOT/ProfilerStudy.Avalonia/bin/Release/net8.0"
 APP_DIR="$PUBLISH_DIR/ProfilerStudy.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
@@ -81,7 +87,18 @@ if [[ "$VERIFY_ONLY" -eq 1 ]]; then
   exit 0
 fi
 
-if [[ ! -d "$PUBLISH_DIR" ]]; then
+SOURCE_DIR="$PUBLISH_DIR"
+if [[ "$FROM_BUILD_OUTPUT" -eq 1 ]]; then
+  SOURCE_DIR="$BUILD_OUTPUT_DIR"
+fi
+
+if [[ ! -d "$SOURCE_DIR" ]]; then
+  if [[ "$FROM_BUILD_OUTPUT" -eq 1 ]]; then
+    echo "Missing Release build output directory: $SOURCE_DIR" >&2
+    echo "Run dotnet build -c Release first or omit --from-build-output." >&2
+    exit 1
+  fi
+
   echo "Missing publish directory: $PUBLISH_DIR" >&2
   echo "Run dotnet publish first or omit --skip-publish." >&2
   exit 1
@@ -90,10 +107,10 @@ fi
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
-find "$PUBLISH_DIR" -maxdepth 1 -type f -print0 | while IFS= read -r -d '' file; do
+find "$SOURCE_DIR" -maxdepth 1 -type f -print0 | while IFS= read -r -d '' file; do
   cp "$file" "$MACOS_DIR/"
 done
-find "$PUBLISH_DIR" -maxdepth 1 -type d ! -path "$PUBLISH_DIR" ! -path "$APP_DIR" -print0 | while IFS= read -r -d '' dir; do
+find "$SOURCE_DIR" -maxdepth 1 -type d ! -path "$SOURCE_DIR" ! -path "$APP_DIR" -print0 | while IFS= read -r -d '' dir; do
   cp -R "$dir" "$MACOS_DIR/"
 done
 
