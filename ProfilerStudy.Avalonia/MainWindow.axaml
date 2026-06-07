@@ -34,16 +34,16 @@
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="6" />
-      <Setter Property="Foreground" Value="#1F2933" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="12" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
       <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
     <Style Selector="Button.toolbar-button:pointerover">
-      <Setter Property="Background" Value="#E7EEF7" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
     </Style>
     <Style Selector="Button.toolbar-button:pressed">
-      <Setter Property="Background" Value="#D9E4F2" />
+      <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor}" />
     </Style>
     <Style Selector="Button.toolbar-button:disabled">
       <Setter Property="Opacity" Value="0.45" />
@@ -59,20 +59,20 @@
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="6" />
-      <Setter Property="Foreground" Value="#1F2933" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="12" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
       <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:pointerover">
-      <Setter Property="Background" Value="#E7EEF7" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:checked">
-      <Setter Property="Background" Value="#D7E7FA" />
-      <Setter Property="Foreground" Value="#0E5CAD" />
+      <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor}" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiBackground}" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:checked:pointerover">
-      <Setter Property="Background" Value="#CFE0F5" />
+      <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor}" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:disabled">
       <Setter Property="Opacity" Value="0.45" />
@@ -84,25 +84,25 @@
       <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="Border.toolbar-gap">
-      <Setter Property="Background" Value="#D6DEE8" />
+      <Setter Property="Background" Value="{DynamicResource SukiBorderBrush}" />
     </Style>
     <Style Selector="Border.toolbar-panel">
-      <Setter Property="Background" Value="#F4F7FA" />
-      <Setter Property="BorderBrush" Value="#CCD6E2" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="Border.toolbox-section">
-      <Setter Property="Background" Value="#FFFFFF" />
-      <Setter Property="BorderBrush" Value="#D7DEE8" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="CornerRadius" Value="8" />
     </Style>
     <Style Selector="Border.toolbox-section-header">
-      <Setter Property="Background" Value="#EEF3F8" />
-      <Setter Property="BorderBrush" Value="#D7DEE8" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="0,0,0,1" />
-      <Setter Property="CornerRadius" Value="6,6,0,0" />
+      <Setter Property="CornerRadius" Value="8,8,0,0" />
       <Setter Property="Padding" Value="8,5" />
     </Style>
     <Style Selector="Button.toolbox-action">
@@ -112,31 +112,31 @@
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="5" />
-      <Setter Property="Foreground" Value="#26323F" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="12" />
     </Style>
     <Style Selector="Button.toolbox-action:pointerover">
-      <Setter Property="Background" Value="#E7EEF7" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
     </Style>
     <Style Selector="Button.panel-command">
-      <Setter Property="Background" Value="#FFFFFF" />
-      <Setter Property="BorderBrush" Value="#CCD6E2" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="5" />
       <Setter Property="Padding" Value="7,4" />
-      <Setter Property="Foreground" Value="#26323F" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="12" />
     </Style>
     <Style Selector="Button.panel-command:pointerover">
-      <Setter Property="Background" Value="#E7EEF7" />
+      <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
     </Style>
     <Style Selector="TextBlock.panel-caption">
-      <Setter Property="Foreground" Value="#607083" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiLowText}" />
       <Setter Property="FontSize" Value="11" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="TextBlock.panel-title">
-      <Setter Property="Foreground" Value="#18222D" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="14" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
@@ -156,62 +156,58 @@
       <Setter Property="BorderBrush" Value="#666666" />
     </Style>
     <Style Selector="Border.status-cell">
-      <Setter Property="Background" Value="#D4D0C8" />
-      <Setter Property="BorderBrush" Value="#8A8A8A" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="1,1,0,0" />
       <Setter Property="Padding" Value="5,1" />
     </Style>
     <Style Selector="TextBlock.status-label">
-      <Setter Property="Foreground" Value="#404040" />
-      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiLowText}" />
       <Setter Property="FontSize" Value="10" />
       <Setter Property="Margin" Value="0,0,4,0" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="TextBlock.status-value">
-      <Setter Property="Foreground" Value="#202020" />
-      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="11" />
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="Border.document-tab">
-      <Setter Property="Background" Value="#DADADA" />
-      <Setter Property="BorderBrush" Value="#7E7E7E" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="1,1,1,0" />
       <Setter Property="Padding" Value="8,3" />
     </Style>
     <Style Selector="Border.document-info-cell">
-      <Setter Property="Background" Value="#CFCFCF" />
-      <Setter Property="BorderBrush" Value="#8A8A8A" />
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
       <Setter Property="BorderThickness" Value="0,0,1,0" />
       <Setter Property="Padding" Value="7,2" />
     </Style>
     <Style Selector="TextBlock.document-label">
-      <Setter Property="Foreground" Value="#505050" />
-      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiLowText}" />
       <Setter Property="FontSize" Value="10" />
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="Margin" Value="0,0,4,0" />
     </Style>
     <Style Selector="TextBlock.document-value">
-      <Setter Property="Foreground" Value="#151515" />
-      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontSize" Value="11" />
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
   </suki:SukiWindow.Styles>
-  <Grid Background="#C8C8C8">
+  <Grid Background="{DynamicResource SukiBackground}">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
+      <RowDefinition Height="0" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="{Binding OutputWindowHeight}" />
       <RowDefinition Height="22" />
     </Grid.RowDefinitions>
-    <Border Grid.Row="0" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1">
-      <Menu Background="#EFEFEF" FontSize="12" Padding="2,0">
+    <Border Grid.Row="0" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1">
+      <Menu Background="Transparent" FontSize="12" Padding="2,0">
         <MenuItem Header="_File">
           <MenuItem Header="_Open" InputGesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
           <MenuItem Header="_Save" InputGesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
@@ -285,13 +281,13 @@
       </Menu>
     </Border>
 
-    <Border Grid.Row="1" Background="#F7F9FC" BorderBrush="#D6DEE8" BorderThickness="0,0,0,1" Height="54">
+    <Border Grid.Row="1" Background="Transparent" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Height="54">
       <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="10,5" ColumnSpacing="10">
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <material:MaterialIcon Kind="Speedometer" Width="24" Height="24" Foreground="#0E5CAD" />
-          <TextBlock Text="Profiler" FontSize="16" FontWeight="Bold" Foreground="#18222D" VerticalAlignment="Center" />
+          <material:MaterialIcon Kind="Speedometer" Width="24" Height="24" Foreground="{DynamicResource SukiPrimaryColor}" />
+          <TextBlock Text="Profiler" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource SukiText}" VerticalAlignment="Center" />
         </StackPanel>
-        <Border Grid.Column="1" Width="1" Background="#D6DEE8" Margin="2,6" />
+        <Border Grid.Column="1" Width="1" Background="{DynamicResource SukiBorderBrush}" Margin="2,6" />
         <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
           <StackPanel Orientation="Horizontal" Spacing="6">
             <Button Classes="toolbar-button" Height="40" Padding="8,0" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
@@ -379,7 +375,7 @@
         </ScrollViewer>
         <Border Grid.Column="3" Classes="toolbar-panel" Padding="8,5" MinWidth="280">
           <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="6">
-            <material:MaterialIcon Kind="Magnify" Width="18" Height="18" Foreground="#607083" VerticalAlignment="Center" />
+            <material:MaterialIcon Kind="Magnify" Width="18" Height="18" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
             <TextBox Grid.Column="1" Text="{Binding ScopeFilterText}" PlaceholderText="Find scope" MinWidth="110" />
             <Button Grid.Column="2" Classes="panel-command" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
             <Button Grid.Column="3" Classes="panel-command" Content="Next" Command="{Binding FindNextScopeCommand}" />
@@ -389,7 +385,7 @@
       </Grid>
     </Border>
 
-    <Grid Grid.Row="2" Background="#C8C8C8">
+    <Grid Grid.Row="2" Background="Transparent" Margin="8,6,8,6">
       <Grid.RowDefinitions>
         <RowDefinition Height="0" />
         <RowDefinition Height="*" />
@@ -399,7 +395,7 @@
         <ColumnDefinition Width="{Binding ToolboxSplitterWidth}" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
-      <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#D4D0C8" BorderBrush="#868686" BorderThickness="0,0,0,1">
+      <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1">
         <Grid ColumnDefinitions="Auto,*">
           <Border Grid.Column="0" Classes="document-tab" Margin="3,3,0,0">
             <StackPanel Orientation="Horizontal" Spacing="5">
@@ -427,34 +423,34 @@
                 <TextBlock Text="{Binding SelectedFrameStatusText}" Classes="document-value" />
               </StackPanel>
             </Border>
-            <Border Grid.Column="3" Background="#CFCFCF" Padding="7,2">
+            <Border Grid.Column="3" Background="{DynamicResource SukiCardBackground}" Padding="7,2">
               <TextBlock Text="{Binding StatusText}" Classes="document-value" />
             </Border>
           </Grid>
         </Grid>
       </Border>
-      <Border Grid.Row="1" Grid.Column="0" Background="#CFCFCF" BorderBrush="#868686" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxMinimizedTabVisible}">
+      <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxMinimizedTabVisible}">
         <Button
-            Background="#CFCFCF"
-            BorderBrush="#868686"
+            Background="{DynamicResource SukiCardBackground}"
+            BorderBrush="{DynamicResource SukiBorderBrush}"
             BorderThickness="0"
             Padding="2"
             Command="{Binding RestoreToolboxCommand}"
             ToolTip.Tip="Restore toolbox">
-          <TextBlock Text="Toolbox" TextAlignment="Center" TextWrapping="Wrap" Foreground="#101010" FontSize="10" />
+          <TextBlock Text="Toolbox" TextAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource SukiText}" FontSize="10" />
         </Button>
       </Border>
-      <Border Grid.Row="1" Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxExpanded}">
+      <Border Grid.Row="1" Grid.Column="0" Background="Transparent" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxExpanded}">
         <Grid RowDefinitions="Auto,*">
           <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3" IsVisible="False">
             <DockPanel LastChildFill="True">
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
-                <TextBlock Text="{Binding ActiveSessionView}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding ActiveSessionView}" Foreground="{DynamicResource SukiLowText}" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
                 <Button Content="_" Width="22" Height="20" Padding="0" FontSize="10" Command="{Binding MinimizeToolboxCommand}" ToolTip.Tip="Minimize toolbox" />
                 <Button Content="□" Width="22" Height="20" Padding="0" FontSize="10" Command="{Binding FloatToolboxCommand}" ToolTip.Tip="Float toolbox" />
                 <Button Content="x" Width="22" Height="20" Padding="0" FontSize="11" Command="{Binding ToggleToolboxCommand}" ToolTip.Tip="Close toolbox" />
               </StackPanel>
-              <TextBlock Text="Toolbox" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
+              <TextBlock Text="Toolbox" Foreground="{DynamicResource SukiText}" FontSize="12" FontWeight="SemiBold" />
             </DockPanel>
           </Border>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -462,21 +458,21 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Session Info" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Session Info" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <Grid Grid.Row="1" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="7" Margin="6">
-                    <TextBlock Text="Frames" Foreground="#404040" />
-                    <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="#101010" />
-                    <TextBlock Grid.Row="1" Text="Average" Foreground="#404040" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" />
-                    <TextBlock Grid.Row="2" Text="Max" Foreground="#404040" />
-                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
-                    <TextBlock Grid.Row="3" Text="Budget" Foreground="#404040" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#101010" />
-                    <TextBlock Grid.Row="4" Text="Threads" Foreground="#404040" />
-                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="#101010" />
-                    <TextBlock Grid.Row="5" Text="Source" Foreground="#404040" />
-                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextWrapping="Wrap" />
+                    <TextBlock Text="Frames" Foreground="{DynamicResource SukiLowText}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="{DynamicResource SukiText}" />
+                    <TextBlock Grid.Row="1" Text="Average" Foreground="{DynamicResource SukiLowText}" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.AverageFrameTimeText}" Foreground="{DynamicResource SukiText}" />
+                    <TextBlock Grid.Row="2" Text="Max" Foreground="{DynamicResource SukiLowText}" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="{DynamicResource SukiText}" />
+                    <TextBlock Grid.Row="3" Text="Budget" Foreground="{DynamicResource SukiLowText}" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="{DynamicResource SukiText}" />
+                    <TextBlock Grid.Row="4" Text="Threads" Foreground="{DynamicResource SukiLowText}" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="{DynamicResource SukiText}" />
+                    <TextBlock Grid.Row="5" Text="Source" Foreground="{DynamicResource SukiLowText}" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
                   </Grid>
                 </Grid>
               </Border>
@@ -484,7 +480,7 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <Grid Grid.Row="1" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="6" ColumnSpacing="4" RowSpacing="4">
                     <Button Classes="toolbox-action" Content="Connect..." Command="{Binding OpenConnectionCommand}" />
@@ -497,7 +493,7 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Frame Navigation" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Frame Navigation" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <Grid Grid.Row="1" ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" Margin="6" ColumnSpacing="4" RowSpacing="4">
                     <Button Classes="toolbox-action" Content="Start" Command="{Binding ResetTimelineCommand}" />
@@ -513,7 +509,7 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Window Layout" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Window Layout" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="3">
                     <Button Classes="toolbox-action" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Threads View</Button>
@@ -528,18 +524,18 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Dock Windows" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Dock Windows" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <Grid Grid.Row="1" ColumnDefinitions="Auto,*,*,*" RowDefinitions="Auto,Auto,Auto" Margin="6" ColumnSpacing="4" RowSpacing="4">
-                    <TextBlock Text="Main" Foreground="#404040" VerticalAlignment="Center" />
+                    <TextBlock Text="Main" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
                     <Button Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreMainSessionDockCommand}" />
                     <Button Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatMainSessionDockCommand}" />
                     <Button Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockMainSessionDockCommand}" />
-                    <TextBlock Grid.Row="1" Text="Toolbox" Foreground="#404040" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="1" Text="Toolbox" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
                     <Button Grid.Row="1" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreToolboxCommand}" />
                     <Button Grid.Row="1" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatToolboxCommand}" />
                     <Button Grid.Row="1" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockToolboxCommand}" />
-                    <TextBlock Grid.Row="2" Text="Output" Foreground="#404040" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="2" Text="Output" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
                     <Button Grid.Row="2" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreOutputWindowCommand}" />
                     <Button Grid.Row="2" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatOutputWindowCommand}" />
                     <Button Grid.Row="2" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockOutputWindowCommand}" />
@@ -550,7 +546,7 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="3">
                     <Button Classes="toolbox-action" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" Foreground="{Binding ThreadsViewBrush}">Info</Button>
@@ -566,7 +562,7 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="4">
                     <TextBox Text="{Binding ScopeFilterText}" PlaceholderText="scope text" />
@@ -582,12 +578,12 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
-                    <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="4">
-                    <TextBlock Text="Captured root" Foreground="#404040" />
+                    <TextBlock Text="Captured root" Foreground="{DynamicResource SukiLowText}" />
                     <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
-                    <TextBlock Text="Local root" Foreground="#404040" Margin="0,4,0,0" />
+                    <TextBlock Text="Local root" Foreground="{DynamicResource SukiLowText}" Margin="0,4,0,0" />
                     <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
                   </StackPanel>
                 </Grid>
@@ -599,22 +595,22 @@
 
       <GridSplitter Grid.Row="1"
                     Grid.Column="1"
-                    Background="#9A9A9A"
-                    BorderBrush="#767676"
+                    Background="{DynamicResource SukiBorderBrush}"
+                    BorderBrush="{DynamicResource SukiBorderBrush}"
                     BorderThickness="1,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     IsVisible="False"
                     ResizeDirection="Columns" />
 
-      <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="1" Height="28" VerticalAlignment="Top" IsVisible="{Binding IsMainSessionDockMinimizedBarVisible}">
+      <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1" Height="28" VerticalAlignment="Top" IsVisible="{Binding IsMainSessionDockMinimizedBarVisible}">
         <DockPanel LastChildFill="True" Margin="7,3">
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
-            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="{DynamicResource SukiLowText}" FontSize="11" VerticalAlignment="Center" />
             <Button Content="Restore" Width="70" Height="20" Padding="0" Command="{Binding RestoreMainSessionDockCommand}" />
             <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleMainSessionDockCommand}" />
           </StackPanel>
-          <TextBlock Text="Main Session View" FontWeight="SemiBold" Foreground="#101010" VerticalAlignment="Center" />
+          <TextBlock Text="Main Session View" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" VerticalAlignment="Center" />
         </DockPanel>
       </Border>
 
@@ -637,7 +633,7 @@
           <Grid Grid.Row="0" ColumnDefinitions="32,*" IsVisible="{Binding IsThreadsInfoPanelVisible}">
             <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="INFO"
-                         Foreground="#202020"
+                         Foreground="{DynamicResource SukiText}"
                          FontWeight="SemiBold"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"
@@ -652,26 +648,26 @@
 
             <Border Grid.Column="1" Background="#F5F5F5" BorderBrush="#7D7D7D" BorderThickness="1" Padding="8,6">
               <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto,*,Auto,*" ColumnSpacing="6" RowSpacing="5">
-                <TextBlock Text="Session" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" Text="Frames" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Column="3" Text="{Binding StatusBarSessionText}" Foreground="#101010" />
-                <TextBlock Grid.Column="4" Text="Threads" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Column="5" Text="{Binding Summary.ThreadCount}" Foreground="#101010" />
+                <TextBlock Text="Session" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="Frames" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="3" Text="{Binding StatusBarSessionText}" Foreground="{DynamicResource SukiText}" />
+                <TextBlock Grid.Column="4" Text="Threads" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="5" Text="{Binding Summary.ThreadCount}" Foreground="{DynamicResource SukiText}" />
 
-                <TextBlock Grid.Row="1" Text="Range" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.RangeText}" Foreground="#101010" />
-                <TextBlock Grid.Row="1" Grid.Column="2" Text="Avg" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" />
-                <TextBlock Grid.Row="1" Grid.Column="4" Text="Max" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
+                <TextBlock Grid.Row="1" Text="Range" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.RangeText}" Foreground="{DynamicResource SukiText}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Avg" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Summary.AverageFrameTimeText}" Foreground="{DynamicResource SukiText}" />
+                <TextBlock Grid.Row="1" Grid.Column="4" Text="Max" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding Summary.MaxFrameTimeText}" Foreground="{DynamicResource SukiText}" />
 
-                <TextBlock Grid.Row="2" Text="Target" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#101010" />
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="Selected" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding SelectedFrameStatusText}" Foreground="#101010" />
-                <TextBlock Grid.Row="2" Grid.Column="4" Text="Visible" Foreground="#505050" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="2" Grid.Column="5" Text="{Binding TimelineRangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="2" Text="Target" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="{DynamicResource SukiText}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="Selected" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding SelectedFrameStatusText}" Foreground="{DynamicResource SukiText}" />
+                <TextBlock Grid.Row="2" Grid.Column="4" Text="Visible" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="2" Grid.Column="5" Text="{Binding TimelineRangeText}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
               </Grid>
             </Border>
           </Grid>
@@ -679,20 +675,20 @@
           <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                <TextBlock Text="INFO" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <TextBlock Text="INFO" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
                   </TextBlock.RenderTransform>
                 </TextBlock>
               </Border>
-              <TextBlock Grid.Column="1" Text="Info hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+              <TextBlock Grid.Column="1" Text="Info hidden" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
             </Grid>
           </Border>
 
           <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
-                         Foreground="#202020"
+                         Foreground="{DynamicResource SukiText}"
                          FontWeight="SemiBold"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"
@@ -710,31 +706,31 @@
                 <Grid RowDefinitions="60,*">
                   <Border Background="#D0D0D0" Padding="6,5">
                     <StackPanel Spacing="1">
-                      <TextBlock Text="Average Frame" Foreground="#202020" FontFamily="Monaco,Consolas" FontSize="10" />
-                      <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="12" />
+                      <TextBlock Text="Average Frame" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="{DynamicResource SukiText}" FontFamily="Consolas,Menlo" FontSize="12" />
                     </StackPanel>
                   </Border>
                   <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
                     <Grid RowDefinitions="*,*,*" ColumnDefinitions="*,58">
-                      <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                      <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                      <TextBlock Grid.Row="1" Text="Max" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                      <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                      <TextBlock Grid.Row="2" Text="In Budget" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                      <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.FramesInBudgetText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="1" Text="Max" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="2" Text="In Budget" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.FramesInBudgetText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
                     </Grid>
                   </Border>
                 </Grid>
                 <Border Grid.Column="1" Background="#D3D3D3" BorderBrush="#101010" BorderThickness="0,0,1,0">
                   <Grid RowDefinitions="Auto,*,Auto">
-                    <TextBlock Text="ms" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
+                    <TextBlock Text="ms" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
                     <Canvas Grid.Row="1">
                       <Line StartPoint="27,4" EndPoint="31,4" Stroke="#101010" StrokeThickness="1" />
                       <Line StartPoint="27,44" EndPoint="31,44" Stroke="#101010" StrokeThickness="1" />
                       <Line StartPoint="27,84" EndPoint="31,84" Stroke="#101010" StrokeThickness="1" />
                       <Ellipse Width="6" Height="6" Fill="#D00000" Canvas.Left="26" Canvas.Top="56" />
                     </Canvas>
-                    <TextBlock Grid.Row="2" Text="0" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
+                    <TextBlock Grid.Row="2" Text="0" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
                   </Grid>
                 </Border>
               </Grid>
@@ -749,13 +745,13 @@
           <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <TextBlock Text="Frame" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
                   </TextBlock.RenderTransform>
                 </TextBlock>
               </Border>
-              <TextBlock Grid.Column="1" Text="Frame Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+              <TextBlock Grid.Column="1" Text="Frame Graph hidden" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
             </Grid>
           </Border>
 
@@ -767,7 +763,7 @@
                 <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
                 <TextBlock Grid.Column="2"
                            Text="{Binding TimelineRangeText}"
-                           Foreground="#303030"
+                           Foreground="{DynamicResource SukiLowText}"
                            VerticalAlignment="Center"
                            TextAlignment="Center"
                            TextTrimming="CharacterEllipsis" />
@@ -782,7 +778,7 @@
           </Grid>
 
           <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
-            <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+            <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
           </Border>
 
           <GridSplitter Grid.Row="3"
@@ -797,7 +793,7 @@
           <Grid Grid.Row="4" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
             <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Time"
-                         Foreground="#202020"
+                         Foreground="{DynamicResource SukiText}"
                          FontWeight="SemiBold"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"
@@ -812,9 +808,9 @@
 
             <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
               <Grid RowDefinitions="Auto,Auto,*">
-                <TextBlock Text="Time Spans" Foreground="#202020" FontFamily="Microsoft Sans Serif, Segoe UI" FontSize="11" FontWeight="SemiBold" />
-                <TextBlock Grid.Row="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
-                <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#505050" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="Time Spans" Foreground="{DynamicResource SukiText}" FontFamily="Microsoft Sans Serif, Segoe UI" FontSize="11" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
               </Grid>
             </Border>
 
@@ -835,13 +831,13 @@
           <Border Grid.Row="4" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                <TextBlock Text="Time" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <TextBlock Text="Time" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
                   </TextBlock.RenderTransform>
                 </TextBlock>
               </Border>
-              <TextBlock Grid.Column="1" Text="Time Spans hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+              <TextBlock Grid.Column="1" Text="Time Spans hidden" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
             </Grid>
           </Border>
 
@@ -904,7 +900,7 @@
             <Grid Grid.Row="6" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
-                           Foreground="#202020"
+                           Foreground="{DynamicResource SukiText}"
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -919,10 +915,10 @@
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
-                  <TextBlock Text="Thread Activity" Foreground="#202020" FontSize="11" FontWeight="SemiBold" />
-                  <TextBlock Grid.Row="1" Text="{Binding ThreadTimelineSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
-                  <TextBlock Grid.Row="2" Text="{Binding Summary.ThreadCountLabel}" Foreground="#505050" FontSize="10" Margin="0,4,0,0" />
-                  <TextBlock Grid.Row="4" Text="{Binding TimelineRangeText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="Thread Activity" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
+                  <TextBlock Grid.Row="1" Text="{Binding ThreadTimelineSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="2" Text="{Binding Summary.ThreadCountLabel}" Foreground="{DynamicResource SukiLowText}" FontSize="10" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="4" Text="{Binding TimelineRangeText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" />
                 </Grid>
               </Border>
 
@@ -974,13 +970,13 @@
             <Border Grid.Row="6" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Threads" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock Text="Threads" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
                     </TextBlock.RenderTransform>
                   </TextBlock>
                 </Border>
-                <TextBlock Grid.Column="1" Text="Scope Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+                <TextBlock Grid.Column="1" Text="Scope Graph hidden" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
             </Border>
 
@@ -996,7 +992,7 @@
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
               <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Cores"
-                           Foreground="#202020"
+                           Foreground="{DynamicResource SukiText}"
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -1011,12 +1007,12 @@
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
-                  <TextBlock Text="Core Activity" Foreground="#202020" FontSize="11" FontWeight="SemiBold" />
-                  <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Text="Core Activity" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
+                  <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
                   <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}" Margin="0,5,0,0">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <TextBlock Text="{Binding CoreText}" Foreground="#202020" FontSize="10" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding CoreText}" Foreground="{DynamicResource SukiText}" FontSize="10" TextTrimming="CharacterEllipsis" />
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
@@ -1033,13 +1029,13 @@
             <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock Text="Cores" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
                     </TextBlock.RenderTransform>
                   </TextBlock>
                 </Border>
-                <TextBlock Grid.Column="1" Text="Core Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+                <TextBlock Grid.Column="1" Text="Core Graph hidden" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
             </Border>
 
@@ -1071,12 +1067,12 @@
                                           Width="0"
                                           Height="0" />
                   <TextBlock Text="{Binding SelectedFrameCounterSummaryText}"
-                             Foreground="#202020"
+                             Foreground="{DynamicResource SukiText}"
                              VerticalAlignment="Center"
                              TextTrimming="CharacterEllipsis" />
                   <TextBlock Grid.Column="1"
                              Text="{Binding TimelineRangeText}"
-                             Foreground="#404040"
+                             Foreground="{DynamicResource SukiLowText}"
                              VerticalAlignment="Center"
                              TextAlignment="Right"
                              TextTrimming="CharacterEllipsis" />
@@ -1092,13 +1088,13 @@
             <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Stats" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock Text="Stats" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
                     </TextBlock.RenderTransform>
                   </TextBlock>
                 </Border>
-                <TextBlock Grid.Column="1" Text="Custom Stats hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+                <TextBlock Grid.Column="1" Text="Custom Stats hidden" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
             </Border>
 
@@ -1114,7 +1110,7 @@
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
                              Text="Scope Hotspots"
-                             Foreground="#101010"
+                             Foreground="{DynamicResource SukiText}"
                              FontSize="12"
                              FontWeight="SemiBold" />
                   <TextBox DockPanel.Dock="Right"
@@ -1123,7 +1119,7 @@
                            Margin="10,0,0,0"
                            PlaceholderText="Filter scopes" />
                   <TextBlock Text="{Binding ScopeHotspotSummaryText}"
-                             Foreground="#404040"
+                             Foreground="{DynamicResource SukiLowText}"
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
@@ -1144,12 +1140,12 @@
                       <DataTemplate>
                         <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="*,90,90,90,90,90">
-                            <TextBlock Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="2" Text="{Binding TotalCountText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="3" Text="{Binding AverageTimeText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="4" Text="{Binding MaxTimePerFrameText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="5" Text="{Binding MaxCountPerFrameText}" Foreground="#101010" TextAlignment="Right" />
+                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="2" Text="{Binding TotalCountText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding AverageTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="{Binding MaxTimePerFrameText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="5" Text="{Binding MaxCountPerFrameText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
                           </Grid>
                         </Border>
                       </DataTemplate>
@@ -1171,11 +1167,11 @@
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
                              Text="Selected Frame Scopes"
-                             Foreground="#101010"
+                             Foreground="{DynamicResource SukiText}"
                              FontSize="12"
                              FontWeight="SemiBold" />
                   <TextBlock Text="{Binding SelectedFrameScopeSummaryText}"
-                             Foreground="#404040"
+                             Foreground="{DynamicResource SukiLowText}"
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
@@ -1190,7 +1186,7 @@
                     <Button Grid.Column="2" Content="Start ms" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Start" Padding="0" HorizontalContentAlignment="Right" />
                     <Button Grid.Column="3" Content="Dur ms" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Duration" Padding="0" HorizontalContentAlignment="Right" />
                     <Button Grid.Column="4" Content="Source" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Source" Padding="0" HorizontalContentAlignment="Left" />
-                    <TextBlock Grid.Column="5" Text="Open" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Grid.Column="5" Text="Open" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" TextAlignment="Right" />
                   </Grid>
                 </Border>
 
@@ -1200,11 +1196,11 @@
                       <DataTemplate>
                         <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="140,*,80,80,220,64">
-                            <TextBlock Text="{Binding ThreadName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="#101010" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
-                            <TextBlock Grid.Column="2" Text="{Binding StartOffsetText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="3" Text="{Binding DurationText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="4" Text="{Binding SourceText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding ThreadName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
+                            <TextBlock Grid.Column="2" Text="{Binding StartOffsetText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding DurationText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="{Binding SourceText}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                             <Button Grid.Column="5"
                                     Content="Open"
                                     Padding="6,1"
@@ -1224,13 +1220,13 @@
             <Border Grid.Row="8" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="False">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Data" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock Text="Data" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
                     </TextBlock.RenderTransform>
                   </TextBlock>
                 </Border>
-                <TextBlock Grid.Column="1" Text="Data Grid hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+                <TextBlock Grid.Column="1" Text="Data Grid hidden" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
             </Border>
 
@@ -1246,11 +1242,11 @@
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
                              Text="Selected Frame Counters"
-                             Foreground="#101010"
+                             Foreground="{DynamicResource SukiText}"
                              FontSize="12"
                              FontWeight="SemiBold" />
                   <TextBlock Text="{Binding SelectedFrameCounterSummaryText}"
-                             Foreground="#404040"
+                             Foreground="{DynamicResource SukiLowText}"
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
@@ -1270,11 +1266,11 @@
                       <DataTemplate>
                         <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="150,*,90,90,80">
-                            <TextBlock Text="{Binding GraphName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="2" Text="{Binding ValueText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="3" Text="{Binding CountText}" Foreground="#101010" TextAlignment="Right" />
-                            <TextBlock Grid.Column="4" Text="{Binding UnitText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding GraphName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="2" Text="{Binding ValueText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding CountText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="{Binding UnitText}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                           </Grid>
                         </Border>
                       </DataTemplate>
@@ -1307,13 +1303,13 @@
                            Text="{Binding ScopeFilterText}"
                            Width="140"
                            Margin="6,0,0,0" />
-                  <TextBlock Text="Scope Data Grid" Foreground="#101010" FontWeight="SemiBold" VerticalAlignment="Center" />
+                  <TextBlock Text="Scope Data Grid" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" VerticalAlignment="Center" />
                 </DockPanel>
               </Border>
 
               <Border Grid.Row="1" Background="#D0D0D0" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
-                  <TextBlock Text="Scope Hotspots" Foreground="#101010" FontWeight="SemiBold" />
+                  <TextBlock Text="Scope Hotspots" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
                   <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="*,70,64">
                       <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
@@ -1327,9 +1323,9 @@
                         <DataTemplate>
                           <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="*,70,64">
-                              <TextBlock Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                              <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="#101010" TextAlignment="Right" />
-                              <TextBlock Grid.Column="2" Text="{Binding TotalCountText}" Foreground="#101010" TextAlignment="Right" />
+                              <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                              <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                              <TextBlock Grid.Column="2" Text="{Binding TotalCountText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
                             </Grid>
                           </Border>
                         </DataTemplate>
@@ -1343,7 +1339,7 @@
 
               <Border Grid.Row="3" Background="#D0D0D0" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
-                  <TextBlock Text="Selected Frame Scopes" Foreground="#101010" FontWeight="SemiBold" />
+                  <TextBlock Text="Selected Frame Scopes" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
                   <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="110,*,70">
                       <Button Content="Thread" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Thread" Padding="0" HorizontalContentAlignment="Left" />
@@ -1357,9 +1353,9 @@
                         <DataTemplate>
                           <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="110,*,70">
-                              <TextBlock Text="{Binding ThreadName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                              <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="#101010" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
-                              <TextBlock Grid.Column="2" Text="{Binding DurationText}" Foreground="#101010" TextAlignment="Right" />
+                              <TextBlock Text="{Binding ThreadName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                              <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
+                              <TextBlock Grid.Column="2" Text="{Binding DurationText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
                             </Grid>
                           </Border>
                         </DataTemplate>
@@ -1373,7 +1369,7 @@
 
               <Border Grid.Row="5" Background="#D0D0D0" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
-                  <TextBlock Text="Selected Frame Counters" Foreground="#101010" FontWeight="SemiBold" />
+                  <TextBlock Text="Selected Frame Counters" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
                   <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="120,*,70">
                       <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
@@ -1387,9 +1383,9 @@
                         <DataTemplate>
                           <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="120,*,70">
-                              <TextBlock Text="{Binding GraphName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                              <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                              <TextBlock Grid.Column="2" Text="{Binding ValueText}" Foreground="#101010" TextAlignment="Right" />
+                              <TextBlock Text="{Binding GraphName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                              <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                              <TextBlock Grid.Column="2" Text="{Binding ValueText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
                             </Grid>
                           </Border>
                         </DataTemplate>
@@ -1404,7 +1400,7 @@
 
         <Grid Grid.Row="0" RowDefinitions="139,24,4,*" ColumnDefinitions="34,225,*" Background="#D4D0C8" IsVisible="{Binding IsCoresViewActive}">
           <Border Grid.Row="0" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
-            <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+            <TextBlock Text="Frame" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
               <TextBlock.RenderTransform>
                 <RotateTransform Angle="-90" />
               </TextBlock.RenderTransform>
@@ -1415,31 +1411,31 @@
               <Grid RowDefinitions="60,*">
                 <Border Background="#D0D0D0" Padding="6,5">
                   <StackPanel Spacing="1">
-                    <TextBlock Text="Average Frame" Foreground="#202020" FontFamily="Monaco,Consolas" FontSize="10" />
-                    <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="12" />
+                    <TextBlock Text="Average Frame" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="{DynamicResource SukiText}" FontFamily="Consolas,Menlo" FontSize="12" />
                   </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
                   <Grid RowDefinitions="*,*,*" ColumnDefinitions="*,58">
-                    <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                    <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                    <TextBlock Grid.Row="1" Text="Max" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                    <TextBlock Grid.Row="2" Text="In Budget" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
-                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.FramesInBudgetText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="1" Text="Max" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="2" Text="In Budget" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.FramesInBudgetText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
                   </Grid>
                 </Border>
               </Grid>
               <Border Grid.Column="1" Background="#D3D3D3" BorderBrush="#101010" BorderThickness="0,0,1,0">
                 <Grid RowDefinitions="Auto,*,Auto">
-                  <TextBlock Text="ms" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
+                  <TextBlock Text="ms" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
                   <Canvas Grid.Row="1">
                     <Line StartPoint="27,4" EndPoint="31,4" Stroke="#101010" StrokeThickness="1" />
                     <Line StartPoint="27,44" EndPoint="31,44" Stroke="#101010" StrokeThickness="1" />
                     <Line StartPoint="27,84" EndPoint="31,84" Stroke="#101010" StrokeThickness="1" />
                     <Ellipse Width="6" Height="6" Fill="#D00000" Canvas.Left="26" Canvas.Top="56" />
                   </Canvas>
-                  <TextBlock Grid.Row="2" Text="0" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
+                  <TextBlock Grid.Row="2" Text="0" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
                 </Grid>
               </Border>
             </Grid>
@@ -1454,7 +1450,7 @@
             <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
               <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
               <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
-              <TextBlock Grid.Column="2" Text="{Binding TimelineRangeText}" Foreground="#303030" VerticalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="2" Text="{Binding TimelineRangeText}" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
               <Button Grid.Column="3" Content="+" Padding="0" Command="{Binding ZoomTimelineInCommand}" />
               <Button Grid.Column="4" Content="▶" Padding="0" Command="{Binding PanTimelineRightCommand}" />
             </Grid>
@@ -1466,7 +1462,7 @@
           <GridSplitter Grid.Row="2" Grid.ColumnSpan="3" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
 
           <Border Grid.Row="3" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
-            <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+            <TextBlock Text="Cores" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
               <TextBlock.RenderTransform>
                 <RotateTransform Angle="-90" />
               </TextBlock.RenderTransform>
@@ -1474,12 +1470,12 @@
           </Border>
           <Border Grid.Row="3" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
             <Grid RowDefinitions="Auto,Auto,*">
-              <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" FontSize="11" />
-              <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+              <TextBlock Text="Cores" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" FontSize="11" />
+              <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
               <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}" Margin="0,5,0,0">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <TextBlock Text="{Binding CoreText}" Foreground="#202020" FontSize="10" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding CoreText}" Foreground="{DynamicResource SukiText}" FontSize="10" TextTrimming="CharacterEllipsis" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
@@ -1494,7 +1490,7 @@
           <Grid RowDefinitions="196,4,*">
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
               <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
-                <TextBlock Text="Scopes" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <TextBlock Text="Scopes" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
                   </TextBlock.RenderTransform>
@@ -1502,9 +1498,9 @@
               </Border>
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
-                  <TextBlock Text="Scope Graph" Foreground="#202020" FontWeight="SemiBold" FontSize="11" />
-                  <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="#505050" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
-                  <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#505050" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="Scope Graph" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" FontSize="11" />
+                  <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
                 </Grid>
               </Border>
               <Border Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
@@ -1515,13 +1511,13 @@
             <GridSplitter Grid.Row="1" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
             <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" Margin="6">
             <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Scopes" Foreground="#101010" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock DockPanel.Dock="Left" Text="Scopes" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
               <TextBox DockPanel.Dock="Right"
                        Text="{Binding ScopeFilterText}"
                        Width="220"
                        Margin="10,0,0,0"
                        />
-              <TextBlock Text="{Binding ScopeHotspotSummaryText}" Foreground="#404040" HorizontalAlignment="Right" />
+              <TextBlock Text="{Binding ScopeHotspotSummaryText}" Foreground="{DynamicResource SukiLowText}" HorizontalAlignment="Right" />
             </DockPanel>
             <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
               <Grid ColumnDefinitions="*,90,90,90,90,90">
@@ -1539,12 +1535,12 @@
                   <DataTemplate>
                     <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
                       <Grid ColumnDefinitions="*,90,90,90,90,90">
-                        <TextBlock Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="#101010" TextAlignment="Right" />
-                        <TextBlock Grid.Column="2" Text="{Binding TotalCountText}" Foreground="#101010" TextAlignment="Right" />
-                        <TextBlock Grid.Column="3" Text="{Binding AverageTimeText}" Foreground="#101010" TextAlignment="Right" />
-                        <TextBlock Grid.Column="4" Text="{Binding MaxTimePerFrameText}" Foreground="#101010" TextAlignment="Right" />
-                        <TextBlock Grid.Column="5" Text="{Binding MaxCountPerFrameText}" Foreground="#101010" TextAlignment="Right" />
+                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="2" Text="{Binding TotalCountText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="3" Text="{Binding AverageTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="4" Text="{Binding MaxTimePerFrameText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="5" Text="{Binding MaxCountPerFrameText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
                       </Grid>
                     </Border>
                   </DataTemplate>
@@ -1558,8 +1554,8 @@
         <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsCustomStatsViewActive}">
           <Grid RowDefinitions="Auto,Auto,*">
             <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Custom Stats" Foreground="#101010" FontSize="11" FontWeight="SemiBold" />
-              <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#404040" FontSize="11" HorizontalAlignment="Right" />
+              <TextBlock DockPanel.Dock="Left" Text="Custom Stats" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" HorizontalAlignment="Right" />
             </DockPanel>
             <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
               <Grid ColumnDefinitions="150,*,90,90,80">
@@ -1576,11 +1572,11 @@
                   <DataTemplate>
                     <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
                       <Grid ColumnDefinitions="150,*,90,90,80">
-                        <TextBlock Text="{Binding GraphName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Grid.Column="2" Text="{Binding ValueText}" Foreground="#101010" TextAlignment="Right" />
-                        <TextBlock Grid.Column="3" Text="{Binding CountText}" Foreground="#101010" TextAlignment="Right" />
-                        <TextBlock Grid.Column="4" Text="{Binding UnitText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding GraphName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="2" Text="{Binding ValueText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="3" Text="{Binding CountText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="4" Text="{Binding UnitText}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                       </Grid>
                     </Border>
                   </DataTemplate>
@@ -1593,15 +1589,15 @@
         <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsLogViewActive}">
           <Grid RowDefinitions="Auto,*">
             <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Log" Foreground="#101010" FontSize="11" FontWeight="SemiBold" />
-              <TextBlock Text="{Binding LogSummaryText}" Foreground="#404040" FontSize="11" HorizontalAlignment="Right" />
+              <TextBlock DockPanel.Dock="Left" Text="Log" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding LogSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" HorizontalAlignment="Right" />
             </DockPanel>
             <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="0,4,0,0">
               <Border Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Padding="3,1">
                 <Grid ColumnDefinitions="58,130,*">
-                  <TextBlock Text="#" Foreground="#202020" FontWeight="SemiBold" />
-                  <TextBlock Grid.Column="1" Text="Time" Foreground="#202020" FontWeight="SemiBold" />
-                  <TextBlock Grid.Column="2" Text="Message" Foreground="#202020" FontWeight="SemiBold" />
+                  <TextBlock Text="#" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
+                  <TextBlock Grid.Column="1" Text="Time" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
+                  <TextBlock Grid.Column="2" Text="Message" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
                 </Grid>
               </Border>
               <ScrollViewer Grid.Row="1" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -1610,9 +1606,9 @@
                     <DataTemplate>
                       <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
                         <Grid ColumnDefinitions="58,130,*">
-                          <TextBlock Text="{Binding Index}" Foreground="#101010" />
-                          <TextBlock Grid.Column="1" Text="{Binding TimeText}" Foreground="#101010" />
-                          <TextBlock Grid.Column="2" Text="{Binding Message}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Index}" Foreground="{DynamicResource SukiText}" />
+                          <TextBlock Grid.Column="1" Text="{Binding TimeText}" Foreground="{DynamicResource SukiText}" />
+                          <TextBlock Grid.Column="2" Text="{Binding Message}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                         </Grid>
                       </Border>
                     </DataTemplate>
@@ -1682,9 +1678,9 @@
           <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="*,220">
             <Border Grid.ColumnSpan="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="10,6">
               <DockPanel>
-                <TextBlock Text="ProfilerStudy" FontSize="12" FontWeight="SemiBold" Foreground="#101010" />
+                <TextBlock Text="ProfilerStudy" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
-                  <TextBlock Text="Startup Page" Foreground="#404040" VerticalAlignment="Center" />
+                  <TextBlock Text="Startup Page" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
                   <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding CloseStartupPageCommand}" />
                 </StackPanel>
               </DockPanel>
@@ -1694,21 +1690,21 @@
 
             <Grid Grid.Row="2" ColumnDefinitions="*,220">
               <StackPanel Margin="10" Spacing="6">
-                <TextBlock Text="Open a profiler capture." Foreground="#202020" FontSize="11" TextWrapping="Wrap" />
+                <TextBlock Text="Open a profiler capture." Foreground="{DynamicResource SukiText}" FontSize="11" TextWrapping="Wrap" />
                 <Button Classes="startup-action" Content="Open Profiler Session..." Command="{Binding OpenSessionCommand}" />
                 <Button Classes="startup-action" Content="Load Generated Sample" Command="{Binding LoadSampleCommand}" />
                 <Button Classes="startup-action" Content="Connect to FramePro..." Command="{Binding OpenConnectionCommand}" />
                 <Button Classes="startup-action" Content="Connect to Android..." Command="{Binding OpenAndroidCommand}" />
                 <Button Classes="startup-action" Content="Close Startup Page" Command="{Binding CloseStartupPageCommand}" />
-                <TextBlock Text="Views are available after a session is loaded." Foreground="#505050" TextWrapping="Wrap" Margin="0,4,0,0" />
+                <TextBlock Text="Views are available after a session is loaded." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" Margin="0,4,0,0" />
               </StackPanel>
 
               <Border Grid.Column="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,0,0,0" Padding="6">
                 <Grid RowDefinitions="Auto,*">
-                  <TextBlock Text="Recent Files" FontWeight="SemiBold" Foreground="#101010" />
+                  <TextBlock Text="Recent Files" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   <ScrollViewer Grid.Row="1" Margin="0,4,0,0" VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="3">
-                      <TextBlock Text="Recent profiler captures." Foreground="#505050" TextWrapping="Wrap" />
+                      <TextBlock Text="Recent profiler captures." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
                       <ItemsControl ItemsSource="{Binding RecentFiles}">
                         <ItemsControl.ItemTemplate>
                           <DataTemplate>
@@ -1747,7 +1743,7 @@
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockToolboxCommand}" />
               <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleToolboxCommand}" />
             </StackPanel>
-            <TextBlock Text="Toolbox" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Toolbox" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           </DockPanel>
         </Border>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -1756,21 +1752,21 @@
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
                   <DockPanel LastChildFill="True">
-                    <TextBlock DockPanel.Dock="Right" Text="{Binding ActiveSessionView}" Foreground="#505050" FontSize="11" />
-                    <TextBlock Text="Session Info" FontWeight="SemiBold" Foreground="#101010" />
+                    <TextBlock DockPanel.Dock="Right" Text="{Binding ActiveSessionView}" Foreground="{DynamicResource SukiLowText}" FontSize="11" />
+                    <TextBlock Text="Session Info" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   </DockPanel>
                 </Border>
                 <Grid Grid.Row="1" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="7" Margin="6">
-                  <TextBlock Text="Frames" Foreground="#404040" />
-                  <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="#101010" />
-                  <TextBlock Grid.Row="1" Text="Average" Foreground="#404040" />
-                  <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" />
-                  <TextBlock Grid.Row="2" Text="Max" Foreground="#404040" />
-                  <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
-                  <TextBlock Grid.Row="3" Text="Threads" Foreground="#404040" />
-                  <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="#101010" />
-                  <TextBlock Grid.Row="4" Text="Source" Foreground="#404040" />
-                  <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextWrapping="Wrap" />
+                  <TextBlock Text="Frames" Foreground="{DynamicResource SukiLowText}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="{DynamicResource SukiText}" />
+                  <TextBlock Grid.Row="1" Text="Average" Foreground="{DynamicResource SukiLowText}" />
+                  <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.AverageFrameTimeText}" Foreground="{DynamicResource SukiText}" />
+                  <TextBlock Grid.Row="2" Text="Max" Foreground="{DynamicResource SukiLowText}" />
+                  <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="{DynamicResource SukiText}" />
+                  <TextBlock Grid.Row="3" Text="Threads" Foreground="{DynamicResource SukiLowText}" />
+                  <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="{DynamicResource SukiText}" />
+                  <TextBlock Grid.Row="4" Text="Source" Foreground="{DynamicResource SukiLowText}" />
+                  <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
                 </Grid>
               </Grid>
             </Border>
@@ -1778,7 +1774,7 @@
             <Border Classes="toolbox-section">
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
-                  <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="#101010" />
+                  <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 </Border>
                 <Grid Grid.Row="1" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="6" ColumnSpacing="5" RowSpacing="5">
                   <Button Classes="toolbox-action" Content="Connect..." Command="{Binding OpenConnectionCommand}" />
@@ -1791,7 +1787,7 @@
             <Border Classes="toolbox-section">
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
-                  <TextBlock Text="Frame Navigation" FontWeight="SemiBold" Foreground="#101010" />
+                  <TextBlock Text="Frame Navigation" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 </Border>
                 <Grid Grid.Row="1" ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto" Margin="6" ColumnSpacing="5" RowSpacing="5">
                   <Button Classes="toolbox-action" Content="Start" Command="{Binding ResetTimelineCommand}" />
@@ -1810,7 +1806,7 @@
             <Border Classes="toolbox-section">
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
-                  <TextBlock Text="Window Layout" FontWeight="SemiBold" Foreground="#101010" />
+                  <TextBlock Text="Window Layout" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 </Border>
                 <UniformGrid Grid.Row="1" Columns="2" Margin="6" RowSpacing="5" ColumnSpacing="5">
                   <Button Classes="toolbox-action" Content="Threads" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}" />
@@ -1826,18 +1822,18 @@
             <Border Classes="toolbox-section">
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
-                  <TextBlock Text="Dock Windows" FontWeight="SemiBold" Foreground="#101010" />
+                  <TextBlock Text="Dock Windows" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 </Border>
                 <Grid Grid.Row="1" ColumnDefinitions="Auto,*,*,*" RowDefinitions="Auto,Auto,Auto" Margin="6" ColumnSpacing="5" RowSpacing="5">
-                  <TextBlock Text="Main" Foreground="#404040" VerticalAlignment="Center" />
+                  <TextBlock Text="Main" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
                   <Button Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreMainSessionDockCommand}" />
                   <Button Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatMainSessionDockCommand}" />
                   <Button Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockMainSessionDockCommand}" />
-                  <TextBlock Grid.Row="1" Text="Toolbox" Foreground="#404040" VerticalAlignment="Center" />
+                  <TextBlock Grid.Row="1" Text="Toolbox" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
                   <Button Grid.Row="1" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreToolboxCommand}" />
                   <Button Grid.Row="1" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatToolboxCommand}" />
                   <Button Grid.Row="1" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockToolboxCommand}" />
-                  <TextBlock Grid.Row="2" Text="Output" Foreground="#404040" VerticalAlignment="Center" />
+                  <TextBlock Grid.Row="2" Text="Output" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
                   <Button Grid.Row="2" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreOutputWindowCommand}" />
                   <Button Grid.Row="2" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatOutputWindowCommand}" />
                   <Button Grid.Row="2" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockOutputWindowCommand}" />
@@ -1848,7 +1844,7 @@
             <Border Classes="toolbox-section">
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
-                  <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="#101010" />
+                  <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 </Border>
                 <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="5">
                   <TextBox Text="{Binding ScopeFilterText}" PlaceholderText="scope text" />
@@ -1864,12 +1860,12 @@
             <Border Classes="toolbox-section">
               <Grid RowDefinitions="Auto,*">
                 <Border Classes="toolbox-section-header">
-                  <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
+                  <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 </Border>
                 <StackPanel Grid.Row="1" Margin="6" Spacing="4">
-                  <TextBlock Text="Captured root" Foreground="#404040" />
+                  <TextBlock Text="Captured root" Foreground="{DynamicResource SukiLowText}" />
                   <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
-                  <TextBlock Text="Local root" Foreground="#404040" Margin="0,4,0,0" />
+                  <TextBlock Text="Local root" Foreground="{DynamicResource SukiLowText}" Margin="0,4,0,0" />
                   <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
                 </StackPanel>
               </Grid>
@@ -1893,7 +1889,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="Registration" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Registration" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -1903,11 +1899,11 @@
           </DockPanel>
         </Border>
         <Grid Grid.Row="1" Margin="14" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
-          <TextBlock Text="ProfilerStudy Registration" FontWeight="SemiBold" Foreground="#101010" />
+          <TextBlock Text="ProfilerStudy Registration" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
             <StackPanel Spacing="7">
-              <TextBlock Text="This viewer preserves the original FramePro registration entry point." Foreground="#101010" TextWrapping="Wrap" />
-              <TextBlock Text="No license verification service is bundled with this macOS shell. Existing profiler files and sample data can be opened without registration." Foreground="#404040" TextWrapping="Wrap" />
+              <TextBlock Text="This viewer preserves the original FramePro registration entry point." Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
+              <TextBlock Text="No license verification service is bundled with this macOS shell. Existing profiler files and sample data can be opened without registration." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </StackPanel>
           </Border>
           <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
@@ -1932,7 +1928,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="Check for Updates" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Check for Updates" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -1942,15 +1938,15 @@
           </DockPanel>
         </Border>
         <Grid Grid.Row="1" Margin="14" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
-          <TextBlock Text="Update Status" FontWeight="SemiBold" Foreground="#101010" />
+          <TextBlock Text="Update Status" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
             <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="7">
-              <TextBlock Text="Current version" Foreground="#404040" />
-              <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="#101010" />
-              <TextBlock Grid.Row="1" Text="Update channel" Foreground="#404040" />
-              <TextBlock Grid.Row="1" Grid.Column="1" Text="Manual builds from this workspace" Foreground="#101010" />
-              <TextBlock Grid.Row="2" Text="Network check" Foreground="#404040" />
-              <TextBlock Grid.Row="2" Grid.Column="1" Text="Not configured in this build" Foreground="#101010" />
+              <TextBlock Text="Current version" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="1" Text="Update channel" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="Manual builds from this workspace" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="2" Text="Network check" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="Not configured in this build" Foreground="{DynamicResource SukiText}" />
             </Grid>
           </Border>
           <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
@@ -1979,7 +1975,7 @@
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockMainSessionDockCommand}" />
               <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleMainSessionDockCommand}" />
             </StackPanel>
-            <TextBlock Text="Main Session View" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Main Session View" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           </DockPanel>
         </Border>
         <Border Grid.Row="1" Background="#D7D7D7" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="4,3">
@@ -1993,21 +1989,21 @@
         </Border>
         <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="6" RowSpacing="6">
           <Grid ColumnDefinitions="*,Auto">
-            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#101010" FontSize="13" FontWeight="SemiBold" />
-            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" FontSize="11" />
+            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="{DynamicResource SukiText}" FontSize="13" FontWeight="SemiBold" />
+            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" />
           </Grid>
           <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#8A8A8A" BorderThickness="1" Padding="8">
             <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="7">
-              <TextBlock Text="Session" Foreground="#505050" FontWeight="SemiBold" />
-              <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-              <TextBlock Grid.Row="1" Text="Range" Foreground="#505050" FontWeight="SemiBold" />
-              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TimelineRangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-              <TextBlock Grid.Row="2" Text="Frame" Foreground="#505050" FontWeight="SemiBold" />
-              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFrameStatusText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-              <TextBlock Grid.Row="3" Text="Scope Graph" Foreground="#505050" FontWeight="SemiBold" />
-              <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#101010" TextWrapping="Wrap" />
-              <TextBlock Grid.Row="4" Text="Custom Stats" Foreground="#505050" FontWeight="SemiBold" />
-              <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#101010" TextWrapping="Wrap" />
+              <TextBlock Text="Session" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Row="1" Text="Range" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TimelineRangeText}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Row="2" Text="Frame" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFrameStatusText}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Row="3" Text="Scope Graph" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
+              <TextBlock Grid.Row="4" Text="Custom Stats" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFrameCounterSummaryText}" Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
             </Grid>
           </Border>
         </Grid>
@@ -2033,7 +2029,7 @@
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockOutputWindowCommand}" />
               <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleOutputWindowCommand}" />
             </StackPanel>
-            <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           </DockPanel>
         </Border>
         <TextBox Grid.Row="1"
@@ -2042,7 +2038,7 @@
                  IsReadOnly="True"
                  BorderThickness="0"
                  Background="#FFFFFF"
-                 Foreground="#101010"
+                 Foreground="{DynamicResource SukiText}"
                  FontFamily="Microsoft Sans Serif, Segoe UI"
                  FontSize="11" />
       </Grid>
@@ -2062,7 +2058,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="ProfilerStudy Help" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="ProfilerStudy Help" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -2072,26 +2068,26 @@
           </DockPanel>
         </Border>
         <Grid Grid.Row="1" Margin="14" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10">
-          <TextBlock Text="Common actions" FontWeight="SemiBold" Foreground="#101010" />
+          <TextBlock Text="Common actions" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
 
           <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
             <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
-              <TextBlock Text="Open session" Foreground="#404040" />
-              <TextBlock Grid.Column="1" Text="File > Open or Ctrl+O" Foreground="#101010" />
-              <TextBlock Grid.Row="1" Text="Save session" Foreground="#404040" />
-              <TextBlock Grid.Row="1" Grid.Column="1" Text="File > Save or Ctrl+S" Foreground="#101010" />
-              <TextBlock Grid.Row="2" Text="Find scope" Foreground="#404040" />
-              <TextBlock Grid.Row="2" Grid.Column="1" Text="Tools > Find or Ctrl+F" Foreground="#101010" />
-              <TextBlock Grid.Row="3" Text="Switch views" Foreground="#404040" />
-              <TextBlock Grid.Row="3" Grid.Column="1" Text="Use the View menu, toolbar, or bottom tabs" Foreground="#101010" />
-              <TextBlock Grid.Row="4" Text="Timeline" Foreground="#404040" />
-              <TextBlock Grid.Row="4" Grid.Column="1" Text="Mouse wheel zooms; drag pans in the ScottPlot timeline controls" Foreground="#101010" TextWrapping="Wrap" />
+              <TextBlock Text="Open session" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Column="1" Text="File > Open or Ctrl+O" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="1" Text="Save session" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="File > Save or Ctrl+S" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="2" Text="Find scope" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="Tools > Find or Ctrl+F" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="3" Text="Switch views" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="Use the View menu, toolbar, or bottom tabs" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="4" Text="Timeline" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="4" Grid.Column="1" Text="Mouse wheel zooms; drag pans in the ScottPlot timeline controls" Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
             </Grid>
           </Border>
 
           <TextBlock Grid.Row="2"
                      Text="This viewer reuses the legacy FramePro session core. The toolbar, startup page, and timeline controls map to the original profiler entry points."
-                     Foreground="#404040"
+                     Foreground="{DynamicResource SukiLowText}"
                      TextWrapping="Wrap" />
 
           <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
@@ -2116,7 +2112,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="Settings" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Settings" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -2126,14 +2122,14 @@
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
-          <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="These settings are used when opening captured source paths from profiler scope rows." Foreground="#404040" TextWrapping="Wrap" />
-          <TextBlock Text="Captured root" Foreground="#303030" Margin="0,4,0,0" />
+          <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
+          <TextBlock Text="These settings are used when opening captured source paths from profiler scope rows." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
+          <TextBlock Text="Captured root" Foreground="{DynamicResource SukiLowText}" Margin="0,4,0,0" />
           <TextBox Text="{Binding CapturedSourceRoot}" PlaceholderText="/buildbot/workspace/project" />
-          <TextBlock Text="Local root" Foreground="#303030" />
+          <TextBlock Text="Local root" Foreground="{DynamicResource SukiLowText}" />
           <TextBox Text="{Binding LocalSourceRoot}" PlaceholderText="/Users/me/project" />
           <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
-            <TextBlock Text="Changes are saved automatically and reused by the source navigation commands." Foreground="#303030" TextWrapping="Wrap" />
+            <TextBlock Text="Changes are saved automatically and reused by the source navigation commands." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           </Border>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
             <Button Content="Close" Width="86" Command="{Binding CloseSettingsCommand}" />
@@ -2156,7 +2152,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="Thread View Settings" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Thread View Settings" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -2166,8 +2162,8 @@
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
-          <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="Show or hide the docked panels used by the Threads view. These controls mirror the View menu and toolbar buttons." Foreground="#404040" TextWrapping="Wrap" />
+          <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
+          <TextBlock Text="Show or hide the docked panels used by the Threads view. These controls mirror the View menu and toolbar buttons." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <UniformGrid Columns="2" RowSpacing="7" ColumnSpacing="7" Margin="0,4,0,0">
             <ToggleButton Content="Info"
                           IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}"
@@ -2195,7 +2191,7 @@
                           CommandParameter="DataGrid" />
           </UniformGrid>
           <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
-            <TextBlock Text="Lane context commands still operate from the thread graph right-click menu: Hide, Move Up, Move Down, Collapse All, and Expand All." Foreground="#303030" TextWrapping="Wrap" />
+            <TextBlock Text="Lane context commands still operate from the thread graph right-click menu: Hide, Move Up, Move Down, Collapse All, and Expand All." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           </Border>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
             <Button Content="Collapse All" Width="92" Command="{Binding CollapseAllThreadsCommand}" />
@@ -2220,7 +2216,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="Callstacks" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Callstacks" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -2230,11 +2226,11 @@
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
-          <TextBlock Text="Callstack Tools" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="Enable or disable callstack capture for a live session, then request a module symbol reload for captured sessions." Foreground="#404040" TextWrapping="Wrap" />
+          <TextBlock Text="Callstack Tools" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
+          <TextBlock Text="Enable or disable callstack capture for a live session, then request a module symbol reload for captured sessions." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <Border Width="42" Height="34" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1">
-              <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />
+              <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource SukiLowText}" />
             </Border>
             <Button Grid.Column="1"
                     HorizontalContentAlignment="Left"
@@ -2242,7 +2238,7 @@
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Capture" />
             <Border Grid.Row="1" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
-              <TextBlock Text="sym" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
+              <TextBlock Text="sym" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource SukiText}" />
             </Border>
             <Button Grid.Row="1"
                     Grid.Column="1"
@@ -2251,7 +2247,7 @@
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Resolve" />
             <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
-              <TextBlock Text="{Binding CallstacksPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding CallstacksPanelStatusText}" Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </Border>
           </Grid>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
@@ -2275,7 +2271,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -2285,15 +2281,15 @@
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
-          <TextBlock Text="FramePro Connection" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="Connection controls are represented here to match the original profiler entry points." Foreground="#404040" TextWrapping="Wrap" />
+          <TextBlock Text="FramePro Connection" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
+          <TextBlock Text="Connection controls are represented here to match the original profiler entry points." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="84,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
-            <TextBlock Text="Host" Foreground="#303030" VerticalAlignment="Center" />
+            <TextBlock Text="Host" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
             <TextBox Grid.Column="1" Text="{Binding ConnectionHost}" PlaceholderText="localhost" />
-            <TextBlock Grid.Row="1" Text="Port" Foreground="#303030" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="1" Text="Port" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConnectionPort}" PlaceholderText="8428" />
             <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
-              <TextBlock Text="{Binding ConnectionPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding ConnectionPanelStatusText}" Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </Border>
           </Grid>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
@@ -2320,7 +2316,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="Android" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="Android" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -2330,8 +2326,8 @@
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
-          <TextBlock Text="Context Switch Tools" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="Connect to the FramePro socket exposed by the Android app, or load a recorded context switch file into the active session." Foreground="#404040" TextWrapping="Wrap" />
+          <TextBlock Text="Context Switch Tools" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
+          <TextBlock Text="Connect to the FramePro socket exposed by the Android app, or load a recorded context switch file into the active session." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <Border Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
               <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
@@ -2360,7 +2356,7 @@
               <TextBlock Text="rec" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
             </Border>
             <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="Auto,72,*" ColumnSpacing="6">
-              <TextBlock Text="Duration (seconds)" Foreground="#303030" VerticalAlignment="Center" />
+              <TextBlock Text="Duration (seconds)" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
               <TextBox Grid.Column="1" Text="{Binding AndroidRecordingDuration}" />
               <Button Grid.Column="2"
                       HorizontalContentAlignment="Left"
@@ -2369,7 +2365,7 @@
                       CommandParameter="RecordContextSwitches" />
             </Grid>
             <Border Grid.Row="3" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
-              <TextBlock Text="ctx" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
+              <TextBlock Text="ctx" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource SukiText}" />
             </Border>
             <Button Grid.Row="3"
                     Grid.Column="1"
@@ -2378,7 +2374,7 @@
                     Command="{Binding AndroidActionCommand}"
                     CommandParameter="LoadContextSwitchFile" />
             <Border Grid.Row="4" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
-              <TextBlock Text="{Binding AndroidPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding AndroidPanelStatusText}" Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </Border>
           </Grid>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
@@ -2402,7 +2398,7 @@
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
           <DockPanel LastChildFill="True">
-            <TextBlock Text="About" FontWeight="SemiBold" Foreground="#101010" />
+            <TextBlock Text="About" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
                     Content="x"
                     Width="24"
@@ -2422,26 +2418,26 @@
                          Foreground="#203246" />
             </Border>
             <StackPanel Grid.Column="1" Spacing="4">
-              <TextBlock Text="{Binding AboutProductText}" FontSize="20" FontWeight="SemiBold" Foreground="#101010" />
-              <TextBlock Text="FramePro profiler viewer" Foreground="#303030" />
-              <TextBlock Text="{Binding AboutCopyrightText}" Foreground="#303030" />
+              <TextBlock Text="{Binding AboutProductText}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Text="FramePro profiler viewer" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Text="{Binding AboutCopyrightText}" Foreground="{DynamicResource SukiLowText}" />
             </StackPanel>
           </Grid>
 
           <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
             <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
-              <TextBlock Text="Version" Foreground="#404040" />
-              <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="#101010" />
-              <TextBlock Grid.Row="1" Text="Website" Foreground="#404040" />
-              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AboutWebsiteText}" Foreground="#101010" />
-              <TextBlock Grid.Row="2" Text="E-mail" Foreground="#404040" />
-              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AboutEmailText}" Foreground="#101010" />
+              <TextBlock Text="Version" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="1" Text="Website" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AboutWebsiteText}" Foreground="{DynamicResource SukiText}" />
+              <TextBlock Grid.Row="2" Text="E-mail" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AboutEmailText}" Foreground="{DynamicResource SukiText}" />
             </Grid>
           </Border>
 
           <TextBlock Grid.Row="2"
                      Text="This Avalonia shell reuses the legacy FramePro session core and preserves the original profiler entry points while bringing the UI to macOS."
-                     Foreground="#404040"
+                     Foreground="{DynamicResource SukiLowText}"
                      TextWrapping="Wrap" />
 
           <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
@@ -2451,32 +2447,32 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" IsVisible="{Binding IsOutputWindowMinimizedBarVisible}">
+    <Border Grid.Row="3" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0" IsVisible="{Binding IsOutputWindowMinimizedBarVisible}">
       <DockPanel LastChildFill="True" Margin="7,3">
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
-          <TextBlock Text="{Binding SessionStatusText}" Foreground="#505050" FontSize="11" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding SessionStatusText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" VerticalAlignment="Center" />
           <Button Content="Restore" Width="70" Height="20" Padding="0" Command="{Binding RestoreOutputWindowCommand}" />
           <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleOutputWindowCommand}" />
         </StackPanel>
-        <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="#101010" VerticalAlignment="Center" />
+        <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" VerticalAlignment="Center" />
       </DockPanel>
     </Border>
 
-    <Border Grid.Row="3" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowExpanded}">
+    <Border Grid.Row="3" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowExpanded}">
       <TextBox Text="{Binding OutputLogText}"
                AcceptsReturn="True"
                IsReadOnly="True"
                BorderThickness="0"
-               Background="#EFEFEF"
-               Foreground="#101010"
-               FontFamily="Microsoft Sans Serif, Segoe UI"
+               Background="{DynamicResource SukiCardBackground}"
+               Foreground="{DynamicResource SukiText}"
+               FontFamily="Consolas,Menlo"
                FontSize="11"
                TextWrapping="NoWrap"
                ScrollViewer.HorizontalScrollBarVisibility="Auto"
                ScrollViewer.VerticalScrollBarVisibility="Auto" />
     </Border>
 
-    <Border Grid.Row="4" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0">
+    <Border Grid.Row="4" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0">
       <Grid ColumnDefinitions="2*,160,180,180,240">
         <Border Classes="status-cell">
           <TextBlock Text="{Binding StatusText}" Classes="status-value" />
