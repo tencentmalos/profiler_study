@@ -712,7 +712,7 @@
             </Grid>
           </Border>
 
-          <Grid Grid.Row="2" ColumnDefinitions="32,150,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+          <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
                          Foreground="#202020"
@@ -756,7 +756,7 @@
             </Grid>
           </Border>
 
-          <Grid Grid.Row="1" ColumnDefinitions="32,150,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+          <Grid Grid.Row="1" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
             <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="4,2">
               <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
@@ -791,7 +791,7 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
-          <Grid Grid.Row="4" ColumnDefinitions="32,150,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
+          <Grid Grid.Row="4" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Time"
                          Foreground="#202020"
@@ -853,7 +853,7 @@
                         IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
           <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,0,0,0,0,0,0" Margin="0,3,0,0" Background="#C8C8C8">
-            <Grid Grid.Row="4" ColumnDefinitions="32,150,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
+            <Grid Grid.Row="4" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
@@ -900,7 +900,7 @@
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-            <Grid Grid.Row="6" ColumnDefinitions="32,150,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
+            <Grid Grid.Row="6" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
                            Foreground="#202020"
@@ -994,7 +994,7 @@
                           ResizeDirection="Rows"
                           IsVisible="False" />
 
-            <Grid Grid.Row="0" ColumnDefinitions="32,150,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
+            <Grid Grid.Row="0" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Cores"
                            Foreground="#202020"
@@ -1044,7 +1044,7 @@
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsCoreGraphVisible}" />
 
-            <Grid Grid.Row="2" ColumnDefinitions="32,150,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
+            <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="" />
               </Border>
@@ -1397,7 +1397,7 @@
           </Border>
         </Grid>
 
-        <Grid Grid.Row="0" RowDefinitions="100,24,4,*" ColumnDefinitions="32,150,*" Background="#C8C8C8" IsVisible="{Binding IsCoresViewActive}">
+        <Grid Grid.Row="0" RowDefinitions="139,24,4,*" ColumnDefinitions="34,225,*" Background="#C8C8C8" IsVisible="{Binding IsCoresViewActive}">
           <Border Grid.Row="0" Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
             <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
               <TextBlock.RenderTransform>
@@ -1459,8 +1459,8 @@
         </Grid>
 
         <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0" IsVisible="{Binding IsScopesViewActive}">
-          <Grid RowDefinitions="163,4,*">
-            <Grid Grid.Row="0" ColumnDefinitions="32,150,*">
+          <Grid RowDefinitions="196,4,*">
+            <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Scopes" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
