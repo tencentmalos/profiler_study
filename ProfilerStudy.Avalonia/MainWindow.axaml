@@ -282,7 +282,7 @@
             </StackPanel>
           </Button>
           <Border Width="18" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}">
+          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9FB6D5" BorderBrush="#4F6584" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="TCP" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#243244" />
@@ -290,7 +290,7 @@
               <TextBlock Text="Connect" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenConnectionCommand}">
+          <Button Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Connection options">
             <StackPanel Spacing="4">
               <Border Width="19" Height="36" Background="#B8B8B8" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
@@ -298,7 +298,7 @@
             </StackPanel>
           </Button>
           <Border Width="11" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}">
+          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
@@ -307,7 +307,7 @@
             </StackPanel>
           </Button>
           <Border Width="11" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect">
+          <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#C16B62" BorderBrush="#73342E" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#3A1111" />
@@ -316,7 +316,7 @@
             </StackPanel>
           </Button>
           <Border Width="61" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="|&lt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />
@@ -324,7 +324,7 @@
               <TextBlock Text="Start" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track the currently selected frame in the visible timeline">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="||" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />
@@ -332,7 +332,7 @@
               <TextBlock Text="Track" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}" ToolTip.Tip="Jump to the latest frame in the session">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&gt;|" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#202020" />
@@ -390,7 +390,7 @@
             </StackPanel>
           </ToggleButton>
           <Border Width="49" Background="#D1D1D1" />
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&lt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#3A2818" />
@@ -398,7 +398,7 @@
               <TextBlock Text="Prev" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select the slowest frame in the current session">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="!" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#3A2818" />
@@ -406,7 +406,7 @@
               <TextBlock Text="Max" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}">
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}" ToolTip.Tip="Select the next frame spike">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="&gt;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#3A2818" />
