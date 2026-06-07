@@ -641,7 +641,7 @@
         </DockPanel>
       </Border>
 
-      <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*,31" Margin="0" Background="#C8C8C8" IsVisible="{Binding IsMainSessionDockExpanded}">
+      <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*,47" Margin="0" Background="#C8C8C8" IsVisible="{Binding IsMainSessionDockExpanded}">
         <Grid Grid.Row="0" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
           <Grid.RowDefinitions>
             <RowDefinition Height="{Binding ThreadsInfoPanelHeight}" />
@@ -1648,55 +1648,45 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0">
-          <Grid RowDefinitions="1,8,*" ColumnDefinitions="104,82,96,*">
-            <Border Grid.Row="0" Grid.ColumnSpan="4" Background="#8A8A8A" />
-            <Polygon Grid.Row="1" Grid.Column="0" Points="42,0 62,0 52,8" Fill="#8A8A8A" IsVisible="{Binding IsThreadsViewActive}" />
-            <Polygon Grid.Row="1" Grid.Column="1" Points="28,0 48,0 38,8" Fill="#8A8A8A" IsVisible="{Binding IsCoresViewActive}" />
-            <Polygon Grid.Row="1" Grid.Column="2" Points="34,0 54,0 44,8" Fill="#8A8A8A" IsVisible="{Binding IsScopesViewActive}" />
+        <Border Grid.Row="2" Background="#EDEDED" BorderBrush="#5A5A5A" BorderThickness="0,1,0,0" Margin="0">
+          <Grid RowDefinitions="8,*" ColumnDefinitions="Auto,Auto,Auto,*">
+            <Polygon Grid.Row="0" Grid.Column="0" Points="53,0 71,0 62,8" Fill="#5A5A5A" IsVisible="{Binding IsThreadsViewActive}" />
+            <Polygon Grid.Row="0" Grid.Column="1" Points="42,0 60,0 51,8" Fill="#5A5A5A" IsVisible="{Binding IsCoresViewActive}" />
+            <Polygon Grid.Row="0" Grid.Column="2" Points="47,0 65,0 56,8" Fill="#5A5A5A" IsVisible="{Binding IsScopesViewActive}" />
 
-            <Button Grid.Row="2" Grid.Column="0"
+            <Button Grid.Row="1" Grid.Column="0"
                     Content="Threads"
                     Command="{Binding SelectSessionViewCommand}"
                     CommandParameter="Threads"
-                    FontSize="12"
+                    Width="124"
+                    Padding="10,0"
+                    FontFamily="Monaco,Consolas"
+                    FontSize="18"
                     Foreground="{Binding ThreadsViewBrush}"
-                    Background="#D4D0C8"
-                    BorderBrush="#8A8A8A"
-                    BorderThickness="0,0,1,0"
-                    Padding="8,0" />
-            <Button Grid.Row="2" Grid.Column="1"
+                    Background="Transparent"
+                    BorderThickness="0" />
+            <Button Grid.Row="1" Grid.Column="1"
                     Content="Cores"
                     Command="{Binding SelectSessionViewCommand}"
                     CommandParameter="Cores"
-                    FontSize="12"
+                    Width="102"
+                    Padding="10,0"
+                    FontFamily="Monaco,Consolas"
+                    FontSize="18"
                     Foreground="{Binding CoresViewBrush}"
-                    Background="#D4D0C8"
-                    BorderBrush="#8A8A8A"
-                    BorderThickness="0,0,1,0"
-                    Padding="8,0" />
-            <Button Grid.Row="2" Grid.Column="2"
+                    Background="Transparent"
+                    BorderThickness="0" />
+            <Button Grid.Row="1" Grid.Column="2"
                     Content="Scopes"
                     Command="{Binding SelectSessionViewCommand}"
                     CommandParameter="Scopes"
-                    FontSize="12"
+                    Width="112"
+                    Padding="10,0"
+                    FontFamily="Monaco,Consolas"
+                    FontSize="18"
                     Foreground="{Binding ScopesViewBrush}"
-                    Background="#D4D0C8"
-                    BorderBrush="#8A8A8A"
-                    BorderThickness="0,0,1,0"
-                    Padding="8,0" />
-            <DockPanel Grid.Row="2" Grid.Column="3" LastChildFill="True" Margin="8,0,8,0">
-              <TextBlock DockPanel.Dock="Right"
-                         Text="{Binding SessionStatusText}"
-                         Foreground="#505050"
-                         FontSize="11"
-                         VerticalAlignment="Center" />
-              <TextBlock Text="{Binding ActiveSessionViewTitle}"
-                         Foreground="#707070"
-                         FontSize="11"
-                         VerticalAlignment="Center"
-                         TextTrimming="CharacterEllipsis" />
-            </DockPanel>
+                    Background="Transparent"
+                    BorderThickness="0" />
           </Grid>
         </Border>
       </Grid>
