@@ -109,6 +109,32 @@
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
+    <Style Selector="Border.document-tab">
+      <Setter Property="Background" Value="#DADADA" />
+      <Setter Property="BorderBrush" Value="#7E7E7E" />
+      <Setter Property="BorderThickness" Value="1,1,1,0" />
+      <Setter Property="Padding" Value="8,3" />
+    </Style>
+    <Style Selector="Border.document-info-cell">
+      <Setter Property="Background" Value="#CFCFCF" />
+      <Setter Property="BorderBrush" Value="#8A8A8A" />
+      <Setter Property="BorderThickness" Value="0,0,1,0" />
+      <Setter Property="Padding" Value="7,2" />
+    </Style>
+    <Style Selector="TextBlock.document-label">
+      <Setter Property="Foreground" Value="#505050" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="0,0,4,0" />
+    </Style>
+    <Style Selector="TextBlock.document-value">
+      <Setter Property="Foreground" Value="#151515" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
   </Window.Styles>
   <Grid Background="#C8C8C8">
     <Grid.RowDefinitions>
@@ -375,12 +401,50 @@
     </Border>
 
     <Grid Grid.Row="2" Background="#BEBEBE">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="27" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="{Binding ToolboxColumnWidth}" />
         <ColumnDefinition Width="{Binding ToolboxSplitterWidth}" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
-      <Border Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxVisible}">
+      <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#BEBEBE" BorderBrush="#868686" BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="Auto,*">
+          <Border Grid.Column="0" Classes="document-tab" Margin="3,3,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <TextBlock Text="Profiler Session" Classes="document-value" FontWeight="SemiBold" />
+              <TextBlock Text="-" Classes="document-label" />
+              <TextBlock Text="{Binding ActiveSessionView}" Classes="document-value" />
+            </StackPanel>
+          </Border>
+          <Grid Grid.Column="1" ColumnDefinitions="2*,Auto,Auto,Auto" Height="26" Margin="0,1,3,0">
+            <Border Classes="document-info-cell">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Session:" Classes="document-label" />
+                <TextBlock Text="{Binding Summary.SourceName}" Classes="document-value" />
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="document-info-cell" MinWidth="210">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Range:" Classes="document-label" />
+                <TextBlock Text="{Binding TimelineRangeText}" Classes="document-value" />
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Classes="document-info-cell" MinWidth="175">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Frame:" Classes="document-label" />
+                <TextBlock Text="{Binding SelectedFrameStatusText}" Classes="document-value" />
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="3" Background="#CFCFCF" Padding="7,2">
+              <TextBlock Text="{Binding StatusText}" Classes="document-value" />
+            </Border>
+          </Grid>
+        </Grid>
+      </Border>
+      <Border Grid.Row="1" Grid.Column="0" Background="#D4D4D4" BorderBrush="#868686" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxVisible}">
         <Grid RowDefinitions="Auto,*">
           <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3">
             <DockPanel LastChildFill="True">
@@ -512,7 +576,8 @@
         </Grid>
       </Border>
 
-      <GridSplitter Grid.Column="1"
+      <GridSplitter Grid.Row="1"
+                    Grid.Column="1"
                     Background="#9A9A9A"
                     BorderBrush="#767676"
                     BorderThickness="1,0"
@@ -521,7 +586,7 @@
                     IsVisible="{Binding IsToolboxVisible}"
                     ResizeDirection="Columns" />
 
-      <Grid Grid.Column="2" RowDefinitions="0,*,31" Margin="0" Background="#C8C8C8">
+      <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="0,*,31" Margin="0" Background="#C8C8C8">
         <Border Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,0,0,4">
           <Grid RowDefinitions="24,Auto,Auto">
             <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="6,0">
