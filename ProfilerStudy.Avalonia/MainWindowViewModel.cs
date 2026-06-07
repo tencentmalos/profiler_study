@@ -59,6 +59,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_AdjustConditionalScopeTimeCommand;
 	private readonly RelayCommand m_OpenSettingsCommand;
 	private readonly RelayCommand m_CloseSettingsCommand;
+	private readonly RelayCommand m_OpenAndroidCommand;
+	private readonly RelayCommand m_CloseAndroidCommand;
+	private readonly RelayCommand m_AndroidActionCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -108,6 +111,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsDataGridVisible = true;
 	private bool m_IsOutputWindowVisible = true;
 	private bool m_IsSettingsPanelVisible;
+	private bool m_IsAndroidPanelVisible;
+	private string m_AndroidPanelStatusText = "No Android recording loaded.";
 	private string m_ScopeColorMode = "Thread";
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
@@ -171,6 +176,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_AdjustConditionalScopeTimeCommand = new RelayCommand(AdjustConditionalScopeTime);
 		m_OpenSettingsCommand = new RelayCommand(_ => OpenSettingsPanel());
 		m_CloseSettingsCommand = new RelayCommand(_ => CloseSettingsPanel());
+		m_OpenAndroidCommand = new RelayCommand(_ => OpenAndroidPanel());
+		m_CloseAndroidCommand = new RelayCommand(_ => CloseAndroidPanel());
+		m_AndroidActionCommand = new RelayCommand(ShowAndroidActionStatus);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -278,6 +286,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand OpenSettingsCommand => m_OpenSettingsCommand;
 
 	public RelayCommand CloseSettingsCommand => m_CloseSettingsCommand;
+
+	public RelayCommand OpenAndroidCommand => m_OpenAndroidCommand;
+
+	public RelayCommand CloseAndroidCommand => m_CloseAndroidCommand;
+
+	public RelayCommand AndroidActionCommand => m_AndroidActionCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -720,6 +734,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_IsSettingsPanelVisible, value);
 	}
 
+	public bool IsAndroidPanelVisible
+	{
+		get => m_IsAndroidPanelVisible;
+		private set => SetProperty(ref m_IsAndroidPanelVisible, value);
+	}
+
+	public string AndroidPanelStatusText
+	{
+		get => m_AndroidPanelStatusText;
+		private set => SetProperty(ref m_AndroidPanelStatusText, value);
+	}
+
 	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
 
 	public IBrush CoresViewBrush => IsCoresViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
@@ -842,6 +868,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void OpenSettingsPanel()
 	{
+		IsAndroidPanelVisible = false;
 		IsSettingsPanelVisible = true;
 		StatusText = "Settings panel opened.";
 	}
@@ -850,6 +877,38 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		IsSettingsPanelVisible = false;
 		StatusText = "Settings saved.";
+	}
+
+	private void OpenAndroidPanel()
+	{
+		IsSettingsPanelVisible = false;
+		IsAndroidPanelVisible = true;
+		StatusText = "Android panel opened.";
+	}
+
+	private void CloseAndroidPanel()
+	{
+		IsAndroidPanelVisible = false;
+		StatusText = "Android panel closed.";
+	}
+
+	private void ShowAndroidActionStatus(object parameter)
+	{
+		string actionName = parameter as string;
+		if (string.Equals(actionName, "RecordContextSwitches", StringComparison.Ordinal))
+		{
+			AndroidPanelStatusText = "Context switch recording is visible in the Avalonia shell; device capture is not implemented yet.";
+		}
+		else if (string.Equals(actionName, "LoadContextSwitchFile", StringComparison.Ordinal))
+		{
+			AndroidPanelStatusText = "Context switch file loading is visible in the Avalonia shell; parser integration is not implemented yet.";
+		}
+		else
+		{
+			AndroidPanelStatusText = "Android action is visible in the Avalonia shell but is not implemented yet.";
+		}
+
+		StatusText = AndroidPanelStatusText;
 	}
 
 	private void AdjustConditionalScopeTime(object parameter)
