@@ -344,9 +344,7 @@ public sealed partial class MainWindow : SukiWindow
 	private void OnSelectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 	{
 		if (e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
-			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs) ||
-			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex) ||
-			e.PropertyName == nameof(TimelineSelection.HoveredFrameTimeMs))
+			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs))
 		{
 			ApplyProfilerStatsSelection(m_ViewModel?.Selection);
 		}

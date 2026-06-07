@@ -53,6 +53,9 @@ public class Curve2DGenerator : ICurveGenerator
     private DetailPlotConfig        _config;
 
     private List<OneCurve>          _curveList = new List<OneCurve>();
+    private int                     _lastHoverSeriesIndex = -1;
+    private double                  _lastHoverX = double.NaN;
+    private double                  _lastHoverY = double.NaN;
 
     //Do not use the tooltip builtin(can clip by plot view)
     ////private Tooltip                 _tooltip;
@@ -284,6 +287,7 @@ public class Curve2DGenerator : ICurveGenerator
             double nearestCurveY = double.MaxValue;
             CurvePointHint? nearestHintItem = null;
             OneCurve? nearestCurve = null;
+            int nearestSeriesIndex = -1;
             DataPoint minYNearestPoint = new DataPoint();
             Color nearestColor = new Color();
 
@@ -310,10 +314,18 @@ public class Curve2DGenerator : ICurveGenerator
                         nearestCurveY = currentYLen;
                         nearestHintItem = hintItem;
                         nearestCurve = _curveList[i];
+                        nearestSeriesIndex = i;
                         minYNearestPoint = nearestPoint.point;
                         nearestColor = nearestPoint.seriesColor;
                     }
                 }
+            }
+
+            if (nearestSeriesIndex == _lastHoverSeriesIndex &&
+                Math.Abs(minYNearestPoint.X - _lastHoverX) < double.Epsilon &&
+                Math.Abs(minYNearestPoint.Y - _lastHoverY) < double.Epsilon)
+            {
+                return;
             }
 
             if (nearestCurve?.Crosshair != null)
@@ -351,6 +363,9 @@ public class Curve2DGenerator : ICurveGenerator
 
             _plot.Refresh();
 
+            _lastHoverSeriesIndex = nearestSeriesIndex;
+            _lastHoverX = minYNearestPoint.X;
+            _lastHoverY = minYNearestPoint.Y;
             hoverResult.NearestHintItem = nearestHintItem;
             MouseHoverResult = hoverResult;
         }
@@ -398,6 +413,9 @@ public class Curve2DGenerator : ICurveGenerator
             _plot.Refresh();
         }
 
+        _lastHoverSeriesIndex = -1;
+        _lastHoverX = double.NaN;
+        _lastHoverY = double.NaN;
         MouseHoverResult = null;
     }
 

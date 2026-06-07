@@ -115,7 +115,13 @@ public sealed class FrameTimelineControl : UserControl
 
 	private void TimelineStatePropertyChanged(object sender, PropertyChangedEventArgs e)
 	{
-		RefreshPlot();
+		if (e.PropertyName == nameof(TimelineViewport.StartFrame) ||
+			e.PropertyName == nameof(TimelineViewport.EndFrame) ||
+			e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
+			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs))
+		{
+			RefreshPlot();
+		}
 	}
 
 	private void ConfigurePlotChrome()

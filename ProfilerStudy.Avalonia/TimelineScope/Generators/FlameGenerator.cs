@@ -129,6 +129,7 @@ public class FlameGenerator : IFlameGenerator
     private Crosshair               _crosshair = null!;
     private Tooltip                 _tooltip = null!;
     private bool                    _mouseInteractionAttached;
+    private StackFrame?             _hoveredFrame;
 
     public FlameGraphConfig     Config => _config;
     public AvaPlot              Plot => _plot;
@@ -348,6 +349,13 @@ public class FlameGenerator : IFlameGenerator
 
         if (hoveredFrame != null)
         {
+            if (ReferenceEquals(_hoveredFrame, hoveredFrame))
+            {
+                return;
+            }
+
+            _hoveredFrame = hoveredFrame;
+
             // Show crosshair
             _crosshair.IsVisible = true;
             _crosshair.Position = mouseLocation;
@@ -400,6 +408,7 @@ public class FlameGenerator : IFlameGenerator
             // Hide crosshair and tooltip
             if (_crosshair.IsVisible || _tooltip.IsVisible)
             {
+                _hoveredFrame = null;
                 _crosshair.IsVisible = false;
                 _tooltip.IsVisible = false;
                 _plot.Refresh();
@@ -431,6 +440,7 @@ public class FlameGenerator : IFlameGenerator
     /// </summary>
     private void OnMouseExit(object? sender, PointerEventArgs e)
     {
+        _hoveredFrame = null;
         if (_crosshair.IsVisible || _tooltip.IsVisible)
         {
             _crosshair.IsVisible = false;
