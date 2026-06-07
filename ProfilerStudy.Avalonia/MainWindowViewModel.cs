@@ -77,7 +77,6 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_SetScopeColorModeCommand;
 	private readonly RelayCommand m_ToggleScopeColorModeCommand;
 	private readonly RelayCommand m_ExitCommand;
-	private readonly RelayCommand m_ShowFeatureStatusCommand;
 	private readonly RelayCommand m_DemoActionCommand;
 	private readonly RelayCommand m_AdjustConditionalScopeTimeCommand;
 	private readonly RelayCommand m_OpenSettingsCommand;
@@ -270,7 +269,6 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_SetScopeColorModeCommand = new RelayCommand(SetScopeColorMode);
 		m_ToggleScopeColorModeCommand = new RelayCommand(_ => ToggleScopeColorMode());
 		m_ExitCommand = new RelayCommand(_ => ExitApplication());
-		m_ShowFeatureStatusCommand = new RelayCommand(ShowFeatureStatus);
 		m_DemoActionCommand = new RelayCommand(parameter => _ = HandleDemoActionAsync(parameter));
 		m_AdjustConditionalScopeTimeCommand = new RelayCommand(AdjustConditionalScopeTime);
 		m_OpenSettingsCommand = new RelayCommand(_ => OpenSettingsPanel());
@@ -429,8 +427,6 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ToggleScopeColorModeCommand => m_ToggleScopeColorModeCommand;
 
 	public RelayCommand ExitCommand => m_ExitCommand;
-
-	public RelayCommand ShowFeatureStatusCommand => m_ShowFeatureStatusCommand;
 
 	public RelayCommand DemoActionCommand => m_DemoActionCommand;
 
@@ -1420,17 +1416,6 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 	}
 
-	private void ShowFeatureStatus(object parameter)
-	{
-		string featureName = parameter as string;
-		if (string.IsNullOrWhiteSpace(featureName))
-		{
-			featureName = "Feature";
-		}
-
-		StatusText = featureName + " is visible in the Avalonia shell but is not implemented yet.";
-	}
-
 	private async Task HandleDemoActionAsync(object parameter)
 	{
 		string actionName = parameter as string;
@@ -1665,7 +1650,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 		else
 		{
-			AndroidPanelStatusText = "Android action is visible in the Avalonia shell but is not implemented yet.";
+			AndroidPanelStatusText = string.IsNullOrWhiteSpace(actionName)
+				? "No Android action was selected."
+				: "Unknown Android action: " + actionName + ".";
 			StatusText = AndroidPanelStatusText;
 		}
 	}

@@ -234,8 +234,8 @@
           <MenuItem Header="_Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
           <Separator />
           <MenuItem Header="_Android">
-            <MenuItem Header="_Start Recording Context Switches..." Command="{Binding OpenAndroidCommand}" />
-            <MenuItem Header="_Load Context Switch File" Command="{Binding OpenAndroidCommand}" />
+            <MenuItem Header="_Start Recording Context Switches..." Command="{Binding AndroidActionCommand}" CommandParameter="RecordContextSwitches" />
+            <MenuItem Header="_Load Context Switch File" Command="{Binding AndroidActionCommand}" CommandParameter="LoadContextSwitchFile" />
           </MenuItem>
           <Separator />
           <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
