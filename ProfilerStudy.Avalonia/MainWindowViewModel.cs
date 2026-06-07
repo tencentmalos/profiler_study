@@ -21,6 +21,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_CloseSessionCommand;
+	private readonly RelayCommand m_ExportFramesToCsvCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
 	private readonly RelayCommand m_TrackSelectedFrameCommand;
 	private readonly RelayCommand m_SelectLastFrameCommand;
@@ -121,6 +122,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_CloseSessionCommand = new RelayCommand(_ => CloseSession(), _ => CurrentDocument != null);
+		m_ExportFramesToCsvCommand = new RelayCommand(_ => _ = ExportFramesToCsvAsync(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
 		m_TrackSelectedFrameCommand = new RelayCommand(_ => TrackSelectedFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_SelectLastFrameCommand = new RelayCommand(_ => SelectLastFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
@@ -184,6 +186,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
 
 	public RelayCommand CloseSessionCommand => m_CloseSessionCommand;
+
+	public RelayCommand ExportFramesToCsvCommand => m_ExportFramesToCsvCommand;
 
 	public RelayCommand ResetTimelineCommand => m_ResetTimelineCommand;
 
@@ -259,6 +263,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
 				m_CloseSessionCommand.RaiseCanExecuteChanged();
+				m_ExportFramesToCsvCommand.RaiseCanExecuteChanged();
 				m_ResetTimelineCommand.RaiseCanExecuteChanged();
 				m_TrackSelectedFrameCommand.RaiseCanExecuteChanged();
 				m_SelectLastFrameCommand.RaiseCanExecuteChanged();
@@ -862,6 +867,61 @@ internal sealed class MainWindowViewModel : ObservableObject
 		await LoadFileDocumentAsync(path);
 	}
 
+	private async Task ExportFramesToCsvAsync()
+	{
+		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
+		{
+			StatusText = "No frame samples loaded.";
+			return;
+		}
+
+		try
+		{
+			Window window = global::Avalonia.Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+				? desktop.MainWindow
+				: null;
+			if (window == null)
+			{
+				StatusText = "No application window is available for export.";
+				return;
+			}
+
+			string sourceName = string.IsNullOrWhiteSpace(CurrentDocument.Summary.SourceName) ? "frames" : Path.GetFileNameWithoutExtension(CurrentDocument.Summary.SourceName);
+			IStorageFile file = await window.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+			{
+				Title = "Export frame graph to CSV",
+				SuggestedFileName = sourceName + "-frames.csv",
+				FileTypeChoices = new List<FilePickerFileType>
+				{
+					new FilePickerFileType("CSV files")
+					{
+						Patterns = new[] { "*.csv" },
+						MimeTypes = new[] { "text/csv" }
+					}
+				}
+			});
+
+			if (file == null)
+			{
+				return;
+			}
+
+			string path = file.TryGetLocalPath();
+			if (string.IsNullOrWhiteSpace(path))
+			{
+				StatusText = "Selected export file is not available as a local path.";
+				return;
+			}
+
+			await File.WriteAllTextAsync(path, BuildFrameCsv(CurrentDocument.FrameSamples));
+			StatusText = "Exported frame CSV to " + path;
+		}
+		catch (Exception ex)
+		{
+			StatusText = ex.Message;
+		}
+	}
+
 	private async Task OpenStartupProfilerAsync(string path)
 	{
 		if (!File.Exists(path))
@@ -871,6 +931,20 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		await LoadFileDocumentAsync(path);
+	}
+
+	private static string BuildFrameCsv(IEnumerable<FrameSample> samples)
+	{
+		var writer = new StringWriter();
+		writer.WriteLine("Frame,DurationMs");
+		foreach (FrameSample sample in samples ?? Array.Empty<FrameSample>())
+		{
+			writer.Write(sample.Index);
+			writer.Write(',');
+			writer.WriteLine(sample.DurationMs.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture));
+		}
+
+		return writer.ToString();
 	}
 
 	private Task LoadFileDocumentAsync(string path)
