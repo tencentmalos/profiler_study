@@ -127,7 +127,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<CoreSummaryRow> m_CoreRows = Array.Empty<CoreSummaryRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_OutputLogText = "Open a profiler file or load generated sample data.";
-	private string m_FooterText = "No session";
+	private string m_FooterText = "No profiler session loaded";
 	private string m_TimelineRangeText = string.Empty;
 	private string m_SessionStatusText = "Session: none";
 	private string m_SelectedFrameStatusText = "Frame: none";
@@ -3564,7 +3564,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		if (CurrentDocument == null)
 		{
-			FooterText = "Avalonia + SkiaSharp migration prototype";
+			FooterText = "No profiler session loaded";
 			return;
 		}
 
