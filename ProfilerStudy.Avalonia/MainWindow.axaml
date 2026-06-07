@@ -208,8 +208,6 @@
               </DataTemplate>
             </MenuItem.ItemTemplate>
           </MenuItem>
-          <MenuItem Header="Load _Sample" Command="{Binding LoadSampleCommand}" />
-          <Separator />
           <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
         </MenuItem>
         <MenuItem Header="_View">
@@ -223,7 +221,6 @@
             <MenuItem Header="_Scope Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
             <MenuItem Header="_CPU Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
             <MenuItem Header="_Custom Stats Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
-            <MenuItem Header="_Data Grid" ToggleType="CheckBox" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" />
           </MenuItem>
           <MenuItem Header="Scope _Colouring">
             <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
@@ -243,12 +240,6 @@
           <Separator />
           <MenuItem Header="_Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
           <Separator />
-          <MenuItem Header="_Callstacks">
-            <MenuItem Header="_Open Callstacks..." Command="{Binding OpenCallstacksCommand}" />
-            <MenuItem Header="_Toggle Live Callstack Recording" Command="{Binding CallstacksActionCommand}" CommandParameter="Capture" />
-            <MenuItem Header="_Reload Module Symbols" Command="{Binding CallstacksActionCommand}" CommandParameter="Resolve" />
-          </MenuItem>
-          <Separator />
           <MenuItem Header="_Android">
             <MenuItem Header="_Start Recording Context Switches..." Command="{Binding AndroidActionCommand}" CommandParameter="RecordContextSwitches" />
             <MenuItem Header="_Load Context Switch File" Command="{Binding AndroidActionCommand}" CommandParameter="LoadContextSwitchFile" />
@@ -257,7 +248,6 @@
           <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
         </MenuItem>
         <MenuItem Header="_Help">
-          <MenuItem Header="_Help" Command="{Binding OpenHelpCommand}" />
           <MenuItem Header="_Registration..." Command="{Binding OpenRegistrationCommand}" />
           <MenuItem Header="_Check for Updates" Command="{Binding OpenUpdateCheckCommand}" />
           <Separator />
