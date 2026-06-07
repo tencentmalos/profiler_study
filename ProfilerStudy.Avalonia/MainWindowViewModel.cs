@@ -20,6 +20,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenRecentSessionCommand;
 	private readonly RelayCommand m_OpenScopeSourceCommand;
 	private readonly RelayCommand m_SortTableCommand;
+	private readonly RelayCommand m_SelectSessionViewCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -43,6 +44,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
 	private string m_SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
+	private string m_ActiveSessionView = "Threads";
 	private string m_ScopeHotspotSortKey = "TotalTime";
 	private bool m_ScopeHotspotSortDescending = true;
 	private string m_SelectedFrameScopeSortKey = "Start";
@@ -69,6 +71,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenRecentSessionCommand = new RelayCommand(parameter => _ = OpenRecentSessionAsync(parameter as string ?? SelectedRecentFile), _ => !string.IsNullOrWhiteSpace(SelectedRecentFile));
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
 		m_SortTableCommand = new RelayCommand(SortTable);
+		m_SelectSessionViewCommand = new RelayCommand(SelectSessionView);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -108,6 +111,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand OpenScopeSourceCommand => m_OpenScopeSourceCommand;
 
 	public RelayCommand SortTableCommand => m_SortTableCommand;
+
+	public RelayCommand SelectSessionViewCommand => m_SelectSessionViewCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -262,10 +267,52 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_SelectedFrameCounterSummaryText, value);
 	}
 
+	public string ActiveSessionView
+	{
+		get => m_ActiveSessionView;
+		private set
+		{
+			if (SetProperty(ref m_ActiveSessionView, value))
+			{
+				RaisePropertyChanged(nameof(ActiveSessionViewTitle));
+				RaisePropertyChanged(nameof(IsThreadsViewActive));
+				RaisePropertyChanged(nameof(IsCoresViewActive));
+				RaisePropertyChanged(nameof(IsScopesViewActive));
+				RaisePropertyChanged(nameof(IsCustomStatsViewActive));
+				RaisePropertyChanged(nameof(IsLogViewActive));
+			}
+		}
+	}
+
+	public string ActiveSessionViewTitle => ActiveSessionView + " View";
+
+	public bool IsThreadsViewActive => ActiveSessionView == "Threads";
+
+	public bool IsCoresViewActive => ActiveSessionView == "Cores";
+
+	public bool IsScopesViewActive => ActiveSessionView == "Scopes";
+
+	public bool IsCustomStatsViewActive => ActiveSessionView == "Custom Stats";
+
+	public bool IsLogViewActive => ActiveSessionView == "Log";
+
 	public bool IsLoading
 	{
 		get => m_IsLoading;
 		private set => SetProperty(ref m_IsLoading, value);
+	}
+
+	private void SelectSessionView(object parameter)
+	{
+		string viewName = parameter as string;
+		if (viewName == "Threads" ||
+			viewName == "Cores" ||
+			viewName == "Scopes" ||
+			viewName == "Custom Stats" ||
+			viewName == "Log")
+		{
+			ActiveSessionView = viewName;
+		}
 	}
 
 	public void SelectFrameFromProfilerStats(int frameIndex)
