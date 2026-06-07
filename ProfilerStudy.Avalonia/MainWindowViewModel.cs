@@ -89,6 +89,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private IReadOnlyList<LogMessageRow> m_LogRows = Array.Empty<LogMessageRow>();
 	private IReadOnlyList<CoreSummaryRow> m_CoreRows = Array.Empty<CoreSummaryRow>();
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
+	private string m_OutputLogText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "No session";
 	private string m_TimelineRangeText = string.Empty;
 	private string m_SessionStatusText = "Session: none";
@@ -431,7 +432,19 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public string StatusText
 	{
 		get => m_StatusText;
-		private set => SetProperty(ref m_StatusText, value);
+		private set
+		{
+			if (SetProperty(ref m_StatusText, value))
+			{
+				AppendOutputLog(value);
+			}
+		}
+	}
+
+	public string OutputLogText
+	{
+		get => m_OutputLogText;
+		private set => SetProperty(ref m_OutputLogText, value);
 	}
 
 	public string FooterText
@@ -916,6 +929,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		IsOutputWindowVisible = !IsOutputWindowVisible;
 		StatusText = IsOutputWindowVisible ? "Output Window visible." : "Output Window hidden.";
+	}
+
+	private void AppendOutputLog(string message)
+	{
+		if (string.IsNullOrWhiteSpace(message))
+		{
+			return;
+		}
+
+		OutputLogText = string.IsNullOrEmpty(m_OutputLogText)
+			? message
+			: m_OutputLogText + Environment.NewLine + message;
 	}
 
 	private void ToggleToolbox()

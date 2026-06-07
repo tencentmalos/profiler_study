@@ -1293,7 +1293,7 @@
           <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="#101010" />
         </Border>
         <TextBox Grid.Row="1"
-                 Text="{Binding StatusText}"
+                 Text="{Binding OutputLogText}"
                  AcceptsReturn="True"
                  IsReadOnly="True"
                  BorderThickness="0"
