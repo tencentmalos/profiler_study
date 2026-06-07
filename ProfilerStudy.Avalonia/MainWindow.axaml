@@ -175,11 +175,11 @@
           <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
         </MenuItem>
         <MenuItem Header="_View">
-          <MenuItem Header="_Threads View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
-          <MenuItem Header="_Cores View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
-          <MenuItem Header="_Scopes View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
-          <MenuItem Header="Custom _Stats View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" />
-          <MenuItem Header="_Log View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
+          <MenuItem Header="_Threads View" ToggleType="Radio" IsChecked="{Binding IsThreadsViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
+          <MenuItem Header="_Cores View" ToggleType="Radio" IsChecked="{Binding IsCoresViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
+          <MenuItem Header="_Scopes View" ToggleType="Radio" IsChecked="{Binding IsScopesViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
+          <MenuItem Header="Custom _Stats View" ToggleType="Radio" IsChecked="{Binding IsCustomStatsViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" />
+          <MenuItem Header="_Log View" ToggleType="Radio" IsChecked="{Binding IsLogViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
           <Separator />
           <MenuItem Header="_Threads View">
             <MenuItem Header="_Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
