@@ -810,8 +810,63 @@
             </Grid>
           </Grid>
         </Border>
-        <Grid Grid.Row="1" RowDefinitions="150,24,4,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
-          <Grid Grid.Row="0" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+        <Grid Grid.Row="1" RowDefinitions="118,150,24,4,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+          <Grid Grid.Row="0" ColumnDefinitions="32,*" IsVisible="{Binding IsThreadsInfoPanelVisible}">
+            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <TextBlock Text="INFO"
+                         Foreground="#202020"
+                         FontWeight="SemiBold"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Width="96"
+                         TextAlignment="Center"
+                         RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                  <RotateTransform Angle="-90" />
+                </TextBlock.RenderTransform>
+              </TextBlock>
+            </Border>
+
+            <Border Grid.Column="1" Background="#F5F5F5" BorderBrush="#7D7D7D" BorderThickness="1" Padding="8,6">
+              <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto,*,Auto,*" ColumnSpacing="10" RowSpacing="5">
+                <TextBlock Text="Session" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="Frames" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="3" Text="{Binding StatusBarSessionText}" Foreground="#101010" />
+                <TextBlock Grid.Column="4" Text="Threads" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="5" Text="{Binding Summary.ThreadCount}" Foreground="#101010" />
+
+                <TextBlock Grid.Row="1" Text="Range" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.RangeText}" Foreground="#101010" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Avg" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" />
+                <TextBlock Grid.Row="1" Grid.Column="4" Text="Max" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
+
+                <TextBlock Grid.Row="2" Text="Target" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#101010" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="Selected" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding SelectedFrameStatusText}" Foreground="#101010" />
+                <TextBlock Grid.Row="2" Grid.Column="4" Text="Visible" Foreground="#505050" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="2" Grid.Column="5" Text="{Binding TimelineRangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              </Grid>
+            </Border>
+          </Grid>
+
+          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
+            <Grid ColumnDefinitions="32,*">
+              <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                <TextBlock Text="INFO" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock.RenderTransform>
+                    <RotateTransform Angle="-90" />
+                  </TextBlock.RenderTransform>
+                </TextBlock>
+              </Border>
+              <TextBlock Grid.Column="1" Text="Info hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+            </Grid>
+          </Border>
+
+          <Grid Grid.Row="1" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
                          Foreground="#202020"
@@ -827,7 +882,7 @@
               </TextBlock>
             </Border>
 
-            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsInfoPanelVisible}">
+            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
               <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" ColumnDefinitions="*,46">
                 <Button Grid.Column="0"
                         Content="Filter Threads..."
@@ -851,13 +906,9 @@
                         Margin="0,3,0,0"
                         Command="{Binding ClearThreadFilterCommand}" />
                 <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,6,0,4" />
-                <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
-                <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Selection.SelectedFrameLabel}" Foreground="#101010" />
+                <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#404040" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
               </Grid>
-            </Border>
-
-            <Border Grid.Column="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
-              <TextBlock Text="Info hidden" Foreground="#303030" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
 
             <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" MinHeight="120">
@@ -889,7 +940,7 @@
             </Border>
           </Grid>
 
-          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+          <Border Grid.Row="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
                 <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
@@ -902,7 +953,7 @@
             </Grid>
           </Border>
 
-          <Grid Grid.Row="1" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+          <Grid Grid.Row="2" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
             <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="4,2">
               <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
@@ -919,7 +970,7 @@
             </Grid>
           </Border>
 
-          <Border Grid.Row="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+          <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
           </Border>
             <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="8,4">
@@ -927,7 +978,7 @@
             </Border>
           </Grid>
 
-          <GridSplitter Grid.Row="2"
+          <GridSplitter Grid.Row="3"
                         Background="#9A9A9A"
                         BorderBrush="#767676"
                         BorderThickness="0,1"
@@ -936,7 +987,7 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
-          <Grid Grid.Row="3" RowDefinitions="260,4,88,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
+          <Grid Grid.Row="4" RowDefinitions="260,4,88,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
             <Grid Grid.Row="0" ColumnDefinitions="32,210,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
