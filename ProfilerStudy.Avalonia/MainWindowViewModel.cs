@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using FramePro;
 using SCLCoreCLR;
 
@@ -1100,10 +1101,13 @@ internal sealed class MainWindowViewModel : ObservableObject
 		ConnectionPanelStatusText = "Connecting to " + host + ":" + port + "...";
 		StatusText = ConnectionPanelStatusText;
 		Session session = new Session(new CoreSettings(), new NullLog());
+		string connectionName = host + ":" + port;
+		session.SessionIsReady += () => Dispatcher.UIThread.Post(() => ApplyLiveConnectionDocument(session, connectionName));
+		session.Disconnected += () => Dispatcher.UIThread.Post(() => OnLiveConnectionDisconnected(session));
 		bool connected = false;
 		try
 		{
-			connected = await Task.Run(() => session.ConnectToTcp(host, port, host + ":" + port, interactive: true, recordContextSwitches: false));
+			connected = await Task.Run(() => session.ConnectToTcp(host, port, connectionName, interactive: true, recordContextSwitches: false));
 		}
 		catch (Exception ex)
 		{
@@ -1133,6 +1137,33 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		session.Disconnect(DisconnectReason.Requested);
+	}
+
+	private void ApplyLiveConnectionDocument(Session session, string connectionName)
+	{
+		if (session == null || session != m_LiveConnectionSession)
+		{
+			return;
+		}
+
+		SessionQueryService queryService = new SessionQueryService(session, 33.333333333333336);
+		FrameSample[] samples = queryService.GetFrameSamples(0, Math.Max(0, session.FrameCount - 1), 0);
+		SessionSummary summary = queryService.CreateSummary("Live: " + connectionName, samples);
+		summary.SourceName = "Live: " + connectionName;
+		ApplyDocument(new SessionDocument("Live: " + connectionName, session, summary, samples));
+		ConnectionPanelStatusText = "Live session ready: " + connectionName + ".";
+		StatusText = ConnectionPanelStatusText;
+	}
+
+	private void OnLiveConnectionDisconnected(Session session)
+	{
+		if (session != m_LiveConnectionSession)
+		{
+			return;
+		}
+
+		ConnectionPanelStatusText = "FramePro transport disconnected: " + session.DisconnectReason + ".";
+		StatusText = ConnectionPanelStatusText;
 	}
 
 	private void DisconnectFromFramePro(bool updateStatus = true)
