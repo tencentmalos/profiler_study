@@ -62,6 +62,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenAndroidCommand;
 	private readonly RelayCommand m_CloseAndroidCommand;
 	private readonly RelayCommand m_AndroidActionCommand;
+	private readonly RelayCommand m_OpenConnectionCommand;
+	private readonly RelayCommand m_CloseConnectionCommand;
+	private readonly RelayCommand m_ConnectionActionCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -113,6 +116,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
+	private bool m_IsConnectionPanelVisible;
+	private string m_ConnectionHost = "localhost";
+	private string m_ConnectionPort = "8428";
+	private string m_ConnectionPanelStatusText = "Not connected.";
 	private string m_ScopeColorMode = "Thread";
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
@@ -179,6 +186,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenAndroidCommand = new RelayCommand(_ => OpenAndroidPanel());
 		m_CloseAndroidCommand = new RelayCommand(_ => CloseAndroidPanel());
 		m_AndroidActionCommand = new RelayCommand(ShowAndroidActionStatus);
+		m_OpenConnectionCommand = new RelayCommand(_ => OpenConnectionPanel());
+		m_CloseConnectionCommand = new RelayCommand(_ => CloseConnectionPanel());
+		m_ConnectionActionCommand = new RelayCommand(ShowConnectionActionStatus);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -292,6 +302,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand CloseAndroidCommand => m_CloseAndroidCommand;
 
 	public RelayCommand AndroidActionCommand => m_AndroidActionCommand;
+
+	public RelayCommand OpenConnectionCommand => m_OpenConnectionCommand;
+
+	public RelayCommand CloseConnectionCommand => m_CloseConnectionCommand;
+
+	public RelayCommand ConnectionActionCommand => m_ConnectionActionCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -746,6 +762,30 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_AndroidPanelStatusText, value);
 	}
 
+	public bool IsConnectionPanelVisible
+	{
+		get => m_IsConnectionPanelVisible;
+		private set => SetProperty(ref m_IsConnectionPanelVisible, value);
+	}
+
+	public string ConnectionHost
+	{
+		get => m_ConnectionHost;
+		set => SetProperty(ref m_ConnectionHost, value ?? string.Empty);
+	}
+
+	public string ConnectionPort
+	{
+		get => m_ConnectionPort;
+		set => SetProperty(ref m_ConnectionPort, value ?? string.Empty);
+	}
+
+	public string ConnectionPanelStatusText
+	{
+		get => m_ConnectionPanelStatusText;
+		private set => SetProperty(ref m_ConnectionPanelStatusText, value);
+	}
+
 	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
 
 	public IBrush CoresViewBrush => IsCoresViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
@@ -869,6 +909,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void OpenSettingsPanel()
 	{
 		IsAndroidPanelVisible = false;
+		IsConnectionPanelVisible = false;
 		IsSettingsPanelVisible = true;
 		StatusText = "Settings panel opened.";
 	}
@@ -882,6 +923,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private void OpenAndroidPanel()
 	{
 		IsSettingsPanelVisible = false;
+		IsConnectionPanelVisible = false;
 		IsAndroidPanelVisible = true;
 		StatusText = "Android panel opened.";
 	}
@@ -909,6 +951,39 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		StatusText = AndroidPanelStatusText;
+	}
+
+	private void OpenConnectionPanel()
+	{
+		IsSettingsPanelVisible = false;
+		IsAndroidPanelVisible = false;
+		IsConnectionPanelVisible = true;
+		StatusText = "Connection panel opened.";
+	}
+
+	private void CloseConnectionPanel()
+	{
+		IsConnectionPanelVisible = false;
+		StatusText = "Connection panel closed.";
+	}
+
+	private void ShowConnectionActionStatus(object parameter)
+	{
+		string actionName = parameter as string;
+		if (string.Equals(actionName, "Connect", StringComparison.Ordinal))
+		{
+			ConnectionPanelStatusText = $"Connection to {ConnectionHost}:{ConnectionPort} is visible in the Avalonia shell; live FramePro transport is not implemented yet.";
+		}
+		else if (string.Equals(actionName, "Disconnect", StringComparison.Ordinal))
+		{
+			ConnectionPanelStatusText = "Disconnected from the visible Avalonia shell connection state.";
+		}
+		else
+		{
+			ConnectionPanelStatusText = "Connection profile editing is visible in the Avalonia shell.";
+		}
+
+		StatusText = ConnectionPanelStatusText;
 	}
 
 	private void AdjustConditionalScopeTime(object parameter)
