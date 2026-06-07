@@ -319,6 +319,13 @@
               <TextBlock Text="Connect" TextAlignment="Center" />
             </StackPanel>
           </Button>
+          <Button Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings">
+            <StackPanel Spacing="4">
+              <Border Width="19" Height="36" Background="#B8B8B8" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Text="..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
+              </Border>
+            </StackPanel>
+          </Button>
           <Border Classes="toolbar-gap" Width="11" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
             <StackPanel Spacing="4">
@@ -335,13 +342,6 @@
                 <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#3A1111" />
               </Border>
               <TextBlock Text="Disconnect" TextAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings">
-            <StackPanel Spacing="4">
-              <Border Width="19" Height="36" Background="#B8B8B8" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Text="..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
-              </Border>
             </StackPanel>
           </Button>
           <Border Classes="toolbar-gap" Width="61" />
@@ -488,55 +488,6 @@
                 <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />
               </Border>
               <TextBlock Text="Callstacks" TextAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Border Classes="toolbar-gap" Width="61" />
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding OpenSessionCommand}" ToolTip.Tip="Open profiler session (Ctrl+O)">
-            <StackPanel Spacing="4">
-              <Border Width="28" Height="36" Background="#C6C099" BorderBrush="#706A3F" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Text="open" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#332F16" />
-              </Border>
-              <TextBlock Text="Open" TextAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SaveSessionCommand}" ToolTip.Tip="Save profiler session (Ctrl+S)">
-            <StackPanel Spacing="4">
-              <Border Width="28" Height="36" Background="#A8B4C8" BorderBrush="#4B596F" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Text="save" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#222B38" />
-              </Border>
-              <TextBlock Text="Save" TextAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SaveSessionAsCommand}" ToolTip.Tip="Save profiler session as a new file">
-            <StackPanel Spacing="4">
-              <Border Width="28" Height="36" Background="#A8B4C8" BorderBrush="#4B596F" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Text="as" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#222B38" />
-              </Border>
-              <TextBlock Text="Save As" TextAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding LoadSampleCommand}" ToolTip.Tip="Load generated sample profiler data">
-            <StackPanel Spacing="4">
-              <Border Width="28" Height="36" Background="#B7B7B7" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Text="demo" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#202020" />
-              </Border>
-              <TextBlock Text="Sample" TextAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding CloseSessionCommand}" ToolTip.Tip="Close active profiler session">
-            <StackPanel Spacing="4">
-              <Border Width="28" Height="36" Background="#C6A2A2" BorderBrush="#734B4B" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Text="x" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#3A1D1D" />
-              </Border>
-              <TextBlock Text="Close" TextAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ExportFramesToCsvCommand}" ToolTip.Tip="Export frame data to CSV">
-            <StackPanel Spacing="4">
-              <Border Width="28" Height="36" Background="#B8C6A2" BorderBrush="#536C3C" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Text="csv" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="9" Foreground="#24331A" />
-              </Border>
-              <TextBlock Text="Export" TextAlignment="Center" />
             </StackPanel>
           </Button>
         </StackPanel>
