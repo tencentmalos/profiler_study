@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -129,6 +130,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
 	private string m_AndroidEndpoint = AdbSocketDiscovery.DebugFrameProEndpoint;
+	private string m_AndroidRecordingDuration = "5";
 	private bool m_IsConnectionPanelVisible;
 	private bool m_IsConnecting;
 	private string m_ConnectionHost = "localhost";
@@ -146,6 +148,19 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_SelectedFrameCounterSortKey = "Graph";
 	private bool m_SelectedFrameCounterSortDescending;
 	private bool m_IsLoading;
+
+	private readonly struct ProcessRunResult
+	{
+		public ProcessRunResult(bool success, string output)
+		{
+			Success = success;
+			Output = output ?? string.Empty;
+		}
+
+		public bool Success { get; }
+
+		public string Output { get; }
+	}
 
 	public MainWindowViewModel(bool loadSampleOnStartup = false, string startupProfilerPath = null)
 		: this(new SourceViewerLauncher(), new AppSettingsService(), loadSampleOnStartup, startupProfilerPath)
@@ -825,6 +840,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 		set => SetProperty(ref m_AndroidEndpoint, value);
 	}
 
+	public string AndroidRecordingDuration
+	{
+		get => m_AndroidRecordingDuration;
+		set => SetProperty(ref m_AndroidRecordingDuration, value);
+	}
+
 	public bool IsConnectionPanelVisible
 	{
 		get => m_IsConnectionPanelVisible;
@@ -1034,8 +1055,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		string actionName = parameter as string;
 		if (string.Equals(actionName, "RecordContextSwitches", StringComparison.Ordinal))
 		{
-			AndroidPanelStatusText = "Context switch recording is visible in the Avalonia shell; device capture is not implemented yet.";
-			StatusText = AndroidPanelStatusText;
+			await RecordAndroidContextSwitchesAsync();
 		}
 		else if (string.Equals(actionName, "ConnectAndroid", StringComparison.Ordinal))
 		{
@@ -1061,6 +1081,133 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			AndroidPanelStatusText = "Android action is visible in the Avalonia shell but is not implemented yet.";
 			StatusText = AndroidPanelStatusText;
+		}
+	}
+
+	private async Task RecordAndroidContextSwitchesAsync()
+	{
+		if (!int.TryParse((AndroidRecordingDuration ?? string.Empty).Trim(), out int duration) || duration <= 0 || duration > 600)
+		{
+			AndroidPanelStatusText = "Android context switch recording duration must be between 1 and 600 seconds.";
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		Window window = global::Avalonia.Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+			? desktop.MainWindow
+			: null;
+		if (window == null)
+		{
+			AndroidPanelStatusText = "No application window is available for saving a context switch recording.";
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		string adb = AdbSocketDiscovery.ResolveAdbExecutable();
+		AndroidPanelStatusText = "Starting Android context switch recording for " + duration + " seconds...";
+		StatusText = AndroidPanelStatusText;
+		ProcessRunResult tracingOn = await RunProcessAsync(adb, new[] { "shell", "echo 1 > /d/tracing/tracing_on" }, 5000);
+		if (!tracingOn.Success)
+		{
+			AndroidPanelStatusText = "Error starting context switch recording: " + tracingOn.Output;
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		ProcessRunResult marker = await RunProcessAsync(adb, new[] { "shell", "echo echo userlandclock\\(\\) > /d/tracing/trace_marker" }, 5000);
+		if (!marker.Success)
+		{
+			await RunProcessAsync(adb, new[] { "shell", "echo 0 > /d/tracing/tracing_on" }, 5000);
+			AndroidPanelStatusText = "Error writing context switch trace marker: " + marker.Output;
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		ProcessRunResult recording = await RunProcessAsync(adb, new[] { "shell", "atrace", "-t", duration.ToString(), "sched" }, (duration * 1000) + 10000);
+		await RunProcessAsync(adb, new[] { "shell", "echo 0 > /d/tracing/tracing_on" }, 5000);
+		if (!recording.Success)
+		{
+			AndroidPanelStatusText = "Error recording Android context switches: " + recording.Output;
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		IStorageFile file = await window.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+		{
+			Title = "Save Android context switch recording",
+			SuggestedFileName = "android-context-switch.profiler_context_switch",
+			FileTypeChoices = new List<FilePickerFileType>
+			{
+				new FilePickerFileType("Android context switch files")
+				{
+					Patterns = new[] { "*.profiler_context_switch" }
+				}
+			}
+		});
+
+		if (file == null)
+		{
+			AndroidPanelStatusText = "Android context switch recording completed but was not saved.";
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		string path = file.TryGetLocalPath();
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			AndroidPanelStatusText = "Selected context switch output file is not available as a local path.";
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		await File.WriteAllTextAsync(path, recording.Output);
+		AndroidPanelStatusText = "Saved Android context switch recording: " + Path.GetFileName(path);
+		StatusText = AndroidPanelStatusText;
+	}
+
+	private static async Task<ProcessRunResult> RunProcessAsync(string executable, string[] arguments, int timeoutMs)
+	{
+		try
+		{
+			ProcessStartInfo startInfo = new ProcessStartInfo
+			{
+				FileName = executable,
+				UseShellExecute = false,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				CreateNoWindow = true
+			};
+			foreach (string argument in arguments)
+			{
+				startInfo.ArgumentList.Add(argument);
+			}
+
+			using (Process process = Process.Start(startInfo))
+			{
+				if (process == null)
+				{
+					return new ProcessRunResult(false, "Failed to start process: " + executable);
+				}
+
+				Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+				Task<string> errorTask = process.StandardError.ReadToEndAsync();
+				Task waitTask = process.WaitForExitAsync();
+				Task completedTask = await Task.WhenAny(waitTask, Task.Delay(timeoutMs));
+				if (completedTask != waitTask)
+				{
+					process.Kill(entireProcessTree: true);
+					return new ProcessRunResult(false, executable + " timed out.");
+				}
+
+				string output = await outputTask;
+				string error = await errorTask;
+				string result = (output + error).Trim();
+				return new ProcessRunResult(process.ExitCode == 0, string.IsNullOrWhiteSpace(result) ? "<empty>" : result);
+			}
+		}
+		catch (Exception ex)
+		{
+			return new ProcessRunResult(false, ex.Message);
 		}
 	}
 
