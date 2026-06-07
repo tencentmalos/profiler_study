@@ -206,6 +206,21 @@
           <MenuItem Header="Custom _Stats View" ToggleType="Radio" IsChecked="{Binding IsCustomStatsViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" />
           <MenuItem Header="_Log View" ToggleType="Radio" IsChecked="{Binding IsLogViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
           <Separator />
+          <MenuItem Header="_Frame Navigation">
+            <MenuItem Header="_Start" Command="{Binding ResetTimelineCommand}" />
+            <MenuItem Header="_Track Selected Frame" Command="{Binding TrackSelectedFrameCommand}" />
+            <MenuItem Header="_End" Command="{Binding SelectLastFrameCommand}" />
+            <Separator />
+            <MenuItem Header="_Previous Spike" Command="{Binding SelectPreviousSpikeCommand}" />
+            <MenuItem Header="Select _Slowest Frame" Command="{Binding SelectSlowestFrameCommand}" />
+            <MenuItem Header="_Next Spike" Command="{Binding SelectNextSpikeCommand}" />
+            <Separator />
+            <MenuItem Header="Pan _Left" Command="{Binding PanTimelineLeftCommand}" />
+            <MenuItem Header="Pan _Right" Command="{Binding PanTimelineRightCommand}" />
+            <MenuItem Header="Zoom _In" Command="{Binding ZoomTimelineInCommand}" />
+            <MenuItem Header="Zoom _Out" Command="{Binding ZoomTimelineOutCommand}" />
+          </MenuItem>
+          <Separator />
           <MenuItem Header="_Threads View">
             <MenuItem Header="_Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
             <MenuItem Header="_Frame Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
