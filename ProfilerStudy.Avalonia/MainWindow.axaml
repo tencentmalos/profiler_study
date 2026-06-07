@@ -1499,37 +1499,97 @@
           </Border>
         </Grid>
 
-        <Border Grid.Row="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsCoresViewActive}">
-          <Grid RowDefinitions="Auto,Auto,*">
-            <DockPanel LastChildFill="True">
-              <TextBlock DockPanel.Dock="Left" Text="Cores View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
-              <TextBlock Text="{Binding CoreSummaryText}" Foreground="#404040" HorizontalAlignment="Right" />
-            </DockPanel>
-            <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,8,0,0" Padding="6,4">
-              <Grid ColumnDefinitions="150,*">
-                <TextBlock Text="Core" Foreground="#202020" FontWeight="SemiBold" />
-                <TextBlock Grid.Column="1" Text="Context switches in visible range" Foreground="#202020" FontWeight="SemiBold" TextAlignment="Right" />
-              </Grid>
-            </Border>
-            <ScrollViewer Grid.Row="2" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-              <ItemsControl ItemsSource="{Binding CoreRows}">
+        <Grid Grid.Row="1" RowDefinitions="100,24,4,*" ColumnDefinitions="32,210,*" Background="#C8C8C8" IsVisible="{Binding IsCoresViewActive}">
+          <Border Grid.Row="0" Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+              <TextBlock.RenderTransform>
+                <RotateTransform Angle="-90" />
+              </TextBlock.RenderTransform>
+            </TextBlock>
+          </Border>
+          <Border Grid.Row="0" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
+              <TextBlock Text="Frame Graph" Foreground="#101010" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#404040" TextWrapping="Wrap" />
+              <TextBlock Grid.Row="2" Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+            </Grid>
+          </Border>
+          <Border Grid.Row="0" Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+            <local:FrameTimelineControl
+                Samples="{Binding FrameSamples}"
+                TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
+                Selection="{Binding Selection}"
+                Viewport="{Binding Viewport}" />
+          </Border>
+
+          <Border Grid.Row="1" Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
+          <Border Grid.Row="1" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="4,2">
+            <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
+              <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
+              <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
+              <TextBlock Grid.Column="2" Text="{Binding TimelineRangeText}" Foreground="#303030" VerticalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+              <Button Grid.Column="3" Content="+" Padding="0" Command="{Binding ZoomTimelineInCommand}" />
+              <Button Grid.Column="4" Content="▶" Padding="0" Command="{Binding PanTimelineRightCommand}" />
+            </Grid>
+          </Border>
+          <Border Grid.Row="1" Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="8,4">
+            <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
+          </Border>
+
+          <GridSplitter Grid.Row="2" Grid.ColumnSpan="3" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
+
+          <Border Grid.Row="3" Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+              <TextBlock.RenderTransform>
+                <RotateTransform Angle="-90" />
+              </TextBlock.RenderTransform>
+            </TextBlock>
+          </Border>
+          <Border Grid.Row="3" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
+              <TextBlock Text="Cores" Foreground="#101010" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+              <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="6,3">
-                      <Grid ColumnDefinitions="150,*">
-                        <TextBlock Text="{Binding CoreText}" Foreground="#101010" />
-                        <TextBlock Grid.Column="1" Text="{Binding ContextSwitchCount}" Foreground="#101010" TextAlignment="Right" />
-                      </Grid>
-                    </Border>
+                    <TextBlock Text="{Binding CoreText}" Foreground="#101010" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-            </ScrollViewer>
-          </Grid>
-        </Border>
+            </Grid>
+          </Border>
+          <Border Grid.Row="3" Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+            <local:CoreTimelineStripControl Rows="{Binding CoreRows}" SummaryText="{Binding CoreSummaryText}" />
+          </Border>
+        </Grid>
 
-        <Border Grid.Row="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="12" IsVisible="{Binding IsScopesViewActive}">
-          <Grid RowDefinitions="Auto,Auto,*">
+        <Border Grid.Row="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0" IsVisible="{Binding IsScopesViewActive}">
+          <Grid RowDefinitions="163,4,*">
+            <Grid Grid.Row="0" ColumnDefinitions="32,210,*">
+              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+                <TextBlock Text="Scopes" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock.RenderTransform>
+                    <RotateTransform Angle="-90" />
+                  </TextBlock.RenderTransform>
+                </TextBlock>
+              </Border>
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
+                <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
+                  <TextBlock Text="Scope Graph" Foreground="#101010" FontWeight="SemiBold" />
+                  <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+                  <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
+                </Grid>
+              </Border>
+              <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+                <local:FrameTimelineControl
+                    Samples="{Binding FrameSamples}"
+                    TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
+                    Selection="{Binding Selection}"
+                    Viewport="{Binding Viewport}" />
+              </Border>
+            </Grid>
+            <GridSplitter Grid.Row="1" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
+            <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" Margin="6">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Scopes View" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
               <TextBox DockPanel.Dock="Right"
@@ -1567,6 +1627,7 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </ScrollViewer>
+            </Grid>
           </Grid>
         </Border>
 
