@@ -263,7 +263,7 @@
               </Border>
             </Grid>
           </Border>
-          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Callstacks">
+          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding OpenCallstacksCommand}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />
@@ -994,6 +994,61 @@
           </Border>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
             <Button Content="Close" Width="86" Command="{Binding CloseSettingsCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Width="520"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D2D2D2"
+            BorderBrush="#676767"
+            BorderThickness="1"
+            BoxShadow="0 8 24 0 #66000000"
+            Padding="0"
+            IsVisible="{Binding IsCallstacksPanelVisible}">
+      <Grid RowDefinitions="Auto,*">
+        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+          <DockPanel LastChildFill="True">
+            <TextBlock Text="Callstacks" FontWeight="SemiBold" Foreground="#101010" />
+            <Button DockPanel.Dock="Right"
+                    Content="x"
+                    Width="24"
+                    Height="22"
+                    Padding="0"
+                    Command="{Binding CloseCallstacksCommand}" />
+          </DockPanel>
+        </Border>
+        <StackPanel Grid.Row="1" Margin="14" Spacing="10">
+          <TextBlock Text="Callstack Tools" FontWeight="SemiBold" Foreground="#101010" />
+          <TextBlock Text="Callstack controls are represented here so the Avalonia toolbar has the same entry point as the original profiler." Foreground="#404040" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
+            <Border Width="42" Height="34" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1">
+              <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#303030" />
+            </Border>
+            <Button Grid.Column="1"
+                    HorizontalContentAlignment="Left"
+                    Content="Capture Callstacks"
+                    Command="{Binding CallstacksActionCommand}"
+                    CommandParameter="Capture" />
+            <Border Grid.Row="1" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
+              <TextBlock Text="sym" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
+            </Border>
+            <Button Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalContentAlignment="Left"
+                    Content="Resolve Symbols"
+                    Command="{Binding CallstacksActionCommand}"
+                    CommandParameter="Resolve" />
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+              <TextBlock Text="{Binding CallstacksPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
+            </Border>
+          </Grid>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+            <Button Content="Close" Width="86" Command="{Binding CloseCallstacksCommand}" />
           </StackPanel>
         </StackPanel>
       </Grid>
