@@ -386,7 +386,22 @@
                     Samples="{Binding FrameSamples}"
                     Viewport="{Binding Viewport}"
                     Selection="{Binding Selection}"
-                    OpenScopeSourceCommand="{Binding OpenScopeSourceCommand}" />
+                    OpenScopeSourceCommand="{Binding OpenScopeSourceCommand}"
+                    FocusThreadCommand="{Binding FocusThreadCommand}">
+                  <local:ThreadTimelineLaneControl.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="Hide" Command="{Binding HideFocusedThreadCommand}" />
+                      <Separator />
+                      <MenuItem Header="Collapse All" Command="{Binding CollapseAllThreadsCommand}" />
+                      <MenuItem Header="Expand All" Command="{Binding ExpandAllThreadsCommand}" />
+                      <Separator />
+                      <MenuItem Header="Move Up" Command="{Binding MoveFocusedThreadUpCommand}" />
+                      <MenuItem Header="Move Down" Command="{Binding MoveFocusedThreadDownCommand}" />
+                      <Separator />
+                      <MenuItem Header="Settings..." Command="{Binding ThreadSettingsCommand}" />
+                    </ContextMenu>
+                  </local:ThreadTimelineLaneControl.ContextMenu>
+                </local:ThreadTimelineLaneControl>
               </Border>
 
               <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#808080" BorderThickness="1">

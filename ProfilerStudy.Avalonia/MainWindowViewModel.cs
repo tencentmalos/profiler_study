@@ -14,7 +14,8 @@ namespace ProfilerStudy.Avalonia;
 
 internal sealed class MainWindowViewModel : ObservableObject
 {
-	private const int MaxVisibleThreadTimelineThreads = 8;
+	private const int DefaultVisibleThreadTimelineThreads = 8;
+	private const int CollapsedVisibleThreadTimelineThreads = 12;
 
 	private readonly SessionLoader m_SessionLoader = new SessionLoader();
 	private readonly RelayCommand m_OpenSessionCommand;
@@ -28,6 +29,13 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ClearThreadFilterCommand;
 	private readonly RelayCommand m_ScrollThreadTimelineUpCommand;
 	private readonly RelayCommand m_ScrollThreadTimelineDownCommand;
+	private readonly RelayCommand m_FocusThreadCommand;
+	private readonly RelayCommand m_HideFocusedThreadCommand;
+	private readonly RelayCommand m_MoveFocusedThreadUpCommand;
+	private readonly RelayCommand m_MoveFocusedThreadDownCommand;
+	private readonly RelayCommand m_CollapseAllThreadsCommand;
+	private readonly RelayCommand m_ExpandAllThreadsCommand;
+	private readonly RelayCommand m_ThreadSettingsCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -61,6 +69,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_ActiveSessionView = "Threads";
 	private int m_ThreadTimelineFirstVisibleThreadIndex;
 	private int m_ThreadTimelineTotalThreadCount;
+	private int m_MaxVisibleThreadTimelineThreads = DefaultVisibleThreadTimelineThreads;
+	private string m_FocusedThreadName;
+	private bool m_AreThreadScopesCollapsed;
+	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
+	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
 	private string m_ScopeHotspotSortKey = "TotalTime";
 	private bool m_ScopeHotspotSortDescending = true;
 	private string m_SelectedFrameScopeSortKey = "Start";
@@ -90,7 +103,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_SelectSessionViewCommand = new RelayCommand(SelectSessionView);
 		m_ClearThreadFilterCommand = new RelayCommand(_ => ThreadFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ThreadFilterText));
 		m_ScrollThreadTimelineUpCommand = new RelayCommand(_ => ScrollThreadTimeline(-1), _ => ThreadTimelineFirstVisibleThreadIndex > 0);
-		m_ScrollThreadTimelineDownCommand = new RelayCommand(_ => ScrollThreadTimeline(1), _ => ThreadTimelineFirstVisibleThreadIndex + MaxVisibleThreadTimelineThreads < ThreadTimelineTotalThreadCount);
+		m_ScrollThreadTimelineDownCommand = new RelayCommand(_ => ScrollThreadTimeline(1), _ => ThreadTimelineFirstVisibleThreadIndex + m_MaxVisibleThreadTimelineThreads < ThreadTimelineTotalThreadCount);
+		m_FocusThreadCommand = new RelayCommand(FocusThread, parameter => parameter is string threadName && !string.IsNullOrWhiteSpace(threadName));
+		m_HideFocusedThreadCommand = new RelayCommand(_ => HideFocusedThread(), _ => !string.IsNullOrWhiteSpace(FocusedThreadName));
+		m_MoveFocusedThreadUpCommand = new RelayCommand(_ => MoveFocusedThread(-1), _ => CanMoveFocusedThread(-1));
+		m_MoveFocusedThreadDownCommand = new RelayCommand(_ => MoveFocusedThread(1), _ => CanMoveFocusedThread(1));
+		m_CollapseAllThreadsCommand = new RelayCommand(_ => SetThreadScopeCollapseState(true));
+		m_ExpandAllThreadsCommand = new RelayCommand(_ => SetThreadScopeCollapseState(false));
+		m_ThreadSettingsCommand = new RelayCommand(_ => ShowThreadSettingsStatus());
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -138,6 +158,20 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ScrollThreadTimelineUpCommand => m_ScrollThreadTimelineUpCommand;
 
 	public RelayCommand ScrollThreadTimelineDownCommand => m_ScrollThreadTimelineDownCommand;
+
+	public RelayCommand FocusThreadCommand => m_FocusThreadCommand;
+
+	public RelayCommand HideFocusedThreadCommand => m_HideFocusedThreadCommand;
+
+	public RelayCommand MoveFocusedThreadUpCommand => m_MoveFocusedThreadUpCommand;
+
+	public RelayCommand MoveFocusedThreadDownCommand => m_MoveFocusedThreadDownCommand;
+
+	public RelayCommand CollapseAllThreadsCommand => m_CollapseAllThreadsCommand;
+
+	public RelayCommand ExpandAllThreadsCommand => m_ExpandAllThreadsCommand;
+
+	public RelayCommand ThreadSettingsCommand => m_ThreadSettingsCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -316,6 +350,20 @@ internal sealed class MainWindowViewModel : ObservableObject
 			{
 				m_ScrollThreadTimelineUpCommand.RaiseCanExecuteChanged();
 				m_ScrollThreadTimelineDownCommand.RaiseCanExecuteChanged();
+			}
+		}
+	}
+
+	public string FocusedThreadName
+	{
+		get => m_FocusedThreadName;
+		private set
+		{
+			if (SetProperty(ref m_FocusedThreadName, value ?? string.Empty))
+			{
+				m_HideFocusedThreadCommand.RaiseCanExecuteChanged();
+				m_MoveFocusedThreadUpCommand.RaiseCanExecuteChanged();
+				m_MoveFocusedThreadDownCommand.RaiseCanExecuteChanged();
 			}
 		}
 	}
@@ -872,13 +920,19 @@ internal sealed class MainWindowViewModel : ObservableObject
 					item.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
 				.ToArray();
 		}
+		if (m_AreThreadScopesCollapsed)
+		{
+			allRows = allRows.Where(item => item.Depth == 0).ToArray();
+		}
 
+		UpdateThreadOrder(allRows);
 		IReadOnlyList<IGrouping<string, ThreadTimelineScopeRow>> threadGroups = allRows
+			.Where(item => !m_HiddenThreadNames.Contains(item.ThreadName))
 			.GroupBy(item => item.ThreadName, StringComparer.Ordinal)
-			.OrderBy(group => group.Min(item => item.StartFrame))
+			.OrderBy(group => GetThreadOrderIndex(group.Key))
 			.ToArray();
 		ThreadTimelineTotalThreadCount = threadGroups.Count;
-		int maxFirstThreadIndex = Math.Max(0, ThreadTimelineTotalThreadCount - MaxVisibleThreadTimelineThreads);
+		int maxFirstThreadIndex = Math.Max(0, ThreadTimelineTotalThreadCount - m_MaxVisibleThreadTimelineThreads);
 		if (ThreadTimelineFirstVisibleThreadIndex > maxFirstThreadIndex)
 		{
 			ThreadTimelineFirstVisibleThreadIndex = maxFirstThreadIndex;
@@ -886,7 +940,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 		string[] visibleThreadNames = threadGroups
 			.Skip(ThreadTimelineFirstVisibleThreadIndex)
-			.Take(MaxVisibleThreadTimelineThreads)
+			.Take(m_MaxVisibleThreadTimelineThreads)
 			.Select(group => group.Key)
 			.ToArray();
 		HashSet<string> visibleThreadNameSet = new HashSet<string>(StringComparer.Ordinal);
@@ -908,19 +962,20 @@ internal sealed class MainWindowViewModel : ObservableObject
 		else
 		{
 			int threadCount = VisibleThreadScopes.Select(item => item.ThreadName).Distinct(StringComparer.Ordinal).Count();
-			string visibleWindowText = ThreadTimelineTotalThreadCount > MaxVisibleThreadTimelineThreads
+			string visibleWindowText = ThreadTimelineTotalThreadCount > m_MaxVisibleThreadTimelineThreads
 				? $" showing threads {ThreadTimelineFirstVisibleThreadIndex + 1}-{ThreadTimelineFirstVisibleThreadIndex + threadCount} of {ThreadTimelineTotalThreadCount}"
 				: string.Empty;
+			string collapseText = m_AreThreadScopesCollapsed ? ", top-level scopes" : string.Empty;
 			ThreadTimelineSummaryText = string.IsNullOrWhiteSpace(filter)
-				? $"{VisibleThreadScopes.Count} scope events across {threadCount} threads in {Viewport.RangeText}"
-				: $"{VisibleThreadScopes.Count} matching scope events across {threadCount} threads in {Viewport.RangeText}";
+				? $"{VisibleThreadScopes.Count} scope events across {threadCount} threads in {Viewport.RangeText}{collapseText}"
+				: $"{VisibleThreadScopes.Count} matching scope events across {threadCount} threads in {Viewport.RangeText}{collapseText}";
 			ThreadTimelineSummaryText += visibleWindowText;
 		}
 	}
 
 	private void ScrollThreadTimeline(int deltaThreads)
 	{
-		int maxFirstThreadIndex = Math.Max(0, ThreadTimelineTotalThreadCount - MaxVisibleThreadTimelineThreads);
+		int maxFirstThreadIndex = Math.Max(0, ThreadTimelineTotalThreadCount - m_MaxVisibleThreadTimelineThreads);
 		int nextIndex = Math.Max(0, Math.Min(maxFirstThreadIndex, ThreadTimelineFirstVisibleThreadIndex + deltaThreads));
 		if (nextIndex == ThreadTimelineFirstVisibleThreadIndex)
 		{
@@ -929,7 +984,95 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 		ThreadTimelineFirstVisibleThreadIndex = nextIndex;
 		ApplyVisibleThreadTimeline();
-		StatusText = $"Showing thread lanes {ThreadTimelineFirstVisibleThreadIndex + 1}-{Math.Min(ThreadTimelineTotalThreadCount, ThreadTimelineFirstVisibleThreadIndex + MaxVisibleThreadTimelineThreads)} of {ThreadTimelineTotalThreadCount}.";
+		StatusText = $"Showing thread lanes {ThreadTimelineFirstVisibleThreadIndex + 1}-{Math.Min(ThreadTimelineTotalThreadCount, ThreadTimelineFirstVisibleThreadIndex + m_MaxVisibleThreadTimelineThreads)} of {ThreadTimelineTotalThreadCount}.";
+	}
+
+	private void FocusThread(object parameter)
+	{
+		FocusedThreadName = parameter as string;
+		StatusText = string.IsNullOrWhiteSpace(FocusedThreadName)
+			? "No thread selected."
+			: "Thread menu target: " + FocusedThreadName;
+	}
+
+	private void HideFocusedThread()
+	{
+		if (string.IsNullOrWhiteSpace(FocusedThreadName))
+		{
+			return;
+		}
+
+		m_HiddenThreadNames.Add(FocusedThreadName);
+		ApplyVisibleThreadTimeline();
+		StatusText = "Hidden thread lane: " + FocusedThreadName;
+	}
+
+	private bool CanMoveFocusedThread(int direction)
+	{
+		if (string.IsNullOrWhiteSpace(FocusedThreadName))
+		{
+			return false;
+		}
+
+		int index = m_ThreadTimelineThreadOrder.IndexOf(FocusedThreadName);
+		int nextIndex = index + direction;
+		return index >= 0 && nextIndex >= 0 && nextIndex < m_ThreadTimelineThreadOrder.Count;
+	}
+
+	private void MoveFocusedThread(int direction)
+	{
+		if (!CanMoveFocusedThread(direction))
+		{
+			return;
+		}
+
+		int index = m_ThreadTimelineThreadOrder.IndexOf(FocusedThreadName);
+		int nextIndex = index + direction;
+		string threadName = m_ThreadTimelineThreadOrder[index];
+		m_ThreadTimelineThreadOrder[index] = m_ThreadTimelineThreadOrder[nextIndex];
+		m_ThreadTimelineThreadOrder[nextIndex] = threadName;
+		ApplyVisibleThreadTimeline();
+		StatusText = direction < 0 ? "Moved thread up: " + threadName : "Moved thread down: " + threadName;
+	}
+
+	private void SetThreadScopeCollapseState(bool collapsed)
+	{
+		m_AreThreadScopesCollapsed = collapsed;
+		m_MaxVisibleThreadTimelineThreads = collapsed ? CollapsedVisibleThreadTimelineThreads : DefaultVisibleThreadTimelineThreads;
+		ThreadTimelineFirstVisibleThreadIndex = 0;
+		ApplyVisibleThreadTimeline();
+		StatusText = collapsed ? "Collapsed all thread scopes to top-level lanes." : "Expanded all thread scopes.";
+	}
+
+	private void ShowThreadSettingsStatus()
+	{
+		StatusText = "Thread settings: right-click a lane, then use Hide, Move Up, Move Down, Collapse All, or Expand All.";
+	}
+
+	private void UpdateThreadOrder(IReadOnlyList<ThreadTimelineScopeRow> rows)
+	{
+		string[] discoveredNames = rows
+			.Select(item => item.ThreadName)
+			.Distinct(StringComparer.Ordinal)
+			.ToArray();
+		HashSet<string> discoveredSet = new HashSet<string>(discoveredNames, StringComparer.Ordinal);
+		m_ThreadTimelineThreadOrder.RemoveAll(item => !discoveredSet.Contains(item));
+		foreach (string threadName in discoveredNames)
+		{
+			if (!m_ThreadTimelineThreadOrder.Contains(threadName))
+			{
+				m_ThreadTimelineThreadOrder.Add(threadName);
+			}
+		}
+		m_HiddenThreadNames.RemoveWhere(item => !discoveredSet.Contains(item));
+		m_MoveFocusedThreadUpCommand.RaiseCanExecuteChanged();
+		m_MoveFocusedThreadDownCommand.RaiseCanExecuteChanged();
+	}
+
+	private int GetThreadOrderIndex(string threadName)
+	{
+		int index = m_ThreadTimelineThreadOrder.IndexOf(threadName);
+		return index < 0 ? int.MaxValue : index;
 	}
 
 	private void SortTable(object parameter)

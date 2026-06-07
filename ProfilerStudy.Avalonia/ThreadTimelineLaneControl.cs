@@ -52,6 +52,9 @@ public sealed class ThreadTimelineLaneControl : Control
 	public static readonly StyledProperty<ICommand> OpenScopeSourceCommandProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, ICommand>(nameof(OpenScopeSourceCommand));
 
+	public static readonly StyledProperty<ICommand> FocusThreadCommandProperty =
+		AvaloniaProperty.Register<ThreadTimelineLaneControl, ICommand>(nameof(FocusThreadCommand));
+
 	static ThreadTimelineLaneControl()
 	{
 		AffectsRender<ThreadTimelineLaneControl>(RowsProperty, SamplesProperty, ViewportProperty, SelectionProperty);
@@ -87,11 +90,26 @@ public sealed class ThreadTimelineLaneControl : Control
 		set => SetValue(OpenScopeSourceCommandProperty, value);
 	}
 
+	public ICommand FocusThreadCommand
+	{
+		get => GetValue(FocusThreadCommandProperty);
+		set => SetValue(FocusThreadCommandProperty, value);
+	}
+
 	protected override void OnPointerPressed(PointerPressedEventArgs e)
 	{
 		base.OnPointerPressed(e);
 		Point point = e.GetPosition(this);
 		PointerPointProperties properties = e.GetCurrentPoint(this).Properties;
+		if (properties.IsRightButtonPressed && TryGetThreadNameAtPoint(point, out string threadName))
+		{
+			if (FocusThreadCommand?.CanExecute(threadName) == true)
+			{
+				FocusThreadCommand.Execute(threadName);
+			}
+			return;
+		}
+
 		if (properties.IsRightButtonPressed && Viewport != null)
 		{
 			m_IsPanning = true;
@@ -391,6 +409,38 @@ public sealed class ThreadTimelineLaneControl : Control
 		}
 
 		return null;
+	}
+
+	private bool TryGetThreadNameAtPoint(Point point, out string threadName)
+	{
+		threadName = null;
+		IReadOnlyList<ThreadTimelineScopeRow> rows = Rows ?? Array.Empty<ThreadTimelineScopeRow>();
+		if (rows.Count == 0)
+		{
+			return false;
+		}
+
+		double y = TopPadding + AxisHeight;
+		foreach (IGrouping<string, ThreadTimelineScopeRow> threadRows in rows
+			.GroupBy(item => item.ThreadName, StringComparer.Ordinal)
+			.OrderBy(group => group.Min(item => item.StartFrame)))
+		{
+			if (y + LaneHeight > Bounds.Height - BottomPadding)
+			{
+				break;
+			}
+
+			Rect rowRect = new Rect(0.0, y, Bounds.Width, LaneHeight);
+			if (rowRect.Contains(point))
+			{
+				threadName = threadRows.Key;
+				return true;
+			}
+
+			y += LaneHeight + LaneGap;
+		}
+
+		return false;
 	}
 
 	private static string FormatScopeTip(ThreadTimelineScopeRow row)
