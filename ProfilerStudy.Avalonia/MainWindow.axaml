@@ -1029,7 +1029,7 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-          <Grid Grid.Row="6" RowDefinitions="88,4,*,4,69,4,260,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
+          <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
             <Grid Grid.Row="4" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
 
@@ -1223,32 +1223,40 @@
 
             <Grid Grid.Row="2" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
-                <TextBlock Text="Stats"
-                           Foreground="#202020"
-                           FontWeight="SemiBold"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Width="96"
-                           TextAlignment="Center"
-                           RenderTransformOrigin="0.5,0.5">
-                  <TextBlock.RenderTransform>
-                    <RotateTransform Angle="-90" />
-                  </TextBlock.RenderTransform>
-                </TextBlock>
+                <TextBlock Text="" />
               </Border>
 
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
-                <StackPanel Spacing="4">
-                  <TextBlock Text="Custom Stats" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
-                  <Separator Margin="0,4" />
-                  <TextBlock Text="Scope Hotspots" Foreground="#101010" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding ScopeHotspotSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
-                </StackPanel>
+              <Border Grid.Column="1" Background="#C4C4C4" BorderBrush="#7D7D7D" BorderThickness="1">
+                <Button Content="Custom Stat..."
+                        Padding="6,0"
+                        HorizontalContentAlignment="Left"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding SelectSessionViewCommand}"
+                        CommandParameter="CustomStats" />
               </Border>
 
-              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
-                <stats:ucProfilerStats x:Name="ProfilerStatsControl" MinHeight="260" />
+              <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" Padding="6,0">
+                <Grid ColumnDefinitions="*,120,120">
+                  <stats:ucProfilerStats x:Name="ProfilerStatsControl"
+                                          IsVisible="False"
+                                          Width="0"
+                                          Height="0" />
+                  <TextBlock Text="{Binding SelectedFrameCounterSummaryText}"
+                             Foreground="#202020"
+                             VerticalAlignment="Center"
+                             TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="1"
+                             Text="{Binding TimelineRangeText}"
+                             Foreground="#404040"
+                             VerticalAlignment="Center"
+                             TextAlignment="Right"
+                             TextTrimming="CharacterEllipsis" />
+                  <Border Grid.Column="2"
+                          Background="#A5A5A5"
+                          BorderBrush="#7A7A7A"
+                          BorderThickness="1"
+                          Margin="8,7,0,7" />
+                </Grid>
               </Border>
             </Grid>
 
