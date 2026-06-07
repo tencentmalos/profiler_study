@@ -487,7 +487,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
-				IsStartupPageVisible = value == null;
+				if (value != null)
+				{
+					IsStartupPageVisible = false;
+				}
 				m_CloseSessionCommand.RaiseCanExecuteChanged();
 				m_CreateSessionFromSelectionCommand.RaiseCanExecuteChanged();
 				m_SaveSessionCommand.RaiseCanExecuteChanged();
