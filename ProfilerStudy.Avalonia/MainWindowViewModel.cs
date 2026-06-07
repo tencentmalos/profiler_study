@@ -36,6 +36,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private TimelineViewport m_Viewport = TimelineViewport.CreateForFrames(0);
 	private IReadOnlyList<ScopeHotspotRow> m_AllScopeHotspots = Array.Empty<ScopeHotspotRow>();
 	private IReadOnlyList<ScopeHotspotRow> m_ScopeHotspots = Array.Empty<ScopeHotspotRow>();
+	private IReadOnlyList<ThreadTimelineScopeRow> m_VisibleThreadScopes = Array.Empty<ThreadTimelineScopeRow>();
 	private IReadOnlyList<ScopeFrameDetailRow> m_SelectedFrameScopes = Array.Empty<ScopeFrameDetailRow>();
 	private IReadOnlyList<SelectedFrameCounterRow> m_SelectedFrameCounters = Array.Empty<SelectedFrameCounterRow>();
 	private IReadOnlyList<LogMessageRow> m_LogRows = Array.Empty<LogMessageRow>();
@@ -44,6 +45,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
 	private string m_ScopeFilterText = string.Empty;
+	private string m_ThreadTimelineSummaryText = "No profiler thread scope data loaded.";
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
 	private string m_SelectedFrameCounterSummaryText = "Select a frame to inspect counters.";
@@ -246,6 +248,18 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_ScopeHotspotSummaryText;
 		private set => SetProperty(ref m_ScopeHotspotSummaryText, value);
+	}
+
+	public IReadOnlyList<ThreadTimelineScopeRow> VisibleThreadScopes
+	{
+		get => m_VisibleThreadScopes;
+		private set => SetProperty(ref m_VisibleThreadScopes, value);
+	}
+
+	public string ThreadTimelineSummaryText
+	{
+		get => m_ThreadTimelineSummaryText;
+		private set => SetProperty(ref m_ThreadTimelineSummaryText, value);
 	}
 
 	public IReadOnlyList<ScopeFrameDetailRow> SelectedFrameScopes
@@ -545,6 +559,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		Selection = document.Selection;
 		Viewport = document.Viewport;
 		ApplyScopeHotspots(document);
+		ApplyVisibleThreadTimeline();
 		ApplySelectedFrameScopes();
 		ApplySelectedFrameCounters();
 		ApplyLogMessages(document);
@@ -740,6 +755,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			e.PropertyName == nameof(TimelineViewport.EndFrame))
 		{
 			ApplyCoreSummary();
+			ApplyVisibleThreadTimeline();
 		}
 		UpdateTimelineText();
 		UpdateFooterText();
@@ -768,6 +784,24 @@ internal sealed class MainWindowViewModel : ObservableObject
 		else
 		{
 			SelectedFrameScopeSummaryText = $"Frame {selectedFrameIndex}: {SelectedFrameScopes.Count} scopes";
+		}
+	}
+
+	private void ApplyVisibleThreadTimeline()
+	{
+		VisibleThreadScopes = ThreadTimelineScopeAnalyzer.Build(CurrentDocument, Viewport);
+		if (CurrentDocument?.Session == null)
+		{
+			ThreadTimelineSummaryText = "Generated sample has no profiler scope stream.";
+		}
+		else if (VisibleThreadScopes.Count == 0)
+		{
+			ThreadTimelineSummaryText = "No scopes found in " + (Viewport?.RangeText ?? "visible range") + ".";
+		}
+		else
+		{
+			int threadCount = VisibleThreadScopes.Select(item => item.ThreadName).Distinct(StringComparer.Ordinal).Count();
+			ThreadTimelineSummaryText = $"{VisibleThreadScopes.Count} scope events across {threadCount} threads in {Viewport.RangeText}";
 		}
 	}
 
