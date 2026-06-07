@@ -10,7 +10,6 @@
     Width="1180"
     Height="760"
     WindowState="Maximized"
-    Icon="/Assets/AppIcon.png"
     IsMenuVisible="False"
     MinWidth="860"
     MinHeight="560">
