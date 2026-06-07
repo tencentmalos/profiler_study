@@ -1,10 +1,9 @@
 <Application
     x:Class="ProfilerStudy.Avalonia.App"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:suki="clr-namespace:SukiUI;assembly=SukiUI">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Application.Styles>
-    <suki:SukiTheme />
+    <FluentTheme />
   </Application.Styles>
   <Application.Resources>
     <ResourceDictionary>

@@ -11,7 +11,7 @@
     <Description>Cross-platform FramePro profiler viewer built with Avalonia.</Description>
     <Company>ProfilerStudy</Company>
     <Copyright>Copyright (c) 2026 ProfilerStudy contributors</Copyright>
-    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+    <ApplicationIcon Condition="'$(RuntimeIdentifier)' == 'win-x64'">Assets\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
@@ -20,8 +20,8 @@
     <ProjectReference Include="..\ProfilerStudyCore\ProfilerStudyCore.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="12.0.4" />
-    <PackageReference Include="SukiUI" Version="7.0.1" />
-    <PackageReference Include="ScottPlot.Avalonia" Version="5.0.55" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.4" />
+    <PackageReference Include="ScottPlot.Avalonia" Version="5.1.58" />
   </ItemGroup>
 </Project>

@@ -75,11 +75,23 @@ internal sealed class MainWindowViewModel : ObservableObject
 		AttachTimelineState(Selection, Viewport);
 		if (!string.IsNullOrWhiteSpace(startupProfilerPath))
 		{
-			_ = OpenStartupProfilerAsync(startupProfilerPath);
+			_ = OpenStartupProfilerSafelyAsync(startupProfilerPath);
 		}
 		else if (loadSampleOnStartup)
 		{
 			_ = LoadSampleAsync();
+		}
+	}
+
+	private async Task OpenStartupProfilerSafelyAsync(string startupProfilerPath)
+	{
+		try
+		{
+			await OpenStartupProfilerAsync(startupProfilerPath);
+		}
+		catch (Exception ex)
+		{
+			StatusText = "Failed to load startup profiler file: " + ex.Message;
 		}
 	}
 

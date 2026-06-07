@@ -1,12 +1,12 @@
 using Avalonia;
+using Avalonia.Controls;
 using System;
 using System.ComponentModel;
-using SukiUI.Controls;
 using ProfilerStudy.Avalonia.ProfilerStats;
 
 namespace ProfilerStudy.Avalonia;
 
-public sealed partial class MainWindow : SukiWindow
+public sealed partial class MainWindow : Window
 {
 	private MainWindowViewModel m_ViewModel;
 	private TimelineViewport m_AttachedViewport;
