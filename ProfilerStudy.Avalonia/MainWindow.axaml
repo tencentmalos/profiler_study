@@ -1492,34 +1492,110 @@
             <TextBlock Text="Toolbox" FontWeight="SemiBold" Foreground="#101010" />
           </DockPanel>
         </Border>
-        <StackPanel Grid.Row="1" Margin="8" Spacing="8">
-          <Border Classes="toolbox-section">
-            <StackPanel>
-              <Border Classes="toolbox-section-header">
-                <TextBlock Text="Session" FontWeight="SemiBold" Foreground="#101010" />
-              </Border>
-              <UniformGrid Columns="2" Margin="6" RowSpacing="5" ColumnSpacing="5">
-                <Button Classes="toolbox-action" Content="Open..." Command="{Binding OpenSessionCommand}" />
-                <Button Classes="toolbox-action" Content="Sample" Command="{Binding LoadSampleCommand}" />
-                <Button Classes="toolbox-action" Content="Connect..." Command="{Binding OpenConnectionCommand}" />
-                <Button Classes="toolbox-action" Content="Android..." Command="{Binding OpenAndroidCommand}" />
-              </UniformGrid>
-            </StackPanel>
-          </Border>
-          <Border Classes="toolbox-section">
-            <StackPanel>
-              <Border Classes="toolbox-section-header">
-                <TextBlock Text="Views" FontWeight="SemiBold" Foreground="#101010" />
-              </Border>
-              <UniformGrid Columns="2" Margin="6" RowSpacing="5" ColumnSpacing="5">
-                <Button Classes="toolbox-action" Content="Threads" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
-                <Button Classes="toolbox-action" Content="Cores" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
-                <Button Classes="toolbox-action" Content="Scopes" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
-                <Button Classes="toolbox-action" Content="Log" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
-              </UniformGrid>
-            </StackPanel>
-          </Border>
-        </StackPanel>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="8" Spacing="8">
+            <Border Classes="toolbox-section">
+              <Grid RowDefinitions="Auto,*">
+                <Border Classes="toolbox-section-header">
+                  <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Right" Text="{Binding ActiveSessionView}" Foreground="#505050" FontSize="11" />
+                    <TextBlock Text="Session Info" FontWeight="SemiBold" Foreground="#101010" />
+                  </DockPanel>
+                </Border>
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="7" Margin="6">
+                  <TextBlock Text="Frames" Foreground="#404040" />
+                  <TextBlock Grid.Column="1" Text="{Binding Summary.FrameCount}" Foreground="#101010" />
+                  <TextBlock Grid.Row="1" Text="Average" Foreground="#404040" />
+                  <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" />
+                  <TextBlock Grid.Row="2" Text="Max" Foreground="#404040" />
+                  <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" />
+                  <TextBlock Grid.Row="3" Text="Threads" Foreground="#404040" />
+                  <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Summary.ThreadCount}" Foreground="#101010" />
+                  <TextBlock Grid.Row="4" Text="Source" Foreground="#404040" />
+                  <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="#101010" TextWrapping="Wrap" />
+                </Grid>
+              </Grid>
+            </Border>
+
+            <Border Classes="toolbox-section">
+              <Grid RowDefinitions="Auto,*">
+                <Border Classes="toolbox-section-header">
+                  <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="#101010" />
+                </Border>
+                <Grid Grid.Row="1" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="6" ColumnSpacing="5" RowSpacing="5">
+                  <Button Classes="toolbox-action" Content="Connect..." Command="{Binding OpenConnectionCommand}" />
+                  <Button Grid.Column="1" Classes="toolbox-action" Content="Android..." Command="{Binding OpenAndroidCommand}" />
+                  <Button Grid.Row="1" Grid.ColumnSpan="2" Classes="toolbox-action" Content="Disconnect" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" />
+                </Grid>
+              </Grid>
+            </Border>
+
+            <Border Classes="toolbox-section">
+              <Grid RowDefinitions="Auto,*">
+                <Border Classes="toolbox-section-header">
+                  <TextBlock Text="Frame Navigation" FontWeight="SemiBold" Foreground="#101010" />
+                </Border>
+                <Grid Grid.Row="1" ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto" Margin="6" ColumnSpacing="5" RowSpacing="5">
+                  <Button Classes="toolbox-action" Content="Start" Command="{Binding ResetTimelineCommand}" />
+                  <Button Grid.Column="1" Classes="toolbox-action" Content="Track" Command="{Binding TrackSelectedFrameCommand}" />
+                  <Button Grid.Column="2" Classes="toolbox-action" Content="End" Command="{Binding SelectLastFrameCommand}" />
+                  <Button Grid.Row="1" Classes="toolbox-action" Content="Prev Spike" Command="{Binding SelectPreviousSpikeCommand}" />
+                  <Button Grid.Row="1" Grid.Column="1" Classes="toolbox-action" Content="Max" Command="{Binding SelectSlowestFrameCommand}" />
+                  <Button Grid.Row="1" Grid.Column="2" Classes="toolbox-action" Content="Next Spike" Command="{Binding SelectNextSpikeCommand}" />
+                  <Button Grid.Row="2" Classes="toolbox-action" Content="Pan Left" Command="{Binding PanTimelineLeftCommand}" />
+                  <Button Grid.Row="2" Grid.Column="1" Classes="toolbox-action" Content="Zoom In" Command="{Binding ZoomTimelineInCommand}" />
+                  <Button Grid.Row="2" Grid.Column="2" Classes="toolbox-action" Content="Pan Right" Command="{Binding PanTimelineRightCommand}" />
+                </Grid>
+              </Grid>
+            </Border>
+
+            <Border Classes="toolbox-section">
+              <Grid RowDefinitions="Auto,*">
+                <Border Classes="toolbox-section-header">
+                  <TextBlock Text="Window Layout" FontWeight="SemiBold" Foreground="#101010" />
+                </Border>
+                <UniformGrid Grid.Row="1" Columns="2" Margin="6" RowSpacing="5" ColumnSpacing="5">
+                  <Button Classes="toolbox-action" Content="Threads" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}" />
+                  <Button Classes="toolbox-action" Content="Cores" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}" />
+                  <Button Classes="toolbox-action" Content="Scopes" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}" />
+                  <Button Classes="toolbox-action" Content="Stats" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}" />
+                  <Button Classes="toolbox-action" Content="Log" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}" />
+                  <Button Classes="toolbox-action" Content="Output" Command="{Binding ToggleOutputWindowCommand}" />
+                </UniformGrid>
+              </Grid>
+            </Border>
+
+            <Border Classes="toolbox-section">
+              <Grid RowDefinitions="Auto,*">
+                <Border Classes="toolbox-section-header">
+                  <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="#101010" />
+                </Border>
+                <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="5">
+                  <TextBox Text="{Binding ScopeFilterText}" Watermark="scope text" />
+                  <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="5">
+                    <Button Classes="toolbox-action" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
+                    <Button Grid.Column="1" Classes="toolbox-action" Content="Next" Command="{Binding FindNextScopeCommand}" />
+                    <Button Grid.Column="2" Classes="toolbox-action" Content="Clear" Command="{Binding ClearScopeFindCommand}" />
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Border>
+
+            <Border Classes="toolbox-section">
+              <Grid RowDefinitions="Auto,*">
+                <Border Classes="toolbox-section-header">
+                  <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
+                </Border>
+                <StackPanel Grid.Row="1" Margin="6" Spacing="4">
+                  <TextBlock Text="Captured root" Foreground="#404040" />
+                  <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
+                  <TextBlock Text="Local root" Foreground="#404040" Margin="0,4,0,0" />
+                  <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
+                </StackPanel>
+              </Grid>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
       </Grid>
     </Border>
 
