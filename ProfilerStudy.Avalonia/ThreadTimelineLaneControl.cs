@@ -33,6 +33,9 @@ public sealed class ThreadTimelineLaneControl : Control
 	private static readonly Pen HoverPen = new Pen(new SolidColorBrush(Color.FromRgb(32, 32, 32)), 2.0);
 
 	private ThreadTimelineScopeRow m_HoveredScope;
+	private bool m_IsPanning;
+	private double m_PanStartX;
+	private int m_PanStartFrame;
 
 	public static readonly StyledProperty<IReadOnlyList<ThreadTimelineScopeRow>> RowsProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, IReadOnlyList<ThreadTimelineScopeRow>>(nameof(Rows));
@@ -88,6 +91,16 @@ public sealed class ThreadTimelineLaneControl : Control
 	{
 		base.OnPointerPressed(e);
 		Point point = e.GetPosition(this);
+		PointerPointProperties properties = e.GetCurrentPoint(this).Properties;
+		if (properties.IsRightButtonPressed && Viewport != null)
+		{
+			m_IsPanning = true;
+			m_PanStartX = point.X;
+			m_PanStartFrame = Viewport.StartFrame;
+			e.Handled = true;
+			return;
+		}
+
 		if (e.ClickCount >= 2)
 		{
 			ThreadTimelineScopeRow scope = TryGetScopeAtPoint(point);
@@ -114,12 +127,24 @@ public sealed class ThreadTimelineLaneControl : Control
 	protected override void OnPointerMoved(PointerEventArgs e)
 	{
 		base.OnPointerMoved(e);
+		Point point = e.GetPosition(this);
+		if (m_IsPanning && Viewport != null)
+		{
+			double axisLeft = LeftPadding + ThreadLabelWidth;
+			double axisRight = Math.Max(axisLeft + 1.0, Bounds.Width - RightPadding);
+			double framesPerPixel = Viewport.VisibleFrameCount / Math.Max(1.0, axisRight - axisLeft);
+			int deltaFrames = (int)Math.Round((m_PanStartX - point.X) * framesPerPixel);
+			Viewport.ScrollFrames(m_PanStartFrame + deltaFrames - Viewport.StartFrame);
+			e.Handled = true;
+			return;
+		}
+
 		if (Selection == null)
 		{
 			return;
 		}
 
-		if (TryGetFrameAtPoint(e.GetPosition(this), out FrameSample frame))
+		if (TryGetFrameAtPoint(point, out FrameSample frame))
 		{
 			Selection.HoveredFrameIndex = frame.Index;
 			Selection.HoveredFrameTimeMs = frame.DurationMs;
@@ -130,12 +155,22 @@ public sealed class ThreadTimelineLaneControl : Control
 			Selection.HoveredFrameTimeMs = 0.0;
 		}
 
-		ThreadTimelineScopeRow hoveredScope = TryGetScopeAtPoint(e.GetPosition(this));
+		ThreadTimelineScopeRow hoveredScope = TryGetScopeAtPoint(point);
 		if (!ReferenceEquals(m_HoveredScope, hoveredScope))
 		{
 			m_HoveredScope = hoveredScope;
 			ToolTip.SetTip(this, hoveredScope == null ? null : FormatScopeTip(hoveredScope));
 			InvalidateVisual();
+		}
+	}
+
+	protected override void OnPointerReleased(PointerReleasedEventArgs e)
+	{
+		base.OnPointerReleased(e);
+		if (m_IsPanning)
+		{
+			m_IsPanning = false;
+			e.Handled = true;
 		}
 	}
 
@@ -147,6 +182,7 @@ public sealed class ThreadTimelineLaneControl : Control
 			Selection.HoveredFrameIndex = -1;
 			Selection.HoveredFrameTimeMs = 0.0;
 		}
+		m_IsPanning = false;
 		m_HoveredScope = null;
 		ToolTip.SetTip(this, null);
 		InvalidateVisual();
