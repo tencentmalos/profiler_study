@@ -810,7 +810,7 @@
             </Grid>
           </Grid>
         </Border>
-        <Grid Grid.Row="1" RowDefinitions="118,24,150,4,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+        <Grid Grid.Row="1" RowDefinitions="118,24,150,4,120,4,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
           <Grid Grid.Row="0" ColumnDefinitions="32,*" IsVisible="{Binding IsThreadsInfoPanelVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="INFO"
@@ -968,7 +968,68 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
-          <Grid Grid.Row="4" RowDefinitions="69,4,260,4,88,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
+          <Grid Grid.Row="4" ColumnDefinitions="32,210,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
+            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <TextBlock Text="Time"
+                         Foreground="#202020"
+                         FontWeight="SemiBold"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Width="96"
+                         TextAlignment="Center"
+                         RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                  <RotateTransform Angle="-90" />
+                </TextBlock.RenderTransform>
+              </TextBlock>
+            </Border>
+
+            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
+              <StackPanel Spacing="4">
+                <TextBlock Text="Time Spans" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+                <Separator Margin="0,4" />
+                <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,0,1">
+              <local:ThreadTimelineLaneControl
+                  Rows="{Binding VisibleThreadScopes}"
+                  Samples="{Binding FrameSamples}"
+                  Viewport="{Binding Viewport}"
+                  Selection="{Binding Selection}"
+                  ColorMode="{Binding ScopeColorMode}"
+                  OpenScopeSourceCommand="{Binding OpenScopeSourceCommand}"
+                  FocusThreadCommand="{Binding FocusThreadCommand}" />
+            </Border>
+
+            <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#7D7D7D" BorderThickness="1" />
+          </Grid>
+
+          <Border Grid.Row="4" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
+            <Grid ColumnDefinitions="32,*">
+              <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                <TextBlock Text="Time" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock.RenderTransform>
+                    <RotateTransform Angle="-90" />
+                  </TextBlock.RenderTransform>
+                </TextBlock>
+              </Border>
+              <TextBlock Grid.Column="1" Text="Time Spans hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+            </Grid>
+          </Border>
+
+          <GridSplitter Grid.Row="5"
+                        Background="#9A9A9A"
+                        BorderBrush="#767676"
+                        BorderThickness="0,1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        ResizeDirection="Rows"
+                        IsVisible="{Binding IsThreadsScopeGraphVisible}" />
+
+          <Grid Grid.Row="6" RowDefinitions="69,4,260,4,88,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
             <Grid Grid.Row="0" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
 
