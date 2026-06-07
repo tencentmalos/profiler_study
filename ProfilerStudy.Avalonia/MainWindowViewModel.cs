@@ -483,38 +483,86 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public bool IsThreadsInfoPanelVisible
 	{
 		get => m_IsThreadsInfoPanelVisible;
-		private set => SetProperty(ref m_IsThreadsInfoPanelVisible, value);
+		private set
+		{
+			if (SetProperty(ref m_IsThreadsInfoPanelVisible, value))
+			{
+				RaisePropertyChanged(nameof(IsThreadsInfoPanelCollapsed));
+			}
+		}
 	}
+
+	public bool IsThreadsInfoPanelCollapsed => !IsThreadsInfoPanelVisible;
 
 	public bool IsThreadsFrameGraphVisible
 	{
 		get => m_IsThreadsFrameGraphVisible;
-		private set => SetProperty(ref m_IsThreadsFrameGraphVisible, value);
+		private set
+		{
+			if (SetProperty(ref m_IsThreadsFrameGraphVisible, value))
+			{
+				RaisePropertyChanged(nameof(IsThreadsFrameGraphCollapsed));
+			}
+		}
 	}
+
+	public bool IsThreadsFrameGraphCollapsed => !IsThreadsFrameGraphVisible;
 
 	public bool IsThreadsScopeGraphVisible
 	{
 		get => m_IsThreadsScopeGraphVisible;
-		private set => SetProperty(ref m_IsThreadsScopeGraphVisible, value);
+		private set
+		{
+			if (SetProperty(ref m_IsThreadsScopeGraphVisible, value))
+			{
+				RaisePropertyChanged(nameof(IsThreadsScopeGraphCollapsed));
+			}
+		}
 	}
+
+	public bool IsThreadsScopeGraphCollapsed => !IsThreadsScopeGraphVisible;
 
 	public bool IsThreadsCoreGraphVisible
 	{
 		get => m_IsThreadsCoreGraphVisible;
-		private set => SetProperty(ref m_IsThreadsCoreGraphVisible, value);
+		private set
+		{
+			if (SetProperty(ref m_IsThreadsCoreGraphVisible, value))
+			{
+				RaisePropertyChanged(nameof(IsThreadsCoreGraphCollapsed));
+			}
+		}
 	}
+
+	public bool IsThreadsCoreGraphCollapsed => !IsThreadsCoreGraphVisible;
 
 	public bool IsThreadsCustomStatsVisible
 	{
 		get => m_IsThreadsCustomStatsVisible;
-		private set => SetProperty(ref m_IsThreadsCustomStatsVisible, value);
+		private set
+		{
+			if (SetProperty(ref m_IsThreadsCustomStatsVisible, value))
+			{
+				RaisePropertyChanged(nameof(IsThreadsCustomStatsCollapsed));
+			}
+		}
 	}
+
+	public bool IsThreadsCustomStatsCollapsed => !IsThreadsCustomStatsVisible;
 
 	public bool IsThreadsDataGridVisible
 	{
 		get => m_IsThreadsDataGridVisible;
-		private set => SetProperty(ref m_IsThreadsDataGridVisible, value);
+		private set
+		{
+			if (SetProperty(ref m_IsThreadsDataGridVisible, value))
+			{
+				RaisePropertyChanged(nameof(IsThreadsDataGridCollapsed));
+			}
+		}
 	}
+
+	public bool IsThreadsDataGridCollapsed => !IsThreadsDataGridVisible;
 
 	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
 

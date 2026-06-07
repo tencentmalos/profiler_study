@@ -394,6 +394,10 @@
               </Grid>
             </Border>
 
+            <Border Grid.Column="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
+              <TextBlock Text="Info hidden" Foreground="#303030" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+
             <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" MinHeight="120">
               <local:FrameTimelineControl
                   Samples="{Binding FrameSamples}"
@@ -402,6 +406,15 @@
                   Viewport="{Binding Viewport}" />
             </Border>
           </Grid>
+
+          <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+            <Grid ColumnDefinitions="32,*">
+              <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+              </Border>
+              <TextBlock Grid.Column="1" Text="Frame Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+            </Grid>
+          </Border>
 
           <Grid Grid.Row="1" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
@@ -417,8 +430,12 @@
                            TextTrimming="CharacterEllipsis" />
                 <Button Grid.Column="3" Content="+" Padding="0" Command="{Binding ZoomTimelineInCommand}" />
                 <Button Grid.Column="4" Content="▶" Padding="0" Command="{Binding PanTimelineRightCommand}" />
-              </Grid>
-            </Border>
+            </Grid>
+          </Border>
+
+          <Border Grid.Row="1" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+            <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+          </Border>
             <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="8,4">
               <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
             </Border>
@@ -499,6 +516,15 @@
               </Border>
             </Grid>
 
+            <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
+              <Grid ColumnDefinitions="32,*">
+                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                  <TextBlock Text="Threads" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Scope Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+              </Grid>
+            </Border>
+
             <GridSplitter Grid.Row="1"
                           Background="#9A9A9A"
                           BorderBrush="#767676"
@@ -532,6 +558,15 @@
               </Border>
             </Grid>
 
+            <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
+              <Grid ColumnDefinitions="32,*">
+                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                  <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Core Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+              </Grid>
+            </Border>
+
             <GridSplitter Grid.Row="3"
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
@@ -563,6 +598,15 @@
                 <stats:ucProfilerStats x:Name="ProfilerStatsControl" MinHeight="260" />
               </Border>
             </Grid>
+
+            <Border Grid.Row="4" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
+              <Grid ColumnDefinitions="32,*">
+                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                  <TextBlock Text="Stats" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Custom Stats hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
+              </Grid>
+            </Border>
 
             <GridSplitter Grid.Row="7"
                           Background="#9A9A9A"
@@ -680,6 +724,15 @@
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
                 </ScrollViewer>
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="6" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsDataGridCollapsed}">
+              <Grid ColumnDefinitions="32,*">
+                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                  <TextBlock Text="Data" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="Data Grid hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
             </Border>
 
