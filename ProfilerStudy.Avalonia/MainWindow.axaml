@@ -230,11 +230,11 @@
                 <TextBlock Text="Find" FontWeight="SemiBold" Foreground="#101010" />
                 <TextBlock Text="Find Scope" DockPanel.Dock="Right" Foreground="#505050" />
               </DockPanel>
-              <TextBox Grid.Row="1" Watermark="Scope text" />
+              <TextBox Grid.Row="1" Watermark="Scope text" Text="{Binding ScopeFilterText}" />
               <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6">
-                <Button Content="Prev" Width="68" IsEnabled="False" />
-                <Button Content="Next" Width="68" IsEnabled="False" />
-                <Button Content="Clear" Width="68" IsEnabled="False" />
+                <Button Content="Prev" Width="68" Command="{Binding FindPreviousScopeCommand}" />
+                <Button Content="Next" Width="68" Command="{Binding FindNextScopeCommand}" />
+                <Button Content="Clear" Width="68" Command="{Binding ClearScopeFindCommand}" />
               </StackPanel>
             </Grid>
           </Border>

@@ -44,6 +44,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ThreadSettingsCommand;
 	private readonly RelayCommand m_ToggleThreadsPanelCommand;
 	private readonly RelayCommand m_ToggleOutputWindowCommand;
+	private readonly RelayCommand m_FindPreviousScopeCommand;
+	private readonly RelayCommand m_FindNextScopeCommand;
+	private readonly RelayCommand m_ClearScopeFindCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -134,6 +137,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ThreadSettingsCommand = new RelayCommand(_ => ShowThreadSettingsStatus());
 		m_ToggleThreadsPanelCommand = new RelayCommand(ToggleThreadsPanel);
 		m_ToggleOutputWindowCommand = new RelayCommand(_ => ToggleOutputWindow());
+		m_FindPreviousScopeCommand = new RelayCommand(_ => FindScope(-1), _ => CanFindScope());
+		m_FindNextScopeCommand = new RelayCommand(_ => FindScope(1), _ => CanFindScope());
+		m_ClearScopeFindCommand = new RelayCommand(_ => ScopeFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ScopeFilterText));
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -212,6 +218,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand ToggleOutputWindowCommand => m_ToggleOutputWindowCommand;
 
+	public RelayCommand FindPreviousScopeCommand => m_FindPreviousScopeCommand;
+
+	public RelayCommand FindNextScopeCommand => m_FindNextScopeCommand;
+
+	public RelayCommand ClearScopeFindCommand => m_ClearScopeFindCommand;
+
 	public SessionSummaryViewModel Summary { get; }
 
 	public SessionDocument CurrentDocument
@@ -229,6 +241,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 				m_PanTimelineRightCommand.RaiseCanExecuteChanged();
 				m_ZoomTimelineInCommand.RaiseCanExecuteChanged();
 				m_ZoomTimelineOutCommand.RaiseCanExecuteChanged();
+				m_FindPreviousScopeCommand.RaiseCanExecuteChanged();
+				m_FindNextScopeCommand.RaiseCanExecuteChanged();
 			}
 		}
 	}
@@ -337,6 +351,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_ScopeFilterText, value ?? string.Empty))
 			{
 				ApplyScopeHotspotFilter();
+				m_FindPreviousScopeCommand.RaiseCanExecuteChanged();
+				m_FindNextScopeCommand.RaiseCanExecuteChanged();
+				m_ClearScopeFindCommand.RaiseCanExecuteChanged();
 			}
 		}
 	}
@@ -1013,6 +1030,63 @@ internal sealed class MainWindowViewModel : ObservableObject
 		FrameSample slowestFrame = CurrentDocument.FrameSamples.OrderByDescending(item => item.DurationMs).First();
 		SelectAndCenterFrame(slowestFrame);
 		StatusText = $"Selected slowest frame {slowestFrame.Index} ({slowestFrame.DurationMs:0.###} ms).";
+	}
+
+	private bool CanFindScope()
+	{
+		return CurrentDocument?.Session != null &&
+			CurrentDocument.FrameSamples != null &&
+			CurrentDocument.FrameSamples.Length > 0 &&
+			!string.IsNullOrWhiteSpace(ScopeFilterText);
+	}
+
+	private void FindScope(int direction)
+	{
+		if (!CanFindScope())
+		{
+			StatusText = string.IsNullOrWhiteSpace(ScopeFilterText)
+				? "Enter scope text to find."
+				: "No profiler scope stream is loaded.";
+			return;
+		}
+
+		string filter = ScopeFilterText.Trim();
+		FrameSample? matchingFrame = FindScopeFrame(filter, direction);
+		if (!matchingFrame.HasValue)
+		{
+			StatusText = direction < 0
+				? $"No previous scope matching \"{filter}\"."
+				: $"No next scope matching \"{filter}\".";
+			return;
+		}
+
+		FrameSample frame = matchingFrame.Value;
+		SelectAndCenterFrame(frame);
+		ActiveSessionView = "Threads";
+		IsThreadsDataGridVisible = true;
+		StatusText = direction < 0
+			? $"Found previous \"{filter}\" in frame {frame.Index}."
+			: $"Found next \"{filter}\" in frame {frame.Index}.";
+	}
+
+	private FrameSample? FindScopeFrame(string filter, int direction)
+	{
+		int currentFrame = Selection.SelectedFrameIndex >= 0
+			? Selection.SelectedFrameIndex
+			: direction < 0 ? Viewport.EndFrame + 1 : Viewport.StartFrame - 1;
+		IEnumerable<FrameSample> samples = direction < 0
+			? CurrentDocument.FrameSamples.Where(item => item.Index < currentFrame).OrderByDescending(item => item.Index)
+			: CurrentDocument.FrameSamples.Where(item => item.Index > currentFrame).OrderBy(item => item.Index);
+		foreach (FrameSample sample in samples)
+		{
+			IReadOnlyList<ScopeFrameDetailRow> scopes = ScopeFrameDetailAnalyzer.Build(CurrentDocument, sample.Index);
+			if (scopes.Any(item => item.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0))
+			{
+				return sample;
+			}
+		}
+
+		return null;
 	}
 
 	private void SelectAdjacentSpike(int direction)
