@@ -250,7 +250,14 @@
             <MenuItem Header="_Float" Command="{Binding FloatToolboxCommand}" />
             <MenuItem Header="_Dock" Command="{Binding DockToolboxCommand}" />
           </MenuItem>
-          <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
+          <MenuItem Header="_Output Window">
+            <MenuItem Header="_Show / Hide" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
+            <MenuItem Header="_Minimize" Command="{Binding MinimizeOutputWindowCommand}" />
+            <MenuItem Header="_Restore" Command="{Binding RestoreOutputWindowCommand}" />
+            <Separator />
+            <MenuItem Header="_Float" Command="{Binding FloatOutputWindowCommand}" />
+            <MenuItem Header="_Dock" Command="{Binding DockOutputWindowCommand}" />
+          </MenuItem>
         </MenuItem>
         <MenuItem Header="_Connection">
           <MenuItem Header="_New Connection..." Command="{Binding OpenConnectionCommand}" />
