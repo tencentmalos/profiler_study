@@ -24,6 +24,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_CloseSessionCommand;
+	private readonly RelayCommand m_SaveSessionCommand;
+	private readonly RelayCommand m_SaveSessionAsCommand;
 	private readonly RelayCommand m_ExportFramesToCsvCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
 	private readonly RelayCommand m_TrackSelectedFrameCommand;
@@ -178,6 +180,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_CloseSessionCommand = new RelayCommand(_ => CloseSession(), _ => CurrentDocument != null);
+		m_SaveSessionCommand = new RelayCommand(_ => _ = SaveSessionAsync(false), _ => CurrentDocument?.Session != null);
+		m_SaveSessionAsCommand = new RelayCommand(_ => _ = SaveSessionAsync(true), _ => CurrentDocument?.Session != null);
 		m_ExportFramesToCsvCommand = new RelayCommand(_ => _ = ExportFramesToCsvAsync(), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
 		m_TrackSelectedFrameCommand = new RelayCommand(_ => TrackSelectedFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
@@ -258,6 +262,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
 
 	public RelayCommand CloseSessionCommand => m_CloseSessionCommand;
+
+	public RelayCommand SaveSessionCommand => m_SaveSessionCommand;
+
+	public RelayCommand SaveSessionAsCommand => m_SaveSessionAsCommand;
 
 	public RelayCommand ExportFramesToCsvCommand => m_ExportFramesToCsvCommand;
 
@@ -367,6 +375,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
 				m_CloseSessionCommand.RaiseCanExecuteChanged();
+				m_SaveSessionCommand.RaiseCanExecuteChanged();
+				m_SaveSessionAsCommand.RaiseCanExecuteChanged();
 				m_ExportFramesToCsvCommand.RaiseCanExecuteChanged();
 				m_ResetTimelineCommand.RaiseCanExecuteChanged();
 				m_TrackSelectedFrameCommand.RaiseCanExecuteChanged();
@@ -1874,6 +1884,139 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			StatusText = ex.Message;
 		}
+	}
+
+	private async Task SaveSessionAsync(bool saveAs)
+	{
+		SessionDocument document = CurrentDocument;
+		Session session = document?.Session;
+		if (session == null)
+		{
+			StatusText = "No profiler session is available to save.";
+			return;
+		}
+
+		if (session.Connected)
+		{
+			StatusText = "Please disconnect before saving.";
+			return;
+		}
+
+		try
+		{
+			if (saveAs || NeedsSaveFilename(session.SessionFilename))
+			{
+				string path = await AskUserForSaveFilenameAsync(session.SessionFilename);
+				if (string.IsNullOrWhiteSpace(path))
+				{
+					return;
+				}
+
+				session.SessionFilename = Path.GetFullPath(path);
+			}
+
+			if (session.ProcessingPackets)
+			{
+				StatusText = "Still processing received packets. Please wait...";
+				await Task.Run(() =>
+				{
+					while (session.ProcessingPackets)
+					{
+						session.WaitforProcessingToFinish(100);
+					}
+				});
+			}
+
+			StatusText = "Writing " + session.SessionFilename + "...";
+			SessionViewSaveData saveData = CreateSessionViewSaveData(document);
+			ThreadJobContext context = new ThreadJobContext();
+			string error = string.Empty;
+			bool saved = await Task.Run(() => session.Write(saveData, context, ref error));
+			if (saved)
+			{
+				AddRecentFile(session.SessionFilename);
+				StatusText = "Saved " + session.SessionFilename;
+			}
+			else
+			{
+				StatusText = "Error writing file " + session.SessionFilename + ": " + error;
+			}
+		}
+		catch (Exception ex)
+		{
+			StatusText = ex.Message;
+		}
+	}
+
+	private async Task<string> AskUserForSaveFilenameAsync(string sessionFilename)
+	{
+		Window window = global::Avalonia.Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+			? desktop.MainWindow
+			: null;
+		if (window == null)
+		{
+			StatusText = "No application window is available for saving.";
+			return null;
+		}
+
+		string suggestedFileName = sessionFilename ?? "session.profiler";
+		if (suggestedFileName.ToLowerInvariant().Trim().EndsWith(".profiler_recording", StringComparison.Ordinal))
+		{
+			suggestedFileName = suggestedFileName.Substring(0, suggestedFileName.Length - ".profiler_recording".Length);
+		}
+
+		IStorageFile file = await window.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+		{
+			Title = "Save profiler session",
+			SuggestedFileName = suggestedFileName,
+			FileTypeChoices = new List<FilePickerFileType>
+			{
+				new FilePickerFileType("Profiler files")
+				{
+					Patterns = new[] { "*.profiler" }
+				},
+				new FilePickerFileType("All files")
+				{
+					Patterns = new[] { "*" }
+				}
+			}
+		});
+
+		if (file == null)
+		{
+			return null;
+		}
+
+		string path = file.TryGetLocalPath();
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			StatusText = "Selected save file is not available as a local path.";
+			return null;
+		}
+
+		return path;
+	}
+
+	private static bool NeedsSaveFilename(string sessionFilename)
+	{
+		return string.IsNullOrWhiteSpace(sessionFilename)
+			|| !Path.IsPathRooted(sessionFilename)
+			|| sessionFilename.ToLowerInvariant().Trim().EndsWith("profiler_recording", StringComparison.Ordinal);
+	}
+
+	private static SessionViewSaveData CreateSessionViewSaveData(SessionDocument document)
+	{
+		SessionViewSaveData saveData = new SessionViewSaveData();
+		if (document?.Viewport == null)
+		{
+			return saveData;
+		}
+
+		saveData.m_FrameGraphVisibleRangeStart = document.Viewport.StartFrame;
+		saveData.m_FrameGraphVisibleRangeEnd = document.Viewport.EndFrame;
+		saveData.m_FrameGraphStart = document.Viewport.StartFrame;
+		saveData.m_FrameGraphViewScale = Math.Max(1, document.Viewport.VisibleFrameCount);
+		return saveData;
 	}
 
 	private async Task OpenStartupProfilerAsync(string path)

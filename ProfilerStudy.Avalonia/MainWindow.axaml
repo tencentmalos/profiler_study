@@ -102,8 +102,8 @@
       <Menu Background="#EFEFEF" FontSize="12" Padding="2,0">
         <MenuItem Header="_File">
           <MenuItem Header="_Open" Command="{Binding OpenSessionCommand}" />
-          <MenuItem Header="_Save" IsEnabled="False" />
-          <MenuItem Header="Save _As..." Command="{Binding ExportFramesToCsvCommand}" />
+          <MenuItem Header="_Save" Command="{Binding SaveSessionCommand}" />
+          <MenuItem Header="Save _As..." Command="{Binding SaveSessionAsCommand}" />
           <MenuItem Header="_Close" Command="{Binding CloseSessionCommand}" />
           <MenuItem Header="Close A_ll" Command="{Binding CloseSessionCommand}" />
           <Separator />
