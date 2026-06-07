@@ -24,6 +24,7 @@ public sealed partial class MainWindow : Window
 		m_ViewportPropertyChanged = OnViewportPropertyChanged;
 		m_SelectionPropertyChanged = OnSelectionPropertyChanged;
 		HookProfilerStatsControl(ProfilerStatsControl);
+		HookProfilerStatsControl(ThreadsProfilerStatsControl);
 		HookProfilerStatsControl(CoresProfilerStatsControl);
 		HookProfilerStatsControl(ScopesProfilerStatsControl);
 		DataContextChanged += OnDataContextChanged;
@@ -208,6 +209,7 @@ public sealed partial class MainWindow : Window
 	private void ApplyProfilerStatsDocument(SessionDocument document)
 	{
 		ProfilerStatsControl?.ApplyDocument(document);
+		ThreadsProfilerStatsControl?.ApplyDocument(document);
 		CoresProfilerStatsControl?.ApplyDocument(document);
 		ScopesProfilerStatsControl?.ApplyDocument(document);
 	}
@@ -215,6 +217,7 @@ public sealed partial class MainWindow : Window
 	private void ApplyProfilerStatsViewport(TimelineViewport viewport)
 	{
 		ProfilerStatsControl?.ApplyViewport(viewport);
+		ThreadsProfilerStatsControl?.ApplyViewport(viewport);
 		CoresProfilerStatsControl?.ApplyViewport(viewport);
 		ScopesProfilerStatsControl?.ApplyViewport(viewport);
 	}
@@ -222,6 +225,7 @@ public sealed partial class MainWindow : Window
 	private void ApplyProfilerStatsSelection(TimelineSelection selection)
 	{
 		ProfilerStatsControl?.ApplySelection(selection);
+		ThreadsProfilerStatsControl?.ApplySelection(selection);
 		CoresProfilerStatsControl?.ApplySelection(selection);
 		ScopesProfilerStatsControl?.ApplySelection(selection);
 	}
