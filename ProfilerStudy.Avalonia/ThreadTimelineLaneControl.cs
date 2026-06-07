@@ -29,6 +29,9 @@ public sealed class ThreadTimelineLaneControl : Control
 	private static readonly Pen BorderPen = new Pen(new SolidColorBrush(Color.FromRgb(124, 124, 124)), 1.0);
 	private static readonly Pen LanePen = new Pen(new SolidColorBrush(Color.FromRgb(150, 150, 150)), 1.0);
 	private static readonly Pen AxisPen = new Pen(new SolidColorBrush(Color.FromRgb(112, 112, 112)), 1.0);
+	private static readonly Pen HoverPen = new Pen(new SolidColorBrush(Color.FromRgb(32, 32, 32)), 2.0);
+
+	private ThreadTimelineScopeRow m_HoveredScope;
 
 	public static readonly StyledProperty<IReadOnlyList<ThreadTimelineScopeRow>> RowsProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, IReadOnlyList<ThreadTimelineScopeRow>>(nameof(Rows));
@@ -104,6 +107,14 @@ public sealed class ThreadTimelineLaneControl : Control
 			Selection.HoveredFrameIndex = -1;
 			Selection.HoveredFrameTimeMs = 0.0;
 		}
+
+		ThreadTimelineScopeRow hoveredScope = TryGetScopeAtPoint(e.GetPosition(this));
+		if (!ReferenceEquals(m_HoveredScope, hoveredScope))
+		{
+			m_HoveredScope = hoveredScope;
+			ToolTip.SetTip(this, hoveredScope == null ? null : FormatScopeTip(hoveredScope));
+			InvalidateVisual();
+		}
 	}
 
 	protected override void OnPointerExited(PointerEventArgs e)
@@ -114,6 +125,9 @@ public sealed class ThreadTimelineLaneControl : Control
 			Selection.HoveredFrameIndex = -1;
 			Selection.HoveredFrameTimeMs = 0.0;
 		}
+		m_HoveredScope = null;
+		ToolTip.SetTip(this, null);
+		InvalidateVisual();
 	}
 
 	protected override Size MeasureOverride(Size availableSize)
@@ -181,7 +195,7 @@ public sealed class ThreadTimelineLaneControl : Control
 
 				IBrush fill = new SolidColorBrush(GetScopeColor(row.Depth));
 				context.FillRectangle(fill, barRect);
-				context.DrawRectangle(null, BorderPen, barRect);
+				context.DrawRectangle(null, ReferenceEquals(row, m_HoveredScope) ? HoverPen : BorderPen, barRect);
 				if (barRect.Width > 58.0)
 				{
 					DrawText(context, row.Name, TextBrush, 9.0, barRect.X + 3.0, barRect.Y);
@@ -244,6 +258,62 @@ public sealed class ThreadTimelineLaneControl : Control
 		}
 
 		return found;
+	}
+
+	private ThreadTimelineScopeRow TryGetScopeAtPoint(Point point)
+	{
+		IReadOnlyList<ThreadTimelineScopeRow> rows = Rows ?? Array.Empty<ThreadTimelineScopeRow>();
+		if (rows.Count == 0 || Viewport == null)
+		{
+			return null;
+		}
+
+		int startFrame = Viewport.StartFrame;
+		int endFrame = Math.Max(startFrame + 1, Viewport.EndFrame);
+		double axisLeft = LeftPadding + ThreadLabelWidth;
+		double axisRight = Math.Max(axisLeft + 1.0, Bounds.Width - RightPadding);
+		double plotWidth = Math.Max(1.0, axisRight - axisLeft);
+		double y = TopPadding + AxisHeight;
+
+		foreach (IGrouping<string, ThreadTimelineScopeRow> threadRows in rows
+			.GroupBy(item => item.ThreadName, StringComparer.Ordinal)
+			.OrderBy(group => group.Min(item => item.StartFrame)))
+		{
+			if (y + LaneHeight > Bounds.Height - BottomPadding)
+			{
+				break;
+			}
+
+			foreach (ThreadTimelineScopeRow row in threadRows.OrderBy(item => item.StartFrame).ThenByDescending(item => item.Depth))
+			{
+				double x = axisLeft + ((row.StartFrame - startFrame) / Math.Max(1.0, endFrame - startFrame + 1.0) * plotWidth);
+				double width = Math.Max(MinBarWidth, (row.EndFrame - row.StartFrame) / Math.Max(1.0, endFrame - startFrame + 1.0) * plotWidth);
+				double depthInset = Math.Min(7.0, row.Depth * 1.1);
+				Rect barRect = new Rect(
+					x,
+					y + 2.0 + depthInset,
+					Math.Min(width, axisRight - x),
+					Math.Max(3.0, LaneHeight - 4.0 - depthInset));
+				if (barRect.Contains(point))
+				{
+					return row;
+				}
+			}
+
+			y += LaneHeight + LaneGap;
+		}
+
+		return null;
+	}
+
+	private static string FormatScopeTip(ThreadTimelineScopeRow row)
+	{
+		return row.ThreadName + "\n" +
+			"Frame " + row.FrameIndex.ToString(CultureInfo.InvariantCulture) + "\n" +
+			row.Name + "\n" +
+			"Depth " + row.Depth.ToString(CultureInfo.InvariantCulture) + ", " +
+			row.StartFrame.ToString("0.###", CultureInfo.InvariantCulture) + "-" +
+			row.EndFrame.ToString("0.###", CultureInfo.InvariantCulture);
 	}
 
 	private static void DrawAxis(DrawingContext context, double left, double right, double top, int startFrame, int endFrame)
