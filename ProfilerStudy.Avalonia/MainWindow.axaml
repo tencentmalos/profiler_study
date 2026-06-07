@@ -202,6 +202,7 @@
           <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
         </MenuItem>
         <MenuItem Header="_Help">
+          <MenuItem Header="_Help" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Help" />
           <MenuItem Header="_Registration..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Registration" />
           <MenuItem Header="_Check for Updates" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Check for Updates" />
           <Separator />
@@ -209,6 +210,7 @@
             <MenuItem Header="_Launch FramePro Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
             <MenuItem Header="_Playback Recording File..." Command="{Binding DemoActionCommand}" CommandParameter="PlaybackRecordingFile" />
           </MenuItem>
+          <MenuItem Header="_Show Startup Page" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Show Startup Page" />
           <Separator />
           <MenuItem Header="_About" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="About" />
         </MenuItem>
