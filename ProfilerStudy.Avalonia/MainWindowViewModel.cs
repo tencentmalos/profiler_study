@@ -49,6 +49,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_FindPreviousScopeCommand;
 	private readonly RelayCommand m_FindNextScopeCommand;
 	private readonly RelayCommand m_ClearScopeFindCommand;
+	private readonly RelayCommand m_OpenFindScopeCommand;
 	private readonly RelayCommand m_SetScopeColorModeCommand;
 	private readonly RelayCommand m_ToggleScopeColorModeCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
@@ -147,6 +148,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_FindPreviousScopeCommand = new RelayCommand(_ => FindScope(-1), _ => CanFindScope());
 		m_FindNextScopeCommand = new RelayCommand(_ => FindScope(1), _ => CanFindScope());
 		m_ClearScopeFindCommand = new RelayCommand(_ => ScopeFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ScopeFilterText));
+		m_OpenFindScopeCommand = new RelayCommand(_ => OpenFindScope());
 		m_SetScopeColorModeCommand = new RelayCommand(SetScopeColorMode);
 		m_ToggleScopeColorModeCommand = new RelayCommand(_ => ToggleScopeColorMode());
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
@@ -236,6 +238,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand FindNextScopeCommand => m_FindNextScopeCommand;
 
 	public RelayCommand ClearScopeFindCommand => m_ClearScopeFindCommand;
+
+	public RelayCommand OpenFindScopeCommand => m_OpenFindScopeCommand;
 
 	public RelayCommand SetScopeColorModeCommand => m_SetScopeColorModeCommand;
 
@@ -716,6 +720,15 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private static string FormatThreadsPanelStatus(string panelName, bool isVisible)
 	{
 		return panelName + (isVisible ? " panel visible." : " panel hidden.");
+	}
+
+	private void OpenFindScope()
+	{
+		ActiveSessionView = "Threads";
+		IsThreadsDataGridVisible = true;
+		StatusText = string.IsNullOrWhiteSpace(ScopeFilterText)
+			? "Enter scope text in the Find Scope toolbar, then use Prev or Next."
+			: "Find Scope ready for \"" + ScopeFilterText.Trim() + "\".";
 	}
 
 	private void ToggleOutputWindow()

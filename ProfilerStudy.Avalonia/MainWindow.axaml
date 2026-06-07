@@ -64,7 +64,7 @@
         </MenuItem>
         <MenuItem Header="_Tools">
           <Separator />
-          <MenuItem Header="_Find" IsEnabled="False" />
+          <MenuItem Header="_Find" Command="{Binding OpenFindScopeCommand}" />
           <Separator />
           <MenuItem Header="_Create Session from Selection" IsEnabled="False" />
           <Separator />
