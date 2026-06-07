@@ -43,6 +43,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ExpandAllThreadsCommand;
 	private readonly RelayCommand m_ThreadSettingsCommand;
 	private readonly RelayCommand m_ToggleThreadsPanelCommand;
+	private readonly RelayCommand m_ToggleOutputWindowCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -85,6 +86,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsThreadsCoreGraphVisible = true;
 	private bool m_IsThreadsCustomStatsVisible = true;
 	private bool m_IsThreadsDataGridVisible = true;
+	private bool m_IsOutputWindowVisible = true;
 	private readonly List<string> m_ThreadTimelineThreadOrder = new List<string>();
 	private readonly HashSet<string> m_HiddenThreadNames = new HashSet<string>(StringComparer.Ordinal);
 	private string m_ScopeHotspotSortKey = "TotalTime";
@@ -131,6 +133,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ExpandAllThreadsCommand = new RelayCommand(_ => SetThreadScopeCollapseState(false));
 		m_ThreadSettingsCommand = new RelayCommand(_ => ShowThreadSettingsStatus());
 		m_ToggleThreadsPanelCommand = new RelayCommand(ToggleThreadsPanel);
+		m_ToggleOutputWindowCommand = new RelayCommand(_ => ToggleOutputWindow());
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -206,6 +209,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ThreadSettingsCommand => m_ThreadSettingsCommand;
 
 	public RelayCommand ToggleThreadsPanelCommand => m_ToggleThreadsPanelCommand;
+
+	public RelayCommand ToggleOutputWindowCommand => m_ToggleOutputWindowCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -574,6 +579,20 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public bool IsThreadsDataGridCollapsed => !IsThreadsDataGridVisible;
 
+	public bool IsOutputWindowVisible
+	{
+		get => m_IsOutputWindowVisible;
+		private set
+		{
+			if (SetProperty(ref m_IsOutputWindowVisible, value))
+			{
+				RaisePropertyChanged(nameof(OutputWindowHeight));
+			}
+		}
+	}
+
+	public GridLength OutputWindowHeight => IsOutputWindowVisible ? new GridLength(150) : new GridLength(0);
+
 	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
 
 	public IBrush CoresViewBrush => IsCoresViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
@@ -641,6 +660,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private static string FormatThreadsPanelStatus(string panelName, bool isVisible)
 	{
 		return panelName + (isVisible ? " panel visible." : " panel hidden.");
+	}
+
+	private void ToggleOutputWindow()
+	{
+		IsOutputWindowVisible = !IsOutputWindowVisible;
+		StatusText = IsOutputWindowVisible ? "Output Window visible." : "Output Window hidden.";
 	}
 
 	public void SelectFrameFromProfilerStats(int frameIndex)

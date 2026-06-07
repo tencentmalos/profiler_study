@@ -9,7 +9,14 @@
     Height="760"
     MinWidth="860"
     MinHeight="560">
-  <Grid RowDefinitions="Auto,Auto,*,150,24" Background="#C8C8C8">
+  <Grid Background="#C8C8C8">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="{Binding OutputWindowHeight}" />
+      <RowDefinition Height="24" />
+    </Grid.RowDefinitions>
     <Border Grid.Row="0" Background="#EFEFEF" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1">
       <Menu Background="#EFEFEF" FontSize="12" Padding="2,0">
         <MenuItem Header="_File">
@@ -48,7 +55,7 @@
             <MenuItem Header="Colour by _Scope" IsEnabled="False" />
           </MenuItem>
           <Separator />
-          <MenuItem Header="_Output Window" />
+          <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
         <MenuItem Header="_Connection">
           <MenuItem Header="_New Connection..." IsEnabled="False" />
@@ -944,7 +951,7 @@
       </Grid>
     </Grid>
 
-    <Border Grid.Row="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120">
+    <Border Grid.Row="3" Background="#D8D8D8" BorderBrush="#8A8A8A" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowVisible}">
       <Grid RowDefinitions="Auto,*">
         <Border Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="7,3">
           <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="#101010" />
