@@ -22,6 +22,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
 	private readonly RelayCommand m_SelectSlowestFrameCommand;
+	private readonly RelayCommand m_PanTimelineLeftCommand;
+	private readonly RelayCommand m_PanTimelineRightCommand;
+	private readonly RelayCommand m_ZoomTimelineInCommand;
+	private readonly RelayCommand m_ZoomTimelineOutCommand;
 	private readonly RelayCommand m_OpenRecentSessionCommand;
 	private readonly RelayCommand m_OpenScopeSourceCommand;
 	private readonly RelayCommand m_SortTableCommand;
@@ -104,6 +108,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
 		m_SelectSlowestFrameCommand = new RelayCommand(_ => SelectSlowestFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
+		m_PanTimelineLeftCommand = new RelayCommand(_ => PanTimeline(-1), _ => CurrentDocument != null);
+		m_PanTimelineRightCommand = new RelayCommand(_ => PanTimeline(1), _ => CurrentDocument != null);
+		m_ZoomTimelineInCommand = new RelayCommand(_ => ZoomTimeline(0.8), _ => CurrentDocument != null);
+		m_ZoomTimelineOutCommand = new RelayCommand(_ => ZoomTimeline(1.25), _ => CurrentDocument != null);
 		m_OpenRecentSessionCommand = new RelayCommand(parameter => _ = OpenRecentSessionAsync(parameter as string ?? SelectedRecentFile), _ => !string.IsNullOrWhiteSpace(SelectedRecentFile));
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
 		m_SortTableCommand = new RelayCommand(SortTable);
@@ -153,6 +161,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand SelectSlowestFrameCommand => m_SelectSlowestFrameCommand;
 
+	public RelayCommand PanTimelineLeftCommand => m_PanTimelineLeftCommand;
+
+	public RelayCommand PanTimelineRightCommand => m_PanTimelineRightCommand;
+
+	public RelayCommand ZoomTimelineInCommand => m_ZoomTimelineInCommand;
+
+	public RelayCommand ZoomTimelineOutCommand => m_ZoomTimelineOutCommand;
+
 	public RelayCommand OpenRecentSessionCommand => m_OpenRecentSessionCommand;
 
 	public RelayCommand OpenScopeSourceCommand => m_OpenScopeSourceCommand;
@@ -194,6 +210,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 			{
 				m_ResetTimelineCommand.RaiseCanExecuteChanged();
 				m_SelectSlowestFrameCommand.RaiseCanExecuteChanged();
+				m_PanTimelineLeftCommand.RaiseCanExecuteChanged();
+				m_PanTimelineRightCommand.RaiseCanExecuteChanged();
+				m_ZoomTimelineInCommand.RaiseCanExecuteChanged();
+				m_ZoomTimelineOutCommand.RaiseCanExecuteChanged();
 			}
 		}
 	}
@@ -925,6 +945,33 @@ internal sealed class MainWindowViewModel : ObservableObject
 		ApplySelectedFrameCounters();
 		UpdateTimelineText();
 		UpdateFooterText();
+	}
+
+	private void PanTimeline(int direction)
+	{
+		if (CurrentDocument == null || Viewport == null)
+		{
+			return;
+		}
+
+		int deltaFrames = Math.Max(1, Viewport.VisibleFrameCount / 5);
+		Viewport.ScrollFrames(direction * deltaFrames);
+		StatusText = direction < 0
+			? "Scrolled timeline left to " + Viewport.RangeText + "."
+			: "Scrolled timeline right to " + Viewport.RangeText + ".";
+	}
+
+	private void ZoomTimeline(double factor)
+	{
+		if (CurrentDocument == null || Viewport == null)
+		{
+			return;
+		}
+
+		Viewport.Zoom(factor, 0.5);
+		StatusText = factor < 1.0
+			? "Zoomed timeline in to " + Viewport.RangeText + "."
+			: "Zoomed timeline out to " + Viewport.RangeText + ".";
 	}
 
 	private void AttachTimelineState(TimelineSelection selection, TimelineViewport viewport)

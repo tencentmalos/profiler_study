@@ -305,7 +305,7 @@
             </Grid>
           </Grid>
         </Border>
-        <Grid Grid.Row="1" RowDefinitions="180,6,*" IsVisible="{Binding IsThreadsViewActive}">
+        <Grid Grid.Row="1" RowDefinitions="180,28,6,*" IsVisible="{Binding IsThreadsViewActive}">
           <Grid Grid.Row="0" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
@@ -354,14 +354,39 @@
             </Border>
           </Grid>
 
-          <GridSplitter Grid.Row="1"
+          <Grid Grid.Row="1" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+            <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,0,0,1" />
+            <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1,0,1,1" Padding="4,2">
+              <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
+                <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
+                <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
+                <TextBlock Grid.Column="2"
+                           Text="{Binding TimelineRangeText}"
+                           Foreground="#303030"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="3" Content="+" Padding="0" Command="{Binding ZoomTimelineInCommand}" />
+                <Button Grid.Column="4" Content="▶" Padding="0" Command="{Binding PanTimelineRightCommand}" />
+              </Grid>
+            </Border>
+            <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#808080" BorderThickness="0,0,1,1" Padding="8,4">
+              <Grid ColumnDefinitions="*,140,*">
+                <Border Background="#AFAFAF" BorderBrush="#808080" BorderThickness="1" Height="8" VerticalAlignment="Center" />
+                <Border Grid.Column="1" Background="#6382CF" BorderBrush="#304C95" BorderThickness="1" Height="14" VerticalAlignment="Center" />
+                <Border Grid.Column="2" Background="#AFAFAF" BorderBrush="#808080" BorderThickness="1" Height="8" VerticalAlignment="Center" />
+              </Grid>
+            </Border>
+          </Grid>
+
+          <GridSplitter Grid.Row="2"
                         Background="#9A9A9A"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
-          <Grid Grid.Row="2" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,8,0,0">
+          <Grid Grid.Row="3" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,8,0,0">
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
