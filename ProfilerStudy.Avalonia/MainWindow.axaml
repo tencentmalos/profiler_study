@@ -233,8 +233,23 @@
             <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
             <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
           </MenuItem>
-          <MenuItem Header="_Main Session View" ToggleType="CheckBox" IsChecked="{Binding IsMainSessionDockVisible, Mode=OneWay}" Command="{Binding ToggleMainSessionDockCommand}" />
-          <MenuItem Header="_Toolbox" ToggleType="CheckBox" IsChecked="{Binding IsToolboxVisible, Mode=OneWay}" Command="{Binding ToggleToolboxCommand}" />
+          <Separator />
+          <MenuItem Header="_Main Session View">
+            <MenuItem Header="_Show / Hide" ToggleType="CheckBox" IsChecked="{Binding IsMainSessionDockVisible, Mode=OneWay}" Command="{Binding ToggleMainSessionDockCommand}" />
+            <MenuItem Header="_Minimize" Command="{Binding MinimizeMainSessionDockCommand}" />
+            <MenuItem Header="_Restore" Command="{Binding RestoreMainSessionDockCommand}" />
+            <Separator />
+            <MenuItem Header="_Float" Command="{Binding FloatMainSessionDockCommand}" />
+            <MenuItem Header="_Dock" Command="{Binding DockMainSessionDockCommand}" />
+          </MenuItem>
+          <MenuItem Header="_Toolbox">
+            <MenuItem Header="_Show / Hide" ToggleType="CheckBox" IsChecked="{Binding IsToolboxVisible, Mode=OneWay}" Command="{Binding ToggleToolboxCommand}" />
+            <MenuItem Header="_Minimize" Command="{Binding MinimizeToolboxCommand}" />
+            <MenuItem Header="_Restore" Command="{Binding RestoreToolboxCommand}" />
+            <Separator />
+            <MenuItem Header="_Float" Command="{Binding FloatToolboxCommand}" />
+            <MenuItem Header="_Dock" Command="{Binding DockToolboxCommand}" />
+          </MenuItem>
           <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
         <MenuItem Header="_Connection">
