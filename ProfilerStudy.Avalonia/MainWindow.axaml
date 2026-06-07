@@ -16,9 +16,9 @@
   </Window.KeyBindings>
   <Window.Styles>
     <Style Selector="Button.toolbar-button">
-      <Setter Property="Background" Value="#D3D3D3" />
-      <Setter Property="BorderBrush" Value="#B4B4B4" />
-      <Setter Property="BorderThickness" Value="0,0,1,0" />
+      <Setter Property="Background" Value="#D6D6D6" />
+      <Setter Property="BorderBrush" Value="#8E8E8E" />
+      <Setter Property="BorderThickness" Value="1,0,1,1" />
       <Setter Property="CornerRadius" Value="0" />
       <Setter Property="Foreground" Value="#101010" />
       <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
@@ -27,12 +27,12 @@
       <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
     <Style Selector="Button.toolbar-button:pointerover">
-      <Setter Property="Background" Value="#E4E4E4" />
-      <Setter Property="BorderBrush" Value="#989898" />
+      <Setter Property="Background" Value="#E9E9E9" />
+      <Setter Property="BorderBrush" Value="#6F6F6F" />
     </Style>
     <Style Selector="Button.toolbar-button:pressed">
-      <Setter Property="Background" Value="#C2C2C2" />
-      <Setter Property="BorderBrush" Value="#777777" />
+      <Setter Property="Background" Value="#BFBFBF" />
+      <Setter Property="BorderBrush" Value="#5F5F5F" />
     </Style>
     <Style Selector="Button.toolbar-button:disabled">
       <Setter Property="Opacity" Value="0.45" />
@@ -44,9 +44,9 @@
       <Setter Property="CornerRadius" Value="0" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button">
-      <Setter Property="Background" Value="#D3D3D3" />
-      <Setter Property="BorderBrush" Value="#B4B4B4" />
-      <Setter Property="BorderThickness" Value="0,0,1,0" />
+      <Setter Property="Background" Value="#D6D6D6" />
+      <Setter Property="BorderBrush" Value="#8E8E8E" />
+      <Setter Property="BorderThickness" Value="1,0,1,1" />
       <Setter Property="CornerRadius" Value="0" />
       <Setter Property="Foreground" Value="#101010" />
       <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
@@ -55,12 +55,12 @@
       <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:pointerover">
-      <Setter Property="Background" Value="#E4E4E4" />
-      <Setter Property="BorderBrush" Value="#989898" />
+      <Setter Property="Background" Value="#E9E9E9" />
+      <Setter Property="BorderBrush" Value="#6F6F6F" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:checked">
-      <Setter Property="Background" Value="#BFCBE3" />
-      <Setter Property="BorderBrush" Value="#6F82A3" />
+      <Setter Property="Background" Value="#C4CFE6" />
+      <Setter Property="BorderBrush" Value="#5E7295" />
     </Style>
     <Style Selector="ToggleButton.toolbar-button:disabled">
       <Setter Property="Opacity" Value="0.45" />
@@ -70,6 +70,16 @@
     </Style>
     <Style Selector="ToggleButton.toolbar-button Border">
       <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="Border.toolbar-gap">
+      <Setter Property="Background" Value="#D1D1D1" />
+      <Setter Property="BorderBrush" Value="#9A9A9A" />
+      <Setter Property="BorderThickness" Value="1,0,1,0" />
+    </Style>
+    <Style Selector="Border.toolbar-panel">
+      <Setter Property="Background" Value="#D1D1D1" />
+      <Setter Property="BorderBrush" Value="#8C8C8C" />
+      <Setter Property="BorderThickness" Value="1,0,1,1" />
     </Style>
     <Style Selector="Border.toolbox-section">
       <Setter Property="Background" Value="#D0D0D0" />
@@ -281,7 +291,7 @@
               <TextBlock Text="Export" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="18" Background="#D1D1D1" />
+          <Border Classes="toolbar-gap" Width="18" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9FB6D5" BorderBrush="#4F6584" BorderThickness="1" HorizontalAlignment="Center">
@@ -297,7 +307,7 @@
               </Border>
             </StackPanel>
           </Button>
-          <Border Width="11" Background="#D1D1D1" />
+          <Border Classes="toolbar-gap" Width="11" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1" HorizontalAlignment="Center">
@@ -306,7 +316,7 @@
               <TextBlock Text="Android" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="11" Background="#D1D1D1" />
+          <Border Classes="toolbar-gap" Width="11" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#C16B62" BorderBrush="#73342E" BorderThickness="1" HorizontalAlignment="Center">
@@ -315,7 +325,7 @@
               <TextBlock Text="Disconnect" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="61" Background="#D1D1D1" />
+          <Border Classes="toolbar-gap" Width="61" />
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1" HorizontalAlignment="Center">
@@ -340,7 +350,7 @@
               <TextBlock Text="End" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="18" Background="#D1D1D1" />
+          <Border Classes="toolbar-gap" Width="18" />
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
@@ -389,7 +399,7 @@
               <TextBlock Text="Details" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <Border Width="49" Background="#D1D1D1" />
+          <Border Classes="toolbar-gap" Width="49" />
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
             <StackPanel Spacing="4">
               <Border Width="28" Height="36" Background="#D8B08D" BorderBrush="#7A4E2D" BorderThickness="1" HorizontalAlignment="Center">
@@ -414,7 +424,7 @@
               <TextBlock Text="Next" TextAlignment="Center" />
             </StackPanel>
           </Button>
-          <Border Width="629" MinHeight="118" Background="#D1D1D1" Padding="8,9">
+          <Border Classes="toolbar-panel" Width="629" MinHeight="118" Padding="8,9">
             <Grid RowDefinitions="Auto,Auto,*" RowSpacing="6">
               <DockPanel>
                 <TextBlock Text="Find" Foreground="#101010" />
@@ -428,7 +438,7 @@
               </StackPanel>
             </Grid>
           </Border>
-          <Border Width="47" Background="#D1D1D1" />
+          <Border Classes="toolbar-gap" Width="47" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#BCA0C8" BorderBrush="#6B4878" BorderThickness="1" HorizontalAlignment="Center">
@@ -438,7 +448,7 @@
               <TextBlock Text="{Binding ScopeColorModeText}" TextAlignment="Center" FontSize="10" Foreground="#505050" />
             </StackPanel>
           </Button>
-          <Border Width="358" MinHeight="118" Background="#D1D1D1" Padding="8,9">
+          <Border Classes="toolbar-panel" Width="358" MinHeight="118" Padding="8,9">
             <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
               <TextBlock Text="Conditional Scope Time" Foreground="#101010" />
               <DockPanel Grid.Row="1">
