@@ -9,6 +9,11 @@
     Height="760"
     MinWidth="860"
     MinHeight="560">
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
+    <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
+    <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenFindScopeCommand}" />
+  </Window.KeyBindings>
   <Window.Styles>
     <Style Selector="Button.toolbar-button">
       <Setter Property="Background" Value="#D3D3D3" />
@@ -258,6 +263,22 @@
                 <TextBlock Text="demo" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#202020" />
               </Border>
               <TextBlock Text="Sample" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding CloseSessionCommand}">
+            <StackPanel Spacing="4">
+              <Border Width="28" Height="36" Background="#C6A2A2" BorderBrush="#734B4B" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Text="x" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#3A1D1D" />
+              </Border>
+              <TextBlock Text="Close" TextAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ExportFramesToCsvCommand}">
+            <StackPanel Spacing="4">
+              <Border Width="28" Height="36" Background="#B8C6A2" BorderBrush="#536C3C" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Text="csv" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="9" Foreground="#24331A" />
+              </Border>
+              <TextBlock Text="Export" TextAlignment="Center" />
             </StackPanel>
           </Button>
           <Border Width="18" Background="#D1D1D1" />
