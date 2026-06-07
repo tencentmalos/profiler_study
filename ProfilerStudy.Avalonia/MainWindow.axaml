@@ -48,6 +48,29 @@
     <Style Selector="ToggleButton.toolbar-button StackPanel">
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
+    <Style Selector="Border.toolbox-section">
+      <Setter Property="Background" Value="#D0D0D0" />
+      <Setter Property="BorderBrush" Value="#858585" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.toolbox-section-header">
+      <Setter Property="Background" Value="#BCBCBC" />
+      <Setter Property="BorderBrush" Value="#858585" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="Padding" Value="5,2" />
+    </Style>
+    <Style Selector="Button.toolbox-action">
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="6,2" />
+      <Setter Property="Background" Value="#E0E0E0" />
+      <Setter Property="BorderBrush" Value="#969696" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Foreground" Value="#101010" />
+    </Style>
+    <Style Selector="Button.toolbox-action:pointerover">
+      <Setter Property="Background" Value="#EAEAEA" />
+    </Style>
   </Window.Styles>
   <Grid Background="#C8C8C8">
     <Grid.RowDefinitions>
@@ -338,9 +361,9 @@
           </Border>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="5" Spacing="5">
-              <Border Background="#D0D0D0" BorderBrush="#858585" BorderThickness="1">
+              <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
-                  <Border Background="#BCBCBC" BorderBrush="#858585" BorderThickness="0,0,0,1" Padding="5,2">
+                  <Border Classes="toolbox-section-header">
                     <TextBlock Text="Session Info" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
                   <Grid Grid.Row="1" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="7" Margin="6">
@@ -360,26 +383,85 @@
                 </Grid>
               </Border>
 
-              <Border Background="#D0D0D0" BorderBrush="#858585" BorderThickness="1">
+              <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
-                  <Border Background="#BCBCBC" BorderBrush="#858585" BorderThickness="0,0,0,1" Padding="5,2">
+                  <Border Classes="toolbox-section-header">
+                    <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="#101010" />
+                  </Border>
+                  <Grid Grid.Row="1" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="6" ColumnSpacing="4" RowSpacing="4">
+                    <Button Classes="toolbox-action" Content="Connect..." Command="{Binding OpenConnectionCommand}" />
+                    <Button Grid.Column="1" Classes="toolbox-action" Content="Android..." Command="{Binding OpenAndroidCommand}" />
+                    <Button Grid.Row="1" Grid.ColumnSpan="2" Classes="toolbox-action" Content="Disconnect" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" />
+                  </Grid>
+                </Grid>
+              </Border>
+
+              <Border Classes="toolbox-section">
+                <Grid RowDefinitions="Auto,*">
+                  <Border Classes="toolbox-section-header">
+                    <TextBlock Text="Frame Navigation" FontWeight="SemiBold" Foreground="#101010" />
+                  </Border>
+                  <Grid Grid.Row="1" ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" Margin="6" ColumnSpacing="4" RowSpacing="4">
+                    <Button Classes="toolbox-action" Content="Start" Command="{Binding ResetTimelineCommand}" />
+                    <Button Grid.Column="1" Classes="toolbox-action" Content="Track" Command="{Binding TrackSelectedFrameCommand}" />
+                    <Button Grid.Column="2" Classes="toolbox-action" Content="End" Command="{Binding SelectLastFrameCommand}" />
+                    <Button Grid.Row="1" Classes="toolbox-action" Content="Prev Spike" Command="{Binding SelectPreviousSpikeCommand}" />
+                    <Button Grid.Row="1" Grid.Column="1" Classes="toolbox-action" Content="Max" Command="{Binding SelectSlowestFrameCommand}" />
+                    <Button Grid.Row="1" Grid.Column="2" Classes="toolbox-action" Content="Next Spike" Command="{Binding SelectNextSpikeCommand}" />
+                  </Grid>
+                </Grid>
+              </Border>
+
+              <Border Classes="toolbox-section">
+                <Grid RowDefinitions="Auto,*">
+                  <Border Classes="toolbox-section-header">
                     <TextBlock Text="Window Layout" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="3">
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" Foreground="{Binding ThreadsViewBrush}">Frame Graph</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" Foreground="{Binding ThreadsViewBrush}">Profiler Scopes</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}">Scope Hotspots</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" Foreground="{Binding ThreadsViewBrush}">Selected Frame</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" Foreground="{Binding CustomStatsViewBrush}">Counters</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" Foreground="{Binding CoresViewBrush}">Cores</Button>
-                    <Button HorizontalContentAlignment="Left" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}">Log</Button>
+                    <Button Classes="toolbox-action" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}">Threads View</Button>
+                    <Button Classes="toolbox-action" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}">Cores View</Button>
+                    <Button Classes="toolbox-action" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}">Scopes View</Button>
+                    <Button Classes="toolbox-action" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}">Custom Stats View</Button>
+                    <Button Classes="toolbox-action" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}">Log View</Button>
                   </StackPanel>
                 </Grid>
               </Border>
 
-              <Border Background="#D0D0D0" BorderBrush="#858585" BorderThickness="1">
+              <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
-                  <Border Background="#BCBCBC" BorderBrush="#858585" BorderThickness="0,0,0,1" Padding="5,2">
+                  <Border Classes="toolbox-section-header">
+                    <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="#101010" />
+                  </Border>
+                  <StackPanel Grid.Row="1" Margin="6" Spacing="3">
+                    <Button Classes="toolbox-action" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" Foreground="{Binding ThreadsViewBrush}">Info</Button>
+                    <Button Classes="toolbox-action" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" Foreground="{Binding ThreadsViewBrush}">Frame Graph</Button>
+                    <Button Classes="toolbox-action" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" Foreground="{Binding ThreadsViewBrush}">Scope Graph</Button>
+                    <Button Classes="toolbox-action" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" Foreground="{Binding CoresViewBrush}">Core Graph</Button>
+                    <Button Classes="toolbox-action" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" Foreground="{Binding CustomStatsViewBrush}">Custom Stats Graph</Button>
+                    <Button Classes="toolbox-action" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" Foreground="{Binding ThreadsViewBrush}">Data Grid</Button>
+                  </StackPanel>
+                </Grid>
+              </Border>
+
+              <Border Classes="toolbox-section">
+                <Grid RowDefinitions="Auto,*">
+                  <Border Classes="toolbox-section-header">
+                    <TextBlock Text="Find Scope" FontWeight="SemiBold" Foreground="#101010" />
+                  </Border>
+                  <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="6" RowSpacing="4">
+                    <TextBox Text="{Binding ScopeFilterText}" Watermark="scope text" />
+                    <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                      <Button Classes="toolbox-action" Content="Prev" Command="{Binding FindPreviousScopeCommand}" />
+                      <Button Grid.Column="1" Classes="toolbox-action" Content="Next" Command="{Binding FindNextScopeCommand}" />
+                      <Button Grid.Column="2" Classes="toolbox-action" Content="Clear" Command="{Binding ClearScopeFindCommand}" />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Border>
+
+              <Border Classes="toolbox-section">
+                <Grid RowDefinitions="Auto,*">
+                  <Border Classes="toolbox-section-header">
                     <TextBlock Text="Source Mapping" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="4">
