@@ -144,54 +144,54 @@
             </StackPanel>
           </Button>
           <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
-          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info">
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="i" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="#203246" />
               </Border>
               <TextBlock Text="Info" TextAlignment="Center" />
             </StackPanel>
-          </Button>
-          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph">
+          </ToggleButton>
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="ms" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
               </Border>
               <TextBlock Text="Frames" TextAlignment="Center" />
             </StackPanel>
-          </Button>
-          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph">
+          </ToggleButton>
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="{}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#203246" />
               </Border>
               <TextBlock Text="Scope" TextAlignment="Center" />
             </StackPanel>
-          </Button>
-          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph">
+          </ToggleButton>
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="CPU" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
               </Border>
               <TextBlock Text="Cores" TextAlignment="Center" />
             </StackPanel>
-          </Button>
-          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats">
+          </ToggleButton>
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="#" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#203246" />
               </Border>
               <TextBlock Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
-          </Button>
-          <Button Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid">
+          </ToggleButton>
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
               </Border>
               <TextBlock Text="Details" TextAlignment="Center" />
             </StackPanel>
-          </Button>
+          </ToggleButton>
           <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
           <Button Width="74" MinHeight="118" Padding="4" IsEnabled="False">
             <StackPanel Spacing="4">

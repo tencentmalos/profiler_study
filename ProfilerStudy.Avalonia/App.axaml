@@ -32,6 +32,28 @@
       <Setter Property="Background" Value="#C6C6C6" />
       <Setter Property="BorderBrush" Value="#404040" />
     </Style>
+    <Style Selector="ToggleButton">
+      <Setter Property="MinHeight" Value="22" />
+      <Setter Property="Padding" Value="7,2" />
+      <Setter Property="Background" Value="#DCDCDC" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="BorderBrush" Value="#808080" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="ToggleButton:pointerover">
+      <Setter Property="Background" Value="#ECECEC" />
+      <Setter Property="BorderBrush" Value="#606060" />
+    </Style>
+    <Style Selector="ToggleButton:checked">
+      <Setter Property="Background" Value="#B7C4D5" />
+      <Setter Property="BorderBrush" Value="#3D5876" />
+    </Style>
+    <Style Selector="ToggleButton:pressed">
+      <Setter Property="Background" Value="#A7B5C6" />
+      <Setter Property="BorderBrush" Value="#303F52" />
+    </Style>
     <Style Selector="TextBox">
       <Setter Property="MinHeight" Value="22" />
       <Setter Property="Padding" Value="4,2" />
