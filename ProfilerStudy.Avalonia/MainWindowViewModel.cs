@@ -201,7 +201,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_CloseSettingsCommand = new RelayCommand(_ => CloseSettingsPanel());
 		m_OpenAndroidCommand = new RelayCommand(_ => OpenAndroidPanel());
 		m_CloseAndroidCommand = new RelayCommand(_ => CloseAndroidPanel());
-		m_AndroidActionCommand = new RelayCommand(ShowAndroidActionStatus);
+		m_AndroidActionCommand = new RelayCommand(parameter => _ = HandleAndroidActionAsync(parameter));
 		m_OpenConnectionCommand = new RelayCommand(_ => OpenConnectionPanel());
 		m_CloseConnectionCommand = new RelayCommand(_ => CloseConnectionPanel());
 		m_ConnectionActionCommand = new RelayCommand(parameter => _ = HandleConnectionActionAsync(parameter));
@@ -1022,23 +1022,92 @@ internal sealed class MainWindowViewModel : ObservableObject
 		StatusText = "Android panel closed.";
 	}
 
-	private void ShowAndroidActionStatus(object parameter)
+	private async Task HandleAndroidActionAsync(object parameter)
 	{
 		string actionName = parameter as string;
 		if (string.Equals(actionName, "RecordContextSwitches", StringComparison.Ordinal))
 		{
 			AndroidPanelStatusText = "Context switch recording is visible in the Avalonia shell; device capture is not implemented yet.";
+			StatusText = AndroidPanelStatusText;
 		}
 		else if (string.Equals(actionName, "LoadContextSwitchFile", StringComparison.Ordinal))
 		{
-			AndroidPanelStatusText = "Context switch file loading is visible in the Avalonia shell; parser integration is not implemented yet.";
+			await LoadAndroidContextSwitchFileAsync();
 		}
 		else
 		{
 			AndroidPanelStatusText = "Android action is visible in the Avalonia shell but is not implemented yet.";
+			StatusText = AndroidPanelStatusText;
+		}
+	}
+
+	private async Task LoadAndroidContextSwitchFileAsync()
+	{
+		if (CurrentDocument?.Session == null)
+		{
+			AndroidPanelStatusText = "Open a profiler session before loading an Android context switch file.";
+			StatusText = AndroidPanelStatusText;
+			return;
 		}
 
-		StatusText = AndroidPanelStatusText;
+		try
+		{
+			Window window = global::Avalonia.Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+				? desktop.MainWindow
+				: null;
+			if (window == null)
+			{
+				AndroidPanelStatusText = "No application window is available for loading a context switch file.";
+				StatusText = AndroidPanelStatusText;
+				return;
+			}
+
+			IReadOnlyList<IStorageFile> files = await window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+			{
+				AllowMultiple = false,
+				Title = "Load Android context switch file",
+				FileTypeFilter = new List<FilePickerFileType>
+				{
+					new FilePickerFileType("Android context switch files")
+					{
+						Patterns = new[] { "*.profiler_context_switch", "*.txt", "*" }
+					}
+				}
+			});
+
+			if (files.Count == 0)
+			{
+				return;
+			}
+
+			string path = files[0].TryGetLocalPath();
+			if (string.IsNullOrWhiteSpace(path))
+			{
+				AndroidPanelStatusText = "Selected context switch file is not available as a local path.";
+				StatusText = AndroidPanelStatusText;
+				return;
+			}
+
+			AndroidPanelStatusText = "Loading Android context switch file...";
+			StatusText = AndroidPanelStatusText;
+			Session session = CurrentDocument.Session;
+			bool loaded = await Task.Run(() => session.LoadContextSwitchFile(path));
+			if (!loaded)
+			{
+				AndroidPanelStatusText = "Failed to load Android context switch file: " + path;
+				StatusText = AndroidPanelStatusText;
+				return;
+			}
+
+			ApplyDocument(CurrentDocument);
+			AndroidPanelStatusText = "Loaded Android context switch file: " + Path.GetFileName(path);
+			StatusText = AndroidPanelStatusText;
+		}
+		catch (Exception ex)
+		{
+			AndroidPanelStatusText = "Failed to load Android context switch file: " + ex.Message;
+			StatusText = AndroidPanelStatusText;
+		}
 	}
 
 	private void OpenConnectionPanel()
