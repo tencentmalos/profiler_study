@@ -337,11 +337,11 @@
                     VerticalAlignment="Stretch"
                     ResizeDirection="Columns" />
 
-      <Grid Grid.Column="2" RowDefinitions="Auto,*,47" Margin="6">
-        <Border Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Margin="0,0,0,8">
-          <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" Margin="8,6">
-            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#101010" FontSize="15" FontWeight="SemiBold" />
-            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" VerticalAlignment="Center" />
+      <Grid Grid.Column="2" RowDefinitions="Auto,*,47" Margin="4" Background="#C8C8C8">
+        <Border Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,0,0,4">
+          <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" Margin="6,4">
+            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#101010" FontSize="13" FontWeight="SemiBold" />
+            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" VerticalAlignment="Center" FontSize="11" />
             <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*" ColumnSpacing="8" Margin="0,5,0,0">
               <TextBlock Text="Info" Foreground="#5A5A5A" FontWeight="SemiBold" />
               <TextBlock Grid.Column="1" Text="{Binding Summary.RangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
@@ -354,9 +354,9 @@
             </Grid>
           </Grid>
         </Border>
-        <Grid Grid.Row="1" RowDefinitions="180,28,6,*" IsVisible="{Binding IsThreadsViewActive}">
-          <Grid Grid.Row="0" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
-            <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
+        <Grid Grid.Row="1" RowDefinitions="180,28,6,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+          <Grid Grid.Row="0" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
                          Foreground="#202020"
                          FontWeight="SemiBold"
@@ -365,7 +365,7 @@
                          TextWrapping="Wrap" />
             </Border>
 
-            <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8" IsVisible="{Binding IsThreadsInfoPanelVisible}">
+            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsInfoPanelVisible}">
               <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" ColumnDefinitions="*,46">
                 <Button Grid.Column="0"
                         Content="Filter Threads..."
@@ -394,7 +394,7 @@
               </Grid>
             </Border>
 
-            <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="0,1,1,1" MinHeight="120">
+            <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" MinHeight="120">
               <local:FrameTimelineControl
                   Samples="{Binding FrameSamples}"
                   TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
@@ -403,9 +403,9 @@
             </Border>
           </Grid>
 
-          <Grid Grid.Row="1" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
-            <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,0,0,1" />
-            <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1,0,1,1" Padding="4,2">
+          <Grid Grid.Row="1" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
+            <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
+            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="4,2">
               <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
                 <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
                 <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
@@ -419,21 +419,23 @@
                 <Button Grid.Column="4" Content="▶" Padding="0" Command="{Binding PanTimelineRightCommand}" />
               </Grid>
             </Border>
-            <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#808080" BorderThickness="0,0,1,1" Padding="8,4">
+            <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="8,4">
               <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
             </Border>
           </Grid>
 
           <GridSplitter Grid.Row="2"
                         Background="#9A9A9A"
+                        BorderBrush="#767676"
+                        BorderThickness="0,1"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
-          <Grid Grid.Row="3" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,8,0,0">
-            <Grid Grid.Row="0" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
-              <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
+          <Grid Grid.Row="3" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,4,0,0" Background="#C8C8C8">
+            <Grid Grid.Row="0" ColumnDefinitions="32,210,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
+              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
                            Foreground="#202020"
                            FontWeight="SemiBold"
@@ -442,7 +444,7 @@
                            TextWrapping="Wrap" />
               </Border>
 
-              <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
                 <StackPanel Spacing="4">
                   <TextBlock Text="Thread Activity" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
                   <TextBlock Text="{Binding ThreadTimelineSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
@@ -453,7 +455,7 @@
                 </StackPanel>
               </Border>
 
-              <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,0,1">
+              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,0,1">
                 <local:ThreadTimelineLaneControl
                     Rows="{Binding VisibleThreadScopes}"
                     Samples="{Binding FrameSamples}"
@@ -477,7 +479,7 @@
                 </local:ThreadTimelineLaneControl>
               </Border>
 
-              <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#808080" BorderThickness="1">
+              <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#7D7D7D" BorderThickness="1">
                 <Grid RowDefinitions="18,*,18">
                   <Button Content="▲"
                           FontSize="8"
@@ -499,13 +501,15 @@
 
             <GridSplitter Grid.Row="1"
                           Background="#9A9A9A"
+                          BorderBrush="#767676"
+                          BorderThickness="0,1"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-            <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
-              <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
+            <Grid Grid.Row="2" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
+              <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Cores"
                            Foreground="#202020"
                            FontWeight="SemiBold"
@@ -514,7 +518,7 @@
                            TextWrapping="Wrap" />
               </Border>
 
-              <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
                 <StackPanel Spacing="4">
                   <TextBlock Text="Core Activity" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
                   <TextBlock Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
