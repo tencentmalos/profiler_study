@@ -23,6 +23,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly SessionLoader m_SessionLoader = new SessionLoader();
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
+	private readonly RelayCommand m_ShowStartupPageCommand;
+	private readonly RelayCommand m_CloseStartupPageCommand;
 	private readonly RelayCommand m_CloseSessionCommand;
 	private readonly RelayCommand m_CreateSessionFromSelectionCommand;
 	private readonly RelayCommand m_SaveSessionCommand;
@@ -88,6 +90,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private Process m_GameSimulatorProcess;
 	private Process m_RecordingPlayerProcess;
 	private SessionDocument m_CurrentDocument;
+	private bool m_IsStartupPageVisible = true;
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
 	private IReadOnlyList<string> m_RecentFiles = Array.Empty<string>();
 	private string m_SelectedRecentFile;
@@ -183,6 +186,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		Summary = new SessionSummaryViewModel();
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
+		m_ShowStartupPageCommand = new RelayCommand(_ => IsStartupPageVisible = true);
+		m_CloseStartupPageCommand = new RelayCommand(_ => IsStartupPageVisible = false);
 		m_CloseSessionCommand = new RelayCommand(_ => CloseSession(), _ => CurrentDocument != null);
 		m_CreateSessionFromSelectionCommand = new RelayCommand(_ => _ = CreateSessionFromSelectionAsync(), _ => CurrentDocument?.Session != null);
 		m_SaveSessionCommand = new RelayCommand(_ => _ = SaveSessionAsync(false), _ => CurrentDocument?.Session != null);
@@ -266,6 +271,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand OpenSessionCommand => m_OpenSessionCommand;
 
 	public RelayCommand LoadSampleCommand => m_LoadSampleCommand;
+
+	public RelayCommand ShowStartupPageCommand => m_ShowStartupPageCommand;
+
+	public RelayCommand CloseStartupPageCommand => m_CloseStartupPageCommand;
 
 	public RelayCommand CloseSessionCommand => m_CloseSessionCommand;
 
@@ -384,7 +393,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
-				RaisePropertyChanged(nameof(IsStartupPageVisible));
+				IsStartupPageVisible = value == null;
 				m_CloseSessionCommand.RaiseCanExecuteChanged();
 				m_CreateSessionFromSelectionCommand.RaiseCanExecuteChanged();
 				m_SaveSessionCommand.RaiseCanExecuteChanged();
@@ -407,7 +416,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 	}
 
-	public bool IsStartupPageVisible => CurrentDocument == null;
+	public bool IsStartupPageVisible
+	{
+		get => m_IsStartupPageVisible;
+		private set => SetProperty(ref m_IsStartupPageVisible, value);
+	}
 
 	public IReadOnlyList<FrameSample> FrameSamples
 	{
