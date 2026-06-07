@@ -161,8 +161,8 @@
           <MenuItem Header="_Check for Updates" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Check for Updates" />
           <Separator />
           <MenuItem Header="_Demo">
-            <MenuItem Header="_Launch FramePro Game Simulator" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="FramePro Game Simulator" />
-            <MenuItem Header="_Playback Recording File..." Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Playback Recording File" />
+            <MenuItem Header="_Launch FramePro Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
+            <MenuItem Header="_Playback Recording File..." Command="{Binding DemoActionCommand}" CommandParameter="PlaybackRecordingFile" />
           </MenuItem>
           <Separator />
           <MenuItem Header="_About" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="About" />

@@ -62,6 +62,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ToggleScopeColorModeCommand;
 	private readonly RelayCommand m_ExitCommand;
 	private readonly RelayCommand m_ShowFeatureStatusCommand;
+	private readonly RelayCommand m_DemoActionCommand;
 	private readonly RelayCommand m_AdjustConditionalScopeTimeCommand;
 	private readonly RelayCommand m_OpenSettingsCommand;
 	private readonly RelayCommand m_CloseSettingsCommand;
@@ -83,6 +84,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private DispatcherTimer m_LiveConnectionRefreshTimer;
 	private string m_LiveConnectionName;
 	private int m_LastLiveFrameCount = -1;
+	private Process m_GameSimulatorProcess;
+	private Process m_RecordingPlayerProcess;
 	private SessionDocument m_CurrentDocument;
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
 	private IReadOnlyList<string> m_RecentFiles = Array.Empty<string>();
@@ -218,6 +221,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ToggleScopeColorModeCommand = new RelayCommand(_ => ToggleScopeColorMode());
 		m_ExitCommand = new RelayCommand(_ => ExitApplication());
 		m_ShowFeatureStatusCommand = new RelayCommand(ShowFeatureStatus);
+		m_DemoActionCommand = new RelayCommand(parameter => _ = HandleDemoActionAsync(parameter));
 		m_AdjustConditionalScopeTimeCommand = new RelayCommand(AdjustConditionalScopeTime);
 		m_OpenSettingsCommand = new RelayCommand(_ => OpenSettingsPanel());
 		m_CloseSettingsCommand = new RelayCommand(_ => CloseSettingsPanel());
@@ -338,6 +342,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand ExitCommand => m_ExitCommand;
 
 	public RelayCommand ShowFeatureStatusCommand => m_ShowFeatureStatusCommand;
+
+	public RelayCommand DemoActionCommand => m_DemoActionCommand;
 
 	public RelayCommand AdjustConditionalScopeTimeCommand => m_AdjustConditionalScopeTimeCommand;
 
@@ -1055,6 +1061,173 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		StatusText = featureName + " is visible in the Avalonia shell but is not implemented yet.";
+	}
+
+	private async Task HandleDemoActionAsync(object parameter)
+	{
+		string actionName = parameter as string;
+		if (string.Equals(actionName, "LaunchGameSimulator", StringComparison.Ordinal))
+		{
+			LaunchGameSimulator();
+		}
+		else if (string.Equals(actionName, "PlaybackRecordingFile", StringComparison.Ordinal))
+		{
+			await PlaybackRecordingFileAsync();
+		}
+	}
+
+	private void LaunchGameSimulator()
+	{
+		if (IsProcessRunning(m_GameSimulatorProcess))
+		{
+			StatusText = "Game Simulator is already running.";
+			return;
+		}
+
+		if (!TryFindProfilerTool("Profiler_GameSimulator.exe", out string toolPath))
+		{
+			StatusText = "Profiler_GameSimulator.exe was not found.";
+			return;
+		}
+
+		try
+		{
+			m_GameSimulatorProcess = StartProfilerTool(toolPath, null);
+			StatusText = "Launched FramePro Game Simulator.";
+		}
+		catch (Exception ex)
+		{
+			StatusText = "Failed to launch game simulator. " + ex.Message;
+		}
+	}
+
+	private async Task PlaybackRecordingFileAsync()
+	{
+		if (IsProcessRunning(m_RecordingPlayerProcess))
+		{
+			StatusText = "Recording Player is already running.";
+			return;
+		}
+
+		if (!TryFindProfilerTool("Profiler_RecordingPlayer.exe", out string toolPath))
+		{
+			StatusText = "Profiler_RecordingPlayer.exe was not found.";
+			return;
+		}
+
+		Window window = global::Avalonia.Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+			? desktop.MainWindow
+			: null;
+		if (window == null)
+		{
+			StatusText = "No application window is available for selecting a recording.";
+			return;
+		}
+
+		IReadOnlyList<IStorageFile> files = await window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+		{
+			AllowMultiple = false,
+			Title = "Playback profiler recording file",
+			FileTypeFilter = new List<FilePickerFileType>
+			{
+				new FilePickerFileType("Profiler recording files")
+				{
+					Patterns = new[] { "*.profiler_recording" }
+				},
+				new FilePickerFileType("All files")
+				{
+					Patterns = new[] { "*" }
+				}
+			}
+		});
+
+		if (files.Count == 0)
+		{
+			return;
+		}
+
+		string path = files[0].TryGetLocalPath();
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			StatusText = "Selected recording file is not available as a local path.";
+			return;
+		}
+
+		try
+		{
+			m_RecordingPlayerProcess = StartProfilerTool(toolPath, path);
+			StatusText = "Launched Recording Player for " + Path.GetFileName(path) + ".";
+			await HandleConnectionActionAsync("Connect");
+		}
+		catch (Exception ex)
+		{
+			StatusText = "Failed to launch recording player. " + ex.Message;
+		}
+	}
+
+	private static bool IsProcessRunning(Process process)
+	{
+		try
+		{
+			return process != null && !process.HasExited;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
+	private static Process StartProfilerTool(string toolPath, string argument)
+	{
+		ProcessStartInfo startInfo = new ProcessStartInfo
+		{
+			FileName = toolPath,
+			UseShellExecute = true,
+			WorkingDirectory = Path.GetDirectoryName(toolPath) ?? string.Empty,
+			WindowStyle = ProcessWindowStyle.Minimized
+		};
+		if (!string.IsNullOrWhiteSpace(argument))
+		{
+			startInfo.ArgumentList.Add(argument);
+		}
+
+		Process process = new Process
+		{
+			StartInfo = startInfo
+		};
+		process.Start();
+		return process;
+	}
+
+	private static bool TryFindProfilerTool(string fileName, out string path)
+	{
+		foreach (string directory in GetProfilerToolSearchDirectories())
+		{
+			if (string.IsNullOrWhiteSpace(directory))
+			{
+				continue;
+			}
+
+			string candidate = Path.Combine(directory, fileName);
+			if (File.Exists(candidate))
+			{
+				path = candidate;
+				return true;
+			}
+		}
+
+		path = null;
+		return false;
+	}
+
+	private static IEnumerable<string> GetProfilerToolSearchDirectories()
+	{
+		string baseDirectory = AppContext.BaseDirectory;
+		yield return baseDirectory;
+		yield return Directory.GetCurrentDirectory();
+		yield return Path.Combine(baseDirectory, "ProfilerStudy");
+		yield return Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "ProfilerStudy"));
+		yield return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "ProfilerStudy"));
 	}
 
 	private void OpenSettingsPanel()
