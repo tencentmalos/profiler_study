@@ -850,7 +850,27 @@
                   Samples="{Binding FrameSamples}"
                   TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
                   Selection="{Binding Selection}"
-                  Viewport="{Binding Viewport}" />
+                  Viewport="{Binding Viewport}">
+                <local:FrameTimelineControl.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem Header="Track Selected Frame" Command="{Binding TrackSelectedFrameCommand}" />
+                    <MenuItem Header="Select Slowest Frame" Command="{Binding SelectSlowestFrameCommand}" />
+                    <Separator />
+                    <MenuItem Header="Previous Spike" Command="{Binding SelectPreviousSpikeCommand}" />
+                    <MenuItem Header="Next Spike" Command="{Binding SelectNextSpikeCommand}" />
+                    <Separator />
+                    <MenuItem Header="Start" Command="{Binding ResetTimelineCommand}" />
+                    <MenuItem Header="End" Command="{Binding SelectLastFrameCommand}" />
+                    <Separator />
+                    <MenuItem Header="Pan Left" Command="{Binding PanTimelineLeftCommand}" />
+                    <MenuItem Header="Pan Right" Command="{Binding PanTimelineRightCommand}" />
+                    <MenuItem Header="Zoom In" Command="{Binding ZoomTimelineInCommand}" />
+                    <MenuItem Header="Zoom Out" Command="{Binding ZoomTimelineOutCommand}" />
+                    <Separator />
+                    <MenuItem Header="Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
+                  </ContextMenu>
+                </local:FrameTimelineControl.ContextMenu>
+              </local:FrameTimelineControl>
             </Border>
           </Grid>
 
