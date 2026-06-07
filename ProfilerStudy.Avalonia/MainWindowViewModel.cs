@@ -22,6 +22,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_LoadSampleCommand;
 	private readonly RelayCommand m_ResetTimelineCommand;
 	private readonly RelayCommand m_SelectSlowestFrameCommand;
+	private readonly RelayCommand m_SelectPreviousSpikeCommand;
+	private readonly RelayCommand m_SelectNextSpikeCommand;
 	private readonly RelayCommand m_PanTimelineLeftCommand;
 	private readonly RelayCommand m_PanTimelineRightCommand;
 	private readonly RelayCommand m_ZoomTimelineInCommand;
@@ -108,6 +110,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_LoadSampleCommand = new RelayCommand(_ => _ = LoadSampleAsync());
 		m_ResetTimelineCommand = new RelayCommand(_ => ResetTimeline(), _ => CurrentDocument != null);
 		m_SelectSlowestFrameCommand = new RelayCommand(_ => SelectSlowestFrame(), _ => CurrentDocument?.FrameSamples?.Length > 0);
+		m_SelectPreviousSpikeCommand = new RelayCommand(_ => SelectAdjacentSpike(-1), _ => CurrentDocument?.FrameSamples?.Length > 0);
+		m_SelectNextSpikeCommand = new RelayCommand(_ => SelectAdjacentSpike(1), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_PanTimelineLeftCommand = new RelayCommand(_ => PanTimeline(-1), _ => CurrentDocument != null);
 		m_PanTimelineRightCommand = new RelayCommand(_ => PanTimeline(1), _ => CurrentDocument != null);
 		m_ZoomTimelineInCommand = new RelayCommand(_ => ZoomTimeline(0.8), _ => CurrentDocument != null);
@@ -161,6 +165,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand SelectSlowestFrameCommand => m_SelectSlowestFrameCommand;
 
+	public RelayCommand SelectPreviousSpikeCommand => m_SelectPreviousSpikeCommand;
+
+	public RelayCommand SelectNextSpikeCommand => m_SelectNextSpikeCommand;
+
 	public RelayCommand PanTimelineLeftCommand => m_PanTimelineLeftCommand;
 
 	public RelayCommand PanTimelineRightCommand => m_PanTimelineRightCommand;
@@ -210,6 +218,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 			{
 				m_ResetTimelineCommand.RaiseCanExecuteChanged();
 				m_SelectSlowestFrameCommand.RaiseCanExecuteChanged();
+				m_SelectPreviousSpikeCommand.RaiseCanExecuteChanged();
+				m_SelectNextSpikeCommand.RaiseCanExecuteChanged();
 				m_PanTimelineLeftCommand.RaiseCanExecuteChanged();
 				m_PanTimelineRightCommand.RaiseCanExecuteChanged();
 				m_ZoomTimelineInCommand.RaiseCanExecuteChanged();
@@ -976,15 +986,58 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		FrameSample slowestFrame = CurrentDocument.FrameSamples.OrderByDescending(item => item.DurationMs).First();
+		SelectAndCenterFrame(slowestFrame);
+		StatusText = $"Selected slowest frame {slowestFrame.Index} ({slowestFrame.DurationMs:0.###} ms).";
+	}
+
+	private void SelectAdjacentSpike(int direction)
+	{
+		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
+		{
+			StatusText = "No frame samples loaded.";
+			return;
+		}
+
+		double thresholdMs = CurrentDocument.Summary.TargetFrameTimeMs > 0.0
+			? CurrentDocument.Summary.TargetFrameTimeMs
+			: CurrentDocument.FrameSamples.Average(item => item.DurationMs);
+		int currentFrame = Selection.SelectedFrameIndex >= 0
+			? Selection.SelectedFrameIndex
+			: direction < 0 ? Viewport.EndFrame + 1 : Viewport.StartFrame - 1;
+		FrameSample spikeFrame = direction < 0
+			? CurrentDocument.FrameSamples
+				.Where(item => item.DurationMs >= thresholdMs && item.Index < currentFrame)
+				.OrderByDescending(item => item.Index)
+				.FirstOrDefault()
+			: CurrentDocument.FrameSamples
+				.Where(item => item.DurationMs >= thresholdMs && item.Index > currentFrame)
+				.OrderBy(item => item.Index)
+				.FirstOrDefault();
+
+		if (spikeFrame.Index == 0 && spikeFrame.DurationMs == 0.0)
+		{
+			StatusText = direction < 0
+				? $"No previous spike frame over {thresholdMs:0.###} ms."
+				: $"No next spike frame over {thresholdMs:0.###} ms.";
+			return;
+		}
+
+		SelectAndCenterFrame(spikeFrame);
+		StatusText = direction < 0
+			? $"Selected previous spike frame {spikeFrame.Index} ({spikeFrame.DurationMs:0.###} ms)."
+			: $"Selected next spike frame {spikeFrame.Index} ({spikeFrame.DurationMs:0.###} ms).";
+	}
+
+	private void SelectAndCenterFrame(FrameSample frame)
+	{
 		int visibleCount = Math.Min(CurrentDocument.Summary.FrameCount, 120);
-		int startFrame = Math.Max(0, slowestFrame.Index - (visibleCount / 2));
+		int startFrame = Math.Max(0, frame.Index - (visibleCount / 2));
 		int endFrame = Math.Min(CurrentDocument.Summary.FrameCount - 1, startFrame + visibleCount - 1);
 		startFrame = Math.Max(0, endFrame - visibleCount + 1);
 
 		Viewport.SetRange(startFrame, endFrame);
-		Selection.SelectedFrameIndex = slowestFrame.Index;
-		Selection.SelectedFrameTimeMs = slowestFrame.DurationMs;
-		StatusText = $"Selected slowest frame {slowestFrame.Index} ({slowestFrame.DurationMs:0.###} ms).";
+		Selection.SelectedFrameIndex = frame.Index;
+		Selection.SelectedFrameTimeMs = frame.DurationMs;
 	}
 
 	private void ResetTimeline()
