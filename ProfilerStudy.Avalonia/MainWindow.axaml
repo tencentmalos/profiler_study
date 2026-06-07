@@ -366,18 +366,39 @@
 
       <Grid Grid.Column="2" RowDefinitions="Auto,*,47" Margin="4" Background="#C8C8C8">
         <Border Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,0,0,4">
-          <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" Margin="6,4">
-            <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#101010" FontSize="13" FontWeight="SemiBold" />
-            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" VerticalAlignment="Center" FontSize="11" />
-            <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*" ColumnSpacing="8" Margin="0,5,0,0">
-              <TextBlock Text="Info" Foreground="#5A5A5A" FontWeight="SemiBold" />
-              <TextBlock Grid.Column="1" Text="{Binding Summary.RangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-              <TextBlock Grid.Column="2" Text="Frame Graph" Foreground="#5A5A5A" FontWeight="SemiBold" />
-              <TextBlock Grid.Column="3" Text="{Binding TimelineRangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-              <TextBlock Grid.Column="4" Text="Scope Graph" Foreground="#5A5A5A" FontWeight="SemiBold" />
-              <TextBlock Grid.Column="5" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
-              <TextBlock Grid.Column="6" Text="Custom Stats" Foreground="#5A5A5A" FontWeight="SemiBold" />
-              <TextBlock Grid.Column="7" Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+          <Grid RowDefinitions="24,Auto,Auto">
+            <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="6,0">
+              <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                  <Button Content="_" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Minimize Dock" />
+                  <Button Content="□" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ShowFeatureStatusCommand}" CommandParameter="Float Dock" />
+                  <Button Content="x" Width="22" Height="18" Padding="0" FontSize="10" Command="{Binding ToggleOutputWindowCommand}" />
+                </StackPanel>
+                <TextBlock Text="Main Session View" Foreground="#101010" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+              </DockPanel>
+            </Border>
+            <Border Grid.Row="1" Background="#D7D7D7" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="4,3">
+              <StackPanel Orientation="Horizontal" Spacing="3">
+                <Button Content="Threads" Width="86" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}" />
+                <Button Content="Cores" Width="76" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}" />
+                <Button Content="Scopes" Width="82" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" Foreground="{Binding ScopesViewBrush}" />
+                <Button Content="Custom Stats" Width="112" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Custom Stats" Foreground="{Binding CustomStatsViewBrush}" />
+                <Button Content="Log" Width="64" Padding="6,2" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}" />
+              </StackPanel>
+            </Border>
+            <Grid Grid.Row="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" Margin="6,4">
+              <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="#101010" FontSize="13" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" VerticalAlignment="Center" FontSize="11" />
+              <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*" ColumnSpacing="8" Margin="0,5,0,0">
+                <TextBlock Text="Info" Foreground="#5A5A5A" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="1" Text="{Binding Summary.RangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="Frame Graph" Foreground="#5A5A5A" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="3" Text="{Binding TimelineRangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="4" Text="Scope Graph" Foreground="#5A5A5A" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="5" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="6" Text="Custom Stats" Foreground="#5A5A5A" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="7" Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              </Grid>
             </Grid>
           </Grid>
         </Border>
