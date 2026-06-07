@@ -35,13 +35,13 @@
           <MenuItem Header="_Log View" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" />
           <Separator />
           <MenuItem Header="_Threads View">
-            <MenuItem Header="_Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
-            <MenuItem Header="_Frame Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsFrameGraphVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
-            <MenuItem Header="_Scope Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsScopeGraphVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
+            <MenuItem Header="_Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
+            <MenuItem Header="_Frame Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
+            <MenuItem Header="_Scope Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
             <MenuItem Header="_CPU Graph" IsEnabled="False" />
-            <MenuItem Header="_Custom Stats Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCustomStatsVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
-            <MenuItem Header="_Core Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCoreGraphVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
-            <MenuItem Header="_Data Grid" ToggleType="CheckBox" IsChecked="{Binding IsThreadsDataGridVisible}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" />
+            <MenuItem Header="_Custom Stats Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
+            <MenuItem Header="_Core Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
+            <MenuItem Header="_Data Grid" ToggleType="CheckBox" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" />
           </MenuItem>
           <MenuItem Header="Scope _Colouring">
             <MenuItem Header="Colour by _Thread" IsEnabled="False" />
@@ -144,7 +144,7 @@
             </StackPanel>
           </Button>
           <Border Width="24" Background="#C4C4C4" BorderBrush="#9A9A9A" BorderThickness="1,0,0,0" />
-          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible}">
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="i" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="#203246" />
@@ -152,7 +152,7 @@
               <TextBlock Text="Info" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible}">
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="ms" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
@@ -160,7 +160,7 @@
               <TextBlock Text="Frames" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible}">
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="{}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" Foreground="#203246" />
@@ -168,7 +168,7 @@
               <TextBlock Text="Scope" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible}">
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="CPU" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
@@ -176,7 +176,7 @@
               <TextBlock Text="Cores" TextAlignment="Center" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible}">
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="#" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" Foreground="#203246" />
@@ -184,7 +184,7 @@
               <TextBlock Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible}">
+          <ToggleButton Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}">
             <StackPanel Spacing="4">
               <Border Width="42" Height="36" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Text="..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#203246" />
