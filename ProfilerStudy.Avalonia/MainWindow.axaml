@@ -673,6 +673,28 @@
               <Border Classes="toolbox-section">
                 <Grid RowDefinitions="Auto,*">
                   <Border Classes="toolbox-section-header">
+                    <TextBlock Text="Dock Windows" FontWeight="SemiBold" Foreground="#101010" />
+                  </Border>
+                  <Grid Grid.Row="1" ColumnDefinitions="Auto,*,*,*" RowDefinitions="Auto,Auto,Auto" Margin="6" ColumnSpacing="4" RowSpacing="4">
+                    <TextBlock Text="Main" Foreground="#404040" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreMainSessionDockCommand}" />
+                    <Button Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatMainSessionDockCommand}" />
+                    <Button Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockMainSessionDockCommand}" />
+                    <TextBlock Grid.Row="1" Text="Toolbox" Foreground="#404040" VerticalAlignment="Center" />
+                    <Button Grid.Row="1" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreToolboxCommand}" />
+                    <Button Grid.Row="1" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatToolboxCommand}" />
+                    <Button Grid.Row="1" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockToolboxCommand}" />
+                    <TextBlock Grid.Row="2" Text="Output" Foreground="#404040" VerticalAlignment="Center" />
+                    <Button Grid.Row="2" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreOutputWindowCommand}" />
+                    <Button Grid.Row="2" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatOutputWindowCommand}" />
+                    <Button Grid.Row="2" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockOutputWindowCommand}" />
+                  </Grid>
+                </Grid>
+              </Border>
+
+              <Border Classes="toolbox-section">
+                <Grid RowDefinitions="Auto,*">
+                  <Border Classes="toolbox-section-header">
                     <TextBlock Text="Threads View Panels" FontWeight="SemiBold" Foreground="#101010" />
                   </Border>
                   <StackPanel Grid.Row="1" Margin="6" Spacing="3">
@@ -1584,6 +1606,28 @@
                   <Button Classes="toolbox-action" Content="Log" Command="{Binding SelectSessionViewCommand}" CommandParameter="Log" Foreground="{Binding LogViewBrush}" />
                   <Button Classes="toolbox-action" Content="Output" Command="{Binding ToggleOutputWindowCommand}" />
                 </UniformGrid>
+              </Grid>
+            </Border>
+
+            <Border Classes="toolbox-section">
+              <Grid RowDefinitions="Auto,*">
+                <Border Classes="toolbox-section-header">
+                  <TextBlock Text="Dock Windows" FontWeight="SemiBold" Foreground="#101010" />
+                </Border>
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,*,*,*" RowDefinitions="Auto,Auto,Auto" Margin="6" ColumnSpacing="5" RowSpacing="5">
+                  <TextBlock Text="Main" Foreground="#404040" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreMainSessionDockCommand}" />
+                  <Button Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatMainSessionDockCommand}" />
+                  <Button Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockMainSessionDockCommand}" />
+                  <TextBlock Grid.Row="1" Text="Toolbox" Foreground="#404040" VerticalAlignment="Center" />
+                  <Button Grid.Row="1" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreToolboxCommand}" />
+                  <Button Grid.Row="1" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatToolboxCommand}" />
+                  <Button Grid.Row="1" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockToolboxCommand}" />
+                  <TextBlock Grid.Row="2" Text="Output" Foreground="#404040" VerticalAlignment="Center" />
+                  <Button Grid.Row="2" Grid.Column="1" Classes="toolbox-action" Content="Restore" Command="{Binding RestoreOutputWindowCommand}" />
+                  <Button Grid.Row="2" Grid.Column="2" Classes="toolbox-action" Content="Float" Command="{Binding FloatOutputWindowCommand}" />
+                  <Button Grid.Row="2" Grid.Column="3" Classes="toolbox-action" Content="Dock" Command="{Binding DockOutputWindowCommand}" />
+                </Grid>
               </Grid>
             </Border>
 
