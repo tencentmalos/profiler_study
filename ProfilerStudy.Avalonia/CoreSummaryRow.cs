@@ -1,16 +1,28 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace ProfilerStudy.Avalonia;
 
 public sealed class CoreSummaryRow
 {
-	public CoreSummaryRow(int coreIndex, int contextSwitchCount)
+	public CoreSummaryRow(int coreIndex, IEnumerable<long> contextSwitchTimes, long visibleStartTime, long visibleEndTime)
 	{
 		CoreIndex = coreIndex;
-		ContextSwitchCount = contextSwitchCount;
+		ContextSwitchTimes = (contextSwitchTimes ?? Array.Empty<long>()).ToArray();
+		VisibleStartTime = visibleStartTime;
+		VisibleEndTime = visibleEndTime < visibleStartTime ? visibleStartTime : visibleEndTime;
 	}
 
 	public int CoreIndex { get; }
 
-	public int ContextSwitchCount { get; }
+	public IReadOnlyList<long> ContextSwitchTimes { get; }
+
+	public int ContextSwitchCount => ContextSwitchTimes.Count;
+
+	public long VisibleStartTime { get; }
+
+	public long VisibleEndTime { get; }
 
 	public string CoreText => "Core " + CoreIndex;
 }

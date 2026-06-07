@@ -814,16 +814,25 @@ internal sealed class MainWindowViewModel : ObservableObject
 			return;
 		}
 
+		long startTime = 0L;
+		long endTime = 0L;
 		List<List<ContextSwitch>> contextSwitches = null;
-		if (CurrentDocument.Session.RecordingContextSwitches && TryGetVisibleFrameTimeRange(out long startTime, out long endTime))
+		if (TryGetVisibleFrameTimeRange(out long visibleStartTime, out long visibleEndTime))
+		{
+			startTime = visibleStartTime;
+			endTime = visibleEndTime;
+		}
+		if (CurrentDocument.Session.RecordingContextSwitches && endTime > startTime)
 		{
 			CurrentDocument.Session.GetContextSwitches(startTime, endTime, out contextSwitches);
 		}
 
 		for (int i = 0; i < coreCount; i++)
 		{
-			int contextSwitchCount = contextSwitches != null && i < contextSwitches.Count ? contextSwitches[i].Count : 0;
-			rows.Add(new CoreSummaryRow(i, contextSwitchCount));
+			IEnumerable<long> contextSwitchTimes = contextSwitches != null && i < contextSwitches.Count
+				? contextSwitches[i].Select(item => item.m_Timestamp)
+				: Array.Empty<long>();
+			rows.Add(new CoreSummaryRow(i, contextSwitchTimes, startTime, endTime));
 		}
 
 		CoreRows = rows;
