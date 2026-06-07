@@ -248,11 +248,86 @@
   <Grid Background="{DynamicResource SukiBackground}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="{Binding OutputWindowHeight}" />
       <RowDefinition Height="22" />
     </Grid.RowDefinitions>
-    <Border Grid.Row="0" Background="Transparent" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Height="54">
+    <Border Grid.Row="0" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" MinHeight="24">
+      <Menu Background="Transparent" FontSize="12" Padding="2,0">
+        <MenuItem Header="_File">
+          <MenuItem Header="_Open" InputGesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
+          <MenuItem Header="_Save" InputGesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
+          <MenuItem Header="Save _As..." Command="{Binding SaveSessionAsCommand}" />
+          <MenuItem Header="_Close" Command="{Binding CloseSessionCommand}" />
+          <MenuItem Header="Close A_ll" Command="{Binding CloseSessionCommand}" />
+          <Separator />
+          <MenuItem Header="_Export to CSV" Command="{Binding ExportFramesToCsvCommand}" />
+          <MenuItem Header="Export _Frame Graph to CSV" Command="{Binding ExportFramesToCsvCommand}" />
+          <Separator />
+          <MenuItem Header="_Recent Files" ItemsSource="{Binding RecentFiles}">
+            <MenuItem.ItemTemplate>
+              <DataTemplate>
+                <MenuItem Header="{Binding}"
+                          Command="{Binding $parent[Window].DataContext.OpenRecentSessionCommand}"
+                          CommandParameter="{Binding}" />
+              </DataTemplate>
+            </MenuItem.ItemTemplate>
+          </MenuItem>
+          <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
+        </MenuItem>
+        <MenuItem Header="_View">
+          <MenuItem Header="_Threads View" ToggleType="Radio" IsChecked="{Binding IsThreadsViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
+          <MenuItem Header="_Cores View" ToggleType="Radio" IsChecked="{Binding IsCoresViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
+          <MenuItem Header="_Scopes View" ToggleType="Radio" IsChecked="{Binding IsScopesViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
+          <Separator />
+          <MenuItem Header="_Threads View">
+            <MenuItem Header="_Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
+            <MenuItem Header="_Frame Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
+            <MenuItem Header="_Scope Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
+            <MenuItem Header="_CPU Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
+            <MenuItem Header="_Custom Stats Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
+          </MenuItem>
+          <MenuItem Header="Scope _Colouring">
+            <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
+            <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
+        </MenuItem>
+        <MenuItem Header="_Connection">
+          <MenuItem Header="_New Connection..." Command="{Binding OpenConnectionCommand}" />
+          <MenuItem Header="_Connect..." Command="{Binding OpenConnectionCommand}" />
+          <MenuItem Header="_Disconnect" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" />
+        </MenuItem>
+        <MenuItem Header="_Tools">
+          <Separator />
+          <MenuItem Header="_Find" InputGesture="Ctrl+F" Command="{Binding OpenFindScopeCommand}" />
+          <Separator />
+          <MenuItem Header="_Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
+          <Separator />
+          <MenuItem Header="_Android">
+            <MenuItem Header="_Start Recording Context Switches..." Command="{Binding AndroidActionCommand}" CommandParameter="RecordContextSwitches" />
+            <MenuItem Header="_Load Context Switch File" Command="{Binding AndroidActionCommand}" CommandParameter="LoadContextSwitchFile" />
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
+        </MenuItem>
+        <MenuItem Header="_Help">
+          <MenuItem Header="_Registration..." Command="{Binding OpenRegistrationCommand}" />
+          <MenuItem Header="_Check for Updates" Command="{Binding OpenUpdateCheckCommand}" />
+          <Separator />
+          <MenuItem Header="_Demo">
+            <MenuItem Header="_Launch FramePro Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
+            <MenuItem Header="_Playback Recording File..." Command="{Binding DemoActionCommand}" CommandParameter="PlaybackRecordingFile" />
+          </MenuItem>
+          <MenuItem Header="_Show Startup Page" Command="{Binding ShowStartupPageCommand}" />
+          <Separator />
+          <MenuItem Header="_About" Command="{Binding OpenAboutCommand}" />
+        </MenuItem>
+      </Menu>
+    </Border>
+    <Border Grid.Row="1" Background="Transparent" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Height="54">
       <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="10,5" ColumnSpacing="10">
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
           <material:MaterialIcon Kind="Speedometer" Width="24" Height="24" Foreground="{DynamicResource SukiPrimaryColor}" />
@@ -329,7 +404,7 @@
       </Grid>
     </Border>
 
-    <Grid Grid.Row="1" Background="Transparent" Margin="8,6,8,6">
+    <Grid Grid.Row="2" Background="Transparent" Margin="8,6,8,6">
       <Grid.RowDefinitions>
         <RowDefinition Height="0" />
         <RowDefinition Height="*" />
@@ -1607,7 +1682,7 @@
       </Grid>
     </Grid>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Background="{DynamicResource SukiBackground}"
             IsVisible="{Binding IsStartupPageVisible}">
@@ -1670,7 +1745,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="330"
             HorizontalAlignment="Left"
@@ -1819,7 +1894,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -1853,7 +1928,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -1891,7 +1966,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="560"
             Height="300"
@@ -1943,7 +2018,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             Height="220"
@@ -1976,7 +2051,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -2025,7 +2100,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -2060,7 +2135,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -2119,7 +2194,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -2171,7 +2246,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -2211,7 +2286,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -2288,7 +2363,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Grid.RowSpan="2"
             Width="520"
             HorizontalAlignment="Center"
@@ -2346,7 +2421,7 @@
       </Grid>
     </Border>
 
-    <Border Grid.Row="2" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0" IsVisible="{Binding IsOutputWindowMinimizedBarVisible}">
+    <Border Grid.Row="3" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0" IsVisible="{Binding IsOutputWindowMinimizedBarVisible}">
       <DockPanel LastChildFill="True" Margin="7,3">
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
           <TextBlock Text="{Binding SessionStatusText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" VerticalAlignment="Center" />
@@ -2357,7 +2432,7 @@
       </DockPanel>
     </Border>
 
-    <Border Grid.Row="2" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowExpanded}">
+    <Border Grid.Row="3" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0" MinHeight="120" IsVisible="{Binding IsOutputWindowExpanded}">
       <TextBox Text="{Binding OutputLogText}"
                AcceptsReturn="True"
                IsReadOnly="True"
@@ -2371,7 +2446,7 @@
                ScrollViewer.VerticalScrollBarVisibility="Auto" />
     </Border>
 
-    <Border Grid.Row="3" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0">
+    <Border Grid.Row="4" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,1,0,0">
       <Grid ColumnDefinitions="2*,160,180,180,240">
         <Border Classes="status-cell">
           <TextBlock Text="{Binding StatusText}" Classes="status-value" />
