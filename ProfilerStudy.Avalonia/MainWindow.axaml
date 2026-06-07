@@ -721,7 +721,21 @@
             </Grid>
           </Grid>
         </Border>
-        <Grid Grid.Row="1" RowDefinitions="118,24,150,4,120,4,*" ColumnDefinitions="*,4,422" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+        <Grid Grid.Row="1" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding ThreadsInfoPanelHeight}" />
+            <RowDefinition Height="{Binding ThreadsFrameScrollbarHeight}" />
+            <RowDefinition Height="{Binding ThreadsFrameGraphHeight}" />
+            <RowDefinition Height="{Binding ThreadsFrameGraphSplitterHeight}" />
+            <RowDefinition Height="{Binding ThreadsScopeGraphHeight}" />
+            <RowDefinition Height="{Binding ThreadsScopeGraphSplitterHeight}" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="{Binding ThreadsDataGridSplitterWidth}" />
+            <ColumnDefinition Width="{Binding ThreadsDataGridColumnWidth}" />
+          </Grid.ColumnDefinitions>
           <Grid Grid.Row="0" ColumnDefinitions="32,*" IsVisible="{Binding IsThreadsInfoPanelVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="INFO"

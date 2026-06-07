@@ -151,12 +151,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private int m_MaxVisibleThreadTimelineThreads = DefaultVisibleThreadTimelineThreads;
 	private string m_FocusedThreadName;
 	private bool m_AreThreadScopesCollapsed;
-	private bool m_IsThreadsInfoPanelVisible = true;
+	private bool m_IsThreadsInfoPanelVisible;
 	private bool m_IsThreadsFrameGraphVisible = true;
 	private bool m_IsThreadsScopeGraphVisible = true;
 	private bool m_IsThreadsCoreGraphVisible = true;
-	private bool m_IsThreadsCustomStatsVisible = true;
-	private bool m_IsThreadsDataGridVisible = true;
+	private bool m_IsThreadsCustomStatsVisible;
+	private bool m_IsThreadsDataGridVisible;
 	private bool m_IsThreadSettingsPanelVisible;
 	private bool m_IsOutputWindowVisible = true;
 	private bool m_IsOutputWindowMinimized;
@@ -843,6 +843,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_IsThreadsInfoPanelVisible, value))
 			{
 				RaisePropertyChanged(nameof(IsThreadsInfoPanelCollapsed));
+				RaiseThreadsLayoutPropertiesChanged();
 			}
 		}
 	}
@@ -857,6 +858,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_IsThreadsFrameGraphVisible, value))
 			{
 				RaisePropertyChanged(nameof(IsThreadsFrameGraphCollapsed));
+				RaiseThreadsLayoutPropertiesChanged();
 			}
 		}
 	}
@@ -871,6 +873,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_IsThreadsScopeGraphVisible, value))
 			{
 				RaisePropertyChanged(nameof(IsThreadsScopeGraphCollapsed));
+				RaiseThreadsLayoutPropertiesChanged();
 			}
 		}
 	}
@@ -885,6 +888,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_IsThreadsCoreGraphVisible, value))
 			{
 				RaisePropertyChanged(nameof(IsThreadsCoreGraphCollapsed));
+				RaiseThreadsLayoutPropertiesChanged();
 			}
 		}
 	}
@@ -899,6 +903,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_IsThreadsCustomStatsVisible, value))
 			{
 				RaisePropertyChanged(nameof(IsThreadsCustomStatsCollapsed));
+				RaiseThreadsLayoutPropertiesChanged();
 			}
 		}
 	}
@@ -913,11 +918,40 @@ internal sealed class MainWindowViewModel : ObservableObject
 			if (SetProperty(ref m_IsThreadsDataGridVisible, value))
 			{
 				RaisePropertyChanged(nameof(IsThreadsDataGridCollapsed));
+				RaiseThreadsLayoutPropertiesChanged();
 			}
 		}
 	}
 
 	public bool IsThreadsDataGridCollapsed => !IsThreadsDataGridVisible;
+
+	public GridLength ThreadsInfoPanelHeight => IsThreadsInfoPanelVisible ? new GridLength(118) : new GridLength(0);
+
+	public GridLength ThreadsFrameScrollbarHeight => IsThreadsFrameGraphVisible ? new GridLength(24) : new GridLength(0);
+
+	public GridLength ThreadsFrameGraphHeight => IsThreadsFrameGraphVisible ? new GridLength(100) : new GridLength(0);
+
+	public GridLength ThreadsFrameGraphSplitterHeight => IsThreadsFrameGraphVisible ? new GridLength(4) : new GridLength(0);
+
+	public GridLength ThreadsScopeGraphHeight => IsThreadsScopeGraphVisible ? new GridLength(163) : new GridLength(0);
+
+	public GridLength ThreadsScopeGraphSplitterHeight => IsThreadsScopeGraphVisible ? new GridLength(4) : new GridLength(0);
+
+	public GridLength ThreadsDataGridSplitterWidth => IsThreadsDataGridVisible ? new GridLength(4) : new GridLength(0);
+
+	public GridLength ThreadsDataGridColumnWidth => IsThreadsDataGridVisible ? new GridLength(422) : new GridLength(0);
+
+	private void RaiseThreadsLayoutPropertiesChanged()
+	{
+		RaisePropertyChanged(nameof(ThreadsInfoPanelHeight));
+		RaisePropertyChanged(nameof(ThreadsFrameScrollbarHeight));
+		RaisePropertyChanged(nameof(ThreadsFrameGraphHeight));
+		RaisePropertyChanged(nameof(ThreadsFrameGraphSplitterHeight));
+		RaisePropertyChanged(nameof(ThreadsScopeGraphHeight));
+		RaisePropertyChanged(nameof(ThreadsScopeGraphSplitterHeight));
+		RaisePropertyChanged(nameof(ThreadsDataGridSplitterWidth));
+		RaisePropertyChanged(nameof(ThreadsDataGridColumnWidth));
+	}
 
 	public bool IsThreadSettingsPanelVisible
 	{
