@@ -364,7 +364,8 @@
                     Rows="{Binding VisibleThreadScopes}"
                     Samples="{Binding FrameSamples}"
                     Viewport="{Binding Viewport}"
-                    Selection="{Binding Selection}" />
+                    Selection="{Binding Selection}"
+                    OpenScopeSourceCommand="{Binding OpenScopeSourceCommand}" />
               </Border>
             </Grid>
 

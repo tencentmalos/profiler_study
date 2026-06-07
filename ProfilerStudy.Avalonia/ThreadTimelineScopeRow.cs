@@ -2,7 +2,7 @@ namespace ProfilerStudy.Avalonia;
 
 public sealed class ThreadTimelineScopeRow
 {
-	public ThreadTimelineScopeRow(int frameIndex, string threadName, int depth, string name, double startFrame, double endFrame)
+	public ThreadTimelineScopeRow(int frameIndex, string threadName, int depth, string name, double startFrame, double endFrame, ScopeFrameDetailRow sourceScope)
 	{
 		FrameIndex = frameIndex;
 		ThreadName = string.IsNullOrWhiteSpace(threadName) ? "(unnamed thread)" : threadName;
@@ -10,6 +10,7 @@ public sealed class ThreadTimelineScopeRow
 		Name = string.IsNullOrWhiteSpace(name) ? "(unnamed scope)" : name;
 		StartFrame = startFrame;
 		EndFrame = endFrame < startFrame ? startFrame : endFrame;
+		SourceScope = sourceScope;
 	}
 
 	public int FrameIndex { get; }
@@ -23,4 +24,10 @@ public sealed class ThreadTimelineScopeRow
 	public double StartFrame { get; }
 
 	public double EndFrame { get; }
+
+	public ScopeFrameDetailRow SourceScope { get; }
+
+	public bool CanOpenSource => SourceScope?.CanOpenSource == true;
+
+	public string SourceText => SourceScope?.SourceText ?? string.Empty;
 }

@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using System.Windows.Input;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -45,6 +46,9 @@ public sealed class ThreadTimelineLaneControl : Control
 	public static readonly StyledProperty<TimelineSelection> SelectionProperty =
 		AvaloniaProperty.Register<ThreadTimelineLaneControl, TimelineSelection>(nameof(Selection));
 
+	public static readonly StyledProperty<ICommand> OpenScopeSourceCommandProperty =
+		AvaloniaProperty.Register<ThreadTimelineLaneControl, ICommand>(nameof(OpenScopeSourceCommand));
+
 	static ThreadTimelineLaneControl()
 	{
 		AffectsRender<ThreadTimelineLaneControl>(RowsProperty, SamplesProperty, ViewportProperty, SelectionProperty);
@@ -74,15 +78,33 @@ public sealed class ThreadTimelineLaneControl : Control
 		set => SetValue(SelectionProperty, value);
 	}
 
+	public ICommand OpenScopeSourceCommand
+	{
+		get => GetValue(OpenScopeSourceCommandProperty);
+		set => SetValue(OpenScopeSourceCommandProperty, value);
+	}
+
 	protected override void OnPointerPressed(PointerPressedEventArgs e)
 	{
 		base.OnPointerPressed(e);
+		Point point = e.GetPosition(this);
+		if (e.ClickCount >= 2)
+		{
+			ThreadTimelineScopeRow scope = TryGetScopeAtPoint(point);
+			if (scope?.SourceScope != null && OpenScopeSourceCommand?.CanExecute(scope.SourceScope) == true)
+			{
+				OpenScopeSourceCommand.Execute(scope.SourceScope);
+				e.Handled = true;
+				return;
+			}
+		}
+
 		if (Selection == null)
 		{
 			return;
 		}
 
-		if (TryGetFrameAtPoint(e.GetPosition(this), out FrameSample frame))
+		if (TryGetFrameAtPoint(point, out FrameSample frame))
 		{
 			Selection.SelectedFrameIndex = frame.Index;
 			Selection.SelectedFrameTimeMs = frame.DurationMs;
@@ -308,12 +330,16 @@ public sealed class ThreadTimelineLaneControl : Control
 
 	private static string FormatScopeTip(ThreadTimelineScopeRow row)
 	{
+		string sourceText = string.IsNullOrWhiteSpace(row.SourceText) ? string.Empty : "\n" + row.SourceText;
+		string openText = row.CanOpenSource ? "\nDouble-click to open source" : string.Empty;
 		return row.ThreadName + "\n" +
 			"Frame " + row.FrameIndex.ToString(CultureInfo.InvariantCulture) + "\n" +
 			row.Name + "\n" +
 			"Depth " + row.Depth.ToString(CultureInfo.InvariantCulture) + ", " +
 			row.StartFrame.ToString("0.###", CultureInfo.InvariantCulture) + "-" +
-			row.EndFrame.ToString("0.###", CultureInfo.InvariantCulture);
+			row.EndFrame.ToString("0.###", CultureInfo.InvariantCulture) +
+			sourceText +
+			openText;
 	}
 
 	private static void DrawAxis(DrawingContext context, double left, double right, double top, int startFrame, int endFrame)

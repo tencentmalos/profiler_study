@@ -54,7 +54,8 @@ internal static class ThreadTimelineScopeAnalyzer
 					scope.Depth,
 					scope.Name,
 					sample.Index + startRatio,
-					sample.Index + endRatio));
+					sample.Index + endRatio,
+					scope));
 			}
 		}
 
