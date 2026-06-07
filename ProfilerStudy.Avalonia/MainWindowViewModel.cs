@@ -56,6 +56,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_ToggleScopeColorModeCommand;
 	private readonly RelayCommand m_ExitCommand;
 	private readonly RelayCommand m_ShowFeatureStatusCommand;
+	private readonly RelayCommand m_AdjustConditionalScopeTimeCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -78,6 +79,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_StatusText = "Open a profiler file or load generated sample data.";
 	private string m_FooterText = "No session";
 	private string m_TimelineRangeText = string.Empty;
+	private string m_SessionStatusText = "Session: none";
+	private string m_SelectedFrameStatusText = "Frame: none";
+	private string m_ConditionalScopeTimeText = "All scope times";
+	private double m_ConditionalScopeTimeMs;
+	private double m_ConditionalScopeTimeWidth;
 	private string m_ScopeFilterText = string.Empty;
 	private string m_ThreadFilterText = string.Empty;
 	private string m_ThreadTimelineSummaryText = "No profiler thread scope data loaded.";
@@ -159,6 +165,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_ToggleScopeColorModeCommand = new RelayCommand(_ => ToggleScopeColorMode());
 		m_ExitCommand = new RelayCommand(_ => ExitApplication());
 		m_ShowFeatureStatusCommand = new RelayCommand(ShowFeatureStatus);
+		m_AdjustConditionalScopeTimeCommand = new RelayCommand(AdjustConditionalScopeTime);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -261,6 +268,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	public RelayCommand ShowFeatureStatusCommand => m_ShowFeatureStatusCommand;
 
+	public RelayCommand AdjustConditionalScopeTimeCommand => m_AdjustConditionalScopeTimeCommand;
+
 	public SessionSummaryViewModel Summary { get; }
 
 	public SessionDocument CurrentDocument
@@ -284,9 +293,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 				m_ZoomTimelineOutCommand.RaiseCanExecuteChanged();
 				m_FindPreviousScopeCommand.RaiseCanExecuteChanged();
 				m_FindNextScopeCommand.RaiseCanExecuteChanged();
-				FooterText = value == null
-					? "No session"
-					: $"{value.Summary.FrameCount} frames";
+				UpdateShellStatusSegments();
 			}
 		}
 	}
@@ -379,6 +386,30 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_TimelineRangeText;
 		private set => SetProperty(ref m_TimelineRangeText, value);
+	}
+
+	public string SessionStatusText
+	{
+		get => m_SessionStatusText;
+		private set => SetProperty(ref m_SessionStatusText, value);
+	}
+
+	public string SelectedFrameStatusText
+	{
+		get => m_SelectedFrameStatusText;
+		private set => SetProperty(ref m_SelectedFrameStatusText, value);
+	}
+
+	public string ConditionalScopeTimeText
+	{
+		get => m_ConditionalScopeTimeText;
+		private set => SetProperty(ref m_ConditionalScopeTimeText, value);
+	}
+
+	public double ConditionalScopeTimeWidth
+	{
+		get => m_ConditionalScopeTimeWidth;
+		private set => SetProperty(ref m_ConditionalScopeTimeWidth, value);
 	}
 
 	public IReadOnlyList<ScopeHotspotRow> ScopeHotspots
@@ -794,6 +825,42 @@ internal sealed class MainWindowViewModel : ObservableObject
 		StatusText = featureName + " is visible in the Avalonia shell but is not implemented yet.";
 	}
 
+	private void AdjustConditionalScopeTime(object parameter)
+	{
+		string direction = parameter as string;
+		double delta = string.Equals(direction, "Down", StringComparison.Ordinal) ? -0.5 : 0.5;
+		m_ConditionalScopeTimeMs = Math.Max(0, Math.Min(20, m_ConditionalScopeTimeMs + delta));
+		UpdateConditionalScopeTimeStatus();
+		StatusText = m_ConditionalScopeTimeMs <= 0
+			? "Conditional Scope Time disabled."
+			: $"Conditional Scope Time threshold set to {m_ConditionalScopeTimeMs:0.0} ms.";
+	}
+
+	private void UpdateConditionalScopeTimeStatus()
+	{
+		ConditionalScopeTimeText = m_ConditionalScopeTimeMs <= 0
+			? "All scope times"
+			: $"Only scopes >= {m_ConditionalScopeTimeMs:0.0} ms";
+		ConditionalScopeTimeWidth = Math.Round(8 + (m_ConditionalScopeTimeMs / 20.0 * 120.0), 1);
+	}
+
+	private void UpdateShellStatusSegments()
+	{
+		if (CurrentDocument == null)
+		{
+			SessionStatusText = "Session: none";
+			SelectedFrameStatusText = "Frame: none";
+			FooterText = "No session";
+			return;
+		}
+
+		SessionStatusText = $"Session: {CurrentDocument.Summary.FrameCount} frames";
+		FooterText = $"{CurrentDocument.Summary.FrameCount} frames";
+		SelectedFrameStatusText = Selection.SelectedFrameIndex >= 0
+			? $"Frame: {Selection.SelectedFrameIndex} ({Selection.SelectedFrameTimeMs:0.###} ms)"
+			: "Frame: none";
+	}
+
 	public void SelectFrameFromProfilerStats(int frameIndex)
 	{
 		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
@@ -831,6 +898,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 		Selection.SelectedFrameIndex = frame.Index;
 		Selection.SelectedFrameTimeMs = frame.DurationMs;
+		UpdateShellStatusSegments();
 		StatusText = $"Selected frame {frame.Index} from profiler scope timeline ({frame.DurationMs:0.###} ms).";
 	}
 
