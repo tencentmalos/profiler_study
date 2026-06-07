@@ -1,6 +1,6 @@
 namespace ProfilerStudy.Avalonia;
 
-internal sealed class CoreSummaryRow
+public sealed class CoreSummaryRow
 {
 	public CoreSummaryRow(int coreIndex, int contextSwitchCount)
 	{

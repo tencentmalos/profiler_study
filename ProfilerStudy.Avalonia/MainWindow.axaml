@@ -337,7 +337,7 @@
                         VerticalAlignment="Stretch"
                         ResizeDirection="Rows" />
 
-          <Grid Grid.Row="2" RowDefinitions="220,6,*,6,180,6,160,6,150" Margin="0,8,0,0">
+          <Grid Grid.Row="2" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,8,0,0">
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
               <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
@@ -377,6 +377,36 @@
 
             <Grid Grid.Row="2" ColumnDefinitions="34,225,*">
               <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
+                <TextBlock Text="Cores"
+                           Foreground="#202020"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap" />
+              </Border>
+
+              <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Core Activity" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+
+              <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,1,1">
+                <local:CoreTimelineStripControl
+                    Rows="{Binding CoreRows}"
+                    SummaryText="{Binding CoreSummaryText}" />
+              </Border>
+            </Grid>
+
+            <GridSplitter Grid.Row="3"
+                          Background="#9A9A9A"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          ResizeDirection="Rows" />
+
+            <Grid Grid.Row="4" ColumnDefinitions="34,225,*">
+              <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
                 <TextBlock Text="Stats"
                            Foreground="#202020"
                            FontWeight="SemiBold"
@@ -400,13 +430,13 @@
               </Border>
             </Grid>
 
-            <GridSplitter Grid.Row="3"
+            <GridSplitter Grid.Row="7"
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows" />
 
-            <Border Grid.Row="4" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+            <Border Grid.Row="8" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
               <Grid RowDefinitions="Auto,96,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -517,13 +547,13 @@
               </Grid>
             </Border>
 
-            <GridSplitter Grid.Row="7"
+            <GridSplitter Grid.Row="9"
                           Background="#9A9A9A"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows" />
 
-            <Border Grid.Row="8" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
+            <Border Grid.Row="10" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
