@@ -728,12 +728,38 @@
               </TextBlock>
             </Border>
 
-            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="4">
-              <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="4">
-                <TextBlock Text="{Binding SelectedFrameStatusText}" Foreground="#101010" FontWeight="SemiBold" TextWrapping="Wrap" />
-                <TextBlock Grid.Row="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#404040" TextWrapping="Wrap" />
-                <TextBlock Grid.Row="2" Text="{Binding Summary.MaxFrameTimeText}" Foreground="#101010" TextWrapping="Wrap" />
-                <TextBlock Grid.Row="3" Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
+            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
+              <Grid ColumnDefinitions="193,32">
+                <Grid RowDefinitions="60,*">
+                  <Border Background="#D0D0D0" Padding="6,5">
+                    <StackPanel Spacing="1">
+                      <TextBlock Text="Average Frame" Foreground="#202020" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="24" />
+                    </StackPanel>
+                  </Border>
+                  <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
+                    <Grid RowDefinitions="*,*,*" ColumnDefinitions="*,58">
+                      <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="1" Text="Max" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="2" Text="In Budget" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                      <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.FramesInBudgetText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                    </Grid>
+                  </Border>
+                </Grid>
+                <Border Grid.Column="1" Background="#D3D3D3" BorderBrush="#101010" BorderThickness="0,0,1,0">
+                  <Grid RowDefinitions="Auto,*,Auto">
+                    <TextBlock Text="ms" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
+                    <Canvas Grid.Row="1">
+                      <Line StartPoint="27,4" EndPoint="31,4" Stroke="#101010" StrokeThickness="1" />
+                      <Line StartPoint="27,44" EndPoint="31,44" Stroke="#101010" StrokeThickness="1" />
+                      <Line StartPoint="27,84" EndPoint="31,84" Stroke="#101010" StrokeThickness="1" />
+                      <Ellipse Width="6" Height="6" Fill="#D00000" Canvas.Left="26" Canvas.Top="56" />
+                    </Canvas>
+                    <TextBlock Grid.Row="2" Text="0" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
+                  </Grid>
+                </Border>
               </Grid>
             </Border>
 
@@ -807,13 +833,12 @@
               </TextBlock>
             </Border>
 
-            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="4">
-              <StackPanel Spacing="3">
-                <TextBlock Text="Time Spans" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
-                <TextBlock Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
-                <Separator Margin="0,4" />
-                <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
-              </StackPanel>
+            <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+              <Grid RowDefinitions="Auto,Auto,*">
+                <TextBlock Text="Time Spans" Foreground="#F0F0F0" FontFamily="Microsoft Sans Serif, Segoe UI" FontSize="11" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#BDBDBD" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
+              </Grid>
             </Border>
 
             <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,0,1">
@@ -916,15 +941,13 @@
                 </TextBlock>
               </Border>
 
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="4">
-                <StackPanel Spacing="3">
-                  <TextBlock Text="Thread Activity" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding ThreadTimelineSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
-                  <Separator Margin="0,4" />
-                  <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" />
-                  <TextBlock Text="{Binding Summary.ThreadCountLabel}" Foreground="#404040" />
-                  <TextBlock Text="{Binding Summary.CoreCountLabel}" Foreground="#404040" />
-                </StackPanel>
+              <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+                <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+                  <TextBlock Text="Thread Activity" Foreground="#F0F0F0" FontSize="11" FontWeight="SemiBold" />
+                  <TextBlock Grid.Row="1" Text="{Binding ThreadTimelineSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="2" Text="{Binding Summary.ThreadCountLabel}" Foreground="#D8D8D8" FontSize="10" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="4" Text="{Binding TimelineRangeText}" Foreground="#BDBDBD" FontSize="10" TextTrimming="CharacterEllipsis" />
+                </Grid>
               </Border>
 
               <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,0,1">
@@ -1010,11 +1033,18 @@
                 </TextBlock>
               </Border>
 
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="4">
-                <StackPanel Spacing="3">
-                  <TextBlock Text="Core Activity" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
-                </StackPanel>
+              <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+                <Grid RowDefinitions="Auto,Auto,*">
+                  <TextBlock Text="Core Activity" Foreground="#F0F0F0" FontSize="11" FontWeight="SemiBold" />
+                  <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}" Margin="0,5,0,0">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding CoreText}" Foreground="#F0F0F0" FontSize="10" TextTrimming="CharacterEllipsis" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Grid>
               </Border>
 
               <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
@@ -1405,11 +1435,38 @@
               </TextBlock.RenderTransform>
             </TextBlock>
           </Border>
-          <Border Grid.Row="0" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
-            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
-              <TextBlock Text="Frame Graph" Foreground="#101010" FontWeight="SemiBold" />
-              <TextBlock Grid.Row="1" Text="{Binding Summary.TargetFrameTimeText}" Foreground="#404040" TextWrapping="Wrap" />
-              <TextBlock Grid.Row="2" Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
+          <Border Grid.Row="0" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
+            <Grid ColumnDefinitions="193,32">
+              <Grid RowDefinitions="60,*">
+                <Border Background="#D0D0D0" Padding="6,5">
+                  <StackPanel Spacing="1">
+                    <TextBlock Text="Average Frame" Foreground="#202020" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="#101010" FontFamily="Consolas,Menlo" FontSize="24" />
+                  </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
+                  <Grid RowDefinitions="*,*,*" ColumnDefinitions="*,58">
+                    <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="1" Text="Max" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Summary.MaxFrameTimeText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="2" Text="In Budget" Margin="5,0" VerticalAlignment="Center" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Summary.FramesInBudgetText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="#101010" FontFamily="Monaco,Consolas" FontSize="10" />
+                  </Grid>
+                </Border>
+              </Grid>
+              <Border Grid.Column="1" Background="#D3D3D3" BorderBrush="#101010" BorderThickness="0,0,1,0">
+                <Grid RowDefinitions="Auto,*,Auto">
+                  <TextBlock Text="ms" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
+                  <Canvas Grid.Row="1">
+                    <Line StartPoint="27,4" EndPoint="31,4" Stroke="#101010" StrokeThickness="1" />
+                    <Line StartPoint="27,44" EndPoint="31,44" Stroke="#101010" StrokeThickness="1" />
+                    <Line StartPoint="27,84" EndPoint="31,84" Stroke="#101010" StrokeThickness="1" />
+                    <Ellipse Width="6" Height="6" Fill="#D00000" Canvas.Left="26" Canvas.Top="56" />
+                  </Canvas>
+                  <TextBlock Grid.Row="2" Text="0" Foreground="#101010" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
+                </Grid>
+              </Border>
             </Grid>
           </Border>
           <Border Grid.Row="0" Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
@@ -1440,14 +1497,14 @@
               </TextBlock.RenderTransform>
             </TextBlock>
           </Border>
-          <Border Grid.Row="3" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
-            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
-              <TextBlock Text="Cores" Foreground="#101010" FontWeight="SemiBold" />
-              <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
-              <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}">
+          <Border Grid.Row="3" Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+            <Grid RowDefinitions="Auto,Auto,*">
+              <TextBlock Text="Cores" Foreground="#F0F0F0" FontWeight="SemiBold" FontSize="11" />
+              <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+              <ItemsControl Grid.Row="2" ItemsSource="{Binding CoreRows}" Margin="0,5,0,0">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <TextBlock Text="{Binding CoreText}" Foreground="#101010" />
+                    <TextBlock Text="{Binding CoreText}" Foreground="#F0F0F0" FontSize="10" TextTrimming="CharacterEllipsis" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
@@ -1468,11 +1525,11 @@
                   </TextBlock.RenderTransform>
                 </TextBlock>
               </Border>
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
-                <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
-                  <TextBlock Text="Scope Graph" Foreground="#101010" FontWeight="SemiBold" />
-                  <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
-                  <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
+              <Border Grid.Column="1" Background="#3F3F3F" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+                <Grid RowDefinitions="Auto,Auto,*">
+                  <TextBlock Text="Scope Graph" Foreground="#F0F0F0" FontWeight="SemiBold" FontSize="11" />
+                  <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="#D8D8D8" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                  <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="#BDBDBD" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
                 </Grid>
               </Border>
               <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
