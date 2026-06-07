@@ -23,6 +23,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_OpenScopeSourceCommand;
 	private readonly RelayCommand m_SortTableCommand;
 	private readonly RelayCommand m_SelectSessionViewCommand;
+	private readonly RelayCommand m_ClearThreadFilterCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -46,6 +47,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_FooterText = "Avalonia + SkiaSharp migration prototype";
 	private string m_TimelineRangeText = string.Empty;
 	private string m_ScopeFilterText = string.Empty;
+	private string m_ThreadFilterText = string.Empty;
 	private string m_ThreadTimelineSummaryText = "No profiler thread scope data loaded.";
 	private string m_ScopeHotspotSummaryText = "No profiler scope data loaded.";
 	private string m_SelectedFrameScopeSummaryText = "Select a frame to inspect scopes.";
@@ -80,6 +82,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
 		m_SortTableCommand = new RelayCommand(SortTable);
 		m_SelectSessionViewCommand = new RelayCommand(SelectSessionView);
+		m_ClearThreadFilterCommand = new RelayCommand(_ => ThreadFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ThreadFilterText));
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -121,6 +124,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand SortTableCommand => m_SortTableCommand;
 
 	public RelayCommand SelectSessionViewCommand => m_SelectSessionViewCommand;
+
+	public RelayCommand ClearThreadFilterCommand => m_ClearThreadFilterCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -249,6 +254,19 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_ScopeHotspotSummaryText;
 		private set => SetProperty(ref m_ScopeHotspotSummaryText, value);
+	}
+
+	public string ThreadFilterText
+	{
+		get => m_ThreadFilterText;
+		set
+		{
+			if (SetProperty(ref m_ThreadFilterText, value ?? string.Empty))
+			{
+				m_ClearThreadFilterCommand.RaiseCanExecuteChanged();
+				ApplyVisibleThreadTimeline();
+			}
+		}
 	}
 
 	public IReadOnlyList<ThreadTimelineScopeRow> VisibleThreadScopes
@@ -805,19 +823,34 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void ApplyVisibleThreadTimeline()
 	{
-		VisibleThreadScopes = ThreadTimelineScopeAnalyzer.Build(CurrentDocument, Viewport);
+		IReadOnlyList<ThreadTimelineScopeRow> allRows = ThreadTimelineScopeAnalyzer.Build(CurrentDocument, Viewport);
+		string filter = ThreadFilterText?.Trim();
+		if (!string.IsNullOrWhiteSpace(filter))
+		{
+			allRows = allRows
+				.Where(item =>
+					item.ThreadName.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0 ||
+					item.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+				.ToArray();
+		}
+
+		VisibleThreadScopes = allRows;
 		if (CurrentDocument?.Session == null)
 		{
 			ThreadTimelineSummaryText = "Generated sample has no profiler scope stream.";
 		}
 		else if (VisibleThreadScopes.Count == 0)
 		{
-			ThreadTimelineSummaryText = "No scopes found in " + (Viewport?.RangeText ?? "visible range") + ".";
+			ThreadTimelineSummaryText = string.IsNullOrWhiteSpace(filter)
+				? "No scopes found in " + (Viewport?.RangeText ?? "visible range") + "."
+				: "No thread scopes match \"" + filter + "\" in " + (Viewport?.RangeText ?? "visible range") + ".";
 		}
 		else
 		{
 			int threadCount = VisibleThreadScopes.Select(item => item.ThreadName).Distinct(StringComparer.Ordinal).Count();
-			ThreadTimelineSummaryText = $"{VisibleThreadScopes.Count} scope events across {threadCount} threads in {Viewport.RangeText}";
+			ThreadTimelineSummaryText = string.IsNullOrWhiteSpace(filter)
+				? $"{VisibleThreadScopes.Count} scope events across {threadCount} threads in {Viewport.RangeText}"
+				: $"{VisibleThreadScopes.Count} matching scope events across {threadCount} threads in {Viewport.RangeText}";
 		}
 	}
 

@@ -315,15 +315,32 @@
             </Border>
 
             <Border Grid.Column="1" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Padding="8">
-              <StackPanel Spacing="4">
-                <TextBlock Text="Frame Graph" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
-                <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
-                <Separator Margin="0,4" />
-                <TextBlock Text="{Binding Selection.SelectedFrameLabel}" Foreground="#101010" />
-                <TextBlock Text="{Binding Summary.FrameCountLabel}" Foreground="#404040" />
-                <TextBlock Text="{Binding Summary.DurationLabel}" Foreground="#404040" />
-                <TextBlock Text="{Binding Summary.ThreadCountLabel}" Foreground="#404040" />
-              </StackPanel>
+              <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" ColumnDefinitions="*,46">
+                <Button Grid.Column="0"
+                        Content="Filter Threads..."
+                        HorizontalContentAlignment="Left"
+                        Padding="6,2"
+                        Command="{Binding SelectSessionViewCommand}"
+                        CommandParameter="Threads" />
+                <Button Grid.Column="1"
+                        Content="Name"
+                        Padding="0"
+                        ToolTip.Tip="Show threads by name or by id" />
+                <TextBox Grid.Row="1"
+                         Grid.Column="0"
+                         Text="{Binding ThreadFilterText}"
+                         Watermark="thread or scope text"
+                         Margin="0,3,2,0" />
+                <Button Grid.Row="1"
+                        Grid.Column="1"
+                        Content="X"
+                        Padding="0"
+                        Margin="0,3,0,0"
+                        Command="{Binding ClearThreadFilterCommand}" />
+                <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,6,0,4" />
+                <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding TimelineRangeText}" Foreground="#404040" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Selection.SelectedFrameLabel}" Foreground="#101010" />
+              </Grid>
             </Border>
 
             <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="0,1,1,1" MinHeight="120">
@@ -342,7 +359,7 @@
                         ResizeDirection="Rows" />
 
           <Grid Grid.Row="2" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,8,0,0">
-            <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
+            <Grid Grid.Row="0" ColumnDefinitions="34,225,*,17">
               <Border Grid.Column="0" Background="#BEBEBE" BorderBrush="#808080" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
                            Foreground="#202020"
@@ -363,13 +380,21 @@
                 </StackPanel>
               </Border>
 
-              <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,1,1">
+              <Border Grid.Column="2" Background="#D1D1D1" BorderBrush="#808080" BorderThickness="0,1,0,1">
                 <local:ThreadTimelineLaneControl
                     Rows="{Binding VisibleThreadScopes}"
                     Samples="{Binding FrameSamples}"
                     Viewport="{Binding Viewport}"
                     Selection="{Binding Selection}"
                     OpenScopeSourceCommand="{Binding OpenScopeSourceCommand}" />
+              </Border>
+
+              <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#808080" BorderThickness="1">
+                <Grid RowDefinitions="18,*,18">
+                  <TextBlock Text="▲" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#303030" />
+                  <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="1" Margin="2,20,2,20" />
+                  <TextBlock Grid.Row="2" Text="▼" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#303030" />
+                </Grid>
               </Border>
             </Grid>
 
