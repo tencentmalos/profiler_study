@@ -76,6 +76,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly AppSettings m_AppSettings;
 	private CancellationTokenSource m_LoadCancellation;
 	private Session m_LiveConnectionSession;
+	private DispatcherTimer m_LiveConnectionRefreshTimer;
+	private string m_LiveConnectionName;
+	private int m_LastLiveFrameCount = -1;
 	private SessionDocument m_CurrentDocument;
 	private IReadOnlyList<FrameSample> m_FrameSamples = Array.Empty<FrameSample>();
 	private IReadOnlyList<string> m_RecentFiles = Array.Empty<string>();
@@ -1122,6 +1125,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		if (connected)
 		{
 			m_LiveConnectionSession = session;
+			m_LiveConnectionName = connectionName;
 			ConnectionPanelStatusText = "Connected to " + host + ":" + port + ". Waiting for profiler packets.";
 			SessionStatusText = "Session: live connection";
 			StatusText = ConnectionPanelStatusText;
@@ -1146,13 +1150,79 @@ internal sealed class MainWindowViewModel : ObservableObject
 			return;
 		}
 
+		ApplyLiveConnectionDocument(session, connectionName, updateStatus: true);
+		StartLiveConnectionRefreshTimer();
+	}
+
+	private void ApplyLiveConnectionDocument(Session session, string connectionName, bool updateStatus)
+	{
+		int selectedFrameIndex = Selection.SelectedFrameIndex;
+		int hoveredFrameIndex = Selection.HoveredFrameIndex;
+		double selectedFrameTimeMs = Selection.SelectedFrameTimeMs;
+		double hoveredFrameTimeMs = Selection.HoveredFrameTimeMs;
+		int startFrame = Viewport.StartFrame;
+		int endFrame = Viewport.EndFrame;
+		SessionDocument document = BuildLiveConnectionDocument(session, connectionName);
+		document.Selection.SelectedFrameIndex = Math.Min(selectedFrameIndex, Math.Max(-1, document.Summary.FrameCount - 1));
+		document.Selection.HoveredFrameIndex = Math.Min(hoveredFrameIndex, Math.Max(-1, document.Summary.FrameCount - 1));
+		document.Selection.SelectedFrameTimeMs = selectedFrameTimeMs;
+		document.Selection.HoveredFrameTimeMs = hoveredFrameTimeMs;
+		document.Viewport.SetRange(startFrame, Math.Max(startFrame, Math.Min(endFrame, Math.Max(0, document.Summary.FrameCount - 1))));
+		ApplyDocument(document);
+		m_LastLiveFrameCount = session.FrameCount;
+		if (!updateStatus)
+		{
+			ConnectionPanelStatusText = "Live session frames: " + m_LastLiveFrameCount + ".";
+			return;
+		}
+
+		ConnectionPanelStatusText = "Live session ready: " + connectionName + ".";
+		StatusText = ConnectionPanelStatusText;
+	}
+
+	private static SessionDocument BuildLiveConnectionDocument(Session session, string connectionName)
+	{
 		SessionQueryService queryService = new SessionQueryService(session, 33.333333333333336);
 		FrameSample[] samples = queryService.GetFrameSamples(0, Math.Max(0, session.FrameCount - 1), 0);
 		SessionSummary summary = queryService.CreateSummary("Live: " + connectionName, samples);
 		summary.SourceName = "Live: " + connectionName;
-		ApplyDocument(new SessionDocument("Live: " + connectionName, session, summary, samples));
-		ConnectionPanelStatusText = "Live session ready: " + connectionName + ".";
-		StatusText = ConnectionPanelStatusText;
+		return new SessionDocument("Live: " + connectionName, session, summary, samples);
+	}
+
+	private void StartLiveConnectionRefreshTimer()
+	{
+		if (m_LiveConnectionRefreshTimer == null)
+		{
+			m_LiveConnectionRefreshTimer = new DispatcherTimer
+			{
+				Interval = System.TimeSpan.FromMilliseconds(750)
+			};
+			m_LiveConnectionRefreshTimer.Tick += LiveConnectionRefreshTimerTick;
+		}
+
+		m_LiveConnectionRefreshTimer.Start();
+	}
+
+	private void StopLiveConnectionRefreshTimer()
+	{
+		m_LiveConnectionRefreshTimer?.Stop();
+	}
+
+	private void LiveConnectionRefreshTimerTick(object sender, EventArgs e)
+	{
+		if (m_LiveConnectionSession == null || string.IsNullOrWhiteSpace(m_LiveConnectionName))
+		{
+			StopLiveConnectionRefreshTimer();
+			return;
+		}
+
+		int frameCount = m_LiveConnectionSession.FrameCount;
+		if (frameCount == m_LastLiveFrameCount)
+		{
+			return;
+		}
+
+		ApplyLiveConnectionDocument(m_LiveConnectionSession, m_LiveConnectionName, updateStatus: false);
 	}
 
 	private void OnLiveConnectionDisconnected(Session session)
@@ -1163,6 +1233,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		ConnectionPanelStatusText = "FramePro transport disconnected: " + session.DisconnectReason + ".";
+		StopLiveConnectionRefreshTimer();
 		StatusText = ConnectionPanelStatusText;
 	}
 
@@ -1173,6 +1244,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 			m_LiveConnectionSession.Disconnect(DisconnectReason.Requested);
 			m_LiveConnectionSession = null;
 		}
+		m_LiveConnectionName = null;
+		m_LastLiveFrameCount = -1;
+		StopLiveConnectionRefreshTimer();
 
 		if (updateStatus)
 		{
