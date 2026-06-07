@@ -196,6 +196,52 @@
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
+    <Style Selector="Border.overlay-panel">
+      <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BoxShadow" Value="0 12 32 0 #66000000" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="Border.overlay-header">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="CornerRadius" Value="8,8,0,0" />
+      <Setter Property="Padding" Value="10,7" />
+    </Style>
+    <Style Selector="Border.overlay-card">
+      <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="9" />
+    </Style>
+    <Style Selector="Border.overlay-icon">
+      <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+    </Style>
+    <Style Selector="Button.overlay-close">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="5" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiLowText}" />
+    </Style>
+    <Style Selector="Button.overlay-close:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor}" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiBackground}" />
+    </Style>
+    <Style Selector="Button.overlay-action">
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="CornerRadius" Value="6" />
+    </Style>
   </suki:SukiWindow.Styles>
   <Grid Background="{DynamicResource SukiBackground}">
     <Grid.RowDefinitions>
@@ -1664,28 +1710,28 @@
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"
-            Background="#D4D0C8"
+            Background="{DynamicResource SukiBackground}"
             IsVisible="{Binding IsStartupPageVisible}">
       <Grid Margin="12">
         <Border
             Width="640"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D4D0C8"
-            BorderBrush="#7D7D7D"
-            BorderThickness="1">
+            Classes="overlay-panel">
           <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="*,220">
-            <Border Grid.ColumnSpan="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="10,6">
+            <Border Grid.ColumnSpan="2" Classes="overlay-header">
               <DockPanel>
                 <TextBlock Text="ProfilerStudy" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
                   <TextBlock Text="Startup Page" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
-                  <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding CloseStartupPageCommand}" />
+                  <Button Classes="overlay-close" Command="{Binding CloseStartupPageCommand}">
+                    <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+                  </Button>
                 </StackPanel>
               </DockPanel>
             </Border>
 
-            <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#8A8A8A" />
+            <Border Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource SukiBorderBrush}" />
 
             <Grid Grid.Row="2" ColumnDefinitions="*,220">
               <StackPanel Margin="10" Spacing="6">
@@ -1698,7 +1744,7 @@
                 <TextBlock Text="Views are available after a session is loaded." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" Margin="0,4,0,0" />
               </StackPanel>
 
-              <Border Grid.Column="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,0,0,0" Padding="6">
+              <Border Grid.Column="1" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1,0,0,0" Padding="8">
                 <Grid RowDefinitions="Auto,*">
                   <TextBlock Text="Recent Files" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
                   <ScrollViewer Grid.Row="1" Margin="0,4,0,0" VerticalScrollBarVisibility="Auto">
@@ -1731,16 +1777,16 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Margin="36,38,0,0"
-            Background="#D4D4D4"
-            BorderBrush="#676767"
-            BorderThickness="1"
+            Classes="overlay-panel"
             IsVisible="{Binding IsToolboxFloatingVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#D4D0C8" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="3,1">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockToolboxCommand}" />
-              <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleToolboxCommand}" />
+              <Button Classes="overlay-close" Command="{Binding ToggleToolboxCommand}">
+                <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+              </Button>
             </StackPanel>
             <TextBlock Text="Toolbox" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           </DockPanel>
@@ -1879,27 +1925,22 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsRegistrationPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Registration" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseRegistrationCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseRegistrationCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <Grid Grid.Row="1" Margin="14" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
           <TextBlock Text="ProfilerStudy Registration" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+          <Border Grid.Row="1" Classes="overlay-card">
             <StackPanel Spacing="7">
               <TextBlock Text="This viewer preserves the original FramePro registration entry point." Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
               <TextBlock Text="No license verification service is bundled with this macOS shell. Existing profiler files and sample data can be opened without registration." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
@@ -1918,27 +1959,22 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsUpdateCheckPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Check for Updates" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseUpdateCheckCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseUpdateCheckCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <Grid Grid.Row="1" Margin="14" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
           <TextBlock Text="Update Status" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+          <Border Grid.Row="1" Classes="overlay-card">
             <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="7">
               <TextBlock Text="Current version" Foreground="{DynamicResource SukiLowText}" />
               <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="{DynamicResource SukiText}" />
@@ -1962,22 +1998,21 @@
             Height="300"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D4D4D4"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
+            Classes="overlay-panel"
             IsVisible="{Binding IsMainSessionDockFloatingVisible}">
       <Grid RowDefinitions="Auto,Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockMainSessionDockCommand}" />
-              <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleMainSessionDockCommand}" />
+              <Button Classes="overlay-close" Command="{Binding ToggleMainSessionDockCommand}">
+                <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+              </Button>
             </StackPanel>
             <TextBlock Text="Main Session View" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           </DockPanel>
         </Border>
-        <Border Grid.Row="1" Background="#D7D7D7" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="4,3">
+        <Border Grid.Row="1" Background="{DynamicResource SukiBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" Padding="6,4">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Button Content="Threads" Width="70" Padding="3,1" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" Foreground="{Binding ThreadsViewBrush}" />
             <Button Content="Cores" Width="58" Padding="3,1" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" Foreground="{Binding CoresViewBrush}" />
@@ -1991,7 +2026,7 @@
             <TextBlock Text="{Binding ActiveSessionViewTitle}" Foreground="{DynamicResource SukiText}" FontSize="13" FontWeight="SemiBold" />
             <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" />
           </Grid>
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#8A8A8A" BorderThickness="1" Padding="8">
+          <Border Grid.Row="1" Classes="overlay-card">
             <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6" RowSpacing="7">
               <TextBlock Text="Session" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
               <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
@@ -2016,17 +2051,16 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Margin="0,0,36,36"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
+            Classes="overlay-panel"
             IsVisible="{Binding IsOutputWindowFloatingVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
               <Button Content="Dock" Width="48" Height="20" Padding="0" Command="{Binding DockOutputWindowCommand}" />
-              <Button Content="x" Width="22" Height="20" Padding="0" Command="{Binding ToggleOutputWindowCommand}" />
+              <Button Classes="overlay-close" Command="{Binding ToggleOutputWindowCommand}">
+                <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+              </Button>
             </StackPanel>
             <TextBlock Text="Output Window" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           </DockPanel>
@@ -2036,7 +2070,7 @@
                  AcceptsReturn="True"
                  IsReadOnly="True"
                  BorderThickness="0"
-                 Background="#FFFFFF"
+                 Background="{DynamicResource SukiBackground}"
                  Foreground="{DynamicResource SukiText}"
                  FontFamily="Microsoft Sans Serif, Segoe UI"
                  FontSize="11" />
@@ -2048,28 +2082,23 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsHelpPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="ProfilerStudy Help" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseHelpCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseHelpCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <Grid Grid.Row="1" Margin="14" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10">
           <TextBlock Text="Common actions" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
 
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+          <Border Grid.Row="1" Classes="overlay-card">
             <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
               <TextBlock Text="Open session" Foreground="{DynamicResource SukiLowText}" />
               <TextBlock Grid.Column="1" Text="File > Open or Ctrl+O" Foreground="{DynamicResource SukiText}" />
@@ -2102,22 +2131,17 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsSettingsPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Settings" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseSettingsCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseSettingsCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
@@ -2127,7 +2151,7 @@
           <TextBox Text="{Binding CapturedSourceRoot}" Watermark="/buildbot/workspace/project" />
           <TextBlock Text="Local root" Foreground="{DynamicResource SukiLowText}" />
           <TextBox Text="{Binding LocalSourceRoot}" Watermark="/Users/me/project" />
-          <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
+          <Border Classes="overlay-card" Margin="0,6,0,0">
             <TextBlock Text="Changes are saved automatically and reused by the source navigation commands." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           </Border>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
@@ -2142,22 +2166,17 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsThreadSettingsPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Thread View Settings" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseThreadSettingsCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseThreadSettingsCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
@@ -2189,7 +2208,7 @@
                           Command="{Binding ToggleThreadsPanelCommand}"
                           CommandParameter="DataGrid" />
           </UniformGrid>
-          <Border Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8" Margin="0,6,0,0">
+          <Border Classes="overlay-card" Margin="0,6,0,0">
             <TextBlock Text="Lane context commands still operate from the thread graph right-click menu: Hide, Move Up, Move Down, Collapse All, and Expand All." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           </Border>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
@@ -2206,46 +2225,43 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsCallstacksPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Callstacks" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseCallstacksCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseCallstacksCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
           <TextBlock Text="Callstack Tools" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           <TextBlock Text="Enable or disable callstack capture for a live session, then request a module symbol reload for captured sessions." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
-            <Border Width="42" Height="34" Background="#B0B0B0" BorderBrush="#606060" BorderThickness="1">
-              <TextBlock Text="stk" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource SukiLowText}" />
+            <Border Width="42" Height="36" Classes="overlay-icon">
+              <material:MaterialIcon Kind="CodeBraces" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SukiPrimaryColor}" />
             </Border>
             <Button Grid.Column="1"
+                    Classes="overlay-action"
                     HorizontalContentAlignment="Left"
                     Content="Toggle Live Callstack Recording"
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Capture" />
-            <Border Grid.Row="1" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
-              <TextBlock Text="sym" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource SukiText}" />
+            <Border Grid.Row="1" Width="42" Height="36" Classes="overlay-icon">
+              <material:MaterialIcon Kind="DatabaseEdit" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SukiPrimaryColor}" />
             </Border>
             <Button Grid.Row="1"
                     Grid.Column="1"
+                    Classes="overlay-action"
                     HorizontalContentAlignment="Left"
                     Content="Reload Module Symbols"
                     Command="{Binding CallstacksActionCommand}"
                     CommandParameter="Resolve" />
-            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Classes="overlay-card">
               <TextBlock Text="{Binding CallstacksPanelStatusText}" Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </Border>
           </Grid>
@@ -2261,22 +2277,17 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsConnectionPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseConnectionCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseConnectionCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
@@ -2287,7 +2298,7 @@
             <TextBox Grid.Column="1" Text="{Binding ConnectionHost}" Watermark="localhost" />
             <TextBlock Grid.Row="1" Text="Port" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConnectionPort}" Watermark="8428" />
-            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Classes="overlay-card">
               <TextBlock Text="{Binding ConnectionPanelStatusText}" Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </Border>
           </Grid>
@@ -2306,30 +2317,25 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsAndroidPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="Android" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseAndroidCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseAndroidCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
           <TextBlock Text="Context Switch Tools" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           <TextBlock Text="Connect to the FramePro socket exposed by the Android app, or load a recorded context switch file into the active session." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
-            <Border Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
-              <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
+            <Border Width="42" Height="36" Classes="overlay-icon">
+              <material:MaterialIcon Kind="Android" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SukiPrimaryColor}" />
             </Border>
             <Grid Grid.Column="1" ColumnDefinitions="*,64,68" ColumnSpacing="6">
               <TextBox Text="{Binding AndroidEndpoint}" Watermark="localfilesystem:/data/user_de/0/.../files/framepro" />
@@ -2342,8 +2348,8 @@
                       Command="{Binding AndroidActionCommand}"
                       CommandParameter="UseReleaseEndpoint" />
             </Grid>
-            <Border Grid.Row="1" Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
-              <TextBlock Text="tcp" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
+            <Border Grid.Row="1" Width="42" Height="36" Classes="overlay-icon">
+              <material:MaterialIcon Kind="LanConnect" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SukiPrimaryColor}" />
             </Border>
             <Button Grid.Row="1"
                     Grid.Column="1"
@@ -2351,8 +2357,8 @@
                     Content="Connect Android"
                     Command="{Binding AndroidActionCommand}"
                     CommandParameter="ConnectAndroid" />
-            <Border Grid.Row="2" Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
-              <TextBlock Text="rec" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
+            <Border Grid.Row="2" Width="42" Height="36" Classes="overlay-icon">
+              <material:MaterialIcon Kind="RecordCircle" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SukiPrimaryColor}" />
             </Border>
             <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="Auto,72,*" ColumnSpacing="6">
               <TextBlock Text="Duration (seconds)" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
@@ -2363,8 +2369,8 @@
                       Command="{Binding AndroidActionCommand}"
                       CommandParameter="RecordContextSwitches" />
             </Grid>
-            <Border Grid.Row="3" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
-              <TextBlock Text="ctx" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource SukiText}" />
+            <Border Grid.Row="3" Width="42" Height="36" Classes="overlay-icon">
+              <material:MaterialIcon Kind="FileDocument" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SukiPrimaryColor}" />
             </Border>
             <Button Grid.Row="3"
                     Grid.Column="1"
@@ -2372,7 +2378,7 @@
                     Content="Load Context Switch File"
                     Command="{Binding AndroidActionCommand}"
                     CommandParameter="LoadContextSwitchFile" />
-            <Border Grid.Row="4" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+            <Border Grid.Row="4" Grid.ColumnSpan="2" Classes="overlay-card">
               <TextBlock Text="{Binding AndroidPanelStatusText}" Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </Border>
           </Grid>
@@ -2388,27 +2394,22 @@
             Width="520"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#D2D2D2"
-            BorderBrush="#676767"
-            BorderThickness="1"
-            BoxShadow="0 8 24 0 #66000000"
-            Padding="0"
+            Classes="overlay-panel"
             IsVisible="{Binding IsAboutPanelVisible}">
       <Grid RowDefinitions="Auto,*">
-        <Border Background="#BDBDBD" BorderBrush="#777777" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Classes="overlay-header">
           <DockPanel LastChildFill="True">
             <TextBlock Text="About" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
             <Button DockPanel.Dock="Right"
-                    Content="x"
-                    Width="24"
-                    Height="22"
-                    Padding="0"
-                    Command="{Binding CloseAboutCommand}" />
+                    Classes="overlay-close"
+                    Command="{Binding CloseAboutCommand}">
+              <material:MaterialIcon Kind="Close" Width="16" Height="16" />
+            </Button>
           </DockPanel>
         </Border>
         <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
           <Grid ColumnDefinitions="72,*" ColumnSpacing="14">
-            <Border Width="64" Height="64" Background="#8DA6C4" BorderBrush="#395978" BorderThickness="1">
+            <Border Width="64" Height="64" Classes="overlay-icon">
               <TextBlock Text="FP"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"
@@ -2423,7 +2424,7 @@
             </StackPanel>
           </Grid>
 
-          <Border Grid.Row="1" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="10">
+          <Border Grid.Row="1" Classes="overlay-card" Padding="10">
             <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="6">
               <TextBlock Text="Version" Foreground="{DynamicResource SukiLowText}" />
               <TextBlock Grid.Column="1" Text="{Binding AboutVersionText}" Foreground="{DynamicResource SukiText}" />
