@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Threading;
 
 namespace ProfilerStudy.Avalonia.ProfilerStats;
@@ -65,6 +66,7 @@ internal sealed class ProfilerStatsController : ObservableObject
 		}
 
 		Timeline.OnScopeRangeChangedByUi += Timeline_OnScopeRangeChangedByUi;
+		Timeline.ChildMainStats.Plot.PointerPressed += TimelineMainStats_PointerPressed;
 		m_IsInitialized = true;
 
 		ApplyEmptyState();
@@ -534,6 +536,28 @@ internal sealed class ProfilerStatsController : ObservableObject
 		if (frame.FrameIndex >= 0)
 		{
 			m_View.NotifyFrameSelectedByUser(frame.FrameIndex);
+		}
+	}
+
+	private void TimelineMainStats_PointerPressed(object sender, PointerPressedEventArgs e)
+	{
+		if (m_TimelineAdapter.FrameSamples.Length == 0)
+		{
+			return;
+		}
+
+		if (e.GetCurrentPoint(Timeline.ChildMainStats.Plot).Properties.IsLeftButtonPressed is false)
+		{
+			return;
+		}
+
+		var position = e.GetPosition(Timeline.ChildMainStats.Plot);
+		var coordinates = Timeline.ChildMainStats.Plot.Plot.GetCoordinates((float)position.X, (float)position.Y);
+		int frameIndex = m_TimelineAdapter.GetNearestFrameIndex(coordinates.X);
+		if (frameIndex >= 0)
+		{
+			m_View.NotifyFrameSelectedByUser(frameIndex);
+			e.Handled = true;
 		}
 	}
 
