@@ -104,6 +104,21 @@
     <Style Selector="Button.toolbox-action:pointerover">
       <Setter Property="Background" Value="#EAEAEA" />
     </Style>
+    <Style Selector="Button.startup-action">
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="10,5" />
+      <Setter Property="Background" Value="#E0E0E0" />
+      <Setter Property="BorderBrush" Value="#8C8C8C" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="Button.startup-action:pointerover">
+      <Setter Property="Background" Value="#EFEFEF" />
+      <Setter Property="BorderBrush" Value="#666666" />
+    </Style>
     <Style Selector="Border.status-cell">
       <Setter Property="Background" Value="#D4D0C8" />
       <Setter Property="BorderBrush" Value="#8A8A8A" />
@@ -1347,6 +1362,66 @@
         </Border>
       </Grid>
     </Grid>
+
+    <Border Grid.Row="2"
+            Grid.RowSpan="2"
+            Background="#C8C8C8"
+            IsVisible="{Binding IsStartupPageVisible}">
+      <Grid Margin="28">
+        <Border
+            Width="760"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#D8D8D8"
+            BorderBrush="#7D7D7D"
+            BorderThickness="1">
+          <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="*,260">
+            <Border Grid.ColumnSpan="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="12,8">
+              <DockPanel>
+                <TextBlock Text="ProfilerStudy" FontSize="18" FontWeight="SemiBold" Foreground="#101010" />
+                <TextBlock DockPanel.Dock="Right" Text="Startup Page" Foreground="#404040" VerticalAlignment="Center" />
+              </DockPanel>
+            </Border>
+
+            <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#F1F1F1" />
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,260">
+              <StackPanel Margin="16" Spacing="10">
+                <TextBlock Text="Open a profiler capture or start from a generated sample." Foreground="#202020" FontSize="13" TextWrapping="Wrap" />
+                <Button Classes="startup-action" Content="Open Profiler Session..." Command="{Binding OpenSessionCommand}" />
+                <Button Classes="startup-action" Content="Load Generated Sample" Command="{Binding LoadSampleCommand}" />
+                <Button Classes="startup-action" Content="Connect to FramePro..." Command="{Binding OpenConnectionCommand}" />
+                <Button Classes="startup-action" Content="Connect to Android..." Command="{Binding OpenAndroidCommand}" />
+                <TextBlock Text="Use the View menu and toolbar to switch between Threads, Cores, Scopes, Custom Stats, and Log after a session is loaded." Foreground="#505050" TextWrapping="Wrap" Margin="0,6,0,0" />
+              </StackPanel>
+
+              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#8A8A8A" BorderThickness="1,0,0,0" Padding="12">
+                <Grid RowDefinitions="Auto,*">
+                  <TextBlock Text="Recent Files" FontWeight="SemiBold" Foreground="#101010" />
+                  <ScrollViewer Grid.Row="1" Margin="0,8,0,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="6">
+                      <TextBlock Text="Recently opened captures appear here." Foreground="#505050" TextWrapping="Wrap" />
+                      <ItemsControl ItemsSource="{Binding RecentFiles}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <Button
+                                Classes="startup-action"
+                                Margin="0,3,0,0"
+                                Content="{Binding}"
+                                Command="{Binding $parent[Window].DataContext.OpenRecentSessionCommand}"
+                                CommandParameter="{Binding}" />
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </ScrollViewer>
+                </Grid>
+              </Border>
+            </Grid>
+          </Grid>
+        </Border>
+      </Grid>
+    </Border>
 
     <Border Grid.Row="2"
             Grid.RowSpan="2"

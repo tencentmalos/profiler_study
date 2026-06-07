@@ -384,6 +384,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			if (SetProperty(ref m_CurrentDocument, value))
 			{
+				RaisePropertyChanged(nameof(IsStartupPageVisible));
 				m_CloseSessionCommand.RaiseCanExecuteChanged();
 				m_CreateSessionFromSelectionCommand.RaiseCanExecuteChanged();
 				m_SaveSessionCommand.RaiseCanExecuteChanged();
@@ -405,6 +406,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 			}
 		}
 	}
+
+	public bool IsStartupPageVisible => CurrentDocument == null;
 
 	public IReadOnlyList<FrameSample> FrameSamples
 	{
