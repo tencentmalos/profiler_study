@@ -59,8 +59,8 @@ public class ucChildSelectScope
             return;
         }
 
-        _scopeSpan.FillColor = TimelineScopeThemeHelper.GetPlotColor(TimelineScopeThemeHelper.InfoSurfaceBrushKey, "#1F2B5F97");
-        _scopeSpan.LineColor = TimelineScopeThemeHelper.GetPlotColor(TimelineScopeThemeHelper.InfoBorderBrushKey, "#FF5F9CE0");
+        _scopeSpan.FillColor = TimelineScopeThemeHelper.GetPlotColor(TimelineScopeThemeHelper.InfoSurfaceBrushKey, "#FFEAF2FF");
+        _scopeSpan.LineColor = TimelineScopeThemeHelper.GetPlotColor(TimelineScopeThemeHelper.InfoBorderBrushKey, "#FF5A95F0");
     }
     
     /// <summary>

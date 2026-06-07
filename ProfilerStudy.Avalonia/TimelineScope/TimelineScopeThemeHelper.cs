@@ -67,11 +67,11 @@ internal static class TimelineScopeThemeHelper
 
     public static void ApplyPlotTheme(AvaPlot plot)
     {
-        var textColor = GetPlotColor(TextBrushKey, "#FFF2F6FA");
-        var plotSurface = GetPlotColor(PlotSurfaceBrushKey, "#FF11181F");
-        var plotGrid = GetPlotColor(PlotGridBrushKey, "#263F5365");
-        var legendBackground = GetPlotColor(LegendBackgroundBrushKey, "#E619232D");
-        var legendBorder = GetPlotColor(LegendBorderBrushKey, "#FF3E5366");
+        var textColor = GetPlotColor(TextBrushKey, "#FF18212B");
+        var plotSurface = GetPlotColor(PlotSurfaceBrushKey, "#FFFFFFFF");
+        var plotGrid = GetPlotColor(PlotGridBrushKey, "#1A203040");
+        var legendBackground = GetPlotColor(LegendBackgroundBrushKey, "#F2FFFFFF");
+        var legendBorder = GetPlotColor(LegendBorderBrushKey, "#FFCBD6E2");
 
         plot.Plot.FigureBackground.Color = plotSurface;
         plot.Plot.DataBackground.Color = plotSurface;
@@ -86,22 +86,22 @@ internal static class TimelineScopeThemeHelper
 
     public static void ApplyTooltipTheme(Border border, TextBlock title, TextBlock content)
     {
-        border.Background = GetBrush(TooltipBackgroundBrushKey, "#FF0D1319");
-        border.BorderBrush = GetBrush(TooltipBorderBrushKey, "#FF4E677C");
-        title.Foreground = GetBrush(TooltipTextBrushKey, "#FFF5F8FB");
-        content.Foreground = GetBrush(TooltipTextBrushKey, "#FFF5F8FB");
+        border.Background = GetBrush(TooltipBackgroundBrushKey, "#FFFFFFFF");
+        border.BorderBrush = GetBrush(TooltipBorderBrushKey, "#FFD0D9E4");
+        title.Foreground = GetBrush(TooltipTextBrushKey, "#FF18212B");
+        content.Foreground = GetBrush(TooltipTextBrushKey, "#FF18212B");
     }
 
     public static void ApplyLabelTheme(Text label)
     {
-        label.LabelFontColor = GetPlotColor(TextBrushKey, "#FFF2F6FA");
+        label.LabelFontColor = GetPlotColor(TextBrushKey, "#FF18212B");
     }
 
     public static void ApplyTooltipTheme(Tooltip tooltip)
     {
-        tooltip.FillColor = GetPlotColor(TooltipBackgroundBrushKey, "#FF0D1319");
-        tooltip.LineColor = GetPlotColor(TooltipBorderBrushKey, "#FF4E677C");
-        tooltip.LabelFontColor = GetPlotColor(TooltipTextBrushKey, "#FFF5F8FB");
+        tooltip.FillColor = GetPlotColor(TooltipBackgroundBrushKey, "#FFFFFFFF");
+        tooltip.LineColor = GetPlotColor(TooltipBorderBrushKey, "#FFD0D9E4");
+        tooltip.LabelFontColor = GetPlotColor(TooltipTextBrushKey, "#FF18212B");
     }
 
     public static void ApplyCrosshairTheme(Crosshair crosshair, string key, string fallbackHex)
@@ -115,25 +115,25 @@ internal static class TimelineScopeThemeHelper
     {
         if (value > 0)
         {
-            return GetBrush(AddedBrushKey, "#FF63D79B");
+            return GetBrush(AddedBrushKey, "#FF128A52");
         }
 
         if (value < 0)
         {
-            return GetBrush(RemovedBrushKey, "#FFFF7E8B");
+            return GetBrush(RemovedBrushKey, "#FFC93B4C");
         }
 
-        return GetBrush(TextBrushKey, "#FFF2F6FA");
+        return GetBrush(TextBrushKey, "#FF18212B");
     }
 
     public static IBrush GetChangeTypeBrush(string? changeType)
     {
         return changeType switch
         {
-            "Added" => GetBrush(AddedBrushKey, "#FF63D79B"),
-            "Removed" => GetBrush(RemovedBrushKey, "#FFFF7E8B"),
-            "Changed" => GetBrush(WarningBrushKey, "#FFFFB44F"),
-            _ => GetBrush(TextBrushKey, "#FFF2F6FA")
+            "Added" => GetBrush(AddedBrushKey, "#FF128A52"),
+            "Removed" => GetBrush(RemovedBrushKey, "#FFC93B4C"),
+            "Changed" => GetBrush(WarningBrushKey, "#FFCC7A00"),
+            _ => GetBrush(TextBrushKey, "#FF18212B")
         };
     }
 }

@@ -272,7 +272,7 @@ public class FlameGenerator : IFlameGenerator
             // Create rectangle
             var rect = _plot.Plot.Add.Rectangle(x, x + width, y, y + height);
             rect.FillColor = frame.Color;
-            rect.LineColor = TimelineScopeThemeHelper.GetPlotColor(TimelineScopeThemeHelper.PanelBorderBrushKey, "#FF334454");
+            rect.LineColor = TimelineScopeThemeHelper.GetPlotColor(TimelineScopeThemeHelper.PanelBorderBrushKey, "#FFD0D9E4");
             rect.LineWidth = 0.5f;
             frameInfo.Rectangle = rect;
 
@@ -323,7 +323,7 @@ public class FlameGenerator : IFlameGenerator
 
         _crosshair = _plot.Plot.Add.Crosshair(0, 0);
         _crosshair.IsVisible = false;
-        TimelineScopeThemeHelper.ApplyCrosshairTheme(_crosshair, TimelineScopeThemeHelper.InfoBrushKey, "#FF73B5FF");
+        TimelineScopeThemeHelper.ApplyCrosshairTheme(_crosshair, TimelineScopeThemeHelper.InfoBrushKey, "#FF2169D6");
         _crosshair.LineWidth = 1;
         _crosshair.LinePattern = LinePattern.Dashed;
 

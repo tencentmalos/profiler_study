@@ -144,17 +144,17 @@
     <Style Selector="Button.startup-action">
       <Setter Property="HorizontalContentAlignment" Value="Left" />
       <Setter Property="Padding" Value="10,5" />
-      <Setter Property="Background" Value="#E0E0E0" />
-      <Setter Property="BorderBrush" Value="#8C8C8C" />
+      <Setter Property="Background" Value="{DynamicResource TimelineScopeSubtleBackgroundBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource TimelineScopePanelBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Foreground" Value="#101010" />
+      <Setter Property="Foreground" Value="{DynamicResource SukiText}" />
       <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
       <Setter Property="FontSize" Value="12" />
     </Style>
     <Style Selector="Button.startup-action:pointerover">
-      <Setter Property="Background" Value="#EFEFEF" />
-      <Setter Property="BorderBrush" Value="#666666" />
+      <Setter Property="Background" Value="{DynamicResource TimelineScopeCardBackgroundBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource TimelineScopePanelBorderBrush}" />
     </Style>
     <Style Selector="Border.status-cell">
       <Setter Property="Background" Value="{DynamicResource SukiCardBackground}" />
@@ -462,7 +462,7 @@
       </Border>
       <Border Grid.Row="1" Grid.Column="0" Background="Transparent" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,1,0" IsVisible="{Binding IsToolboxExpanded}">
         <Grid RowDefinitions="Auto,*">
-          <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#868686" BorderThickness="0,0,0,1" Padding="5,3" IsVisible="False">
+          <Border Grid.Row="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Padding="5,3" IsVisible="False">
             <DockPanel LastChildFill="True">
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
                 <TextBlock Text="{Binding ActiveSessionView}" Foreground="{DynamicResource SukiLowText}" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0" />
@@ -634,8 +634,8 @@
         </DockPanel>
       </Border>
 
-      <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*,47" Margin="0" Background="#D4D0C8" IsVisible="{Binding IsMainSessionDockExpanded}">
-        <Grid Grid.Row="0" IsVisible="{Binding IsThreadsViewActive}" Background="#D4D0C8">
+      <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*,47" Margin="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" IsVisible="{Binding IsMainSessionDockExpanded}">
+        <Grid Grid.Row="0" IsVisible="{Binding IsThreadsViewActive}" Background="{DynamicResource TimelineScopePanelBackgroundBrush}">
           <Grid.RowDefinitions>
             <RowDefinition Height="{Binding ThreadsInfoPanelHeight}" />
             <RowDefinition Height="{Binding ThreadsFrameScrollbarHeight}" />
@@ -651,7 +651,7 @@
             <ColumnDefinition Width="{Binding ThreadsDataGridColumnWidth}" />
           </Grid.ColumnDefinitions>
           <Grid Grid.Row="0" ColumnDefinitions="32,*" IsVisible="{Binding IsThreadsInfoPanelVisible}">
-            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
               <TextBlock Text="INFO"
                          Foreground="{DynamicResource SukiText}"
                          FontWeight="SemiBold"
@@ -666,7 +666,7 @@
               </TextBlock>
             </Border>
 
-            <Border Grid.Column="1" Background="#F5F5F5" BorderBrush="#7D7D7D" BorderThickness="1" Padding="8,6">
+            <Border Grid.Column="1" Background="{DynamicResource TimelineScopeCardBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="8,6">
               <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto,*,Auto,*" ColumnSpacing="6" RowSpacing="5">
                 <TextBlock Text="Session" Foreground="{DynamicResource SukiLowText}" FontWeight="SemiBold" />
                 <TextBlock Grid.Column="1" Text="{Binding Summary.SourceName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
@@ -692,9 +692,9 @@
             </Border>
           </Grid>
 
-          <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
+          <Border Grid.Row="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" IsVisible="{Binding IsThreadsInfoPanelCollapsed}">
             <Grid ColumnDefinitions="32,*">
-              <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+              <Border Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,0">
                 <TextBlock Text="INFO" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
@@ -706,7 +706,7 @@
           </Border>
 
           <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
-            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
                          Foreground="{DynamicResource SukiText}"
                          FontWeight="SemiBold"
@@ -721,16 +721,16 @@
               </TextBlock>
             </Border>
 
-            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
+            <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="0">
               <Grid ColumnDefinitions="193,32">
                 <Grid RowDefinitions="60,*">
-                  <Border Background="#D0D0D0" Padding="6,5">
+                  <Border Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" Padding="6,5">
                     <StackPanel Spacing="1">
                       <TextBlock Text="Average Frame" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
                       <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="{DynamicResource SukiText}" FontFamily="Consolas,Menlo" FontSize="12" />
                     </StackPanel>
                   </Border>
-                  <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
+                  <Border Grid.Row="1" Background="{DynamicResource TimelineScopeCardBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,0,0">
                     <Grid RowDefinitions="*,*,*" ColumnDefinitions="*,58">
                       <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
                       <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
@@ -741,14 +741,14 @@
                     </Grid>
                   </Border>
                 </Grid>
-                <Border Grid.Column="1" Background="#D3D3D3" BorderBrush="#101010" BorderThickness="0,0,1,0">
+                <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource SukiText}" BorderThickness="0,0,1,0">
                   <Grid RowDefinitions="Auto,*,Auto">
                     <TextBlock Text="ms" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
                     <Canvas Grid.Row="1">
-                      <Line StartPoint="27,4" EndPoint="31,4" Stroke="#101010" StrokeThickness="1" />
-                      <Line StartPoint="27,44" EndPoint="31,44" Stroke="#101010" StrokeThickness="1" />
-                      <Line StartPoint="27,84" EndPoint="31,84" Stroke="#101010" StrokeThickness="1" />
-                      <Ellipse Width="6" Height="6" Fill="#D00000" Canvas.Left="26" Canvas.Top="56" />
+                      <Line StartPoint="27,4" EndPoint="31,4" Stroke="{DynamicResource SukiText}" StrokeThickness="1" />
+                      <Line StartPoint="27,44" EndPoint="31,44" Stroke="{DynamicResource SukiText}" StrokeThickness="1" />
+                      <Line StartPoint="27,84" EndPoint="31,84" Stroke="{DynamicResource SukiText}" StrokeThickness="1" />
+                      <Ellipse Width="6" Height="6" Fill="{DynamicResource TimelineScopeRemovedBrush}" Canvas.Left="26" Canvas.Top="56" />
                     </Canvas>
                     <TextBlock Grid.Row="2" Text="0" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
                   </Grid>
@@ -756,15 +756,15 @@
               </Grid>
             </Border>
 
-            <Border Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" MinHeight="120">
+            <Border Grid.Column="2" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,1,1" MinHeight="120">
               <stats:ucProfilerStats x:Name="ThreadsProfilerStatsControl"
                                      IsCompactMode="True" />
             </Border>
           </Grid>
 
-          <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+          <Border Grid.Row="2" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
-              <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+              <Border Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,0">
                 <TextBlock Text="Frame" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
@@ -776,8 +776,8 @@
           </Border>
 
           <Grid Grid.Row="1" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
-            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
-            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="3,1">
+            <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,0,0,1" />
+            <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,0,1,1" Padding="3,1">
               <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
                 <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
                 <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
@@ -792,18 +792,18 @@
             </Grid>
           </Border>
 
-            <Border Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="3,1">
+            <Border Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,1" Padding="3,1">
               <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
             </Border>
           </Grid>
 
-          <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
+          <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,0,1,1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <TextBlock Text="Session scrollbar hidden with Frame Graph" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" Margin="8,0" />
           </Border>
 
           <GridSplitter Grid.Row="3"
-                        Background="#9A9A9A"
-                        BorderBrush="#767676"
+                        Background="{DynamicResource TimelineScopeSeparatorBrush}"
+                        BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}"
                         BorderThickness="0,1"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
@@ -811,7 +811,7 @@
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
           <Grid Grid.Row="4" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
-            <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+            <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
               <TextBlock Text="Time"
                          Foreground="{DynamicResource SukiText}"
                          FontWeight="SemiBold"
@@ -826,7 +826,7 @@
               </TextBlock>
             </Border>
 
-            <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+            <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="5">
               <Grid RowDefinitions="Auto,Auto,*">
                 <TextBlock Text="Time Spans" Foreground="{DynamicResource SukiText}" FontFamily="Microsoft Sans Serif, Segoe UI" FontSize="11" FontWeight="SemiBold" />
                 <TextBlock Grid.Row="1" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
@@ -834,7 +834,7 @@
               </Grid>
             </Border>
 
-            <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,0,1">
+            <Border Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,0,1">
               <local:ThreadTimelineLaneControl
                   Rows="{Binding VisibleThreadScopes}"
                   Samples="{Binding FrameSamples}"
@@ -845,12 +845,12 @@
                   FocusThreadCommand="{Binding FocusThreadCommand}" />
             </Border>
 
-            <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#7D7D7D" BorderThickness="1" />
+            <Border Grid.Column="3" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" />
           </Grid>
 
-          <Border Grid.Row="4" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
+          <Border Grid.Row="4" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
-              <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+              <Border Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,0">
                 <TextBlock Text="Time" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
@@ -862,19 +862,19 @@
           </Border>
 
           <GridSplitter Grid.Row="5"
-                        Background="#9A9A9A"
-                        BorderBrush="#767676"
+                        Background="{DynamicResource TimelineScopeSeparatorBrush}"
+                        BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}"
                         BorderThickness="0,1"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
-          <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,0,0,0,0,0,0" Margin="0,3,0,0" Background="#D4D0C8">
+          <Grid Grid.Row="6" RowDefinitions="88,4,32,4,69,4,*,0,0,0,0,0,0" Margin="0,3,0,0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}">
             <Grid Grid.Row="4" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsScopeGraphVisible}">
-              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1" />
+              <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1" />
 
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
+              <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="0">
                 <Grid RowDefinitions="39,30" ColumnDefinitions="*,46">
                   <Button Grid.Column="0"
                           Content="Filter Threads..."
@@ -899,7 +899,7 @@
                 </Grid>
               </Border>
 
-              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+              <Border Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,1,1">
                 <local:FrameTimelineControl
                     Samples="{Binding FrameSamples}"
                     TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
@@ -909,8 +909,8 @@
             </Grid>
 
             <GridSplitter Grid.Row="5"
-                          Background="#9A9A9A"
-                          BorderBrush="#767676"
+                          Background="{DynamicResource TimelineScopeSeparatorBrush}"
+                          BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}"
                           BorderThickness="0,1"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
@@ -918,7 +918,7 @@
                           IsVisible="{Binding IsThreadsScopeGraphVisible}" />
 
             <Grid Grid.Row="6" ColumnDefinitions="34,225,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
-              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
                            Foreground="{DynamicResource SukiText}"
                            FontWeight="SemiBold"
@@ -933,7 +933,7 @@
                 </TextBlock>
               </Border>
 
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+              <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
                   <TextBlock Text="Thread Activity" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
                   <TextBlock Grid.Row="1" Text="{Binding ThreadTimelineSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
@@ -942,7 +942,7 @@
                 </Grid>
               </Border>
 
-              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,0,1">
+              <Border Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,0,1">
                 <local:ThreadTimelineLaneControl
                     Rows="{Binding VisibleThreadScopes}"
                     Samples="{Binding FrameSamples}"
@@ -967,29 +967,29 @@
                 </local:ThreadTimelineLaneControl>
               </Border>
 
-              <Border Grid.Column="3" Background="#D7D7D7" BorderBrush="#7D7D7D" BorderThickness="1">
+              <Border Grid.Column="3" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1">
                 <Grid RowDefinitions="18,*,18">
                   <Button Content="▲"
                           FontSize="8"
                           Padding="0"
                           BorderThickness="0"
-                          Background="#D7D7D7"
+                          Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}"
                           Command="{Binding ScrollThreadTimelineUpCommand}" />
-                  <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="1" Margin="2,20,2,20" />
+                  <Border Grid.Row="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Margin="2,20,2,20" />
                   <Button Grid.Row="2"
                           Content="▼"
                           FontSize="8"
                           Padding="0"
                           BorderThickness="0"
-                          Background="#D7D7D7"
+                          Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}"
                           Command="{Binding ScrollThreadTimelineDownCommand}" />
                 </Grid>
               </Border>
             </Grid>
 
-            <Border Grid.Row="6" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
+            <Border Grid.Row="6" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
-                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                <Border Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,0">
                   <TextBlock Text="Threads" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
@@ -1001,8 +1001,8 @@
             </Border>
 
             <GridSplitter Grid.Row="7"
-                          Background="#9A9A9A"
-                          BorderBrush="#767676"
+                          Background="{DynamicResource TimelineScopeSeparatorBrush}"
+                          BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}"
                           BorderThickness="0,1"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
@@ -1010,7 +1010,7 @@
                           IsVisible="False" />
 
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCoreGraphVisible}">
-              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
                 <TextBlock Text="Cores"
                            Foreground="{DynamicResource SukiText}"
                            FontWeight="SemiBold"
@@ -1025,7 +1025,7 @@
                 </TextBlock>
               </Border>
 
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+              <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Core Activity" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
                   <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
@@ -1039,16 +1039,16 @@
                 </Grid>
               </Border>
 
-              <Border Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+              <Border Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,1,1">
                 <local:CoreTimelineStripControl
                     Rows="{Binding CoreRows}"
                     SummaryText="{Binding CoreSummaryText}" />
               </Border>
             </Grid>
 
-            <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
+            <Border Grid.Row="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
-                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                <Border Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,0">
                   <TextBlock Text="Cores" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
@@ -1060,18 +1060,18 @@
             </Border>
 
             <GridSplitter Grid.Row="1"
-                          Background="#9A9A9A"
+                          Background="{DynamicResource TimelineScopeSeparatorBrush}"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsCoreGraphVisible}" />
 
             <Grid Grid.Row="2" ColumnDefinitions="34,225,*" IsVisible="{Binding IsThreadsCustomStatsVisible}">
-              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
                 <TextBlock Text="" />
               </Border>
 
-              <Border Grid.Column="1" Background="#C4C4C4" BorderBrush="#7D7D7D" BorderThickness="1">
+              <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1">
                 <Button Content="Custom Stat..."
                         Padding="6,0"
                         HorizontalContentAlignment="Left"
@@ -1080,7 +1080,7 @@
                         CommandParameter="CustomStats" />
               </Border>
 
-              <Border Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1" Padding="6,0">
+              <Border Grid.Column="2" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,1,1" Padding="6,0">
                 <Grid ColumnDefinitions="*,120,120">
                   <stats:ucProfilerStats x:Name="ProfilerStatsControl"
                                           IsVisible="False"
@@ -1097,17 +1097,17 @@
                              TextAlignment="Right"
                              TextTrimming="CharacterEllipsis" />
                   <Border Grid.Column="2"
-                          Background="#A5A5A5"
-                          BorderBrush="#7A7A7A"
+                          Background="{DynamicResource TimelineScopeSeparatorBrush}"
+                          BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}"
                           BorderThickness="1"
                           Margin="8,7,0,7" />
                 </Grid>
               </Border>
             </Grid>
 
-            <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
+            <Border Grid.Row="2" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
               <Grid ColumnDefinitions="32,*">
-                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                <Border Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,0">
                   <TextBlock Text="Stats" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
@@ -1119,13 +1119,13 @@
             </Border>
 
             <GridSplitter Grid.Row="9"
-                          Background="#9A9A9A"
+                          Background="{DynamicResource TimelineScopeSeparatorBrush}"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="False" />
 
-            <Border Grid.Row="10" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="False">
+            <Border Grid.Row="10" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="6" IsVisible="False">
               <Grid RowDefinitions="Auto,96,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -1143,7 +1143,7 @@
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
-                <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="5,3">
+                <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="5,3">
                   <Grid ColumnDefinitions="*,90,90,90,90,90">
                     <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
                     <Button Grid.Column="1" Content="Total ms" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:TotalTime" Padding="0" HorizontalContentAlignment="Right" />
@@ -1158,7 +1158,7 @@
                   <ItemsControl ItemsSource="{Binding ScopeHotspots}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
+                        <Border BorderBrush="{DynamicResource TimelineScopeSeparatorBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="*,90,90,90,90,90">
                             <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
@@ -1176,13 +1176,13 @@
             </Border>
 
             <GridSplitter Grid.Row="3"
-                          Background="#9A9A9A"
+                          Background="{DynamicResource TimelineScopeSeparatorBrush}"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="{Binding IsThreadsCustomStatsVisible}" />
 
-            <Border Grid.Row="8" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="False">
+            <Border Grid.Row="8" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="6" IsVisible="False">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -1195,11 +1195,11 @@
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
-                <Border Grid.Row="1" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,5,0,5">
+                <Border Grid.Row="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Margin="0,5,0,5">
                   <local:SelectedFrameThreadLaneControl Rows="{Binding SelectedFrameScopes}" ColorMode="{Binding ScopeColorMode}" />
                 </Border>
 
-                <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="5,3">
+                <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Padding="5,3">
                   <Grid ColumnDefinitions="140,*,80,80,220,64">
                     <Button Content="Thread" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Thread" Padding="0" HorizontalContentAlignment="Left" />
                     <Button Grid.Column="1" Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Scope" Padding="0" HorizontalContentAlignment="Left" />
@@ -1214,7 +1214,7 @@
                   <ItemsControl ItemsSource="{Binding SelectedFrameScopes}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
+                        <Border BorderBrush="{DynamicResource TimelineScopeSeparatorBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="140,*,80,80,220,64">
                             <TextBlock Text="{Binding ThreadName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
@@ -1237,9 +1237,9 @@
               </Grid>
             </Border>
 
-            <Border Grid.Row="8" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="False">
+            <Border Grid.Row="8" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" IsVisible="False">
               <Grid ColumnDefinitions="32,*">
-                <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
+                <Border Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,0">
                   <TextBlock Text="Data" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                     <TextBlock.RenderTransform>
                       <RotateTransform Angle="-90" />
@@ -1251,13 +1251,13 @@
             </Border>
 
             <GridSplitter Grid.Row="11"
-                          Background="#9A9A9A"
+                          Background="{DynamicResource TimelineScopeSeparatorBrush}"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Rows"
                           IsVisible="False" />
 
-            <Border Grid.Row="12" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="False">
+            <Border Grid.Row="12" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="6" IsVisible="False">
               <Grid RowDefinitions="Auto,Auto,*">
                 <DockPanel Grid.Row="0" LastChildFill="True">
                   <TextBlock DockPanel.Dock="Left"
@@ -1270,7 +1270,7 @@
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
-                <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="5,3">
+                <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="5,3">
                   <Grid ColumnDefinitions="150,*,90,90,80">
                     <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
                     <Button Grid.Column="1" Content="Counter" Command="{Binding SortTableCommand}" CommandParameter="Counter:Counter" Padding="0" HorizontalContentAlignment="Left" />
@@ -1284,7 +1284,7 @@
                   <ItemsControl ItemsSource="{Binding SelectedFrameCounters}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
+                        <Border BorderBrush="{DynamicResource TimelineScopeSeparatorBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                           <Grid ColumnDefinitions="150,*,90,90,80">
                             <TextBlock Text="{Binding GraphName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
@@ -1304,7 +1304,7 @@
           <GridSplitter Grid.Column="1"
                         Grid.RowSpan="7"
                         Width="4"
-                        Background="#636363"
+                        Background="{DynamicResource TimelineScopeSeparatorBrush}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         ResizeDirection="Columns"
@@ -1312,12 +1312,12 @@
 
           <Border Grid.Column="2"
                   Grid.RowSpan="7"
-                  Background="#D0D0D0"
-                  BorderBrush="#7D7D7D"
+                  Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}"
+                  BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}"
                   BorderThickness="1"
                   IsVisible="{Binding IsThreadsDataGridVisible}">
             <Grid RowDefinitions="28,*,4,*,4,*">
-              <Border Grid.Row="0" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="3,1">
+              <Border Grid.Row="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                 <DockPanel LastChildFill="True">
                   <TextBox DockPanel.Dock="Right"
                            Text="{Binding ScopeFilterText}"
@@ -1327,10 +1327,10 @@
                 </DockPanel>
               </Border>
 
-              <Border Grid.Row="1" Background="#D0D0D0" Padding="5">
+              <Border Grid.Row="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Scope Hotspots" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
-                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
+                  <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="*,70,64">
                       <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
                       <Button Grid.Column="1" Content="Total" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:TotalTime" Padding="0" HorizontalContentAlignment="Right" />
@@ -1341,7 +1341,7 @@
                     <ItemsControl ItemsSource="{Binding ScopeHotspots}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
+                          <Border BorderBrush="{DynamicResource TimelineScopeSeparatorBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="*,70,64">
                               <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                               <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
@@ -1355,12 +1355,12 @@
                 </Grid>
               </Border>
 
-              <GridSplitter Grid.Row="2" Background="#636363" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
+              <GridSplitter Grid.Row="2" Background="{DynamicResource TimelineScopeSeparatorBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
 
-              <Border Grid.Row="3" Background="#D0D0D0" Padding="5">
+              <Border Grid.Row="3" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Selected Frame Scopes" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
-                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
+                  <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="110,*,70">
                       <Button Content="Thread" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Thread" Padding="0" HorizontalContentAlignment="Left" />
                       <Button Grid.Column="1" Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Scope" Padding="0" HorizontalContentAlignment="Left" />
@@ -1371,7 +1371,7 @@
                     <ItemsControl ItemsSource="{Binding SelectedFrameScopes}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
+                          <Border BorderBrush="{DynamicResource TimelineScopeSeparatorBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="110,*,70">
                               <TextBlock Text="{Binding ThreadName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                               <TextBlock Grid.Column="1" Text="{Binding IndentedName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" FontFamily="Menlo,Consolas,monospace" />
@@ -1385,12 +1385,12 @@
                 </Grid>
               </Border>
 
-              <GridSplitter Grid.Row="4" Background="#636363" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
+              <GridSplitter Grid.Row="4" Background="{DynamicResource TimelineScopeSeparatorBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
 
-              <Border Grid.Row="5" Background="#D0D0D0" Padding="5">
+              <Border Grid.Row="5" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Selected Frame Counters" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
-                  <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
+                  <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="3,1">
                     <Grid ColumnDefinitions="120,*,70">
                       <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
                       <Button Grid.Column="1" Content="Counter" Command="{Binding SortTableCommand}" CommandParameter="Counter:Counter" Padding="0" HorizontalContentAlignment="Left" />
@@ -1401,7 +1401,7 @@
                     <ItemsControl ItemsSource="{Binding SelectedFrameCounters}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                          <Border BorderBrush="#B0B0B0" BorderThickness="0,0,0,1" Padding="3,1">
+                          <Border BorderBrush="{DynamicResource TimelineScopeSeparatorBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                             <Grid ColumnDefinitions="120,*,70">
                               <TextBlock Text="{Binding GraphName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                               <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
@@ -1418,24 +1418,24 @@
           </Border>
         </Grid>
 
-        <Grid Grid.Row="0" RowDefinitions="139,24,4,*" ColumnDefinitions="34,225,*" Background="#D4D0C8" IsVisible="{Binding IsCoresViewActive}">
-          <Border Grid.Row="0" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+        <Grid Grid.Row="0" RowDefinitions="139,24,4,*" ColumnDefinitions="34,225,*" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" IsVisible="{Binding IsCoresViewActive}">
+          <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
             <TextBlock Text="Frame" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
               <TextBlock.RenderTransform>
                 <RotateTransform Angle="-90" />
               </TextBlock.RenderTransform>
             </TextBlock>
           </Border>
-          <Border Grid.Row="0" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0">
+          <Border Grid.Row="0" Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="0">
             <Grid ColumnDefinitions="193,32">
               <Grid RowDefinitions="60,*">
-                <Border Background="#D0D0D0" Padding="6,5">
+                <Border Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" Padding="6,5">
                   <StackPanel Spacing="1">
                     <TextBlock Text="Average Frame" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
                     <TextBlock Text="{Binding Summary.AverageFrameTimeText}" Foreground="{DynamicResource SukiText}" FontFamily="Consolas,Menlo" FontSize="12" />
                   </StackPanel>
                 </Border>
-                <Border Grid.Row="1" Background="#EBEBEB" BorderBrush="#B8B8B8" BorderThickness="0,1,0,0">
+                <Border Grid.Row="1" Background="{DynamicResource TimelineScopeCardBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,0,0">
                   <Grid RowDefinitions="*,*,*" ColumnDefinitions="*,58">
                     <TextBlock Text="FPS" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
                     <TextBlock Grid.Column="1" Text="{Binding Summary.AverageFpsText}" Margin="0,0,5,0" VerticalAlignment="Center" TextAlignment="Right" Foreground="{DynamicResource SukiText}" FontFamily="Monaco,Consolas" FontSize="10" />
@@ -1446,27 +1446,27 @@
                   </Grid>
                 </Border>
               </Grid>
-              <Border Grid.Column="1" Background="#D3D3D3" BorderBrush="#101010" BorderThickness="0,0,1,0">
+              <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource SukiText}" BorderThickness="0,0,1,0">
                 <Grid RowDefinitions="Auto,*,Auto">
                   <TextBlock Text="ms" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,2,5,0" />
                   <Canvas Grid.Row="1">
-                    <Line StartPoint="27,4" EndPoint="31,4" Stroke="#101010" StrokeThickness="1" />
-                    <Line StartPoint="27,44" EndPoint="31,44" Stroke="#101010" StrokeThickness="1" />
-                    <Line StartPoint="27,84" EndPoint="31,84" Stroke="#101010" StrokeThickness="1" />
-                    <Ellipse Width="6" Height="6" Fill="#D00000" Canvas.Left="26" Canvas.Top="56" />
+                    <Line StartPoint="27,4" EndPoint="31,4" Stroke="{DynamicResource SukiText}" StrokeThickness="1" />
+                    <Line StartPoint="27,44" EndPoint="31,44" Stroke="{DynamicResource SukiText}" StrokeThickness="1" />
+                    <Line StartPoint="27,84" EndPoint="31,84" Stroke="{DynamicResource SukiText}" StrokeThickness="1" />
+                    <Ellipse Width="6" Height="6" Fill="{DynamicResource TimelineScopeRemovedBrush}" Canvas.Left="26" Canvas.Top="56" />
                   </Canvas>
                   <TextBlock Grid.Row="2" Text="0" Foreground="{DynamicResource SukiText}" FontFamily="Arial" FontSize="9" HorizontalAlignment="Right" Margin="0,0,5,2" />
                 </Grid>
               </Border>
             </Grid>
           </Border>
-          <Border Grid.Row="0" Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+          <Border Grid.Row="0" Grid.Column="2" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,1,1">
             <stats:ucProfilerStats x:Name="CoresProfilerStatsControl"
                                    IsCompactMode="True" />
           </Border>
 
-          <Border Grid.Row="1" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,0,0,1" />
-          <Border Grid.Row="1" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1,0,1,1" Padding="3,1">
+          <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,0,0,1" />
+          <Border Grid.Row="1" Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,0,1,1" Padding="3,1">
             <Grid ColumnDefinitions="22,22,*,22,22" ColumnSpacing="3">
               <Button Content="◀" Padding="0" Command="{Binding PanTimelineLeftCommand}" />
               <Button Grid.Column="1" Content="-" Padding="0" Command="{Binding ZoomTimelineOutCommand}" />
@@ -1475,20 +1475,20 @@
               <Button Grid.Column="4" Content="▶" Padding="0" Command="{Binding PanTimelineRightCommand}" />
             </Grid>
           </Border>
-          <Border Grid.Row="1" Grid.Column="2" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,1" Padding="3,1">
+          <Border Grid.Row="1" Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,1" Padding="3,1">
             <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
           </Border>
 
-          <GridSplitter Grid.Row="2" Grid.ColumnSpan="3" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
+          <GridSplitter Grid.Row="2" Grid.ColumnSpan="3" Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
 
-          <Border Grid.Row="3" Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+          <Border Grid.Row="3" Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
             <TextBlock Text="Cores" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
               <TextBlock.RenderTransform>
                 <RotateTransform Angle="-90" />
               </TextBlock.RenderTransform>
             </TextBlock>
           </Border>
-          <Border Grid.Row="3" Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+          <Border Grid.Row="3" Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="5">
             <Grid RowDefinitions="Auto,Auto,*">
               <TextBlock Text="Cores" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" FontSize="11" />
               <TextBlock Grid.Row="1" Text="{Binding CoreSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
@@ -1501,34 +1501,34 @@
               </ItemsControl>
             </Grid>
           </Border>
-          <Border Grid.Row="3" Grid.Column="2" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+          <Border Grid.Row="3" Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,1,1">
             <local:CoreTimelineStripControl Rows="{Binding CoreRows}" SummaryText="{Binding CoreSummaryText}" />
           </Border>
         </Grid>
 
-        <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="0" IsVisible="{Binding IsScopesViewActive}">
+        <Border Grid.Row="0" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="0" IsVisible="{Binding IsScopesViewActive}">
           <Grid RowDefinitions="196,4,*">
             <Grid Grid.Row="0" ColumnDefinitions="34,225,*">
-              <Border Grid.Column="0" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
+              <Border Grid.Column="0" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,0,1">
                 <TextBlock Text="Scopes" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
                   <TextBlock.RenderTransform>
                     <RotateTransform Angle="-90" />
                   </TextBlock.RenderTransform>
                 </TextBlock>
               </Border>
-              <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="5">
+              <Border Grid.Column="1" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="5">
                 <Grid RowDefinitions="Auto,Auto,*">
                   <TextBlock Text="Scope Graph" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" FontSize="11" />
                   <TextBlock Grid.Row="1" Text="{Binding ScopeHotspotSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
                   <TextBlock Grid.Row="2" Text="{Binding TimelineRangeText}" Foreground="{DynamicResource SukiLowText}" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
                 </Grid>
               </Border>
-              <Border Grid.Column="2" Background="#D4D0C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
+              <Border Grid.Column="2" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1,1,1">
                 <stats:ucProfilerStats x:Name="ScopesProfilerStatsControl"
                                        IsCompactMode="True" />
               </Border>
             </Grid>
-            <GridSplitter Grid.Row="1" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
+            <GridSplitter Grid.Row="1" Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
             <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" Margin="6">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Scopes" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
@@ -1539,7 +1539,7 @@
                        />
               <TextBlock Text="{Binding ScopeHotspotSummaryText}" Foreground="{DynamicResource SukiLowText}" HorizontalAlignment="Right" />
             </DockPanel>
-            <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
+            <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
               <Grid ColumnDefinitions="*,90,90,90,90,90">
                 <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
                 <Button Grid.Column="1" Content="Total ms" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:TotalTime" Padding="0" HorizontalContentAlignment="Right" />
@@ -1549,11 +1549,11 @@
                 <Button Grid.Column="5" Content="Calls/frame" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:MaxCount" Padding="0" HorizontalContentAlignment="Right" />
               </Grid>
             </Border>
-            <ScrollViewer Grid.Row="2" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="2" Background="{DynamicResource TimelineScopeCardBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding ScopeHotspots}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
+                    <Border BorderBrush="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                       <Grid ColumnDefinitions="*,90,90,90,90,90">
                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                         <TextBlock Grid.Column="1" Text="{Binding TotalTimeText}" Foreground="{DynamicResource SukiText}" TextAlignment="Right" />
@@ -1571,13 +1571,13 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsCustomStatsViewActive}">
+        <Border Grid.Row="0" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="6" IsVisible="{Binding IsCustomStatsViewActive}">
           <Grid RowDefinitions="Auto,Auto,*">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Custom Stats" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
               <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" HorizontalAlignment="Right" />
             </DockPanel>
-            <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
+            <Border Grid.Row="1" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,1,0" Margin="0,4,0,0" Padding="3,1">
               <Grid ColumnDefinitions="150,*,90,90,80">
                 <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
                 <Button Grid.Column="1" Content="Counter" Command="{Binding SortTableCommand}" CommandParameter="Counter:Counter" Padding="0" HorizontalContentAlignment="Left" />
@@ -1586,11 +1586,11 @@
                 <Button Grid.Column="4" Content="Unit" Command="{Binding SortTableCommand}" CommandParameter="Counter:Unit" Padding="0" HorizontalContentAlignment="Left" />
               </Grid>
             </Border>
-            <ScrollViewer Grid.Row="2" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="2" Background="{DynamicResource TimelineScopeCardBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding SelectedFrameCounters}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
+                    <Border BorderBrush="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                       <Grid ColumnDefinitions="150,*,90,90,80">
                         <TextBlock Text="{Binding GraphName}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
                         <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource SukiText}" TextTrimming="CharacterEllipsis" />
@@ -1606,25 +1606,25 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="0" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsLogViewActive}">
+        <Border Grid.Row="0" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Padding="6" IsVisible="{Binding IsLogViewActive}">
           <Grid RowDefinitions="Auto,*">
             <DockPanel LastChildFill="True">
               <TextBlock DockPanel.Dock="Left" Text="Log" Foreground="{DynamicResource SukiText}" FontSize="11" FontWeight="SemiBold" />
               <TextBlock Text="{Binding LogSummaryText}" Foreground="{DynamicResource SukiLowText}" FontSize="11" HorizontalAlignment="Right" />
             </DockPanel>
             <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="0,4,0,0">
-              <Border Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Padding="3,1">
+              <Border Background="{DynamicResource TimelineScopePanelBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,1,0" Padding="3,1">
                 <Grid ColumnDefinitions="58,130,*">
                   <TextBlock Text="#" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
                   <TextBlock Grid.Column="1" Text="Time" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
                   <TextBlock Grid.Column="2" Text="Message" Foreground="{DynamicResource SukiText}" FontWeight="SemiBold" />
                 </Grid>
               </Border>
-              <ScrollViewer Grid.Row="1" Background="#FFFFFF" BorderBrush="#8A8A8A" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+              <ScrollViewer Grid.Row="1" Background="{DynamicResource TimelineScopeCardBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding LogRows}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border BorderBrush="#D0D0D0" BorderThickness="0,0,0,1" Padding="3,1">
+                      <Border BorderBrush="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderThickness="0,0,0,1" Padding="3,1">
                         <Grid ColumnDefinitions="58,130,*">
                           <TextBlock Text="{Binding Index}" Foreground="{DynamicResource SukiText}" />
                           <TextBlock Grid.Column="1" Text="{Binding TimeText}" Foreground="{DynamicResource SukiText}" />
@@ -1639,11 +1639,11 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="2" Background="#EDEDED" BorderBrush="#5A5A5A" BorderThickness="0,1,0,0" Margin="0">
+        <Border Grid.Row="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopeSeparatorBrush}" BorderThickness="0,1,0,0" Margin="0">
           <Grid RowDefinitions="8,*" ColumnDefinitions="Auto,Auto,Auto,*">
-            <Polygon Grid.Row="0" Grid.Column="0" Points="53,0 71,0 62,8" Fill="#5A5A5A" IsVisible="{Binding IsThreadsViewActive}" />
-            <Polygon Grid.Row="0" Grid.Column="1" Points="42,0 60,0 51,8" Fill="#5A5A5A" IsVisible="{Binding IsCoresViewActive}" />
-            <Polygon Grid.Row="0" Grid.Column="2" Points="47,0 65,0 56,8" Fill="#5A5A5A" IsVisible="{Binding IsScopesViewActive}" />
+            <Polygon Grid.Row="0" Grid.Column="0" Points="53,0 71,0 62,8" Fill="{DynamicResource TimelineScopeSeparatorBrush}" IsVisible="{Binding IsThreadsViewActive}" />
+            <Polygon Grid.Row="0" Grid.Column="1" Points="42,0 60,0 51,8" Fill="{DynamicResource TimelineScopeSeparatorBrush}" IsVisible="{Binding IsCoresViewActive}" />
+            <Polygon Grid.Row="0" Grid.Column="2" Points="47,0 65,0 56,8" Fill="{DynamicResource TimelineScopeSeparatorBrush}" IsVisible="{Binding IsScopesViewActive}" />
 
             <Button Grid.Row="1" Grid.Column="0"
                     Content="Threads"
@@ -2390,7 +2390,7 @@
                          VerticalAlignment="Center"
                          FontSize="24"
                          FontWeight="Bold"
-                         Foreground="#203246" />
+                         Foreground="{DynamicResource SukiText}" />
             </Border>
             <StackPanel Grid.Column="1" Spacing="4">
               <TextBlock Text="{Binding AboutProductText}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />

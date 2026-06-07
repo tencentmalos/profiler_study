@@ -133,7 +133,7 @@ public class ucDetailPlotComponent
     {
         var border = new Border
         {
-            BorderBrush = TimelineScopeThemeHelper.GetBrush(TimelineScopeThemeHelper.PanelBorderBrushKey, "#FF334454"),
+            BorderBrush = TimelineScopeThemeHelper.GetBrush(TimelineScopeThemeHelper.PanelBorderBrushKey, "#FFD0D9E4"),
             BorderThickness = new Thickness(1, 0, 1, 1),
             Margin = new Thickness(0, 0, 0, isFirstView ? 8 : 0),
             Height = 250
@@ -148,8 +148,8 @@ public class ucDetailPlotComponent
             VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Top,
             Margin = new Thickness(5),
             FontWeight = global::Avalonia.Media.FontWeight.Bold,
-            Foreground = TimelineScopeThemeHelper.GetBrush(TimelineScopeThemeHelper.TextBrushKey, "#FFF2F6FA"),
-            Background = TimelineScopeThemeHelper.GetBrush(TimelineScopeThemeHelper.PlotTitleSurfaceBrushKey, "#E61B2731"),
+            Foreground = TimelineScopeThemeHelper.GetBrush(TimelineScopeThemeHelper.TextBrushKey, "#FF18212B"),
+            Background = TimelineScopeThemeHelper.GetBrush(TimelineScopeThemeHelper.PlotTitleSurfaceBrushKey, "#FFF7FAFD"),
             Padding = new Thickness(2)
         };
 

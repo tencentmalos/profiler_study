@@ -20,15 +20,6 @@ public sealed class SelectedFrameThreadLaneControl : Control
 	private const double MinBarWidth = 2.0;
 	private const double TimeAxisHeight = 18.0;
 
-	private static readonly IBrush BackgroundBrush = new SolidColorBrush(Color.FromRgb(207, 207, 207));
-	private static readonly IBrush LabelBackgroundBrush = new SolidColorBrush(Color.FromRgb(190, 190, 190));
-	private static readonly IBrush EmptyTextBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80));
-	private static readonly IBrush TextBrush = new SolidColorBrush(Color.FromRgb(16, 16, 16));
-	private static readonly IBrush MutedTextBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64));
-	private static readonly Pen BorderPen = new Pen(new SolidColorBrush(Color.FromRgb(124, 124, 124)), 1.0);
-	private static readonly Pen LanePen = new Pen(new SolidColorBrush(Color.FromRgb(150, 150, 150)), 1.0);
-	private static readonly Pen AxisPen = new Pen(new SolidColorBrush(Color.FromRgb(112, 112, 112)), 1.0);
-
 	public static readonly StyledProperty<IReadOnlyList<ScopeFrameDetailRow>> RowsProperty =
 		AvaloniaProperty.Register<SelectedFrameThreadLaneControl, IReadOnlyList<ScopeFrameDetailRow>>(nameof(Rows));
 
@@ -63,28 +54,29 @@ public sealed class SelectedFrameThreadLaneControl : Control
 	public override void Render(DrawingContext context)
 	{
 		base.Render(context);
+		TimelineDrawingTheme theme = TimelineDrawingTheme.Current();
 		Rect bounds = Bounds;
-		context.FillRectangle(BackgroundBrush, bounds);
-		context.DrawRectangle(null, BorderPen, bounds.Deflate(0.5));
+		context.FillRectangle(theme.BackgroundBrush, bounds);
+		context.DrawRectangle(null, theme.BorderPen, bounds.Deflate(0.5));
 
 		IReadOnlyList<ScopeFrameDetailRow> rows = Rows ?? Array.Empty<ScopeFrameDetailRow>();
 		if (rows.Count == 0)
 		{
-			DrawText(context, "Select a frame with scope data to show thread lanes.", EmptyTextBrush, 12.0, LeftPadding, TopPadding);
+			DrawText(context, "Select a frame with scope data to show thread lanes.", theme.EmptyTextBrush, 12.0, LeftPadding, TopPadding);
 			return;
 		}
 
 		double maxEndMs = rows.Max(item => item.StartOffsetMs + Math.Max(0.0, item.DurationMs));
 		if (maxEndMs <= 0.0)
 		{
-			DrawText(context, "Selected frame has no measurable scope duration.", EmptyTextBrush, 12.0, LeftPadding, TopPadding);
+			DrawText(context, "Selected frame has no measurable scope duration.", theme.EmptyTextBrush, 12.0, LeftPadding, TopPadding);
 			return;
 		}
 
 		double axisLeft = LeftPadding + ThreadLabelWidth;
 		double axisRight = Math.Max(axisLeft + 1.0, bounds.Width - RightPadding);
 		double plotWidth = Math.Max(1.0, axisRight - axisLeft);
-		DrawAxis(context, axisLeft, axisRight, TopPadding, maxEndMs);
+		DrawAxis(context, theme, axisLeft, axisRight, TopPadding, maxEndMs);
 
 		double y = TopPadding + TimeAxisHeight;
 		foreach (IGrouping<string, ScopeFrameDetailRow> threadRows in rows
@@ -98,12 +90,12 @@ public sealed class SelectedFrameThreadLaneControl : Control
 			}
 
 			var labelRect = new Rect(LeftPadding, y, ThreadLabelWidth - 4.0, LaneHeight);
-			context.FillRectangle(LabelBackgroundBrush, labelRect);
-			context.DrawRectangle(null, LanePen, labelRect);
-			DrawText(context, threadRows.Key, TextBrush, 10.0, labelRect.X + 4.0, labelRect.Y + 2.0);
+			context.FillRectangle(theme.LabelBackgroundBrush, labelRect);
+			context.DrawRectangle(null, theme.LanePen, labelRect);
+			DrawText(context, threadRows.Key, theme.TextBrush, 10.0, labelRect.X + 4.0, labelRect.Y + 2.0);
 
 			var laneRect = new Rect(axisLeft, y, plotWidth, LaneHeight);
-			context.DrawRectangle(null, LanePen, laneRect);
+			context.DrawRectangle(null, theme.LanePen, laneRect);
 
 			foreach (ScopeFrameDetailRow row in threadRows.OrderBy(item => item.StartOffsetMs).ThenBy(item => item.Depth))
 			{
@@ -120,12 +112,12 @@ public sealed class SelectedFrameThreadLaneControl : Control
 					continue;
 				}
 
-				IBrush fill = new SolidColorBrush(ResolveScopeColor(row.Depth, row.ThreadName, row.Name));
+				IBrush fill = new SolidColorBrush(ResolveScopeColor(theme, row.Depth, row.ThreadName, row.Name));
 				context.FillRectangle(fill, barRect);
-				context.DrawRectangle(null, BorderPen, barRect);
+				context.DrawRectangle(null, theme.BorderPen, barRect);
 				if (barRect.Width > 54.0)
 				{
-					DrawText(context, row.Name, TextBrush, 9.0, barRect.X + 4.0, barRect.Y + 1.0);
+					DrawText(context, row.Name, theme.TextBrush, 9.0, barRect.X + 4.0, barRect.Y + 1.0);
 				}
 			}
 
@@ -133,28 +125,28 @@ public sealed class SelectedFrameThreadLaneControl : Control
 		}
 	}
 
-	private static void DrawAxis(DrawingContext context, double left, double right, double top, double maxEndMs)
+	private static void DrawAxis(DrawingContext context, TimelineDrawingTheme theme, double left, double right, double top, double maxEndMs)
 	{
 		double axisY = top + TimeAxisHeight - 4.0;
-		context.DrawLine(AxisPen, new Point(left, axisY), new Point(right, axisY));
+		context.DrawLine(theme.AxisPen, new Point(left, axisY), new Point(right, axisY));
 
 		for (int i = 0; i <= 4; ++i)
 		{
 			double ratio = i / 4.0;
 			double x = left + ((right - left) * ratio);
-			context.DrawLine(AxisPen, new Point(x, axisY), new Point(x, axisY - 5.0));
-			DrawText(context, FormatMs(maxEndMs * ratio), MutedTextBrush, 9.0, x + 2.0, top);
+			context.DrawLine(theme.AxisPen, new Point(x, axisY), new Point(x, axisY - 5.0));
+			DrawText(context, FormatMs(maxEndMs * ratio), theme.MutedTextBrush, 9.0, x + 2.0, top);
 		}
 	}
 
-	private Color ResolveScopeColor(int depth, string threadName, string scopeName)
+	private Color ResolveScopeColor(TimelineDrawingTheme theme, int depth, string threadName, string scopeName)
 	{
 		if (string.Equals(ColorMode, "Scope", StringComparison.Ordinal))
 		{
-			return GetScopeColor(GetStablePaletteIndex(scopeName));
+			return theme.ScopeColor(GetStablePaletteIndex(scopeName));
 		}
 
-		return GetScopeColor(GetStablePaletteIndex(threadName) + depth);
+		return theme.ScopeColor(GetStablePaletteIndex(threadName) + depth);
 	}
 
 	private static int GetStablePaletteIndex(string value)
@@ -169,20 +161,6 @@ public sealed class SelectedFrameThreadLaneControl : Control
 
 			return Math.Abs(hash);
 		}
-	}
-
-	private static Color GetScopeColor(int depth)
-	{
-		Color[] palette =
-		{
-			Color.FromRgb(115, 181, 255),
-			Color.FromRgb(99, 215, 155),
-			Color.FromRgb(255, 180, 79),
-			Color.FromRgb(255, 126, 139),
-			Color.FromRgb(192, 162, 255),
-			Color.FromRgb(122, 218, 218),
-		};
-		return palette[Math.Abs(depth) % palette.Length];
 	}
 
 	private static string FormatMs(double value)

@@ -12,9 +12,9 @@
       <SolidColorBrush x:Key="TimelineScopePlotSurfaceBrush" Color="#FFFFFFFF" />
       <SolidColorBrush x:Key="TimelineScopePlotTitleSurfaceBrush" Color="#FFF7FAFD" />
       <SolidColorBrush x:Key="TimelineScopePlotGridBrush" Color="#1A203040" />
-      <SolidColorBrush x:Key="TimelineScopeTooltipBackgroundBrush" Color="#FF101922" />
-      <SolidColorBrush x:Key="TimelineScopeTooltipBorderBrush" Color="#FF41566D" />
-      <SolidColorBrush x:Key="TimelineScopeTooltipTextBrush" Color="#FFF5F8FB" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipBackgroundBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipBorderBrush" Color="#FFD0D9E4" />
+      <SolidColorBrush x:Key="TimelineScopeTooltipTextBrush" Color="#FF18212B" />
       <SolidColorBrush x:Key="TimelineScopeLegendBackgroundBrush" Color="#F2FFFFFF" />
       <SolidColorBrush x:Key="TimelineScopeLegendBorderBrush" Color="#FFCBD6E2" />
       <SolidColorBrush x:Key="TimelineScopeAddedBrush" Color="#FF128A52" />

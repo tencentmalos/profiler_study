@@ -18,16 +18,6 @@ public sealed class CoreTimelineStripControl : Control
 	private const double LaneHeight = 14.0;
 	private const double LaneGap = 5.0;
 
-	private static readonly IBrush BackgroundBrush = new SolidColorBrush(Color.FromRgb(207, 207, 207));
-	private static readonly IBrush LabelBackgroundBrush = new SolidColorBrush(Color.FromRgb(190, 190, 190));
-	private static readonly IBrush EmptyTextBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80));
-	private static readonly IBrush TextBrush = new SolidColorBrush(Color.FromRgb(16, 16, 16));
-	private static readonly IBrush EmptyLaneBrush = new SolidColorBrush(Color.FromRgb(196, 196, 196));
-	private static readonly IBrush SwitchBrush = new SolidColorBrush(Color.FromRgb(245, 245, 245));
-	private static readonly Pen BorderPen = new Pen(new SolidColorBrush(Color.FromRgb(124, 124, 124)), 1.0);
-	private static readonly Pen LanePen = new Pen(new SolidColorBrush(Color.FromRgb(150, 150, 150)), 1.0);
-	private static readonly Pen SwitchPen = new Pen(SwitchBrush, 1.0);
-
 	public static readonly StyledProperty<IReadOnlyList<CoreSummaryRow>> RowsProperty =
 		AvaloniaProperty.Register<CoreTimelineStripControl, IReadOnlyList<CoreSummaryRow>>(nameof(Rows));
 
@@ -61,14 +51,15 @@ public sealed class CoreTimelineStripControl : Control
 	public override void Render(DrawingContext context)
 	{
 		base.Render(context);
+		TimelineDrawingTheme theme = TimelineDrawingTheme.Current();
 		Rect bounds = Bounds;
-		context.FillRectangle(BackgroundBrush, bounds);
-		context.DrawRectangle(null, BorderPen, bounds.Deflate(0.5));
+		context.FillRectangle(theme.BackgroundBrush, bounds);
+		context.DrawRectangle(null, theme.BorderPen, bounds.Deflate(0.5));
 
 		IReadOnlyList<CoreSummaryRow> rows = Rows ?? Array.Empty<CoreSummaryRow>();
 		if (rows.Count == 0)
 		{
-			DrawText(context, string.IsNullOrWhiteSpace(SummaryText) ? "No core data in visible range." : SummaryText, EmptyTextBrush, 12.0, LeftPadding, TopPadding);
+			DrawText(context, string.IsNullOrWhiteSpace(SummaryText) ? "No core data in visible range." : SummaryText, theme.EmptyTextBrush, 12.0, LeftPadding, TopPadding);
 			return;
 		}
 
@@ -83,23 +74,23 @@ public sealed class CoreTimelineStripControl : Control
 			}
 
 			var labelRect = new Rect(LeftPadding, y, CoreLabelWidth - 4.0, LaneHeight);
-			context.FillRectangle(LabelBackgroundBrush, labelRect);
-			context.DrawRectangle(null, LanePen, labelRect);
-			DrawText(context, row.CoreText, TextBrush, 10.0, labelRect.X + 4.0, labelRect.Y);
+			context.FillRectangle(theme.LabelBackgroundBrush, labelRect);
+			context.DrawRectangle(null, theme.LanePen, labelRect);
+			DrawText(context, row.CoreText, theme.TextBrush, 10.0, labelRect.X + 4.0, labelRect.Y);
 
 			var laneRect = new Rect(laneLeft, y, laneWidth, LaneHeight);
-			context.FillRectangle(EmptyLaneBrush, laneRect);
-			context.DrawRectangle(null, LanePen, laneRect);
-			DrawContextSwitches(context, row, laneRect);
+			context.FillRectangle(theme.EmptyLaneBrush, laneRect);
+			context.DrawRectangle(null, theme.LanePen, laneRect);
+			DrawContextSwitches(context, theme, row, laneRect);
 			if (row.ContextSwitchCount > 0)
 			{
-				DrawText(context, row.ContextSwitchCount.ToString(CultureInfo.InvariantCulture), TextBrush, 10.0, laneLeft + 4.0, y);
+				DrawText(context, row.ContextSwitchCount.ToString(CultureInfo.InvariantCulture), theme.TextBrush, 10.0, laneLeft + 4.0, y);
 			}
 			y += LaneHeight + LaneGap;
 		}
 	}
 
-	private static void DrawContextSwitches(DrawingContext context, CoreSummaryRow row, Rect laneRect)
+	private static void DrawContextSwitches(DrawingContext context, TimelineDrawingTheme theme, CoreSummaryRow row, Rect laneRect)
 	{
 		long duration = Math.Max(1L, row.VisibleEndTime - row.VisibleStartTime);
 		foreach (long timestamp in row.ContextSwitchTimes)
@@ -111,7 +102,7 @@ public sealed class CoreTimelineStripControl : Control
 			}
 
 			double x = laneRect.X + (laneRect.Width * ratio);
-			context.DrawLine(SwitchPen, new Point(x, laneRect.Y + 2.0), new Point(x, laneRect.Bottom - 2.0));
+			context.DrawLine(theme.SwitchPen, new Point(x, laneRect.Y + 2.0), new Point(x, laneRect.Bottom - 2.0));
 		}
 	}
 

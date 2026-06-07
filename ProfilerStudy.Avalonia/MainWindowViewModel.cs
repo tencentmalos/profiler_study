@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
@@ -1241,15 +1242,28 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_CallstacksPanelStatusText, value);
 	}
 
-	public IBrush ThreadsViewBrush => IsThreadsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+	public IBrush ThreadsViewBrush => GetViewTabBrush(IsThreadsViewActive);
 
-	public IBrush CoresViewBrush => IsCoresViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+	public IBrush CoresViewBrush => GetViewTabBrush(IsCoresViewActive);
 
-	public IBrush ScopesViewBrush => IsScopesViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+	public IBrush ScopesViewBrush => GetViewTabBrush(IsScopesViewActive);
 
-	public IBrush CustomStatsViewBrush => IsCustomStatsViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+	public IBrush CustomStatsViewBrush => GetViewTabBrush(IsCustomStatsViewActive);
 
-	public IBrush LogViewBrush => IsLogViewActive ? Brushes.RoyalBlue : Brushes.DimGray;
+	public IBrush LogViewBrush => GetViewTabBrush(IsLogViewActive);
+
+	private static IBrush GetViewTabBrush(bool isActive)
+	{
+		string key = isActive ? "SukiPrimaryColor" : "TimelineScopeSubtleTextBrush";
+		string fallback = isActive ? "#FF2169D6" : "#FF5D6977";
+		if (Application.Current?.TryGetResource(key, Application.Current.ActualThemeVariant, out var value) == true &&
+			value is IBrush brush)
+		{
+			return brush;
+		}
+
+		return new SolidColorBrush(Color.Parse(fallback));
+	}
 
 	public bool IsLoading
 	{
