@@ -12,6 +12,7 @@ public partial class ucProfilerStats : UserControl
 
 	internal event Action<int, int> ViewportChangedByUser;
 	internal event Action<int> FrameSelectedByUser;
+	internal event Action<int> FrameHoveredByUser;
 
 	public ucProfilerStats()
 	{
@@ -59,6 +60,11 @@ public partial class ucProfilerStats : UserControl
 	internal void NotifyFrameSelectedByUser(int frameIndex)
 	{
 		FrameSelectedByUser?.Invoke(frameIndex);
+	}
+
+	internal void NotifyFrameHoveredByUser(int frameIndex)
+	{
+		FrameHoveredByUser?.Invoke(frameIndex);
 	}
 
 	public StackPanel DetailPlotControlsHost => DetailPlotControlsPanel;

@@ -67,6 +67,8 @@ internal sealed class ProfilerStatsController : ObservableObject
 
 		Timeline.OnScopeRangeChangedByUi += Timeline_OnScopeRangeChangedByUi;
 		Timeline.ChildMainStats.Plot.PointerPressed += TimelineMainStats_PointerPressed;
+		Timeline.ChildMainStats.Plot.PointerMoved += TimelineMainStats_PointerMoved;
+		Timeline.ChildMainStats.Plot.PointerExited += TimelineMainStats_PointerExited;
 		m_IsInitialized = true;
 
 		ApplyEmptyState();
@@ -559,6 +561,23 @@ internal sealed class ProfilerStatsController : ObservableObject
 			m_View.NotifyFrameSelectedByUser(frameIndex);
 			e.Handled = true;
 		}
+	}
+
+	private void TimelineMainStats_PointerMoved(object sender, PointerEventArgs e)
+	{
+		if (m_TimelineAdapter.FrameSamples.Length == 0)
+		{
+			return;
+		}
+
+		var position = e.GetPosition(Timeline.ChildMainStats.Plot);
+		var coordinates = Timeline.ChildMainStats.Plot.Plot.GetCoordinates((float)position.X, (float)position.Y);
+		m_View.NotifyFrameHoveredByUser(m_TimelineAdapter.GetNearestFrameIndex(coordinates.X));
+	}
+
+	private void TimelineMainStats_PointerExited(object sender, PointerEventArgs e)
+	{
+		m_View.NotifyFrameHoveredByUser(-1);
 	}
 
 	private void SetAllDetailPlotsVisible(bool isVisible)

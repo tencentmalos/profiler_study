@@ -1946,6 +1946,32 @@ internal sealed class MainWindowViewModel : ObservableObject
 		StatusText = $"Selected frame {frame.Index} from profiler scope timeline ({frame.DurationMs:0.###} ms).";
 	}
 
+	public void HoverFrameFromProfilerStats(int frameIndex)
+	{
+		if (frameIndex < 0)
+		{
+			Selection.HoveredFrameIndex = -1;
+			Selection.HoveredFrameTimeMs = 0.0;
+			return;
+		}
+
+		if (CurrentDocument?.FrameSamples == null || CurrentDocument.FrameSamples.Length == 0)
+		{
+			return;
+		}
+
+		foreach (FrameSample sample in CurrentDocument.FrameSamples)
+		{
+			if (sample.Index == frameIndex)
+			{
+				Selection.HoveredFrameIndex = sample.Index;
+				Selection.HoveredFrameTimeMs = sample.DurationMs;
+				StatusText = $"Hover frame {sample.Index} from profiler scope timeline ({sample.DurationMs:0.###} ms).";
+				return;
+			}
+		}
+	}
+
 	private async Task OpenSessionAsync()
 	{
 		try

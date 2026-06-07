@@ -25,6 +25,7 @@ public sealed partial class MainWindow : Window
 		m_SelectionPropertyChanged = OnSelectionPropertyChanged;
 		ProfilerStatsControl.ViewportChangedByUser += OnProfilerStatsViewportChangedByUser;
 		ProfilerStatsControl.FrameSelectedByUser += OnProfilerStatsFrameSelectedByUser;
+		ProfilerStatsControl.FrameHoveredByUser += OnProfilerStatsFrameHoveredByUser;
 		DataContextChanged += OnDataContextChanged;
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
@@ -176,6 +177,11 @@ public sealed partial class MainWindow : Window
 	private void OnProfilerStatsFrameSelectedByUser(int frameIndex)
 	{
 		m_ViewModel?.SelectFrameFromProfilerStats(frameIndex);
+	}
+
+	private void OnProfilerStatsFrameHoveredByUser(int frameIndex)
+	{
+		m_ViewModel?.HoverFrameFromProfilerStats(frameIndex);
 	}
 
 	private void ApplyProfilerStatsDocumentAndViewport()
