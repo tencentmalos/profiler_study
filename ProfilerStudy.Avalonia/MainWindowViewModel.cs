@@ -161,7 +161,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsOutputWindowVisible = true;
 	private bool m_IsOutputWindowMinimized;
 	private bool m_IsOutputWindowFloating;
-	private bool m_IsToolboxVisible = true;
+	private bool m_IsToolboxVisible;
 	private bool m_IsToolboxMinimized;
 	private bool m_IsToolboxFloating;
 	private bool m_IsMainSessionDockVisible = true;
