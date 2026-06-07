@@ -456,7 +456,7 @@
 
     <Grid Grid.Row="2" Background="#BEBEBE">
       <Grid.RowDefinitions>
-        <RowDefinition Height="27" />
+        <RowDefinition Height="0" />
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
