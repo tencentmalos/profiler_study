@@ -282,12 +282,23 @@
                     VerticalAlignment="Stretch"
                     ResizeDirection="Columns" />
 
-      <Grid Grid.Column="2" RowDefinitions="Auto,*" Margin="6">
-        <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,0,0,8">
-          <TextBlock Text="Frame Timeline" Foreground="#101010" FontSize="15" FontWeight="SemiBold" />
-          <TextBlock Text="{Binding Summary.RangeText}" Foreground="#404040" VerticalAlignment="Center" />
-          <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" VerticalAlignment="Center" />
-        </StackPanel>
+      <Grid Grid.Column="2" RowDefinitions="Auto,*,47" Margin="6">
+        <Border Background="#D1D1D1" BorderBrush="#808080" BorderThickness="1" Margin="0,0,0,8">
+          <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" Margin="8,6">
+            <TextBlock Text="Threads View" Foreground="#101010" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#404040" VerticalAlignment="Center" />
+            <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*" ColumnSpacing="8" Margin="0,5,0,0">
+              <TextBlock Text="Info" Foreground="#5A5A5A" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="1" Text="{Binding Summary.RangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="2" Text="Frame Graph" Foreground="#5A5A5A" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="3" Text="{Binding TimelineRangeText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="4" Text="Scope Graph" Foreground="#5A5A5A" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="5" Text="{Binding SelectedFrameScopeSummaryText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="6" Text="Custom Stats" Foreground="#5A5A5A" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="7" Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#101010" TextTrimming="CharacterEllipsis" />
+            </Grid>
+          </Grid>
+        </Border>
         <Grid Grid.Row="1" RowDefinitions="180,6,*">
           <Border Grid.Row="0" Background="#C8C8C8" BorderBrush="#808080" BorderThickness="1" MinHeight="120">
             <local:FrameTimelineControl
@@ -473,6 +484,19 @@
             </Border>
           </Grid>
         </Grid>
+
+        <Border Grid.Row="2" Background="#EDEDED" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,8,0,0">
+          <Grid RowDefinitions="8,*">
+            <Polygon Points="46,0 64,0 55,8" Fill="#6382CF" HorizontalAlignment="Left" />
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="22" Margin="18,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="Threads" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#6382CF" />
+              <TextBlock Text="Cores" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" />
+              <TextBlock Text="Scopes" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" />
+              <TextBlock Text="Custom Stats" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" />
+              <TextBlock Text="Log" FontFamily="Monaco,Menlo,Consolas,monospace" FontSize="18" Foreground="#949494" />
+            </StackPanel>
+          </Grid>
+        </Border>
       </Grid>
     </Grid>
 
