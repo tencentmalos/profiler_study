@@ -20,7 +20,7 @@
     <KeyBinding Gesture="PageDown" Command="{Binding SelectNextSpikeCommand}" />
     <KeyBinding Gesture="Ctrl+PageUp" Command="{Binding PanTimelineLeftCommand}" />
     <KeyBinding Gesture="Ctrl+PageDown" Command="{Binding PanTimelineRightCommand}" />
-    <KeyBinding Gesture="Ctrl+=" Command="{Binding ZoomTimelineInCommand}" />
+    <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomTimelineInCommand}" />
     <KeyBinding Gesture="Ctrl+-" Command="{Binding ZoomTimelineOutCommand}" />
     <KeyBinding Gesture="Ctrl+T" Command="{Binding TrackSelectedFrameCommand}" />
   </Window.KeyBindings>
