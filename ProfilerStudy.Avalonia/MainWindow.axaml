@@ -156,7 +156,15 @@
           <MenuItem Header="_Export to CSV" Command="{Binding ExportFramesToCsvCommand}" />
           <MenuItem Header="Export _Frame Graph to CSV" Command="{Binding ExportFramesToCsvCommand}" />
           <Separator />
-          <MenuItem Header="_Recent Files" Command="{Binding OpenRecentSessionCommand}" />
+          <MenuItem Header="_Recent Files" ItemsSource="{Binding RecentFiles}">
+            <MenuItem.ItemTemplate>
+              <DataTemplate>
+                <MenuItem Header="{Binding}"
+                          Command="{Binding $parent[Window].DataContext.OpenRecentSessionCommand}"
+                          CommandParameter="{Binding}" />
+              </DataTemplate>
+            </MenuItem.ItemTemplate>
+          </MenuItem>
           <MenuItem Header="Load _Sample" Command="{Binding LoadSampleCommand}" />
           <Separator />
           <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
