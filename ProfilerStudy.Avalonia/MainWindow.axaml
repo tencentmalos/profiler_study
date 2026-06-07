@@ -559,7 +559,7 @@
             </Grid>
           </Grid>
         </Border>
-        <Grid Grid.Row="1" RowDefinitions="180,28,6,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
+        <Grid Grid.Row="1" RowDefinitions="150,24,4,*" IsVisible="{Binding IsThreadsViewActive}" Background="#C8C8C8">
           <Grid Grid.Row="0" ColumnDefinitions="32,210,*" IsVisible="{Binding IsThreadsFrameGraphVisible}">
             <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
               <TextBlock Text="Frame"
@@ -655,7 +655,7 @@
                         ResizeDirection="Rows"
                         IsVisible="{Binding IsThreadsFrameGraphVisible}" />
 
-          <Grid Grid.Row="3" RowDefinitions="220,6,92,6,*,6,180,6,160,6,150" Margin="0,4,0,0" Background="#C8C8C8">
+          <Grid Grid.Row="3" RowDefinitions="260,4,88,4,*,4,156,4,140,4,128" Margin="0,3,0,0" Background="#C8C8C8">
             <Grid Grid.Row="0" ColumnDefinitions="32,210,*,17" IsVisible="{Binding IsThreadsScopeGraphVisible}">
               <Border Grid.Column="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1,1,0,1">
                 <TextBlock Text="Threads"
@@ -668,7 +668,7 @@
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
                 <StackPanel Spacing="4">
-                  <TextBlock Text="Thread Activity" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
+                  <TextBlock Text="Thread Activity" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
                   <TextBlock Text="{Binding ThreadTimelineSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
                   <Separator Margin="0,4" />
                   <TextBlock Text="{Binding TimelineRangeText}" Foreground="#404040" />
@@ -752,7 +752,7 @@
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
                 <StackPanel Spacing="4">
-                  <TextBlock Text="Core Activity" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
+                  <TextBlock Text="Core Activity" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
                   <TextBlock Text="{Binding CoreSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
                 </StackPanel>
               </Border>
@@ -792,7 +792,7 @@
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
                 <StackPanel Spacing="4">
-                  <TextBlock Text="Custom Stats" Foreground="#101010" FontSize="14" FontWeight="SemiBold" />
+                  <TextBlock Text="Custom Stats" Foreground="#101010" FontSize="12" FontWeight="SemiBold" />
                   <TextBlock Text="{Binding SelectedFrameCounterSummaryText}" Foreground="#404040" TextWrapping="Wrap" />
                   <Separator Margin="0,4" />
                   <TextBlock Text="Scope Hotspots" Foreground="#101010" FontWeight="SemiBold" />
@@ -827,7 +827,7 @@
                   <TextBlock DockPanel.Dock="Left"
                              Text="Scope Hotspots"
                              Foreground="#101010"
-                             FontSize="14"
+                             FontSize="12"
                              FontWeight="SemiBold" />
                   <TextBox DockPanel.Dock="Right"
                            Text="{Binding ScopeFilterText}"
@@ -839,7 +839,7 @@
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
-                <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
+                <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="5,3">
                   <Grid ColumnDefinitions="*,90,90,90,90,90">
                     <Button Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:Name" Padding="0" HorizontalContentAlignment="Left" />
                     <Button Grid.Column="1" Content="Total ms" Command="{Binding SortTableCommand}" CommandParameter="Hotspot:TotalTime" Padding="0" HorizontalContentAlignment="Right" />
@@ -884,18 +884,18 @@
                   <TextBlock DockPanel.Dock="Left"
                              Text="Selected Frame Scopes"
                              Foreground="#101010"
-                             FontSize="14"
+                             FontSize="12"
                              FontWeight="SemiBold" />
                   <TextBlock Text="{Binding SelectedFrameScopeSummaryText}"
                              Foreground="#404040"
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
-                <Border Grid.Row="1" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,7,0,7">
+                <Border Grid.Row="1" Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,5,0,5">
                   <local:SelectedFrameThreadLaneControl Rows="{Binding SelectedFrameScopes}" ColorMode="{Binding ScopeColorMode}" />
                 </Border>
 
-                <Border Grid.Row="2" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="6,4">
+                <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Padding="5,3">
                   <Grid ColumnDefinitions="140,*,80,80,220,64">
                     <Button Content="Thread" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Thread" Padding="0" HorizontalContentAlignment="Left" />
                     <Button Grid.Column="1" Content="Scope" Command="{Binding SortTableCommand}" CommandParameter="FrameScope:Scope" Padding="0" HorizontalContentAlignment="Left" />
@@ -955,14 +955,14 @@
                   <TextBlock DockPanel.Dock="Left"
                              Text="Selected Frame Counters"
                              Foreground="#101010"
-                             FontSize="14"
+                             FontSize="12"
                              FontWeight="SemiBold" />
                   <TextBlock Text="{Binding SelectedFrameCounterSummaryText}"
                              Foreground="#404040"
                              HorizontalAlignment="Right" />
                 </DockPanel>
 
-                <Border Grid.Row="1" Background="#BEBEBE" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,7,0,0" Padding="6,4">
+                <Border Grid.Row="1" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="0,0,0,1" Margin="0,5,0,0" Padding="5,3">
                   <Grid ColumnDefinitions="150,*,90,90,80">
                     <Button Content="Graph" Command="{Binding SortTableCommand}" CommandParameter="Counter:Graph" Padding="0" HorizontalContentAlignment="Left" />
                     <Button Grid.Column="1" Content="Counter" Command="{Binding SortTableCommand}" CommandParameter="Counter:Counter" Padding="0" HorizontalContentAlignment="Left" />
