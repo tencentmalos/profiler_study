@@ -9,7 +9,7 @@
     Title="ProfilerStudy"
     Width="1180"
     Height="760"
-    WindowState="Maximized"
+    WindowStartupLocation="CenterScreen"
     IsMenuVisible="False"
     MinWidth="860"
     MinHeight="560">
