@@ -152,6 +152,28 @@ public sealed class ThreadTimelineLaneControl : Control
 		InvalidateVisual();
 	}
 
+	protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+	{
+		base.OnPointerWheelChanged(e);
+		if (Viewport == null || Viewport.FrameCount <= 0 || e.Delta.Y == 0.0)
+		{
+			return;
+		}
+
+		if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+		{
+			int deltaFrames = Math.Max(1, Viewport.VisibleFrameCount / 12);
+			Viewport.ScrollFrames(e.Delta.Y > 0.0 ? -deltaFrames : deltaFrames);
+			e.Handled = true;
+			return;
+		}
+
+		double anchorRatio = GetTimelineAnchorRatio(e.GetPosition(this));
+		double factor = e.Delta.Y > 0.0 ? 1.25 : 0.8;
+		Viewport.Zoom(factor, anchorRatio);
+		e.Handled = true;
+	}
+
 	protected override Size MeasureOverride(Size availableSize)
 	{
 		IReadOnlyList<ThreadTimelineScopeRow> rows = Rows ?? Array.Empty<ThreadTimelineScopeRow>();
@@ -280,6 +302,13 @@ public sealed class ThreadTimelineLaneControl : Control
 		}
 
 		return found;
+	}
+
+	private double GetTimelineAnchorRatio(Point point)
+	{
+		double axisLeft = LeftPadding + ThreadLabelWidth;
+		double axisRight = Math.Max(axisLeft + 1.0, Bounds.Width - RightPadding);
+		return Math.Clamp((point.X - axisLeft) / Math.Max(1.0, axisRight - axisLeft), 0.0, 1.0);
 	}
 
 	private ThreadTimelineScopeRow TryGetScopeAtPoint(Point point)
