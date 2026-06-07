@@ -255,17 +255,17 @@
     </Grid.RowDefinitions>
     <Border Grid.Row="0" Background="{DynamicResource SukiCardBackground}" BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="0,0,0,1" MinHeight="24">
       <Menu Background="Transparent" FontSize="12" Padding="2,0">
-        <MenuItem Header="_File">
-          <MenuItem Header="_Open" InputGesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
-          <MenuItem Header="_Save" InputGesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
-          <MenuItem Header="Save _As..." Command="{Binding SaveSessionAsCommand}" />
-          <MenuItem Header="_Close" Command="{Binding CloseSessionCommand}" />
-          <MenuItem Header="Close A_ll" Command="{Binding CloseSessionCommand}" />
+        <MenuItem Header="File">
+          <MenuItem Header="Open" InputGesture="Ctrl+O" Command="{Binding OpenSessionCommand}" />
+          <MenuItem Header="Save" InputGesture="Ctrl+S" Command="{Binding SaveSessionCommand}" />
+          <MenuItem Header="Save As..." Command="{Binding SaveSessionAsCommand}" />
+          <MenuItem Header="Close" Command="{Binding CloseSessionCommand}" />
+          <MenuItem Header="Close All" Command="{Binding CloseSessionCommand}" />
           <Separator />
-          <MenuItem Header="_Export to CSV" Command="{Binding ExportFramesToCsvCommand}" />
-          <MenuItem Header="Export _Frame Graph to CSV" Command="{Binding ExportFramesToCsvCommand}" />
+          <MenuItem Header="Export to CSV" Command="{Binding ExportFramesToCsvCommand}" />
+          <MenuItem Header="Export Frame Graph to CSV" Command="{Binding ExportFramesToCsvCommand}" />
           <Separator />
-          <MenuItem Header="_Recent Files" ItemsSource="{Binding RecentFiles}">
+          <MenuItem Header="Recent Files" ItemsSource="{Binding RecentFiles}">
             <MenuItem.ItemTemplate>
               <DataTemplate>
                 <MenuItem Header="{Binding}"
@@ -274,56 +274,56 @@
               </DataTemplate>
             </MenuItem.ItemTemplate>
           </MenuItem>
-          <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
+          <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
         </MenuItem>
-        <MenuItem Header="_View">
-          <MenuItem Header="_Threads View" ToggleType="Radio" IsChecked="{Binding IsThreadsViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
-          <MenuItem Header="_Cores View" ToggleType="Radio" IsChecked="{Binding IsCoresViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
-          <MenuItem Header="_Scopes View" ToggleType="Radio" IsChecked="{Binding IsScopesViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
+        <MenuItem Header="View">
+          <MenuItem Header="Threads View" ToggleType="Radio" IsChecked="{Binding IsThreadsViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Threads" />
+          <MenuItem Header="Cores View" ToggleType="Radio" IsChecked="{Binding IsCoresViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Cores" />
+          <MenuItem Header="Scopes View" ToggleType="Radio" IsChecked="{Binding IsScopesViewActive, Mode=OneWay}" Command="{Binding SelectSessionViewCommand}" CommandParameter="Scopes" />
           <Separator />
-          <MenuItem Header="_Threads View">
-            <MenuItem Header="_Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
-            <MenuItem Header="_Frame Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
-            <MenuItem Header="_Scope Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
-            <MenuItem Header="_CPU Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
-            <MenuItem Header="_Custom Stats Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
+          <MenuItem Header="Threads View">
+            <MenuItem Header="Info" ToggleType="CheckBox" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" />
+            <MenuItem Header="Frame Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" />
+            <MenuItem Header="Scope Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" />
+            <MenuItem Header="CPU Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" />
+            <MenuItem Header="Custom Stats Graph" ToggleType="CheckBox" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" />
           </MenuItem>
-          <MenuItem Header="Scope _Colouring">
-            <MenuItem Header="Colour by _Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
-            <MenuItem Header="Colour by _Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
-          </MenuItem>
-          <Separator />
-          <MenuItem Header="_Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
-        </MenuItem>
-        <MenuItem Header="_Connection">
-          <MenuItem Header="_New Connection..." Command="{Binding OpenConnectionCommand}" />
-          <MenuItem Header="_Connect..." Command="{Binding OpenConnectionCommand}" />
-          <MenuItem Header="_Disconnect" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" />
-        </MenuItem>
-        <MenuItem Header="_Tools">
-          <Separator />
-          <MenuItem Header="_Find" InputGesture="Ctrl+F" Command="{Binding OpenFindScopeCommand}" />
-          <Separator />
-          <MenuItem Header="_Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
-          <Separator />
-          <MenuItem Header="_Android">
-            <MenuItem Header="_Start Recording Context Switches..." Command="{Binding AndroidActionCommand}" CommandParameter="RecordContextSwitches" />
-            <MenuItem Header="_Load Context Switch File" Command="{Binding AndroidActionCommand}" CommandParameter="LoadContextSwitchFile" />
+          <MenuItem Header="Scope Colouring">
+            <MenuItem Header="Colour by Thread" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeThread, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Thread" />
+            <MenuItem Header="Colour by Scope" ToggleType="Radio" IsChecked="{Binding IsScopeColorModeScope, Mode=OneWay}" Command="{Binding SetScopeColorModeCommand}" CommandParameter="Scope" />
           </MenuItem>
           <Separator />
-          <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
+          <MenuItem Header="Output Window" ToggleType="CheckBox" IsChecked="{Binding IsOutputWindowVisible, Mode=OneWay}" Command="{Binding ToggleOutputWindowCommand}" />
         </MenuItem>
-        <MenuItem Header="_Help">
-          <MenuItem Header="_Registration..." Command="{Binding OpenRegistrationCommand}" />
-          <MenuItem Header="_Check for Updates" Command="{Binding OpenUpdateCheckCommand}" />
+        <MenuItem Header="Connection">
+          <MenuItem Header="New Connection..." Command="{Binding OpenConnectionCommand}" />
+          <MenuItem Header="Connect..." Command="{Binding OpenConnectionCommand}" />
+          <MenuItem Header="Disconnect" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" />
+        </MenuItem>
+        <MenuItem Header="Tools">
           <Separator />
-          <MenuItem Header="_Demo">
-            <MenuItem Header="_Launch FramePro Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
-            <MenuItem Header="_Playback Recording File..." Command="{Binding DemoActionCommand}" CommandParameter="PlaybackRecordingFile" />
+          <MenuItem Header="Find" InputGesture="Ctrl+F" Command="{Binding OpenFindScopeCommand}" />
+          <Separator />
+          <MenuItem Header="Create Session from Selection" Command="{Binding CreateSessionFromSelectionCommand}" />
+          <Separator />
+          <MenuItem Header="Android">
+            <MenuItem Header="Start Recording Context Switches..." Command="{Binding AndroidActionCommand}" CommandParameter="RecordContextSwitches" />
+            <MenuItem Header="Load Context Switch File" Command="{Binding AndroidActionCommand}" CommandParameter="LoadContextSwitchFile" />
           </MenuItem>
-          <MenuItem Header="_Show Startup Page" Command="{Binding ShowStartupPageCommand}" />
           <Separator />
-          <MenuItem Header="_About" Command="{Binding OpenAboutCommand}" />
+          <MenuItem Header="Settings" Command="{Binding OpenSettingsCommand}" />
+        </MenuItem>
+        <MenuItem Header="Help">
+          <MenuItem Header="Registration..." Command="{Binding OpenRegistrationCommand}" />
+          <MenuItem Header="Check for Updates" Command="{Binding OpenUpdateCheckCommand}" />
+          <Separator />
+          <MenuItem Header="Demo">
+            <MenuItem Header="Launch FramePro Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
+            <MenuItem Header="Playback Recording File..." Command="{Binding DemoActionCommand}" CommandParameter="PlaybackRecordingFile" />
+          </MenuItem>
+          <MenuItem Header="Show Startup Page" Command="{Binding ShowStartupPageCommand}" />
+          <Separator />
+          <MenuItem Header="About" Command="{Binding OpenAboutCommand}" />
         </MenuItem>
       </Menu>
     </Border>
