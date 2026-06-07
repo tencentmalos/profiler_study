@@ -818,7 +818,13 @@
                          FontWeight="SemiBold"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Center"
-                         TextWrapping="Wrap" />
+                         Width="96"
+                         TextAlignment="Center"
+                         RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                  <RotateTransform Angle="-90" />
+                </TextBlock.RenderTransform>
+              </TextBlock>
             </Border>
 
             <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6" IsVisible="{Binding IsThreadsInfoPanelVisible}">
@@ -886,7 +892,11 @@
           <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsFrameGraphCollapsed}">
             <Grid ColumnDefinitions="32,*">
               <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <TextBlock Text="Frame" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                  <TextBlock.RenderTransform>
+                    <RotateTransform Angle="-90" />
+                  </TextBlock.RenderTransform>
+                </TextBlock>
               </Border>
               <TextBlock Grid.Column="1" Text="Frame Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
             </Grid>
@@ -934,7 +944,13 @@
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           TextWrapping="Wrap" />
+                           Width="120"
+                           TextAlignment="Center"
+                           RenderTransformOrigin="0.5,0.5">
+                  <TextBlock.RenderTransform>
+                    <RotateTransform Angle="-90" />
+                  </TextBlock.RenderTransform>
+                </TextBlock>
               </Border>
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
@@ -996,7 +1012,11 @@
             <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsScopeGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Threads" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                  <TextBlock Text="Threads" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <TextBlock.RenderTransform>
+                      <RotateTransform Angle="-90" />
+                    </TextBlock.RenderTransform>
+                  </TextBlock>
                 </Border>
                 <TextBlock Grid.Column="1" Text="Scope Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
@@ -1018,7 +1038,13 @@
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           TextWrapping="Wrap" />
+                           Width="96"
+                           TextAlignment="Center"
+                           RenderTransformOrigin="0.5,0.5">
+                  <TextBlock.RenderTransform>
+                    <RotateTransform Angle="-90" />
+                  </TextBlock.RenderTransform>
+                </TextBlock>
               </Border>
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
@@ -1038,7 +1064,11 @@
             <Border Grid.Row="2" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCoreGraphCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                  <TextBlock Text="Cores" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <TextBlock.RenderTransform>
+                      <RotateTransform Angle="-90" />
+                    </TextBlock.RenderTransform>
+                  </TextBlock>
                 </Border>
                 <TextBlock Grid.Column="1" Text="Core Graph hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
@@ -1058,7 +1088,13 @@
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           TextWrapping="Wrap" />
+                           Width="96"
+                           TextAlignment="Center"
+                           RenderTransformOrigin="0.5,0.5">
+                  <TextBlock.RenderTransform>
+                    <RotateTransform Angle="-90" />
+                  </TextBlock.RenderTransform>
+                </TextBlock>
               </Border>
 
               <Border Grid.Column="1" Background="#D0D0D0" BorderBrush="#7D7D7D" BorderThickness="1" Padding="6">
@@ -1079,7 +1115,11 @@
             <Border Grid.Row="4" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsCustomStatsCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Stats" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                  <TextBlock Text="Stats" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <TextBlock.RenderTransform>
+                      <RotateTransform Angle="-90" />
+                    </TextBlock.RenderTransform>
+                  </TextBlock>
                 </Border>
                 <TextBlock Grid.Column="1" Text="Custom Stats hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
@@ -1207,7 +1247,11 @@
             <Border Grid.Row="6" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="1" IsVisible="{Binding IsThreadsDataGridCollapsed}">
               <Grid ColumnDefinitions="32,*">
                 <Border Background="#AFAFAF" BorderBrush="#7D7D7D" BorderThickness="0,0,1,0">
-                  <TextBlock Text="Data" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" />
+                  <TextBlock Text="Data" Foreground="#202020" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <TextBlock.RenderTransform>
+                      <RotateTransform Angle="-90" />
+                    </TextBlock.RenderTransform>
+                  </TextBlock>
                 </Border>
                 <TextBlock Grid.Column="1" Text="Data Grid hidden" Foreground="#303030" VerticalAlignment="Center" Margin="8,0" />
               </Grid>
