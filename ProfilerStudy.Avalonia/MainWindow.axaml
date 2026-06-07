@@ -10,7 +10,7 @@
     Width="1180"
     Height="760"
     WindowStartupLocation="CenterScreen"
-    IsMenuVisible="False"
+    IsMenuVisible="True"
     MinWidth="860"
     MinHeight="560">
   <suki:SukiWindow.KeyBindings>
@@ -247,7 +247,7 @@
   </suki:SukiWindow.Styles>
   <Grid Background="{DynamicResource SukiBackground}">
     <Grid.RowDefinitions>
-      <RowDefinition Height="0" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="{Binding OutputWindowHeight}" />
