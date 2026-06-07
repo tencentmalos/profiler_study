@@ -128,6 +128,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
+	private string m_AndroidEndpoint = AdbSocketDiscovery.DebugFrameProEndpoint;
 	private bool m_IsConnectionPanelVisible;
 	private bool m_IsConnecting;
 	private string m_ConnectionHost = "localhost";
@@ -818,6 +819,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_AndroidPanelStatusText, value);
 	}
 
+	public string AndroidEndpoint
+	{
+		get => m_AndroidEndpoint;
+		set => SetProperty(ref m_AndroidEndpoint, value);
+	}
+
 	public bool IsConnectionPanelVisible
 	{
 		get => m_IsConnectionPanelVisible;
@@ -1030,6 +1037,22 @@ internal sealed class MainWindowViewModel : ObservableObject
 			AndroidPanelStatusText = "Context switch recording is visible in the Avalonia shell; device capture is not implemented yet.";
 			StatusText = AndroidPanelStatusText;
 		}
+		else if (string.Equals(actionName, "ConnectAndroid", StringComparison.Ordinal))
+		{
+			await ConnectToAndroidAsync();
+		}
+		else if (string.Equals(actionName, "UseDebugEndpoint", StringComparison.Ordinal))
+		{
+			AndroidEndpoint = AdbSocketDiscovery.DebugFrameProEndpoint;
+			AndroidPanelStatusText = "Android target set to debug endpoint.";
+			StatusText = AndroidPanelStatusText;
+		}
+		else if (string.Equals(actionName, "UseReleaseEndpoint", StringComparison.Ordinal))
+		{
+			AndroidEndpoint = AdbSocketDiscovery.ReleaseFrameProEndpoint;
+			AndroidPanelStatusText = "Android target set to release endpoint.";
+			StatusText = AndroidPanelStatusText;
+		}
 		else if (string.Equals(actionName, "LoadContextSwitchFile", StringComparison.Ordinal))
 		{
 			await LoadAndroidContextSwitchFileAsync();
@@ -1039,6 +1062,71 @@ internal sealed class MainWindowViewModel : ObservableObject
 			AndroidPanelStatusText = "Android action is visible in the Avalonia shell but is not implemented yet.";
 			StatusText = AndroidPanelStatusText;
 		}
+	}
+
+	private async Task ConnectToAndroidAsync()
+	{
+		if (m_IsConnecting)
+		{
+			AndroidPanelStatusText = "Connection attempt is already in progress.";
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		string endpoint = (AndroidEndpoint ?? string.Empty).Trim();
+		if (!AdbSocketDiscovery.IsAdbSocketEndpoint(endpoint))
+		{
+			AndroidPanelStatusText = "Invalid Android FramePro endpoint: " + endpoint;
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		DisconnectFromFramePro(updateStatus: false);
+		m_IsConnecting = true;
+		AndroidPanelStatusText = "Connecting to Android endpoint...";
+		ConnectionPanelStatusText = AndroidPanelStatusText;
+		StatusText = AndroidPanelStatusText;
+		Session session = new Session(new CoreSettings(), new NullLog());
+		string connectionName = "Android";
+		session.SessionIsReady += () => Dispatcher.UIThread.Post(() => ApplyLiveConnectionDocument(session, connectionName));
+		session.Disconnected += () => Dispatcher.UIThread.Post(() => OnLiveConnectionDisconnected(session));
+		bool connected = false;
+		try
+		{
+			connected = await Task.Run(() => session.ConnectToAndroid(endpoint));
+		}
+		catch (Exception ex)
+		{
+			AndroidPanelStatusText = "Android connection failed: " + ex.Message;
+			ConnectionPanelStatusText = AndroidPanelStatusText;
+			StatusText = AndroidPanelStatusText;
+		}
+		finally
+		{
+			m_IsConnecting = false;
+		}
+
+		if (connected)
+		{
+			m_LiveConnectionSession = session;
+			m_LiveConnectionName = connectionName;
+			AndroidPanelStatusText = "Connected to Android. Waiting for profiler packets.";
+			ConnectionPanelStatusText = AndroidPanelStatusText;
+			SessionStatusText = "Session: live Android connection";
+			StatusText = AndroidPanelStatusText;
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(AndroidPanelStatusText) || AndroidPanelStatusText.StartsWith("Connecting", StringComparison.Ordinal))
+		{
+			AndroidPanelStatusText = string.IsNullOrWhiteSpace(session.LastConnectionError)
+				? "Android connection failed: " + endpoint
+				: session.LastConnectionError;
+			ConnectionPanelStatusText = AndroidPanelStatusText;
+			StatusText = AndroidPanelStatusText;
+		}
+
+		session.Disconnect(DisconnectReason.Requested);
 	}
 
 	private async Task LoadAndroidContextSwitchFileAsync()

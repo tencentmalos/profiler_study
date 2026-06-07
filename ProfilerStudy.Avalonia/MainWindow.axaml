@@ -1357,26 +1357,50 @@
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
           <TextBlock Text="Context Switch Tools" FontWeight="SemiBold" Foreground="#101010" />
-          <TextBlock Text="Android capture entry points are represented here so the Avalonia shell matches the original profiler workflow." Foreground="#404040" TextWrapping="Wrap" />
-          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
+          <TextBlock Text="Connect to the FramePro socket exposed by the Android app, or load a recorded context switch file into the active session." Foreground="#404040" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <Border Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
               <TextBlock Text="ADB" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
             </Border>
+            <Grid Grid.Column="1" ColumnDefinitions="*,64,68" ColumnSpacing="6">
+              <TextBox Text="{Binding AndroidEndpoint}" Watermark="localfilesystem:/data/user_de/0/.../files/framepro" />
+              <Button Grid.Column="1"
+                      Content="Debug"
+                      Command="{Binding AndroidActionCommand}"
+                      CommandParameter="UseDebugEndpoint" />
+              <Button Grid.Column="2"
+                      Content="Release"
+                      Command="{Binding AndroidActionCommand}"
+                      CommandParameter="UseReleaseEndpoint" />
+            </Grid>
+            <Border Grid.Row="1" Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
+              <TextBlock Text="tcp" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
+            </Border>
+            <Button Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalContentAlignment="Left"
+                    Content="Connect Android"
+                    Command="{Binding AndroidActionCommand}"
+                    CommandParameter="ConnectAndroid" />
+            <Border Grid.Row="2" Width="42" Height="34" Background="#9EBB9C" BorderBrush="#4E6F4D" BorderThickness="1">
+              <TextBlock Text="rec" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#253725" />
+            </Border>
             <Button Grid.Column="1"
+                    Grid.Row="2"
                     HorizontalContentAlignment="Left"
                     Content="Start Recording Context Switches..."
                     Command="{Binding AndroidActionCommand}"
                     CommandParameter="RecordContextSwitches" />
-            <Border Grid.Row="1" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
+            <Border Grid.Row="3" Width="42" Height="34" Background="#BDBDBD" BorderBrush="#606060" BorderThickness="1">
               <TextBlock Text="ctx" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="#202020" />
             </Border>
-            <Button Grid.Row="1"
+            <Button Grid.Row="3"
                     Grid.Column="1"
                     HorizontalContentAlignment="Left"
                     Content="Load Context Switch File"
                     Command="{Binding AndroidActionCommand}"
                     CommandParameter="LoadContextSwitchFile" />
-            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
+            <Border Grid.Row="4" Grid.ColumnSpan="2" Background="#C5C5C5" BorderBrush="#888888" BorderThickness="1" Padding="8">
               <TextBlock Text="{Binding AndroidPanelStatusText}" Foreground="#303030" TextWrapping="Wrap" />
             </Border>
           </Grid>
