@@ -276,10 +276,10 @@
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
         <StackPanel Orientation="Horizontal" Spacing="0" Margin="0">
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Open FramePro connection settings">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Connect" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Connect" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Button Classes="toolbar-button" Width="31" MinHeight="118" Padding="2" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings">
             <StackPanel Spacing="4">
@@ -288,92 +288,92 @@
           </Button>
           <Border Classes="toolbar-gap" Width="11" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Open Android profiler connection and context switch tools">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Android" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/connect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Android" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Border Classes="toolbar-gap" Width="11" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ConnectionActionCommand}" CommandParameter="Disconnect" ToolTip.Tip="Disconnect the active FramePro session">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/disconnect.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Disconnect" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/disconnect.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Disconnect" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Border Classes="toolbar-gap" Width="61" />
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding ResetTimelineCommand}" ToolTip.Tip="Jump to the start of the frame timeline">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/goto_start.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Start" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/goto_start.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Start" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding TrackSelectedFrameCommand}" ToolTip.Tip="Track the currently selected frame in the visible timeline">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/track_end.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Track" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/track_end.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Track" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectLastFrameCommand}" ToolTip.Tip="Jump to the latest frame in the session">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/goto_end.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="End" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/goto_end.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="End" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Border Classes="toolbar-gap" Width="18" />
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="Info" IsChecked="{Binding IsThreadsInfoPanelVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread info panel">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/info.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Info" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/info.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Info" TextAlignment="Center" />
+              </Grid>
           </ToggleButton>
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="FrameGraph" IsChecked="{Binding IsThreadsFrameGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the frame graph">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/frames.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Frames" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/frames.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Frames" TextAlignment="Center" />
+              </Grid>
           </ToggleButton>
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="ScopeGraph" IsChecked="{Binding IsThreadsScopeGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the thread scope graph">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/scope.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Scope" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/scope.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Scope" TextAlignment="Center" />
+              </Grid>
           </ToggleButton>
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CoreGraph" IsChecked="{Binding IsThreadsCoreGraphVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the CPU core graph">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/cores.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Cores" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/cores.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Cores" TextAlignment="Center" />
+              </Grid>
           </ToggleButton>
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="CustomStats" IsChecked="{Binding IsThreadsCustomStatsVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the custom stats graph">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/custom_stats.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/custom_stats.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Custom Stats" TextAlignment="Center" TextWrapping="Wrap" />
+              </Grid>
           </ToggleButton>
           <ToggleButton Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleThreadsPanelCommand}" CommandParameter="DataGrid" IsChecked="{Binding IsThreadsDataGridVisible, Mode=OneWay}" ToolTip.Tip="Show or hide the profiler data grids">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/details.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Details" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/details.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Details" TextAlignment="Center" />
+              </Grid>
           </ToggleButton>
           <Border Classes="toolbar-gap" Width="49" />
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectPreviousSpikeCommand}" ToolTip.Tip="Select the previous frame spike">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/prev_spike.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Prev" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/prev_spike.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Prev" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectSlowestFrameCommand}" ToolTip.Tip="Select the slowest frame in the current session">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/max_frame.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Max" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/max_frame.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Max" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Button Classes="toolbar-button" Width="73" MinHeight="118" Padding="4" Command="{Binding SelectNextSpikeCommand}" ToolTip.Tip="Select the next frame spike">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/next_spike.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Next" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/next_spike.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Next" TextAlignment="Center" />
+              </Grid>
           </Button>
           <Border Classes="toolbar-panel" Width="629" MinHeight="118" Padding="8,9">
             <Grid RowDefinitions="Auto,Auto,*" RowSpacing="6">
@@ -391,11 +391,11 @@
           </Border>
           <Border Classes="toolbar-gap" Width="47" />
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding ToggleScopeColorModeCommand}" ToolTip.Tip="Toggle scope colouring between thread and scope modes">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/colour_mode.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Colour Mode" TextAlignment="Center" TextWrapping="Wrap" />
-              <TextBlock Text="{Binding ScopeColorModeText}" TextAlignment="Center" FontSize="10" Foreground="#505050" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/colour_mode.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Colour Mode" TextAlignment="Center" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="2" Text="{Binding ScopeColorModeText}" TextAlignment="Center" FontSize="10" Foreground="#505050" />
+              </Grid>
           </Button>
           <Border Classes="toolbar-panel" Width="358" MinHeight="118" Padding="8,9">
             <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
@@ -413,10 +413,10 @@
             </Grid>
           </Border>
           <Button Classes="toolbar-button" Width="119" MinHeight="118" Padding="4" Command="{Binding OpenCallstacksCommand}" ToolTip.Tip="Open callstack capture and symbol tools">
-            <StackPanel Spacing="4">
-              <Image Source="/Assets/Toolbar/callstacks.png" HorizontalAlignment="Center" Stretch="None" />
-              <TextBlock Text="Callstacks" TextAlignment="Center" />
-            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Margin="0,0,0,2">
+                <Image Grid.Row="0" Source="/Assets/Toolbar/callstacks.png" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" />
+                <TextBlock Grid.Row="1" Text="Callstacks" TextAlignment="Center" />
+              </Grid>
           </Button>
         </StackPanel>
       </ScrollViewer>
