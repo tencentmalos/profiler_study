@@ -9,7 +9,7 @@
     d:DesignWidth="1000"
     mc:Ignorable="d">
     
-    <Grid Background="{DynamicResource TimelineScopePanelBackgroundBrush}" RowDefinitions="200,60,*">
+    <Grid x:Name="RootGrid" Background="{DynamicResource TimelineScopePanelBackgroundBrush}" RowDefinitions="200,60,*">
         <!-- Timeline Area (Always Visible) -->
         <Border Grid.Row="0" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1" Margin="0,0,0,8">
             <Grid>
@@ -26,7 +26,7 @@
         </Border>
         
         <!-- Shared X-Axis Area -->
-        <Border Grid.Row="1" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,1,0" Margin="0,0,0,0">
+        <Border x:Name="SharedXAxisBorder" Grid.Row="1" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="1,1,1,0" Margin="0,0,0,0">
             <Grid>
                 <ScottPlot:AvaPlot Name="SharedXAxisPlot" />
                 <TextBlock Text="Time Scope" 
@@ -40,7 +40,7 @@
         </Border>
         
         <!-- DetailView Area with Scrollbar -->
-        <Grid Grid.Row="2">
+        <Grid x:Name="DetailViewArea" Grid.Row="2">
             <ScrollViewer Margin="0,0,0,0" 
                           VerticalScrollBarVisibility="Auto" 
                           HorizontalScrollBarVisibility="Disabled">

@@ -23,9 +23,8 @@ public sealed partial class MainWindow : Window
 		m_ViewModelPropertyChanged = OnViewModelPropertyChanged;
 		m_ViewportPropertyChanged = OnViewportPropertyChanged;
 		m_SelectionPropertyChanged = OnSelectionPropertyChanged;
-		ProfilerStatsControl.ViewportChangedByUser += OnProfilerStatsViewportChangedByUser;
-		ProfilerStatsControl.FrameSelectedByUser += OnProfilerStatsFrameSelectedByUser;
-		ProfilerStatsControl.FrameHoveredByUser += OnProfilerStatsFrameHoveredByUser;
+		HookProfilerStatsControl(ProfilerStatsControl);
+		HookProfilerStatsControl(ScopesProfilerStatsControl);
 		DataContextChanged += OnDataContextChanged;
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
@@ -88,12 +87,12 @@ public sealed partial class MainWindow : Window
 		else if (e.PropertyName == nameof(MainWindowViewModel.Viewport))
 		{
 			AttachViewport(m_ViewModel?.Viewport);
-			ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
+			ApplyProfilerStatsViewport(m_ViewModel?.Viewport);
 		}
 		else if (e.PropertyName == nameof(MainWindowViewModel.Selection))
 		{
 			AttachSelection(m_ViewModel?.Selection);
-			ProfilerStatsControl?.ApplySelection(m_ViewModel?.Selection);
+			ApplyProfilerStatsSelection(m_ViewModel?.Selection);
 		}
 	}
 
@@ -142,7 +141,7 @@ public sealed partial class MainWindow : Window
 		{
 			if (m_IsApplyingProfilerStatsViewport is false)
 			{
-				ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
+				ApplyProfilerStatsViewport(m_ViewModel?.Viewport);
 			}
 		}
 	}
@@ -154,7 +153,7 @@ public sealed partial class MainWindow : Window
 			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex) ||
 			e.PropertyName == nameof(TimelineSelection.HoveredFrameTimeMs))
 		{
-			ProfilerStatsControl?.ApplySelection(m_ViewModel?.Selection);
+			ApplyProfilerStatsSelection(m_ViewModel?.Selection);
 		}
 	}
 
@@ -188,8 +187,38 @@ public sealed partial class MainWindow : Window
 
 	private void ApplyProfilerStatsDocumentAndViewport()
 	{
-		ProfilerStatsControl?.ApplyDocument(m_ViewModel?.CurrentDocument);
-		ProfilerStatsControl?.ApplyViewport(m_ViewModel?.Viewport);
-		ProfilerStatsControl?.ApplySelection(m_ViewModel?.Selection);
+		ApplyProfilerStatsDocument(m_ViewModel?.CurrentDocument);
+		ApplyProfilerStatsViewport(m_ViewModel?.Viewport);
+		ApplyProfilerStatsSelection(m_ViewModel?.Selection);
+	}
+
+	private void HookProfilerStatsControl(ucProfilerStats control)
+	{
+		if (control == null)
+		{
+			return;
+		}
+
+		control.ViewportChangedByUser += OnProfilerStatsViewportChangedByUser;
+		control.FrameSelectedByUser += OnProfilerStatsFrameSelectedByUser;
+		control.FrameHoveredByUser += OnProfilerStatsFrameHoveredByUser;
+	}
+
+	private void ApplyProfilerStatsDocument(SessionDocument document)
+	{
+		ProfilerStatsControl?.ApplyDocument(document);
+		ScopesProfilerStatsControl?.ApplyDocument(document);
+	}
+
+	private void ApplyProfilerStatsViewport(TimelineViewport viewport)
+	{
+		ProfilerStatsControl?.ApplyViewport(viewport);
+		ScopesProfilerStatsControl?.ApplyViewport(viewport);
+	}
+
+	private void ApplyProfilerStatsSelection(TimelineSelection selection)
+	{
+		ProfilerStatsControl?.ApplySelection(selection);
+		ScopesProfilerStatsControl?.ApplySelection(selection);
 	}
 }

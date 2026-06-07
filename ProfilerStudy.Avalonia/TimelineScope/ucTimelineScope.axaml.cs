@@ -49,6 +49,20 @@ public partial class ucTimelineScope : UserControl
 
     public bool EnableAutoScaleY { get; set; } = true;
 
+    public void SetCompactTimelineMode(bool isCompact)
+    {
+        if (RootGrid == null)
+        {
+            return;
+        }
+
+        RootGrid.RowDefinitions = isCompact
+            ? new RowDefinitions("*,0,0")
+            : new RowDefinitions("200,60,*");
+        SharedXAxisBorder.IsVisible = !isCompact;
+        DetailViewArea.IsVisible = !isCompact;
+    }
+
     // DetailView configurations
     //private List<DetailViewConfig> _detailViewConfigs = new List<DetailViewConfig>();
 

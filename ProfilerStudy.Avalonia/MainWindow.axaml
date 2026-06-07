@@ -1581,11 +1581,8 @@
                 </Grid>
               </Border>
               <Border Grid.Column="2" Background="#C8C8C8" BorderBrush="#7D7D7D" BorderThickness="0,1,1,1">
-                <local:FrameTimelineControl
-                    Samples="{Binding FrameSamples}"
-                    TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
-                    Selection="{Binding Selection}"
-                    Viewport="{Binding Viewport}" />
+                <stats:ucProfilerStats x:Name="ScopesProfilerStatsControl"
+                                       IsCompactMode="True" />
               </Border>
             </Grid>
             <GridSplitter Grid.Row="1" Background="#9A9A9A" BorderBrush="#767676" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />
