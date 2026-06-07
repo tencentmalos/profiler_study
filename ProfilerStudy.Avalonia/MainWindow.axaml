@@ -90,19 +90,21 @@
       <Setter Property="Background" Value="#EAEAEA" />
     </Style>
     <Style Selector="Border.status-cell">
-      <Setter Property="Background" Value="#E7E7E7" />
-      <Setter Property="BorderBrush" Value="#A0A0A0" />
+      <Setter Property="Background" Value="#D4D0C8" />
+      <Setter Property="BorderBrush" Value="#8A8A8A" />
       <Setter Property="BorderThickness" Value="1,1,0,0" />
-      <Setter Property="Padding" Value="6,2" />
+      <Setter Property="Padding" Value="5,1" />
     </Style>
     <Style Selector="TextBlock.status-label">
-      <Setter Property="Foreground" Value="#606060" />
+      <Setter Property="Foreground" Value="#404040" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
       <Setter Property="FontSize" Value="10" />
-      <Setter Property="Margin" Value="0,0,5,0" />
+      <Setter Property="Margin" Value="0,0,4,0" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="TextBlock.status-value">
       <Setter Property="Foreground" Value="#202020" />
+      <Setter Property="FontFamily" Value="Microsoft Sans Serif, Segoe UI" />
       <Setter Property="FontSize" Value="11" />
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
       <Setter Property="VerticalAlignment" Value="Center" />
@@ -519,7 +521,7 @@
                     IsVisible="{Binding IsToolboxVisible}"
                     ResizeDirection="Columns" />
 
-      <Grid Grid.Column="2" RowDefinitions="0,*,47" Margin="0" Background="#C8C8C8">
+      <Grid Grid.Column="2" RowDefinitions="0,*,31" Margin="0" Background="#C8C8C8">
         <Border Background="#CFCFCF" BorderBrush="#7D7D7D" BorderThickness="1" Margin="0,0,0,4">
           <Grid RowDefinitions="24,Auto,Auto">
             <Border Grid.Row="0" Background="#BDBDBD" BorderBrush="#7D7D7D" BorderThickness="0,0,0,1" Padding="6,0">
@@ -1131,14 +1133,14 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="2" Background="#EDEDED" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,8,0,0">
+        <Border Grid.Row="2" Background="#D4D0C8" BorderBrush="#8A8A8A" BorderThickness="1,1,1,0" Margin="0,4,0,0">
           <Grid RowDefinitions="1,8,*" ColumnDefinitions="104,82,96,176,72,*">
-            <Border Grid.Row="0" Grid.ColumnSpan="6" Background="#4169E1" />
-            <Polygon Grid.Row="1" Grid.Column="0" Points="42,0 62,0 52,8" Fill="#4169E1" IsVisible="{Binding IsThreadsViewActive}" />
-            <Polygon Grid.Row="1" Grid.Column="1" Points="28,0 48,0 38,8" Fill="#4169E1" IsVisible="{Binding IsCoresViewActive}" />
-            <Polygon Grid.Row="1" Grid.Column="2" Points="34,0 54,0 44,8" Fill="#4169E1" IsVisible="{Binding IsScopesViewActive}" />
-            <Polygon Grid.Row="1" Grid.Column="3" Points="72,0 92,0 82,8" Fill="#4169E1" IsVisible="{Binding IsCustomStatsViewActive}" />
-            <Polygon Grid.Row="1" Grid.Column="4" Points="22,0 42,0 32,8" Fill="#4169E1" IsVisible="{Binding IsLogViewActive}" />
+            <Border Grid.Row="0" Grid.ColumnSpan="6" Background="#8A8A8A" />
+            <Polygon Grid.Row="1" Grid.Column="0" Points="42,0 62,0 52,8" Fill="#8A8A8A" IsVisible="{Binding IsThreadsViewActive}" />
+            <Polygon Grid.Row="1" Grid.Column="1" Points="28,0 48,0 38,8" Fill="#8A8A8A" IsVisible="{Binding IsCoresViewActive}" />
+            <Polygon Grid.Row="1" Grid.Column="2" Points="34,0 54,0 44,8" Fill="#8A8A8A" IsVisible="{Binding IsScopesViewActive}" />
+            <Polygon Grid.Row="1" Grid.Column="3" Points="72,0 92,0 82,8" Fill="#8A8A8A" IsVisible="{Binding IsCustomStatsViewActive}" />
+            <Polygon Grid.Row="1" Grid.Column="4" Points="22,0 42,0 32,8" Fill="#8A8A8A" IsVisible="{Binding IsLogViewActive}" />
 
             <Button Grid.Row="2" Grid.Column="0"
                     Content="Threads"
@@ -1146,8 +1148,8 @@
                     CommandParameter="Threads"
                     FontSize="12"
                     Foreground="{Binding ThreadsViewBrush}"
-                    Background="#EDEDED"
-                    BorderBrush="#A0A0A0"
+                    Background="#D4D0C8"
+                    BorderBrush="#8A8A8A"
                     BorderThickness="0,0,1,0"
                     Padding="8,0" />
             <Button Grid.Row="2" Grid.Column="1"
@@ -1156,8 +1158,8 @@
                     CommandParameter="Cores"
                     FontSize="12"
                     Foreground="{Binding CoresViewBrush}"
-                    Background="#EDEDED"
-                    BorderBrush="#A0A0A0"
+                    Background="#D4D0C8"
+                    BorderBrush="#8A8A8A"
                     BorderThickness="0,0,1,0"
                     Padding="8,0" />
             <Button Grid.Row="2" Grid.Column="2"
@@ -1166,8 +1168,8 @@
                     CommandParameter="Scopes"
                     FontSize="12"
                     Foreground="{Binding ScopesViewBrush}"
-                    Background="#EDEDED"
-                    BorderBrush="#A0A0A0"
+                    Background="#D4D0C8"
+                    BorderBrush="#8A8A8A"
                     BorderThickness="0,0,1,0"
                     Padding="8,0" />
             <Button Grid.Row="2" Grid.Column="3"
@@ -1176,8 +1178,8 @@
                     CommandParameter="Custom Stats"
                     FontSize="12"
                     Foreground="{Binding CustomStatsViewBrush}"
-                    Background="#EDEDED"
-                    BorderBrush="#A0A0A0"
+                    Background="#D4D0C8"
+                    BorderBrush="#8A8A8A"
                     BorderThickness="0,0,1,0"
                     Padding="8,0" />
             <Button Grid.Row="2" Grid.Column="4"
@@ -1186,8 +1188,8 @@
                     CommandParameter="Log"
                     FontSize="12"
                     Foreground="{Binding LogViewBrush}"
-                    Background="#EDEDED"
-                    BorderBrush="#A0A0A0"
+                    Background="#D4D0C8"
+                    BorderBrush="#8A8A8A"
                     BorderThickness="0,0,1,0"
                     Padding="8,0" />
             <DockPanel Grid.Row="2" Grid.Column="5" LastChildFill="True" Margin="8,0,8,0">
