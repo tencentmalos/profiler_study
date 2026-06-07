@@ -14,6 +14,8 @@ namespace ProfilerStudy.Avalonia;
 
 internal sealed class MainWindowViewModel : ObservableObject
 {
+	private const int MaxVisibleThreadTimelineThreads = 8;
+
 	private readonly SessionLoader m_SessionLoader = new SessionLoader();
 	private readonly RelayCommand m_OpenSessionCommand;
 	private readonly RelayCommand m_LoadSampleCommand;
@@ -24,6 +26,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private readonly RelayCommand m_SortTableCommand;
 	private readonly RelayCommand m_SelectSessionViewCommand;
 	private readonly RelayCommand m_ClearThreadFilterCommand;
+	private readonly RelayCommand m_ScrollThreadTimelineUpCommand;
+	private readonly RelayCommand m_ScrollThreadTimelineDownCommand;
 	private readonly ISourceViewerLauncher m_SourceViewerLauncher;
 	private readonly IAppSettingsService m_AppSettingsService;
 	private readonly AppSettings m_AppSettings;
@@ -55,6 +59,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_LogSummaryText = "No profiler log messages loaded.";
 	private string m_CoreSummaryText = "No profiler core data loaded.";
 	private string m_ActiveSessionView = "Threads";
+	private int m_ThreadTimelineFirstVisibleThreadIndex;
+	private int m_ThreadTimelineTotalThreadCount;
 	private string m_ScopeHotspotSortKey = "TotalTime";
 	private bool m_ScopeHotspotSortDescending = true;
 	private string m_SelectedFrameScopeSortKey = "Start";
@@ -83,6 +89,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_SortTableCommand = new RelayCommand(SortTable);
 		m_SelectSessionViewCommand = new RelayCommand(SelectSessionView);
 		m_ClearThreadFilterCommand = new RelayCommand(_ => ThreadFilterText = string.Empty, _ => !string.IsNullOrWhiteSpace(ThreadFilterText));
+		m_ScrollThreadTimelineUpCommand = new RelayCommand(_ => ScrollThreadTimeline(-1), _ => ThreadTimelineFirstVisibleThreadIndex > 0);
+		m_ScrollThreadTimelineDownCommand = new RelayCommand(_ => ScrollThreadTimeline(1), _ => ThreadTimelineFirstVisibleThreadIndex + MaxVisibleThreadTimelineThreads < ThreadTimelineTotalThreadCount);
 		m_CapturedSourceRoot = m_AppSettings.CapturedSourceRoot ?? string.Empty;
 		m_LocalSourceRoot = m_AppSettings.LocalSourceRoot ?? string.Empty;
 		ApplyRecentFiles(m_AppSettings.RecentFiles);
@@ -126,6 +134,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	public RelayCommand SelectSessionViewCommand => m_SelectSessionViewCommand;
 
 	public RelayCommand ClearThreadFilterCommand => m_ClearThreadFilterCommand;
+
+	public RelayCommand ScrollThreadTimelineUpCommand => m_ScrollThreadTimelineUpCommand;
+
+	public RelayCommand ScrollThreadTimelineDownCommand => m_ScrollThreadTimelineDownCommand;
 
 	public SessionSummaryViewModel Summary { get; }
 
@@ -263,6 +275,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			if (SetProperty(ref m_ThreadFilterText, value ?? string.Empty))
 			{
+				ThreadTimelineFirstVisibleThreadIndex = 0;
 				m_ClearThreadFilterCommand.RaiseCanExecuteChanged();
 				ApplyVisibleThreadTimeline();
 			}
@@ -279,6 +292,32 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_ThreadTimelineSummaryText;
 		private set => SetProperty(ref m_ThreadTimelineSummaryText, value);
+	}
+
+	public int ThreadTimelineFirstVisibleThreadIndex
+	{
+		get => m_ThreadTimelineFirstVisibleThreadIndex;
+		private set
+		{
+			if (SetProperty(ref m_ThreadTimelineFirstVisibleThreadIndex, Math.Max(0, value)))
+			{
+				m_ScrollThreadTimelineUpCommand.RaiseCanExecuteChanged();
+				m_ScrollThreadTimelineDownCommand.RaiseCanExecuteChanged();
+			}
+		}
+	}
+
+	public int ThreadTimelineTotalThreadCount
+	{
+		get => m_ThreadTimelineTotalThreadCount;
+		private set
+		{
+			if (SetProperty(ref m_ThreadTimelineTotalThreadCount, Math.Max(0, value)))
+			{
+				m_ScrollThreadTimelineUpCommand.RaiseCanExecuteChanged();
+				m_ScrollThreadTimelineDownCommand.RaiseCanExecuteChanged();
+			}
+		}
 	}
 
 	public IReadOnlyList<ScopeFrameDetailRow> SelectedFrameScopes
@@ -834,7 +873,28 @@ internal sealed class MainWindowViewModel : ObservableObject
 				.ToArray();
 		}
 
-		VisibleThreadScopes = allRows;
+		IReadOnlyList<IGrouping<string, ThreadTimelineScopeRow>> threadGroups = allRows
+			.GroupBy(item => item.ThreadName, StringComparer.Ordinal)
+			.OrderBy(group => group.Min(item => item.StartFrame))
+			.ToArray();
+		ThreadTimelineTotalThreadCount = threadGroups.Count;
+		int maxFirstThreadIndex = Math.Max(0, ThreadTimelineTotalThreadCount - MaxVisibleThreadTimelineThreads);
+		if (ThreadTimelineFirstVisibleThreadIndex > maxFirstThreadIndex)
+		{
+			ThreadTimelineFirstVisibleThreadIndex = maxFirstThreadIndex;
+		}
+
+		string[] visibleThreadNames = threadGroups
+			.Skip(ThreadTimelineFirstVisibleThreadIndex)
+			.Take(MaxVisibleThreadTimelineThreads)
+			.Select(group => group.Key)
+			.ToArray();
+		HashSet<string> visibleThreadNameSet = new HashSet<string>(StringComparer.Ordinal);
+		foreach (string threadName in visibleThreadNames)
+		{
+			visibleThreadNameSet.Add(threadName);
+		}
+		VisibleThreadScopes = allRows.Where(item => visibleThreadNameSet.Contains(item.ThreadName)).ToArray();
 		if (CurrentDocument?.Session == null)
 		{
 			ThreadTimelineSummaryText = "Generated sample has no profiler scope stream.";
@@ -848,10 +908,28 @@ internal sealed class MainWindowViewModel : ObservableObject
 		else
 		{
 			int threadCount = VisibleThreadScopes.Select(item => item.ThreadName).Distinct(StringComparer.Ordinal).Count();
+			string visibleWindowText = ThreadTimelineTotalThreadCount > MaxVisibleThreadTimelineThreads
+				? $" showing threads {ThreadTimelineFirstVisibleThreadIndex + 1}-{ThreadTimelineFirstVisibleThreadIndex + threadCount} of {ThreadTimelineTotalThreadCount}"
+				: string.Empty;
 			ThreadTimelineSummaryText = string.IsNullOrWhiteSpace(filter)
 				? $"{VisibleThreadScopes.Count} scope events across {threadCount} threads in {Viewport.RangeText}"
 				: $"{VisibleThreadScopes.Count} matching scope events across {threadCount} threads in {Viewport.RangeText}";
+			ThreadTimelineSummaryText += visibleWindowText;
 		}
+	}
+
+	private void ScrollThreadTimeline(int deltaThreads)
+	{
+		int maxFirstThreadIndex = Math.Max(0, ThreadTimelineTotalThreadCount - MaxVisibleThreadTimelineThreads);
+		int nextIndex = Math.Max(0, Math.Min(maxFirstThreadIndex, ThreadTimelineFirstVisibleThreadIndex + deltaThreads));
+		if (nextIndex == ThreadTimelineFirstVisibleThreadIndex)
+		{
+			return;
+		}
+
+		ThreadTimelineFirstVisibleThreadIndex = nextIndex;
+		ApplyVisibleThreadTimeline();
+		StatusText = $"Showing thread lanes {ThreadTimelineFirstVisibleThreadIndex + 1}-{Math.Min(ThreadTimelineTotalThreadCount, ThreadTimelineFirstVisibleThreadIndex + MaxVisibleThreadTimelineThreads)} of {ThreadTimelineTotalThreadCount}.";
 	}
 
 	private void SortTable(object parameter)
