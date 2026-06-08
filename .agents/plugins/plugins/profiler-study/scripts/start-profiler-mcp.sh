@@ -61,7 +61,7 @@ project_path="$repo_root/ProfilerStudy.McpServer/ProfilerStudy.McpServer.csproj"
 server_path="$repo_root/ProfilerStudy.McpServer/bin/Release/net8.0/ProfilerStudy.McpServer.dll"
 
 if [[ ! -f "$server_path" ]]; then
-	dotnet build "$project_path" -c Release -nologo -v minimal >&2
+	dotnet build "$project_path" -c Release -nologo -v minimal -p:TargetFrameworks=net8.0 >&2
 fi
 
 if [[ ! -f "$server_path" ]]; then
