@@ -320,17 +320,25 @@ internal sealed class FrameTimelinePixelLayout
 	{
 		if (FrameWidth < 1.0)
 		{
-			foreach (FrameTimelinePixelBar bar in Bars)
+			if (Model.TryGetItem(frameIndex, out _) is false)
 			{
-				if (bar.Item.Index == frameIndex)
-				{
-					rect = new Rect(bar.Rect.X, Bounds.Y, bar.Rect.Width, Bounds.Height);
-					return true;
-				}
+				rect = default;
+				return false;
 			}
 
-			rect = default;
-			return false;
+			int columnCount = Math.Max(1, (int)Math.Ceiling(Bounds.Width));
+			int column = (int)Math.Floor((frameIndex - Model.StartFrame) * FrameWidth);
+			column = Math.Max(0, Math.Min(columnCount - 1, column));
+			double denseX = Bounds.X + column;
+			double width = Math.Min(1.0, Math.Max(0.0, Bounds.Right - denseX));
+			if (width <= 0.0)
+			{
+				rect = default;
+				return false;
+			}
+
+			rect = new Rect(denseX, Bounds.Y, width, Bounds.Height);
+			return true;
 		}
 
 		if (Model.TryGetItem(frameIndex, out _) is false)

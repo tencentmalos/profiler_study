@@ -146,6 +146,11 @@ internal static class AvaloniaSmokeTest
 			7,
 			new global::Avalonia.Rect(denseRepresentativeRect.X, denseLayout.Bounds.Y, denseRepresentativeRect.Width, denseLayout.Bounds.Height),
 			"frame timeline dense overlay follows representative column");
+		AssertTryGetOverlayRect(
+			denseLayout,
+			6,
+			new global::Avalonia.Rect(denseRepresentativeRect.X, denseLayout.Bounds.Y, denseRepresentativeRect.Width, denseLayout.Bounds.Height),
+			"frame timeline dense overlay keeps non representative frame visible");
 
 		FrameSample[] stableHeightSamples =
 		{
