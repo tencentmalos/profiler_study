@@ -68,6 +68,7 @@
 - 像素布局必须同时服务绘制、命中和滚轮缩放锚点；不能让 bar rect 使用一套 frame-to-x 映射，而 pointer/zoom 使用另一套近似映射。
 - 帧数据重绘与交互覆盖层刷新需要分离：`Samples`、`TargetFrameMs`、`Viewport` 变化可以重建 bars、target line、坐标轴；`SelectedFrameIndex`、`HoveredFrameIndex` 变化只应替换 selected/hover overlay，不应重建所有 frame items。
 - `FrameTimelineRenderModel` 构建可见 items 时应按 viewport 起点定位到首个可见 sample，不能在长 session 下每次从 samples 开头线性扫描到可见范围。
+- `FrameTimelineRenderModel.StartFrame/EndFrame` 表示 viewport 坐标范围，不能因为可见范围内最后一个 `FrameSample` 早于 viewport end 就截断；稀疏采样只影响 items，不影响 frame-to-x 映射。
 - 当可见帧数大于可用像素宽度时，frame graph 的视觉绘制可以按像素列聚合，但每列必须保留该列覆盖范围内最需要用户关注的帧：优先保留分类最严重、同类中耗时最高的 sample。聚合只影响绘制 bars 数量和颜色表达，不能改变 `FrameTimelineRenderModel` 中的真实 frame items。
 - dense 聚合后 hover/selection overlay 也必须复用 `FrameTimelinePixelLayout` 的像素列 rect；代表帧使用代表 bar 所在列，非代表但真实存在的可见帧也要映射回所属像素列，不能因为没有成为该列的代表 bar 就丢失选中反馈。
 - `FrameSample.Index` 与 WinForms `FrameIndexToX` 一样表示该帧左边界；单帧命中区间应为 `[Index, Index + 1)`，bar rect、hover/selection overlay、wheel anchor 必须复用这套左边界坐标。采样或稀疏 `FrameSample` 只能扩大视觉表达，不能把未采样的帧间隙命中到临近 sample。

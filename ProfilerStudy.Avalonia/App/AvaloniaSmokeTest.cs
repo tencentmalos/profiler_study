@@ -130,6 +130,14 @@ internal static class AvaloniaSmokeTest
 		Assert(pixelHit.Index == 5, "frame timeline pixel hit identity");
 		Assert(Math.Abs(layout.GetFrameCoordinate(new global::Avalonia.Point(55, 20)) - 5.5) < 0.0001, "frame timeline pixel coordinate");
 		Assert(layout.TryHit(new global::Avalonia.Point(60, 20), out _) is false, "frame timeline sparse pixel gap miss");
+		TimelineViewport sparseTailViewport = TimelineViewport.CreateForFrames(21);
+		FrameTimelineRenderModel sparseTailModel = FrameTimelineRenderModel.Create(
+			new[] { new FrameSample(0, 10.0), new FrameSample(10, 20.0) },
+			sparseTailViewport,
+			16.0);
+		Assert(sparseTailModel.EndFrame == 20, "frame timeline sparse viewport end preserved");
+		FrameTimelinePixelLayout sparseTailLayout = FrameTimelinePixelLayout.Create(sparseTailModel, new global::Avalonia.Rect(0, 0, 210, 55));
+		Assert(Math.Abs(sparseTailLayout.GetFrameCoordinate(new global::Avalonia.Point(105, 20)) - 10.5) < 0.0001, "frame timeline sparse viewport coordinate");
 
 		FrameSample[] denseSamples = Enumerable.Range(0, 20)
 			.Select(index => new FrameSample(index, index == 7 ? 80.0 : 5.0))

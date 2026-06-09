@@ -66,7 +66,7 @@ internal sealed class FrameTimelineRenderModel
 		}
 
 		int startFrame = Math.Max(0, viewport.StartFrame);
-		int endFrame = Math.Min(viewport.EndFrame, samples[samples.Count - 1].Index);
+		int endFrame = Math.Max(startFrame, viewport.EndFrame);
 		List<FrameTimelineRenderItem> items = new List<FrameTimelineRenderItem>();
 		double maxDurationMs = 0.0;
 		for (int i = LowerBoundFrameIndex(samples, startFrame); i < samples.Count; i++)
