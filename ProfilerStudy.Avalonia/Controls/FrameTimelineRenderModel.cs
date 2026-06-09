@@ -220,9 +220,14 @@ internal sealed class FrameTimelinePixelLayout
 			return false;
 		}
 
-		double frameCoordinate = Model.StartFrame + ((point.X - Bounds.X) / Math.Max(1.0, FrameWidth));
+		double frameCoordinate = GetFrameCoordinate(point);
 		int frameIndex = (int)Math.Floor(frameCoordinate);
 		return Model.TryGetItem(frameIndex, out item);
+	}
+
+	public double GetFrameCoordinate(Point point)
+	{
+		return Model.StartFrame + ((point.X - Bounds.X) / Math.Max(1.0, FrameWidth));
 	}
 }
 

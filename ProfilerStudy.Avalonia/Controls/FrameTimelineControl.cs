@@ -228,7 +228,7 @@ public sealed class FrameTimelineControl : Control
 			double anchorFrame = PointToFrameCoordinate(e.GetPosition(this));
 			double anchorRatio = Viewport.VisibleFrameCount <= 1
 				? 0.5
-				: (anchorFrame - Viewport.StartFrame) / Math.Max(1, Viewport.VisibleFrameCount - 1);
+				: (anchorFrame - Viewport.StartFrame) / Math.Max(1, Viewport.VisibleFrameCount);
 			Viewport.Zoom(e.Delta.Y > 0 ? 1.25 : 0.8, anchorRatio);
 		}
 		e.Handled = true;
@@ -316,6 +316,7 @@ public sealed class FrameTimelineControl : Control
 			return;
 		}
 
+		EnsureLayout();
 		if (m_PixelLayout.TryHit(position, out FrameTimelineRenderItem item))
 		{
 			Selection.HoverFrame(item.Index, item.DurationMs);
@@ -333,6 +334,7 @@ public sealed class FrameTimelineControl : Control
 			return;
 		}
 
+		EnsureLayout();
 		if (m_PixelLayout.TryHit(position, out FrameTimelineRenderItem item))
 		{
 			Selection.SelectFrame(item.Index, item.DurationMs);
@@ -347,9 +349,9 @@ public sealed class FrameTimelineControl : Control
 			return 0.0;
 		}
 
-		Rect graphBounds = GetGraphBounds();
-		double ratio = Math.Clamp((position.X - graphBounds.X) / Math.Max(1.0, graphBounds.Width), 0.0, 1.0);
-		return Viewport.StartFrame + (ratio * Math.Max(0, Viewport.VisibleFrameCount - 1));
+		EnsureLayout();
+		double frameCoordinate = m_PixelLayout.GetFrameCoordinate(position);
+		return Math.Clamp(frameCoordinate, Viewport.StartFrame, Viewport.EndFrame + 1.0);
 	}
 
 	private Rect GetGraphBounds()

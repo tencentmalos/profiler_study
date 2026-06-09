@@ -125,6 +125,7 @@ internal static class AvaloniaSmokeTest
 		FrameTimelinePixelLayout layout = FrameTimelinePixelLayout.Create(sparseModel, new global::Avalonia.Rect(0, 0, 110, 55));
 		Assert(layout.TryHit(new global::Avalonia.Point(55, 20), out FrameTimelineRenderItem pixelHit), "frame timeline pixel hit");
 		Assert(pixelHit.Index == 5, "frame timeline pixel hit identity");
+		Assert(Math.Abs(layout.GetFrameCoordinate(new global::Avalonia.Point(55, 20)) - 5.5) < 0.0001, "frame timeline pixel coordinate");
 	}
 
 	private static void AssertSourcePathMapping()
