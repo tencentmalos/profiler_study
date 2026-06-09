@@ -57,6 +57,15 @@
 - Avalonia 使用 `third_party/ScottPlot/` 中的源码级 ScottPlot，而不是 NuGet `ScottPlot.Avalonia`。如果现有 ScottPlot API 无法表达逐帧 frame strip、固定像素高度、hover/selection 覆盖层，应优先在子仓做有边界的定制。
 - 当前可接受差异：绘制技术不同，Avalonia 可用不同图标/字体；不可接受差异：同一帧在两个 UI 中分类不同、选中范围不同。
 
+## 本轮 Avalonia 对齐方案
+
+- 重点不是复刻 WinForms 外观，而是让 timeline-frame-graph 自成闭环：可见帧、帧分类、hover、selection、viewport、下游 scope/counter/timeline 刷新必须使用同一套帧索引语义。
+- `FrameTimelineControl` 不应把帧耗时只表达为连续折线；可见范围内的每个 `FrameSample` 应以独立 frame item 表达，避免折线插值弱化逐帧定位与命中语义。
+- frame item 颜色按 WinForms `FrameGraphPanel.GetFrameBrush` 的语义分组：低于目标帧耗时为正常，达到目标帧耗时为 warning，达到两倍目标帧耗时为 alert。
+- target line 保持横向参考线；selected frame 与 hovered frame 应明确绑定到整帧索引，保证状态栏、selected frame scopes、selected frame counters 和 thread timeline 能跟随变化。
+- 本轮不新增 WinForms 的 selected range、time span overlay、event label；这些依赖额外 selection/event 状态，后续应在状态模型扩展后再补齐。
+- 大范围显示仍允许绘制采样后的 `FrameSample`，但鼠标命中和选择必须使用样本的真实 `Index`，不能用绘制数组下标替代帧号。
+
 ## 数据流与状态归属
 
 ```text

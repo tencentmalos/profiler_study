@@ -17,9 +17,12 @@ public sealed class FrameTimelineControl : UserControl
 	private static readonly ScottPlotColor DataBackground = new(211, 211, 211);
 	private static readonly ScottPlotColor FrameLineColor = new(0, 128, 0);
 	private static readonly ScottPlotColor WarningFrameLineColor = new(210, 126, 0);
+	private static readonly ScottPlotColor AlertFrameLineColor = new(200, 35, 35);
 	private static readonly ScottPlotColor TargetLineColor = new(182, 82, 0, 150);
-	private static readonly ScottPlotColor SelectionLineColor = new(64, 130, 210, 220);
+	private static readonly ScottPlotColor SelectionLineColor = new(64, 130, 210, 180);
+	private static readonly ScottPlotColor SelectionFillColor = new(0, 128, 255, 35);
 	private static readonly ScottPlotColor HoverLineColor = new(255, 255, 255, 190);
+	private static readonly ScottPlotColor HoverFillColor = new(255, 255, 255, 45);
 	private static readonly ScottPlotColor AxisColor = new(30, 30, 30);
 	private static readonly ScottPlotColor GridColor = new(155, 155, 155, 120);
 
@@ -118,7 +121,9 @@ public sealed class FrameTimelineControl : UserControl
 		if (e.PropertyName == nameof(TimelineViewport.StartFrame) ||
 			e.PropertyName == nameof(TimelineViewport.EndFrame) ||
 			e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
-			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs))
+			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs) ||
+			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex) ||
+			e.PropertyName == nameof(TimelineSelection.HoveredFrameTimeMs))
 		{
 			RefreshPlot();
 		}
@@ -175,32 +180,32 @@ public sealed class FrameTimelineControl : UserControl
 				return;
 			}
 
-			double[] xs = visibleSamples.Select(item => (double)item.Index).ToArray();
-			double[] ys = visibleSamples.Select(item => item.DurationMs).ToArray();
-			double maxMs = Math.Max(TargetFrameMs * 2.0, ys.Max());
-
-			var frameLine = m_Plot.Plot.Add.Scatter(xs, ys);
-			frameLine.LineStyle.Color = FrameLineColor;
-			frameLine.MarkerSize = visibleSamples.Count <= 160 ? 3 : 0;
-			frameLine.LegendText = "Frame ms";
-
-			double[] warningXs = visibleSamples.Where(item => item.DurationMs >= TargetFrameMs).Select(item => (double)item.Index).ToArray();
-			double[] warningYs = visibleSamples.Where(item => item.DurationMs >= TargetFrameMs).Select(item => item.DurationMs).ToArray();
-			if (warningXs.Length > 0)
+			double maxMs = Math.Max(TargetFrameMs * 2.0, visibleSamples.Max(item => item.DurationMs));
+			List<ScottPlot.Bar> bars = new List<ScottPlot.Bar>(visibleSamples.Count);
+			foreach (FrameSample item in visibleSamples)
 			{
-				var warningMarkers = m_Plot.Plot.Add.Scatter(warningXs, warningYs);
-				warningMarkers.LineStyle.Color = WarningFrameLineColor;
-				warningMarkers.MarkerSize = 4;
+				ScottPlotColor color = GetFrameColor(GetFrameTimeCategory(item.DurationMs, TargetFrameMs));
+				bars.Add(new ScottPlot.Bar
+				{
+					Position = item.Index,
+					Value = item.DurationMs,
+					ValueBase = 0.0,
+					Size = GetFrameBarSize(visibleSamples.Count),
+					FillColor = color,
+					LineColor = color,
+					LineWidth = 0
+				});
 			}
+			m_Plot.Plot.Add.Bars(bars);
 
 			AddHorizontalGuide(TargetFrameMs, startFrame, endFrame, TargetLineColor);
 			if (Selection != null && Selection.SelectedFrameIndex >= startFrame && Selection.SelectedFrameIndex <= endFrame)
 			{
-				AddVerticalGuide(Selection.SelectedFrameIndex, maxMs, SelectionLineColor);
+				AddFrameOverlay(Selection.SelectedFrameIndex, maxMs, SelectionFillColor, SelectionLineColor);
 			}
 			if (Selection != null && Selection.HoveredFrameIndex >= startFrame && Selection.HoveredFrameIndex <= endFrame)
 			{
-				AddVerticalGuide(Selection.HoveredFrameIndex, maxMs, HoverLineColor);
+				AddFrameOverlay(Selection.HoveredFrameIndex, maxMs, HoverFillColor, HoverLineColor);
 			}
 
 			m_Plot.Plot.Axes.SetLimits(startFrame, Math.Max(startFrame + 1, endFrame), 0, Math.Max(1.0, maxMs * 1.1));
@@ -217,6 +222,16 @@ public sealed class FrameTimelineControl : UserControl
 		var guide = m_Plot.Plot.Add.Scatter(new[] { xStart, xEnd }, new[] { y, y });
 		guide.LineStyle.Color = color;
 		guide.MarkerSize = 0;
+	}
+
+	private void AddFrameOverlay(double frameIndex, double maxMs, ScottPlotColor fillColor, ScottPlotColor lineColor)
+	{
+		var span = m_Plot.Plot.Add.HorizontalSpan(frameIndex - 0.5, frameIndex + 0.5, fillColor);
+		span.LineStyle.Color = lineColor;
+		span.LineStyle.Width = 1;
+		span.EnableAutoscale = false;
+		AddVerticalGuide(frameIndex - 0.5, maxMs, lineColor);
+		AddVerticalGuide(frameIndex + 0.5, maxMs, lineColor);
 	}
 
 	private void AddVerticalGuide(double frameIndex, double maxMs, ScottPlotColor color)
@@ -379,5 +394,40 @@ public sealed class FrameTimelineControl : UserControl
 		}
 		sample = default;
 		return false;
+	}
+
+	internal static CoreUtils.FrameTimeCategory GetFrameTimeCategory(double durationMs, double targetFrameMs)
+	{
+		if (targetFrameMs <= 0.0)
+		{
+			return CoreUtils.FrameTimeCategory.InBudget;
+		}
+
+		double percentOverTarget = durationMs * 100.0 / targetFrameMs - 100.0;
+		if (percentOverTarget > 100.0)
+		{
+			return CoreUtils.FrameTimeCategory.Alert;
+		}
+		if (percentOverTarget > 0.0)
+		{
+			return CoreUtils.FrameTimeCategory.Warning;
+		}
+		return CoreUtils.FrameTimeCategory.InBudget;
+	}
+
+	private static ScottPlotColor GetFrameColor(CoreUtils.FrameTimeCategory category)
+	{
+		return category switch
+		{
+			CoreUtils.FrameTimeCategory.InBudget => FrameLineColor,
+			CoreUtils.FrameTimeCategory.Warning => WarningFrameLineColor,
+			CoreUtils.FrameTimeCategory.Alert => AlertFrameLineColor,
+			_ => WarningFrameLineColor
+		};
+	}
+
+	private static double GetFrameBarSize(int visibleSampleCount)
+	{
+		return visibleSampleCount <= 180 ? 0.86 : 1.0;
 	}
 }

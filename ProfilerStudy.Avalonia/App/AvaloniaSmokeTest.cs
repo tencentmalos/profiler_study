@@ -52,6 +52,7 @@ internal static class AvaloniaSmokeTest
 			AssertThemeSettings();
 			AssertTableSorting();
 			AssertFlameChartControl();
+			AssertFrameTimelineCategories();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -85,6 +86,14 @@ internal static class AvaloniaSmokeTest
 		{
 			throw new InvalidOperationException("Smoke test failed: " + name);
 		}
+	}
+
+	private static void AssertFrameTimelineCategories()
+	{
+		Assert(FrameTimelineControl.GetFrameTimeCategory(16.0, 16.0) == CoreUtils.FrameTimeCategory.InBudget, "frame category target boundary");
+		Assert(FrameTimelineControl.GetFrameTimeCategory(16.001, 16.0) == CoreUtils.FrameTimeCategory.Warning, "frame category warning boundary");
+		Assert(FrameTimelineControl.GetFrameTimeCategory(32.0, 16.0) == CoreUtils.FrameTimeCategory.Warning, "frame category alert boundary");
+		Assert(FrameTimelineControl.GetFrameTimeCategory(32.001, 16.0) == CoreUtils.FrameTimeCategory.Alert, "frame category alert over boundary");
 	}
 
 	private static void AssertSourcePathMapping()
