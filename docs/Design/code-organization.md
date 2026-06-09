@@ -29,6 +29,16 @@ MCP code is grouped around server responsibilities.
 - `Diagnostics/`: self-test and diagnostic checks.
 - `Reporting/`: markdown formatting for structured MCP results.
 
+### `tools/profiler_study_sdk`
+
+ProfilerStudy SDK 代码通过 git submodule 引入，远端为：
+
+```text
+git@github.com:tencentmalos/profiler_study_sdk.git
+```
+
+主仓库不再维护内嵌的 `tools/sdk source` 副本；后续 SDK 修复应先提交到 `profiler_study_sdk` 仓库，再在主仓库更新 submodule revision。这样 Azahar、ProfilerStudy 和其它项目可以共享同一份 SDK 源码，避免不同项目各自拷贝 `FramePro.cpp` / `FramePro.h` 后产生协议或 Android socket 行为漂移。
+
 ### `ProfilerStudy`
 
 The WinForms UI is legacy code and is intentionally isolated.

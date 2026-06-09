@@ -1,3 +1,6 @@
 [submodule "third_party/ScottPlot"]
 	path = third_party/ScottPlot
 	url = git@github.com:tencentmalos/ScottPlot.git
+[submodule "tools/profiler_study_sdk"]
+	path = tools/profiler_study_sdk
+	url = git@github.com:tencentmalos/profiler_study_sdk.git
