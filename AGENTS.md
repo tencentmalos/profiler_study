@@ -6,10 +6,12 @@ This is a Visual Studio 2022 C# Windows Forms profiler UI targeting `.NET Framew
 
 - `ProfilerStudy/` contains the legacy WinForms application under `LegacyWinForms/`.
 - `ProfilerStudyCore/` contains core session, packet, transport, timing, and data model logic grouped by feature.
+- `ProfilerStudy.Avalonia/` contains the cross-platform Avalonia shell, reusable controls, and feature-grouped UI analyzers.
 - `ProfilerCanvas/` and `CanvasDataGrid/` contain reusable editor, canvas, and grid controls.
 - `CoreUtils/` contains shared utility types under `SCLCoreCLR`.
 - `docker/` contains docking and MDI UI infrastructure.
 - `tools/` and checked-in `.exe` files support source navigation and profiler demos.
+- `docs/Design/Features/` contains feature design documents. `docs/Design/Features/Controls/` contains per-control-family WinForms/Avalonia alignment documents.
 
 ## Build, Test, and Development Commands
 
@@ -40,5 +42,7 @@ Pull requests should include a concise description, the affected projects or UI 
 ## Agent-Specific Instructions
 
 Preserve legacy behavior unless the task explicitly calls for a redesign. Avoid broad refactors across UI projects when a targeted change in one module is sufficient. Treat checked-in binary tools as project assets and do not replace them without a clear reason.
+
+Before changing a subfeature, update the corresponding design document first, then implement the code. For Core behavior, use `docs/Design/Features/core-foundation.md`. For WinForms shell changes, use `docs/Design/Features/legacy-winforms-shell.md`. For Avalonia shell changes, use `docs/Design/Features/avalonia-shell.md`. For shared/basic UI controls, update the relevant per-control-family document under `docs/Design/Features/Controls/` so WinForms and Avalonia stay aligned.
 
 After each code change that successfully builds, automatically create a focused git commit for the verified changes before reporting completion. Include the build evidence in the response. Do not include unrelated dirty or untracked files in that commit.
