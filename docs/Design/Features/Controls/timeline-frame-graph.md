@@ -66,6 +66,7 @@
 - frame graph 的主绘制路径应采用 Avalonia 原生矩形绘制，而不是通用 plot chart；这样可以直接表达 WinForms `FrameGraphPanel` 的 frame rect、target line、selected/hover band、像素命中与拖拽滚动语义。
 - 像素布局必须同时服务绘制、命中和滚轮缩放锚点；不能让 bar rect 使用一套 frame-to-x 映射，而 pointer/zoom 使用另一套近似映射。
 - 帧数据重绘与交互覆盖层刷新需要分离：`Samples`、`TargetFrameMs`、`Viewport` 变化可以重建 bars、target line、坐标轴；`SelectedFrameIndex`、`HoveredFrameIndex` 变化只应替换 selected/hover overlay，不应重建所有 frame items。
+- `FrameTimelineRenderModel` 构建可见 items 时应按 viewport 起点定位到首个可见 sample，不能在长 session 下每次从 samples 开头线性扫描到可见范围。
 - frame item 颜色按 WinForms `FrameGraphPanel.GetFrameBrush` 的语义分组：低于目标帧耗时为正常，达到目标帧耗时为 warning，达到两倍目标帧耗时为 alert。
 - target line 保持横向参考线；selected frame 与 hovered frame 应明确绑定到整帧索引，保证状态栏、selected frame scopes、selected frame counters 和 thread timeline 能跟随变化。
 - `TimelineSelection` 应以 frame index 和 frame duration 成对更新为默认入口；外部控件不应只写 index 或只写 duration，避免状态栏、ProfilerStats marker、selected frame scopes 使用不一致的选择状态。

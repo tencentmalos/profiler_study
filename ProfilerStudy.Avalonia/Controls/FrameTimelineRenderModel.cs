@@ -69,13 +69,9 @@ internal sealed class FrameTimelineRenderModel
 		int endFrame = Math.Min(viewport.EndFrame, samples[samples.Count - 1].Index);
 		List<FrameTimelineRenderItem> items = new List<FrameTimelineRenderItem>();
 		double maxDurationMs = 0.0;
-		for (int i = 0; i < samples.Count; i++)
+		for (int i = LowerBoundFrameIndex(samples, startFrame); i < samples.Count; i++)
 		{
 			FrameSample sample = samples[i];
-			if (sample.Index < startFrame)
-			{
-				continue;
-			}
 			if (sample.Index > endFrame)
 			{
 				break;
@@ -99,6 +95,26 @@ internal sealed class FrameTimelineRenderModel
 
 		maxDurationMs = Math.Max(Math.Max(1.0, targetFrameMs * 2.0), maxDurationMs);
 		return new FrameTimelineRenderModel(items, startFrame, endFrame, targetFrameMs, maxDurationMs);
+	}
+
+	private static int LowerBoundFrameIndex(IReadOnlyList<FrameSample> samples, int frameIndex)
+	{
+		int left = 0;
+		int right = samples.Count;
+		while (left < right)
+		{
+			int mid = left + ((right - left) / 2);
+			if (samples[mid].Index < frameIndex)
+			{
+				left = mid + 1;
+			}
+			else
+			{
+				right = mid;
+			}
+		}
+
+		return left;
 	}
 
 	public bool TryGetItem(int frameIndex, out FrameTimelineRenderItem item)

@@ -126,6 +126,49 @@ internal static class AvaloniaSmokeTest
 		Assert(layout.TryHit(new global::Avalonia.Point(55, 20), out FrameTimelineRenderItem pixelHit), "frame timeline pixel hit");
 		Assert(pixelHit.Index == 5, "frame timeline pixel hit identity");
 		Assert(Math.Abs(layout.GetFrameCoordinate(new global::Avalonia.Point(55, 20)) - 5.5) < 0.0001, "frame timeline pixel coordinate");
+
+		CountingFrameSampleList manySamples = new CountingFrameSampleList(10000);
+		TimelineViewport tailViewport = TimelineViewport.CreateForFrames(10000);
+		tailViewport.SetRange(9900, 9910);
+		FrameTimelineRenderModel tailModel = FrameTimelineRenderModel.Create(manySamples, tailViewport, 16.0);
+		Assert(tailModel.HasItems && tailModel.Items[0].Index == 9900, "frame timeline tail model");
+		Assert(manySamples.AccessCount < 100, "frame timeline tail model sample access count");
+	}
+
+	private sealed class CountingFrameSampleList : IReadOnlyList<FrameSample>
+	{
+		private readonly int m_Count;
+
+		public CountingFrameSampleList(int count)
+		{
+			m_Count = count;
+		}
+
+		public int AccessCount { get; private set; }
+
+		public int Count => m_Count;
+
+		public FrameSample this[int index]
+		{
+			get
+			{
+				AccessCount++;
+				return new FrameSample(index, (index % 120) + 1.0);
+			}
+		}
+
+		public IEnumerator<FrameSample> GetEnumerator()
+		{
+			for (int i = 0; i < m_Count; i++)
+			{
+				yield return this[i];
+			}
+		}
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 	}
 
 	private static void AssertSourcePathMapping()
