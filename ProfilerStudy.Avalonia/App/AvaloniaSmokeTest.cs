@@ -55,6 +55,7 @@ internal static class AvaloniaSmokeTest
 			AssertTableSorting();
 			AssertFlameChartControl();
 			AssertFrameTimelineRenderModel(document);
+			AssertFrameTimelineNavigationContract();
 			AssertSessionScrollbarFrameStripContract();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -179,6 +180,15 @@ internal static class AvaloniaSmokeTest
 	{
 		Assert(layout.TryGetOverlayRect(frameIndex, out global::Avalonia.Rect rect), name + " result");
 		Assert(rect == expectedRect, name + " rect");
+	}
+
+	private static void AssertFrameTimelineNavigationContract()
+	{
+		FrameTimelineRange range = FrameTimelineNavigation.CenterRange(500, 1000, 37);
+		Assert(range.StartFrame <= 500 && range.EndFrame >= 500, "frame timeline navigation contains frame");
+		Assert(range.EndFrame - range.StartFrame + 1 == 37, "frame timeline navigation preserves visible count");
+		FrameTimelineRange tailRange = FrameTimelineNavigation.CenterRange(999, 1000, 37);
+		Assert(tailRange.StartFrame == 963 && tailRange.EndFrame == 999, "frame timeline navigation clamps tail range");
 	}
 
 	private static void AssertSessionScrollbarFrameStripContract()

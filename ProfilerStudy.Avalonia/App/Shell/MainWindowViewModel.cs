@@ -3333,12 +3333,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 	private void SelectAndCenterFrame(FrameSample frame)
 	{
-		int visibleCount = Math.Min(CurrentDocument.Summary.FrameCount, 120);
-		int startFrame = Math.Max(0, frame.Index - (visibleCount / 2));
-		int endFrame = Math.Min(CurrentDocument.Summary.FrameCount - 1, startFrame + visibleCount - 1);
-		startFrame = Math.Max(0, endFrame - visibleCount + 1);
-
-		Viewport.SetRange(startFrame, endFrame);
+		int visibleCount = Viewport == null || Viewport.VisibleFrameCount <= 0
+			? CurrentDocument.Summary.FrameCount
+			: Viewport.VisibleFrameCount;
+		FrameTimelineRange range = FrameTimelineNavigation.CenterRange(frame.Index, CurrentDocument.Summary.FrameCount, visibleCount);
+		Viewport.SetRange(range.StartFrame, range.EndFrame);
 		Selection.SelectFrame(frame.Index, frame.DurationMs);
 	}
 

@@ -75,6 +75,7 @@
 - frame bar 高度应表达 frame duration 在当前显示 scale 下的比例，不能因为 target frame ms 变化而整体重新归一化；target frame ms 只影响颜色分类和 target line 位置。Avalonia 暂未实现 WinForms 可拖拽 y-axis scale 时，渲染模型至少要保证同一组可见帧在不同 target 下高度稳定。
 - target line 保持横向参考线；selected frame 与 hovered frame 应明确绑定到整帧索引，保证状态栏、selected frame scopes、selected frame counters 和 thread timeline 能跟随变化。
 - `TimelineSelection` 应以 frame index 和 frame duration 成对更新为默认入口；外部控件不应只写 index 或只写 duration，避免状态栏、ProfilerStats marker、selected frame scopes 使用不一致的选择状态。
+- Max、Prev Spike、Next Spike、End、Track 等导航命令选中并居中某帧时，应默认保留当前 `Viewport.VisibleFrameCount`，只在当前 viewport 不合法时退回到合理范围；不能把用户已经调整好的缩放强制重置成固定 120 帧。
 - 本轮不新增 WinForms 的 selected range、time span overlay、event label；这些依赖额外 selection/event 状态，后续应在状态模型扩展后再补齐。
 - 大范围显示仍允许绘制采样或像素列聚合后的 `FrameSample`，但鼠标命中和选择必须使用样本的真实 `Index`，不能用绘制数组下标或聚合列号替代帧号。
 
