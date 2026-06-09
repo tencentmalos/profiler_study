@@ -138,6 +138,21 @@ internal static class AvaloniaSmokeTest
 		Assert(denseLayout.TryHit(new global::Avalonia.Point(1.875, 20), out FrameTimelineRenderItem denseHit), "frame timeline dense exact hit");
 		Assert(denseHit.Index == 7, "frame timeline dense exact hit identity");
 
+		FrameSample[] stableHeightSamples =
+		{
+			new FrameSample(0, 5.0),
+			new FrameSample(1, 10.0)
+		};
+		TimelineViewport stableHeightViewport = TimelineViewport.CreateForFrames(stableHeightSamples.Length);
+		FrameTimelinePixelLayout lowTargetLayout = FrameTimelinePixelLayout.Create(
+			FrameTimelineRenderModel.Create(stableHeightSamples, stableHeightViewport, 8.0),
+			new global::Avalonia.Rect(0, 0, 20, 50));
+		FrameTimelinePixelLayout highTargetLayout = FrameTimelinePixelLayout.Create(
+			FrameTimelineRenderModel.Create(stableHeightSamples, stableHeightViewport, 60.0),
+			new global::Avalonia.Rect(0, 0, 20, 50));
+		Assert(Math.Abs(lowTargetLayout.Bars[1].Rect.Height - highTargetLayout.Bars[1].Rect.Height) < 0.0001, "frame timeline target independent bar height");
+		Assert(lowTargetLayout.TargetLineY != highTargetLayout.TargetLineY, "frame timeline target line moves");
+
 		CountingFrameSampleList manySamples = new CountingFrameSampleList(10000);
 		TimelineViewport tailViewport = TimelineViewport.CreateForFrames(10000);
 		tailViewport.SetRange(9900, 9910);

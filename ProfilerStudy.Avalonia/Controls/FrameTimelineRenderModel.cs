@@ -93,7 +93,7 @@ internal sealed class FrameTimelineRenderModel
 				0.0);
 		}
 
-		maxDurationMs = Math.Max(Math.Max(1.0, targetFrameMs * 2.0), maxDurationMs);
+		maxDurationMs = Math.Max(1.0, maxDurationMs);
 		return new FrameTimelineRenderModel(items, startFrame, endFrame, targetFrameMs, maxDurationMs);
 	}
 
