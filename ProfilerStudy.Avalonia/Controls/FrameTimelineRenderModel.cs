@@ -302,9 +302,23 @@ internal sealed class FrameTimelinePixelLayout
 			return false;
 		}
 
+		if (FrameWidth < 1.0)
+		{
+			foreach (FrameTimelinePixelBar bar in Bars)
+			{
+				if (point.X >= bar.Rect.X && point.X < bar.Rect.Right)
+				{
+					item = bar.Item;
+					return true;
+				}
+			}
+
+			item = default;
+			return false;
+		}
+
 		double frameCoordinate = GetFrameCoordinate(point);
-		int frameIndex = (int)Math.Floor(frameCoordinate);
-		return Model.TryGetItem(frameIndex, out item);
+		return Model.TryHitFrameCoordinate(frameCoordinate, out item);
 	}
 
 	public double GetFrameCoordinate(Point point)

@@ -124,9 +124,10 @@ internal static class AvaloniaSmokeTest
 		Assert(sparseModel.TryHitFrameCoordinate(2.5, out _) is false, "frame timeline sparse gap miss");
 
 		FrameTimelinePixelLayout layout = FrameTimelinePixelLayout.Create(sparseModel, new global::Avalonia.Rect(0, 0, 110, 55));
-		Assert(layout.TryHit(new global::Avalonia.Point(55, 20), out FrameTimelineRenderItem pixelHit), "frame timeline pixel hit");
+		Assert(layout.TryHit(new global::Avalonia.Point(54.9, 20), out FrameTimelineRenderItem pixelHit), "frame timeline pixel hit");
 		Assert(pixelHit.Index == 5, "frame timeline pixel hit identity");
 		Assert(Math.Abs(layout.GetFrameCoordinate(new global::Avalonia.Point(55, 20)) - 5.5) < 0.0001, "frame timeline pixel coordinate");
+		Assert(layout.TryHit(new global::Avalonia.Point(55, 20), out _) is false, "frame timeline sparse pixel band miss");
 
 		FrameSample[] denseSamples = Enumerable.Range(0, 20)
 			.Select(index => new FrameSample(index, index == 7 ? 80.0 : 5.0))
