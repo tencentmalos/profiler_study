@@ -5,7 +5,7 @@
       "args": [
         "scripts/start-profiler-mcp.sh"
       ],
-      "note": "Builds and launches the ProfilerStudy MCP stdio server from the local marketplace source. Requires bash and a .NET 8 SDK."
+      "note": "Publishes and launches the ProfilerStudy MCP stdio server from the local marketplace source. Requires bash and a .NET 8 SDK."
     }
   }
 }

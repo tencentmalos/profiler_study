@@ -1,26 +1,26 @@
 ---
 name: profiler-mcp
-description: Use when analyzing FramePro or ProfilerStudy captures through the profiler-study MCP server, including Android captures, .profiler files, slow frames, scope hotspots, loaded sessions, custom stats, counters, and performance bug reports.
+description: Use when analyzing ProfilerStudy or ProfilerStudy captures through the profiler-study MCP server, including Android captures, .profiler files, slow frames, scope hotspots, loaded sessions, custom stats, counters, and performance bug reports.
 ---
 
 # Profiler MCP
 
 ## Overview
 
-Use the `profiler-study` MCP server as the first choice for ProfilerStudy / FramePro analysis. Prefer structured tool results over ad hoc file parsing or guessing from screenshots.
+Use the `profiler-study` MCP server as the first choice for ProfilerStudy / ProfilerStudy analysis. Prefer structured tool results over ad hoc file parsing or guessing from screenshots.
 
 ## Setup Check
 
 Before analysis, verify the MCP server is available when tools are visible in the session. If not available, inspect `C:\Users\Admin\.codex\config.toml` and ensure it contains `mcp_servers.profiler-study` pointing at:
 
 ```text
-C:\workspace\profiler_legacy\ProfilerStudy.McpServer\bin\Release\net8.0\ProfilerStudy.McpServer.dll
+C:\workspace\profiler_legacy\ProfilerStudy.McpServer\publish\codex\ProfilerStudy.McpServer.dll
 ```
 
 If the binary is stale or missing, build from `C:\workspace\profiler_legacy`:
 
 ```powershell
-dotnet build ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release -nologo -v minimal
+dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release -nologo -v minimal -p:TargetFrameworks=net8.0 -o ProfilerStudy.McpServer\publish\codex
 ```
 
 ## Workflow
@@ -34,7 +34,7 @@ dotnet build ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release -
 
 ## Interpretation Rules
 
-- Treat counters as FramePro custom stats. Use their `valueType`, `unit`, `totalCount`, `maxValuePerFrame`, and per-frame samples to explain behavior.
+- Treat counters as ProfilerStudy custom stats. Use their `valueType`, `unit`, `totalCount`, `maxValuePerFrame`, and per-frame samples to explain behavior.
 - Treat `analyze_frame_detail.frameCounters` as the current frame's custom stat samples; use it before issuing separate counter queries for a single suspicious frame.
 - Do not infer missing scope time from nested totals. The server's diagnostics use conservative broad-unattributed estimates.
 - Keep raw output bounded: use `top`, frame ranges, `max_nodes`, `max_depth`, `min_duration_ms`, and `max_samples` instead of requesting whole traces.

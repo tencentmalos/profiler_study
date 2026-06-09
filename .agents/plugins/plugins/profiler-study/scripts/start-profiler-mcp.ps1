@@ -86,10 +86,11 @@ function Get-SourceRoot {
 
 $repoRoot = Get-SourceRoot
 $projectPath = Join-Path $repoRoot 'ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj'
-$serverPath = Join-Path $repoRoot 'ProfilerStudy.McpServer\bin\Release\net8.0\ProfilerStudy.McpServer.dll'
+$publishDir = Join-Path $repoRoot 'ProfilerStudy.McpServer\publish\codex'
+$serverPath = Join-Path $publishDir 'ProfilerStudy.McpServer.dll'
 
 if (!(Test-Path $serverPath -PathType Leaf)) {
-    $buildOutput = & dotnet build $projectPath -c Release -nologo -v minimal -p:TargetFrameworks=net8.0 2>&1
+    $buildOutput = & dotnet publish $projectPath -c Release -nologo -v minimal -p:TargetFrameworks=net8.0 -o $publishDir 2>&1
     foreach ($line in $buildOutput) {
         [Console]::Error.WriteLine($line)
     }
@@ -99,7 +100,7 @@ if (!(Test-Path $serverPath -PathType Leaf)) {
 }
 
 if (!(Test-Path $serverPath -PathType Leaf)) {
-    throw "ProfilerStudy MCP server build did not produce $serverPath"
+    throw "ProfilerStudy MCP server publish did not produce $serverPath"
 }
 
 & dotnet $serverPath @args

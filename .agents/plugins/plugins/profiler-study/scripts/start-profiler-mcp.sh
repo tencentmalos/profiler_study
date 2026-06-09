@@ -58,14 +58,15 @@ resolve_repo_root() {
 
 repo_root="$(resolve_repo_root)"
 project_path="$repo_root/ProfilerStudy.McpServer/ProfilerStudy.McpServer.csproj"
-server_path="$repo_root/ProfilerStudy.McpServer/bin/Release/net8.0/ProfilerStudy.McpServer.dll"
+publish_dir="$repo_root/ProfilerStudy.McpServer/publish/codex"
+server_path="$publish_dir/ProfilerStudy.McpServer.dll"
 
 if [[ ! -f "$server_path" ]]; then
-	dotnet build "$project_path" -c Release -nologo -v minimal -p:TargetFrameworks=net8.0 >&2
+	dotnet publish "$project_path" -c Release -nologo -v minimal -p:TargetFrameworks=net8.0 -o "$publish_dir" >&2
 fi
 
 if [[ ! -f "$server_path" ]]; then
-	printf 'ProfilerStudy MCP server build did not produce %s\n' "$server_path" >&2
+	printf 'ProfilerStudy MCP server publish did not produce %s\n' "$server_path" >&2
 	exit 1
 fi
 
