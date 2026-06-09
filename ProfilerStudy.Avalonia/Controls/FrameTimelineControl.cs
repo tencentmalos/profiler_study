@@ -303,8 +303,7 @@ public sealed class FrameTimelineControl : UserControl
 	{
 		if (Selection != null)
 		{
-			Selection.HoveredFrameTimeMs = 0.0;
-			Selection.HoveredFrameIndex = -1;
+			Selection.ClearHoveredFrame();
 		}
 	}
 
@@ -377,13 +376,11 @@ public sealed class FrameTimelineControl : UserControl
 		double frameCoordinate = PointToFrameCoordinate(position);
 		if (m_RenderModel.TryHitFrameCoordinate(frameCoordinate, out FrameTimelineRenderItem item))
 		{
-			Selection.HoveredFrameTimeMs = item.DurationMs;
-			Selection.HoveredFrameIndex = item.Index;
+			Selection.HoverFrame(item.Index, item.DurationMs);
 		}
 		else
 		{
-			Selection.HoveredFrameTimeMs = 0.0;
-			Selection.HoveredFrameIndex = -1;
+			Selection.ClearHoveredFrame();
 		}
 	}
 
@@ -397,10 +394,8 @@ public sealed class FrameTimelineControl : UserControl
 		double frameCoordinate = PointToFrameCoordinate(position);
 		if (m_RenderModel.TryHitFrameCoordinate(frameCoordinate, out FrameTimelineRenderItem item))
 		{
-			Selection.SelectedFrameTimeMs = item.DurationMs;
-			Selection.SelectedFrameIndex = item.Index;
-			Selection.HoveredFrameTimeMs = item.DurationMs;
-			Selection.HoveredFrameIndex = item.Index;
+			Selection.SelectFrame(item.Index, item.DurationMs);
+			Selection.HoverFrame(item.Index, item.DurationMs);
 		}
 	}
 

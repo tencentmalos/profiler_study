@@ -30,14 +30,16 @@ internal static class AvaloniaSmokeTest
 			Assert(document.Viewport.StartFrame == 10 && document.Viewport.EndFrame == 20, "explicit viewport range");
 
 			FrameSample sample = document.FrameSamples[document.Viewport.StartFrame];
-			document.Selection.SelectedFrameIndex = sample.Index;
-			document.Selection.SelectedFrameTimeMs = sample.DurationMs;
+			document.Selection.SelectFrame(sample.Index, sample.DurationMs);
 			Assert(document.Selection.SelectedFrameIndex == sample.Index, "selection index");
 			Assert(document.Selection.SelectedFrameTimeMs > 0.0, "selection duration");
+			document.Selection.SelectFrame(sample.Index + 1, 123.456);
+			Assert(document.Selection.SelectedFrameIndex == sample.Index + 1 && document.Selection.SelectedFrameTimeMs == 123.456, "selection paired update");
+			document.Selection.ClearSelectedFrame();
+			Assert(document.Selection.SelectedFrameIndex == -1 && document.Selection.SelectedFrameTimeMs == 0.0, "selection paired clear");
 			FrameSample slowestFrame = FindSlowestFrame(document.FrameSamples);
 			document.Viewport.SetRange(Math.Max(0, slowestFrame.Index - 5), Math.Min(document.Summary.FrameCount - 1, slowestFrame.Index + 5));
-			document.Selection.SelectedFrameIndex = slowestFrame.Index;
-			document.Selection.SelectedFrameTimeMs = slowestFrame.DurationMs;
+			document.Selection.SelectFrame(slowestFrame.Index, slowestFrame.DurationMs);
 			Assert(document.Viewport.Contains(slowestFrame.Index), "slowest frame viewport");
 			Assert(document.Selection.SelectedFrameIndex == slowestFrame.Index, "slowest frame selection");
 

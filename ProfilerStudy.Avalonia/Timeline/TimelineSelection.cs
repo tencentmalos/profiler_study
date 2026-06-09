@@ -30,4 +30,32 @@ public sealed class TimelineSelection : ObservableObject
 		get => m_HoveredFrameTimeMs;
 		set => SetProperty(ref m_HoveredFrameTimeMs, value);
 	}
+
+	public void SelectFrame(int frameIndex, double frameTimeMs)
+	{
+		SelectedFrameTimeMs = frameIndex < 0 ? 0.0 : frameTimeMs;
+		SelectedFrameIndex = frameIndex;
+	}
+
+	public void HoverFrame(int frameIndex, double frameTimeMs)
+	{
+		HoveredFrameTimeMs = frameIndex < 0 ? 0.0 : frameTimeMs;
+		HoveredFrameIndex = frameIndex;
+	}
+
+	public void ClearSelectedFrame()
+	{
+		SelectFrame(-1, 0.0);
+	}
+
+	public void ClearHoveredFrame()
+	{
+		HoverFrame(-1, 0.0);
+	}
+
+	public void Clear()
+	{
+		ClearSelectedFrame();
+		ClearHoveredFrame();
+	}
 }

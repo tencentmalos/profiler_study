@@ -2181,15 +2181,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		int selectedFrameIndex = Selection.SelectedFrameIndex;
 		int hoveredFrameIndex = Selection.HoveredFrameIndex;
-		double selectedFrameTimeMs = Selection.SelectedFrameTimeMs;
-		double hoveredFrameTimeMs = Selection.HoveredFrameTimeMs;
 		int startFrame = Viewport.StartFrame;
 		int endFrame = Viewport.EndFrame;
 		SessionDocument document = BuildLiveConnectionDocument(session, connectionName);
-		document.Selection.SelectedFrameIndex = Math.Min(selectedFrameIndex, Math.Max(-1, document.Summary.FrameCount - 1));
-		document.Selection.HoveredFrameIndex = Math.Min(hoveredFrameIndex, Math.Max(-1, document.Summary.FrameCount - 1));
-		document.Selection.SelectedFrameTimeMs = selectedFrameTimeMs;
-		document.Selection.HoveredFrameTimeMs = hoveredFrameTimeMs;
+		int maxFrameIndex = Math.Max(-1, document.Summary.FrameCount - 1);
+		ApplySelectionToDocument(document, Math.Min(selectedFrameIndex, maxFrameIndex), Math.Min(hoveredFrameIndex, maxFrameIndex));
 		document.Viewport.SetRange(startFrame, Math.Max(startFrame, Math.Min(endFrame, Math.Max(0, document.Summary.FrameCount - 1))));
 		ApplyDocument(document);
 		m_LastLiveFrameCount = session.FrameCount;
@@ -2212,8 +2208,47 @@ internal sealed class MainWindowViewModel : ObservableObject
 		return new SessionDocument("Live: " + connectionName, session, summary, samples);
 	}
 
-	private void StartLiveConnectionRefreshTimer()
+	private static void ApplySelectionToDocument(SessionDocument document, int selectedFrameIndex, int hoveredFrameIndex)
 	{
+		if (TryFindFrameSample(document.FrameSamples, selectedFrameIndex, out FrameSample selectedFrame))
+		{
+			document.Selection.SelectFrame(selectedFrame.Index, selectedFrame.DurationMs);
+		}
+		else
+		{
+			document.Selection.ClearSelectedFrame();
+		}
+
+		if (TryFindFrameSample(document.FrameSamples, hoveredFrameIndex, out FrameSample hoveredFrame))
+		{
+			document.Selection.HoverFrame(hoveredFrame.Index, hoveredFrame.DurationMs);
+		}
+		else
+		{
+			document.Selection.ClearHoveredFrame();
+		}
+	}
+
+	private static bool TryFindFrameSample(IEnumerable<FrameSample> samples, int frameIndex, out FrameSample frame)
+	{
+		if (samples != null && frameIndex >= 0)
+		{
+			foreach (FrameSample sample in samples)
+			{
+				if (sample.Index == frameIndex)
+				{
+					frame = sample;
+					return true;
+				}
+			}
+		}
+
+		frame = default;
+		return false;
+	}
+
+		private void StartLiveConnectionRefreshTimer()
+		{
 		if (m_LiveConnectionRefreshTimer == null)
 		{
 			m_LiveConnectionRefreshTimer = new DispatcherTimer
@@ -2519,8 +2554,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			Viewport.SetRange(startFrame, endFrame);
 		}
 
-		Selection.SelectedFrameIndex = frame.Index;
-		Selection.SelectedFrameTimeMs = frame.DurationMs;
+		Selection.SelectFrame(frame.Index, frame.DurationMs);
 		UpdateShellStatusSegments();
 		StatusText = $"Selected frame {frame.Index} from profiler scope timeline ({frame.DurationMs:0.###} ms).";
 	}
@@ -2529,8 +2563,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		if (frameIndex < 0)
 		{
-			Selection.HoveredFrameIndex = -1;
-			Selection.HoveredFrameTimeMs = 0.0;
+			Selection.ClearHoveredFrame();
 			return;
 		}
 
@@ -2543,8 +2576,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		{
 			if (sample.Index == frameIndex)
 			{
-				Selection.HoveredFrameIndex = sample.Index;
-				Selection.HoveredFrameTimeMs = sample.DurationMs;
+				Selection.HoverFrame(sample.Index, sample.DurationMs);
 				StatusText = $"Hover frame {sample.Index} from profiler scope timeline ({sample.DurationMs:0.###} ms).";
 				return;
 			}
@@ -3307,8 +3339,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		startFrame = Math.Max(0, endFrame - visibleCount + 1);
 
 		Viewport.SetRange(startFrame, endFrame);
-		Selection.SelectedFrameIndex = frame.Index;
-		Selection.SelectedFrameTimeMs = frame.DurationMs;
+		Selection.SelectFrame(frame.Index, frame.DurationMs);
 	}
 
 	private void ResetTimeline()
@@ -3318,10 +3349,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			return;
 		}
 		CurrentDocument.Viewport.Reset(CurrentDocument.Summary.FrameCount);
-		CurrentDocument.Selection.SelectedFrameIndex = -1;
-		CurrentDocument.Selection.HoveredFrameIndex = -1;
-		CurrentDocument.Selection.SelectedFrameTimeMs = 0.0;
-		CurrentDocument.Selection.HoveredFrameTimeMs = 0.0;
+		CurrentDocument.Selection.Clear();
 		ApplySelectedFrameScopes();
 		ApplySelectedFrameCounters();
 		UpdateTimelineText();

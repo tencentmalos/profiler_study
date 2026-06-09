@@ -136,8 +136,7 @@ public sealed class ThreadTimelineLaneControl : Control
 
 		if (TryGetFrameAtPoint(point, out FrameSample frame))
 		{
-			Selection.SelectedFrameIndex = frame.Index;
-			Selection.SelectedFrameTimeMs = frame.DurationMs;
+			Selection.SelectFrame(frame.Index, frame.DurationMs);
 		}
 	}
 
@@ -163,13 +162,11 @@ public sealed class ThreadTimelineLaneControl : Control
 
 		if (TryGetFrameAtPoint(point, out FrameSample frame))
 		{
-			Selection.HoveredFrameIndex = frame.Index;
-			Selection.HoveredFrameTimeMs = frame.DurationMs;
+			Selection.HoverFrame(frame.Index, frame.DurationMs);
 		}
 		else
 		{
-			Selection.HoveredFrameIndex = -1;
-			Selection.HoveredFrameTimeMs = 0.0;
+			Selection.ClearHoveredFrame();
 		}
 
 		ThreadTimelineScopeRow hoveredScope = TryGetScopeAtPoint(point);
@@ -196,8 +193,7 @@ public sealed class ThreadTimelineLaneControl : Control
 		base.OnPointerExited(e);
 		if (Selection != null)
 		{
-			Selection.HoveredFrameIndex = -1;
-			Selection.HoveredFrameTimeMs = 0.0;
+			Selection.ClearHoveredFrame();
 		}
 		m_IsPanning = false;
 		m_HoveredScope = null;
