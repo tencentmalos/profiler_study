@@ -1,16 +1,22 @@
-# Perfetto/Tracy 可视化与 MCP 一体化方案
+# Perfetto/Tracy 文件访问与 ProfilerStudy/MCP 共享方案
 
 ## 目标澄清
 
-这份方案聚焦 **ProfilerStudy 直接打开 Perfetto/Tracy 抓取文件，并让 MCP 访问同一份文件、同一个打开中的 document、同一个可视化选区**。
+这份方案聚焦 **ProfilerStudy 直接打开 Perfetto/Tracy 抓取文件，并让 MCP 访问同一份源文件或同一个 trace artifact**。
 
-这里的核心目标不是单独增加一个 MCP translator，而是让可视化操作和 MCP 分析尽量一体化：
+这里的核心目标不是单独增加一个 MCP translator，而是让可视化 UI 和 MCP 共享同一套 trace 文件导入、artifact 管理和查询模型。这里的“共享”不表示 MCP 与可视化工具进程互动。
 
 - 用户在 ProfilerStudy UI 中打开 `.perfetto-trace`、`.pftrace`、systrace、`.tracy` 文件后，能像打开 FramePro 文件一样看 timeline、thread tracks、slices、counters、frames/slow frames。
-- MCP 能看到 UI 当前打开了哪些 trace、当前 active document、当前 visible range、selected frame/slice/thread/counter。
-- MCP 能基于 UI 的当前选区做分析，而不是让用户重复输入文件路径和 frame range。
-- MCP 在 UI 未运行时仍能直接读取指定抓取文件，作为 headless fallback。
+- MCP 能用同一套 importer/query model 读取用户指定的 trace 文件，或读取 ProfilerStudy 登记过的 trace artifact。
+- live capture 产生的原始抓取、normalized cache、diagnostics 应进入 artifact store，让 UI 和 MCP 能引用同一个结果。
+- MCP 不依赖 UI 是否正在运行，也不与 UI 进程通信。
 - Perfetto/Tracy 支持先锁定为这次一体化工作的第一目标；FramePro 继续保留现有能力。
+
+明确非目标：
+
+- 不设计 MCP attach 当前 UI document。
+- 不设计 MCP 读取 UI selection、visible range 或 active document。
+- 不设计 UI 触发 MCP 分析或 MCP 控制 UI 跳转。
 
 ## 当前代码基础
 
@@ -24,28 +30,28 @@
    - `ProfilerStudy.Avalonia/Sessions/SessionLoader.cs` 只通过 `FramePro.Session.Read` 加载 FramePro 文件。
    - `SessionDocument` 已经包含 `Id`、`SourcePath`、`Session`、`Summary`、`FrameSamples`、`Selection`、`Viewport`。
    - `MainWindowViewModel` 已有 open/recent/live connection、shared `TimelineSelection`、shared `TimelineViewport`、多视图刷新逻辑。
-   - 这条链路更适合扩展成 Perfetto/Tracy 统一可视化 document。
+   - 这条链路更适合扩展成 Perfetto/Tracy 统一可视化 document；selection/viewport 留在 UI 层，不进入 MCP contract。
 
 3. **MCP server**
    - `ProfilerStudy.McpServer` 当前是独立 stdio server。
    - `ProfilerAnalysisService` 自己维护 `LoadedSession` 字典，直接持有 `FramePro.Session`。
-   - MCP 可以独立读取 FramePro 文件，但不知道 UI 当前打开了什么，也不知道 UI selection/viewport。
+   - MCP 可以独立读取 FramePro 文件，但不知道 UI 当前打开了什么。本阶段接受这一点，优先统一“文件/Artifact 可访问性”和“查询模型”。
 
 因此，一体化不应该只改 MCP，也不应该只让 UI shell out 到外部 Perfetto/Tracy UI。合理方向是抽出一个 **ProfilerStudy Trace Workspace**，让 UI 和 MCP 使用同一套 document/query/import 概念。
 
 ## 推荐总体架构
 
-推荐采用 **共享 Trace Workspace + 可选 UI Bridge + MCP headless fallback**。
+推荐采用 **共享 Trace Workspace + Trace Artifact Store + MCP direct file/artifact access**。
 
 ```text
-                     ┌─────────────────────────────┐
-                     │ ProfilerStudy.Avalonia UI    │
-                     │ - open files                 │
-                     │ - timeline/threads/counters  │
-                     │ - selection/viewport         │
-                     └──────────────┬──────────────┘
-                                    │ in-process
-                                    v
+        ┌─────────────────────────────┐
+        │ ProfilerStudy.Avalonia UI    │
+        │ - open trace files           │
+        │ - visualize timeline/slices  │
+        │ - create live artifacts      │
+        └──────────────┬──────────────┘
+                       │ in-process
+                       v
 ┌────────────────────────────────────────────────────────────────┐
 │ ProfilerStudy.TraceWorkspace                                    │
 │ - TraceDocument registry                                        │
@@ -53,33 +59,31 @@
 │ - ITraceQuerySession                                            │
 │ - FramePro / Perfetto / Tracy importers                         │
 │ - shared diagnostics/query DTOs                                 │
-└─────────────────────┬───────────────────────────┬──────────────┘
-                      │                           │
-                      │ local bridge              │ direct library use
-                      v                           v
-        ┌────────────────────────┐     ┌───────────────────────────┐
-        │ UI Bridge              │     │ ProfilerStudy.McpServer    │
-        │ - list open docs       │     │ - stdio MCP tools          │
-        │ - current selection    │     │ - attach UI doc if present │
-        │ - reveal/select range  │     │ - load file if headless    │
-        └────────────────────────┘     └───────────────────────────┘
+└─────────────────────┬──────────────────────────────────────────┘
+                      │ direct library use
+                      v
+        ┌───────────────────────────┐
+        │ ProfilerStudy.McpServer    │
+        │ - stdio MCP tools          │
+        │ - load explicit file path  │
+        │ - load registered artifact │
+        └───────────────────────────┘
 ```
 
 关键点：
 
 - UI 是用户可视化操作的 primary surface。
 - Trace Workspace 是数据和查询边界，不属于 UI 控件，也不属于 MCP server。
-- UI Bridge 只在 UI 运行时提供 “MCP 附着到当前 UI 状态” 的能力。
-- MCP server 仍然可以独立运行；UI 不运行时，它直接用 Trace Workspace 加载文件。
+- Trace Artifact Store 是 UI live capture、normalized cache、import diagnostics 和 MCP artifact 访问的共享索引。
+- MCP server 通过显式文件路径或 artifact id 加载 trace，不依赖 UI 当前状态，也不连接 UI 进程。
 - Perfetto/Tracy importer 的输出是 `TraceDocument`/`ITraceQuerySession`，不是 FramePro packet，也不是只给 MCP 的一次性 JSON。
 
 ## 方案对比
 
 | 方案 | 说明 | 优点 | 问题 | 结论 |
 | --- | --- | --- | --- | --- |
-| UI 和 MCP 各自读取文件 | UI 打开一份，MCP 再用 path 读一份 | 最容易实现 | selection/viewport 不共享；用户需要重复描述上下文 | 只能作为 fallback |
-| MCP server 做唯一 backend，UI 也连 MCP | UI 所有查询走 MCP server | 状态天然统一 | UI 强依赖 MCP 生命周期；调试和发布复杂度上升 | 后续可评估，不适合第一阶段 |
-| 共享 Trace Workspace + UI Bridge | UI 和 MCP 共用核心库；UI 运行时 MCP 可附着 UI 状态 | 一体化程度高，UI/headless 都可用 | 需要定义 document/bridge/query 边界 | 推荐 |
+| UI 和 MCP 各自实现 parser | UI 和 MCP 分别维护 Perfetto/Tracy 读取逻辑 | 初期看似最容易 | 双份解析逻辑会漂移；diagnostics/cache 不一致 | 不推荐 |
+| 共享 Trace Workspace + Artifact Store | UI 和 MCP 共用 importer/query；MCP 按 path 或 artifact id 访问 | 文件/Artifact 一致，UI/headless 都可用，实现边界清晰 | 不共享 UI selection/viewport | 推荐 |
 
 ## Trace Workspace 数据模型
 
@@ -89,13 +93,12 @@
 TraceDocument
   Id
   SourcePath
+  ArtifactId?
   SourceFormat: FramePro | Perfetto | Systrace | Tracy
   DisplayName
   CreatedUtc
   ImportDiagnostics
   QuerySession: ITraceQuerySession
-  Selection: TraceSelection
-  Viewport: TraceViewport
 ```
 
 `ITraceQuerySession` 是核心查询接口：
@@ -116,9 +119,14 @@ ITraceQuerySession
 
 现有 FramePro 通过 `FrameProTraceQuerySession` adapter 继续工作。Perfetto 和 Tracy importer 产出 `PerfettoTraceQuerySession`、`TracyTraceQuerySession`。
 
-`TraceSelection` 和 `TraceViewport` 应同时支持 frame-based 和 time-based trace：
+UI 层仍然需要 view state，但它是 UI 私有状态，不属于 MCP contract：
 
 ```text
+TraceViewState
+  DocumentId
+  Selection: TraceSelection
+  Viewport: TraceViewport
+
 TraceSelection
   SelectedFrameIndex?
   SelectedSliceId?
@@ -134,9 +142,9 @@ TraceViewport
   EndFrameIndex?
 ```
 
-原因：FramePro 很强 frame-centric；Perfetto 和 Tracy 更接近 time/slice-centric。不能要求所有 trace 都有可靠 frame index。UI 和 MCP 都要能表达“当前可视时间范围”和“当前选中的 slice/thread/counter”。
+原因：FramePro 很强 frame-centric；Perfetto 和 Tracy 更接近 time/slice-centric。不能要求所有 trace 都有可靠 frame index。UI 必须能表达“当前可视时间范围”和“当前选中的 slice/thread/counter”，但 MCP 只通过显式参数、path、artifact id 查询。
 
-## UI 一体化设计
+## UI 支持设计
 
 ### 1. 直接打开 Perfetto/Tracy 文件
 
@@ -163,28 +171,19 @@ WinForms legacy 可以暂时只保留 FramePro 支持。等 Trace Workspace 稳�
 - Frame Detail：如果 trace 有 frame，显示 selected frame 内的线程层级；如果没有 frame，则显示 selected time range 内热点。
 - Diagnostics：importer 版本、缺失 table、unsupported Tracy event、frame synthesis 规则。
 
-这能让用户在同一个 ProfilerStudy 里“看”和“问 MCP”，而不是在 Perfetto UI、Tracy UI、ProfilerStudy 三个工具之间切换上下文。
+这能让用户在同一个 ProfilerStudy 里查看 Perfetto/Tracy/FramePro 数据，同时 MCP 也能读取同一类抓取文件或 artifact；两者不需要运行时互动。
 
-### 3. UI 触发 MCP 分析
+## MCP 支持设计
 
-后续 UI 可以增加轻量入口：
+MCP server 增加文件和 artifact 访问能力，不与可视化 UI 进程通信。
 
-- “Ask MCP about selected frame/range”
-- “Analyze visible range”
-- “Explain selected slice”
-- “Compare selected range with previous range”
+### 文件读取
 
-第一阶段不用在 UI 内嵌 chat。只需要确保 UI Bridge 暴露当前 document/selection，Codex 侧 MCP tool 能读到即可。
-
-## MCP 一体化设计
-
-MCP server 增加两类能力：headless 文件读取和 UI 附着。
-
-### Headless 文件读取
-
-UI 未运行时：
+UI 是否运行无关：
 
 - `load_trace_file(path, format=auto, top=10)`
+- `load_trace_artifact(artifact_id, top=10)`
+- `list_trace_artifacts(format?, since?, limit?)`
 - `list_sessions`
 - `get_session_summary`
 - `find_slow_frames`
@@ -194,50 +193,7 @@ UI 未运行时：
 - `list_counters`
 - `query_counter`
 
-这些工具走 `TraceWorkspace` 直接加载文件。
-
-### UI 附着工具
-
-UI 运行时：
-
-| Tool | 用途 |
-| --- | --- |
-| `list_ui_documents` | 列出 ProfilerStudy UI 当前打开的 trace documents |
-| `get_active_ui_document` | 返回 active document id、source path、format、summary、visible range、selection |
-| `attach_ui_document` | 将 MCP session 绑定到 UI document，后续分析工具可用这个 session id |
-| `analyze_ui_selection` | 分析 UI 当前 selected frame/slice/time range |
-| `analyze_ui_visible_range` | 分析 UI 当前 viewport |
-| `reveal_frame_in_ui` | 可选：让 UI 跳到某个 frame |
-| `reveal_time_range_in_ui` | 可选：让 UI 跳到某个 time range |
-
-默认工具应以 read-only 为主。`reveal_*` 这种会改变 UI 状态的操作需要明确权限或用户确认。
-
-### UI Bridge 协议
-
-UI Bridge 可以是本地 JSON-RPC：
-
-- Windows：named pipe。
-- macOS/Linux：Unix domain socket。
-- fallback：loopback TCP，仅监听 `127.0.0.1`。
-
-Bridge 启动在 UI 进程内，由 UI 持有当前 document registry。MCP server 作为 client 连接 bridge。
-
-Bridge 最小 API：
-
-```text
-workspace/listDocuments
-workspace/getActiveDocument
-workspace/getDocumentSummary
-workspace/getViewport
-workspace/getSelection
-workspace/queryRangeSummary
-workspace/queryFrameDetail
-workspace/querySliceDetail
-workspace/revealRange
-workspace/revealFrame
-```
-
-不要通过 bridge 暴露任意文件系统访问，也不要暴露任意 SQL。
+这些工具走 `TraceWorkspace` 直接加载文件或 artifact。现有 `load_session_file` 可以保留为 FramePro-specific alias，保证兼容。
 
 ## Perfetto 支持方案
 
@@ -290,14 +246,14 @@ profiler-tracy-bridge import --input capture.tracy --output normalized.json
 
 ### Tracy live socket
 
-MCP 和 UI 都应使用同一 bridge：
+UI live capture 和 MCP headless capture 都应调用同一个 Tracy capture helper：
 
 ```text
 tracy://127.0.0.1:8086
   -> profiler-tracy-bridge capture --host 127.0.0.1 --port 8086 --seconds 30 --output capture.tracy --normalized normalized.json
   -> TraceArtifactStore register original + normalized
   -> UI open TraceDocument
-  -> MCP attach same document
+  -> MCP load artifact_id or source path
 ```
 
 从用户角度看，ProfilerStudy 是直接连接 Tracy target 并打开 capture。实现上复用 Tracy 官方 worker/capture 逻辑，避免手写私有 wire protocol。
@@ -336,67 +292,62 @@ Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`�
 
 ### Phase 1：Trace Workspace 抽象
 
-- 定义 `TraceDocument`、`TraceSelection`、`TraceViewport`、`ITraceQuerySession`。
+- 定义 `TraceDocument`、`TraceArtifactManifest`、`ITraceQuerySession`。
 - 用 `FrameProTraceQuerySession` 包住现有 `FramePro.Session`。
-- 将 Avalonia `SessionDocument` 迁移为或包裹为 `TraceDocument`。
+- 将 Avalonia `SessionDocument` 迁移为或包裹为 `TraceDocument`；selection/viewport 作为 UI view state 保留。
 - MCP `LoadedSession` 改为持有 `ITraceQuerySession`，FramePro 行为保持兼容。
 
 验收：
 
 - FramePro 文件仍能在 UI 和 MCP 中按原行为打开/分析。
-- UI selection/viewport 能表示 frame range 和 time range。
+- MCP 分析工具不再直接依赖 `FramePro.Session`。
 
-### Phase 2：UI Bridge 和 MCP attach
+### Phase 2：Artifact Store 和 MCP 文件/Artifact 访问
 
-- UI 进程启动 local bridge。
-- MCP server 自动探测 bridge。
-- 新增 `list_ui_documents`、`get_active_ui_document`、`attach_ui_document`、`analyze_ui_selection`。
-- UI 未运行时工具返回明确 fallback 提示，不失败。
+- 增加 `TraceArtifactStore` manifest/index。
+- UI live capture 后登记原始文件、normalized cache 和 diagnostics。
+- MCP 新增 `load_trace_file`、`load_trace_artifact`、`list_trace_artifacts`、`get_import_diagnostics`。
+- MCP 只访问显式 path 或 ProfilerStudy artifact store，不扫描用户目录。
 
 验收：
 
-- UI 打开一个 FramePro 文件后，MCP 能列出它并分析当前选区。
-- MCP 仍能独立 `load_trace_file(path)`。
+- MCP 能通过 path 或 artifact id 加载同一类 trace 数据。
+- UI 不运行时 MCP 文件/Artifact 查询仍可用。
 
 ### Phase 3：Perfetto/Systrace 直接打开
 
 - 增加 `PerfettoTraceImporter` 和 `TraceProcessorRunner`。
 - Avalonia open dialog 支持 `.perfetto-trace`、`.pftrace`、`.systrace`、`.html`、`.txt`。
 - UI 展示 timeline/thread lanes/slices/counters。
-- MCP 可以 attach UI document 或 headless load 同一文件。
+- MCP 可以通过 path 或 artifact id 加载同一文件。
 
 验收：
 
 - 同一个 Perfetto 文件可被 UI 打开，也可被 MCP 分析。
-- UI 当前 visible range 可被 MCP `analyze_ui_visible_range` 使用。
+- Perfetto import diagnostics 在 UI 和 MCP 中一致。
 
 ### Phase 4：Tracy 文件和 live socket
 
-- 增加 `profiler-tracy-bridge` 或文档化外部 bridge。
+- 增加 `profiler-tracy-bridge` 或文档化外部 Tracy capture helper。
 - UI 支持打开 `.tracy`。
 - UI 支持 `tracy://host:port` duration capture，capture 后打开 document。
-- MCP 支持 headless capture 和 attach UI Tracy document。
+- MCP 支持 headless capture，并能通过 artifact id 或 path 读取同一 Tracy capture。
 
 验收：
 
 - Tracy target capture 后，UI 能看到 capture，MCP 能分析同一个 artifact。
 - `.tracy` 文件可直接打开并进入 recent/artifact store。
 
-### Phase 5：双向协作增强
+### Phase 5：更深入的外部诊断
 
-- MCP `reveal_frame_in_ui`、`reveal_time_range_in_ui`。
-- UI “Ask MCP about selected range” 入口。
 - cross-format compare：FramePro vs Perfetto vs Tracy。
 - richer diagnostics：Perfetto scheduling/blocking、Tracy lock/GPU/allocation/callstack。
 
 ## 安全和权限
 
-- Bridge 只监听本机，并使用 per-run token 或随机 pipe/socket 名。
-- MCP 默认 read-only 访问 UI document 状态。
-- 改变 UI 状态的工具需要明确用户确认或配置允许。
 - 不允许模型传任意 SQL；Perfetto 查询由代码内固定 SQL 实现。
 - 不允许 MCP 扫描用户目录；只访问用户显式传入 path 或 artifact store manifest。
-- bridge/helper process 必须有 timeout、output size cap 和 cancellation。
+- Tracy capture helper process 必须有 timeout、output size cap 和 cancellation。
 - diagnostics 可以返回 dependency versions、import warnings，但不要返回无关环境变量或目录列表。
 
 ## 资料依据
@@ -409,13 +360,13 @@ Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`�
 
 ## 推荐结论
 
-优先做 **Trace Workspace + UI Bridge**，再接 Perfetto，最后接 Tracy。
+优先做 **Trace Workspace + Artifact Store + MCP direct file/artifact access**，再接 Perfetto，最后接 Tracy。MCP 与可视化 UI 进程的互动不进入当前方案。
 
 具体顺序：
 
 1. 先把 FramePro 也包进 `ITraceQuerySession`，建立 UI/MCP 共享 document 语义。
-2. 做 UI Bridge，让 MCP 能看到 ProfilerStudy 当前打开的文件和选区。
-3. 接 Perfetto/systrace，因为 Trace Processor 能提供稳定解析能力，适合先验证统一 UI/MCP 工作流。
+2. 做 Artifact Store 和 MCP direct file/artifact access，让 UI 产物和 MCP 查询能引用同一批抓取文件。
+3. 接 Perfetto/systrace，因为 Trace Processor 能提供稳定解析能力，适合先验证统一文件/Artifact 工作流。
 4. 接 Tracy 时复用官方 C++ worker/capture 代码做 bridge，避免维护私有 wire protocol。
 
-这样 ProfilerStudy 会成为可视化主界面，MCP 成为同一 workspace 上的分析协作者，而不是另一个独立 trace 读取器。
+这样 ProfilerStudy 会成为可视化主界面，MCP 成为同一批 trace 文件和 artifact 上的分析入口，而不是另一个独立 trace 读取器。
