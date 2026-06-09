@@ -316,6 +316,34 @@ internal sealed class FrameTimelinePixelLayout
 		return Model.TryHitFrameCoordinate(frameCoordinate, out item);
 	}
 
+	public bool TryGetOverlayRect(int frameIndex, out Rect rect)
+	{
+		if (FrameWidth < 1.0)
+		{
+			foreach (FrameTimelinePixelBar bar in Bars)
+			{
+				if (bar.Item.Index == frameIndex)
+				{
+					rect = new Rect(bar.Rect.X, Bounds.Y, bar.Rect.Width, Bounds.Height);
+					return true;
+				}
+			}
+
+			rect = default;
+			return false;
+		}
+
+		if (Model.TryGetItem(frameIndex, out _) is false)
+		{
+			rect = default;
+			return false;
+		}
+
+		double x = Bounds.X + ((frameIndex - Model.StartFrame) * FrameWidth);
+		rect = new Rect(x, Bounds.Y, Math.Max(1.0, FrameWidth), Bounds.Height);
+		return true;
+	}
+
 	public double GetFrameCoordinate(Point point)
 	{
 		return Model.StartFrame + ((point.X - Bounds.X) / Math.Max(double.Epsilon, FrameWidth));

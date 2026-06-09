@@ -140,6 +140,12 @@ internal static class AvaloniaSmokeTest
 		Assert(denseLayout.Bars.Any(bar => bar.Item.Index == 7 && bar.Item.Category == CoreUtils.FrameTimeCategory.Alert), "frame timeline dense keeps alert frame");
 		Assert(denseLayout.TryHit(new global::Avalonia.Point(1.875, 20), out FrameTimelineRenderItem denseHit), "frame timeline dense exact hit");
 		Assert(denseHit.Index == 7, "frame timeline dense exact hit identity");
+		global::Avalonia.Rect denseRepresentativeRect = denseLayout.Bars.First(bar => bar.Item.Index == 7).Rect;
+		AssertTryGetOverlayRect(
+			denseLayout,
+			7,
+			new global::Avalonia.Rect(denseRepresentativeRect.X, denseLayout.Bounds.Y, denseRepresentativeRect.Width, denseLayout.Bounds.Height),
+			"frame timeline dense overlay follows representative column");
 
 		FrameSample[] stableHeightSamples =
 		{
@@ -162,6 +168,12 @@ internal static class AvaloniaSmokeTest
 		FrameTimelineRenderModel tailModel = FrameTimelineRenderModel.Create(manySamples, tailViewport, 16.0);
 		Assert(tailModel.HasItems && tailModel.Items[0].Index == 9900, "frame timeline tail model");
 		Assert(manySamples.AccessCount < 100, "frame timeline tail model sample access count");
+	}
+
+	private static void AssertTryGetOverlayRect(FrameTimelinePixelLayout layout, int frameIndex, global::Avalonia.Rect expectedRect, string name)
+	{
+		Assert(layout.TryGetOverlayRect(frameIndex, out global::Avalonia.Rect rect), name + " result");
+		Assert(rect == expectedRect, name + " rect");
 	}
 
 	private static void AssertSessionScrollbarFrameStripContract()

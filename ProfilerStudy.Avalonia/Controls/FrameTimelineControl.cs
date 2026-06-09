@@ -282,15 +282,11 @@ public sealed class FrameTimelineControl : Control
 	private void DrawFrameOverlay(DrawingContext context, int frameIndex, IBrush fillBrush, Pen linePen)
 	{
 		if (m_PixelLayout.HasBars is false ||
-			frameIndex < m_RenderModel.StartFrame ||
-			frameIndex > m_RenderModel.EndFrame)
+			m_PixelLayout.TryGetOverlayRect(frameIndex, out Rect rect) is false)
 		{
 			return;
 		}
 
-		Rect graphBounds = m_PixelLayout.Bounds;
-		double x = graphBounds.X + ((frameIndex - m_RenderModel.StartFrame) * m_PixelLayout.FrameWidth);
-		Rect rect = new Rect(x, graphBounds.Y, Math.Max(1.0, m_PixelLayout.FrameWidth), graphBounds.Height);
 		context.FillRectangle(fillBrush, rect);
 		context.DrawLine(linePen, new Point(rect.X, rect.Y), new Point(rect.X, rect.Bottom));
 		context.DrawLine(linePen, new Point(rect.Right, rect.Y), new Point(rect.Right, rect.Bottom));
