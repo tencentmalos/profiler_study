@@ -822,7 +822,10 @@
           </Border>
 
             <Border Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,1" Padding="3,1">
-              <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
+              <local:SessionScrollbarControl
+                  Samples="{Binding FrameSamples}"
+                  TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
+                  Viewport="{Binding Viewport}" />
             </Border>
           </Grid>
 
@@ -1505,7 +1508,10 @@
             </Grid>
           </Border>
           <Border Grid.Row="1" Grid.Column="2" Background="{DynamicResource TimelineScopeSubtleBackgroundBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,0,1,1" Padding="3,1">
-            <local:SessionScrollbarControl Viewport="{Binding Viewport}" />
+            <local:SessionScrollbarControl
+                Samples="{Binding FrameSamples}"
+                TargetFrameMs="{Binding Summary.TargetFrameTimeMs}"
+                Viewport="{Binding Viewport}" />
           </Border>
 
           <GridSplitter Grid.Row="2" Grid.ColumnSpan="3" Background="{DynamicResource TimelineScopeSeparatorBrush}" BorderBrush="{DynamicResource TimelineScopePanelBorderBrush}" BorderThickness="0,1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" />

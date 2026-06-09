@@ -55,6 +55,7 @@ internal static class AvaloniaSmokeTest
 			AssertTableSorting();
 			AssertFlameChartControl();
 			AssertFrameTimelineRenderModel(document);
+			AssertSessionScrollbarFrameStripContract();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -159,6 +160,20 @@ internal static class AvaloniaSmokeTest
 		FrameTimelineRenderModel tailModel = FrameTimelineRenderModel.Create(manySamples, tailViewport, 16.0);
 		Assert(tailModel.HasItems && tailModel.Items[0].Index == 9900, "frame timeline tail model");
 		Assert(manySamples.AccessCount < 100, "frame timeline tail model sample access count");
+	}
+
+	private static void AssertSessionScrollbarFrameStripContract()
+	{
+		Assert(typeof(SessionScrollbarControl).GetProperty("Samples") != null, "session scrollbar samples property");
+		Assert(typeof(SessionScrollbarControl).GetProperty("TargetFrameMs") != null, "session scrollbar target property");
+
+		FrameSample[] samples = Enumerable.Range(0, 20)
+			.Select(index => new FrameSample(index, index == 12 ? 40.0 : 5.0))
+			.ToArray();
+		TimelineViewport viewport = TimelineViewport.CreateForFrames(samples.Length);
+		SessionScrollbarFrameStripLayout layout = SessionScrollbarFrameStripLayout.Create(samples, viewport, 16.0, new global::Avalonia.Rect(0, 0, 5, 8));
+		Assert(layout.Bars.Count <= 5, "session scrollbar frame strip dense columns");
+		Assert(layout.Bars.Any(bar => bar.Category == CoreUtils.FrameTimeCategory.Alert), "session scrollbar frame strip keeps alert");
 	}
 
 	private sealed class CountingFrameSampleList : IReadOnlyList<FrameSample>

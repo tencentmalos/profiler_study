@@ -41,6 +41,7 @@
 - WinForms 的 `SessionScrollBar` / `TimeRange` 是当前行为参考。
 - Avalonia 的 `TimelineViewport` 是新模型，允许更明确表达 frame range 与 time range，但必须与 WinForms 用户操作语义一致。
 - 对齐重点是“操作结果一致”，不是 scrollbar 像素实现一致。
+- Avalonia 的 `SessionScrollbarControl` 不能只是 viewport 滑块；它应接收 `FrameSample` 和 target frame ms，在 track 底部绘制全局 frame strip，使用正常、warning、alert 三类颜色帮助用户在全局 session 中定位 spike。该 strip 是视觉采样，不能改变 viewport/selection 的真实 frame index 语义。
 
 ## 数据流与状态归属
 

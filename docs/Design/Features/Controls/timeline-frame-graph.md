@@ -63,6 +63,7 @@
 - 重点不是复刻 WinForms 外观，而是让 timeline-frame-graph 自成闭环：可见帧、帧分类、hover、selection、viewport、下游 scope/counter/timeline 刷新必须使用同一套帧索引语义。
 - `FrameTimelineRenderModel` 是非可视闭环核心，负责从 `FrameSample`、viewport、target frame ms 生成可见 frame item；绘制和命中都应依赖它，避免 ScottPlot 调用与交互逻辑各自计算一套帧范围。
 - `FrameTimelineControl` 不应把帧耗时只表达为连续折线；可见范围内的每个 `FrameSample` 应以独立 frame item 表达，避免折线插值弱化逐帧定位与命中语义。
+- 全局 overview 的 session scrollbar 也应接入同一组 `FrameSample` 和 target frame ms，按 WinForms `SessionScrollBar.DrawFrameTimes` 的语义绘制 frame strip；否则用户只能在局部 graph 中看到逐帧分类，无法在全局范围内定位 spike。
 - frame graph 的主绘制路径应采用 Avalonia 原生矩形绘制，而不是通用 plot chart；这样可以直接表达 WinForms `FrameGraphPanel` 的 frame rect、target line、selected/hover band、像素命中与拖拽滚动语义。
 - 像素布局必须同时服务绘制、命中和滚轮缩放锚点；不能让 bar rect 使用一套 frame-to-x 映射，而 pointer/zoom 使用另一套近似映射。
 - 帧数据重绘与交互覆盖层刷新需要分离：`Samples`、`TargetFrameMs`、`Viewport` 变化可以重建 bars、target line、坐标轴；`SelectedFrameIndex`、`HoveredFrameIndex` 变化只应替换 selected/hover overlay，不应重建所有 frame items。
