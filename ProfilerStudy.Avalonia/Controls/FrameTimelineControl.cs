@@ -121,9 +121,7 @@ public sealed class FrameTimelineControl : UserControl
 		if (e.PropertyName == nameof(TimelineViewport.StartFrame) ||
 			e.PropertyName == nameof(TimelineViewport.EndFrame) ||
 			e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
-			e.PropertyName == nameof(TimelineSelection.SelectedFrameTimeMs) ||
-			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex) ||
-			e.PropertyName == nameof(TimelineSelection.HoveredFrameTimeMs))
+			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex))
 		{
 			RefreshPlot();
 		}
@@ -251,8 +249,8 @@ public sealed class FrameTimelineControl : UserControl
 	{
 		if (Selection != null)
 		{
-			Selection.HoveredFrameIndex = -1;
 			Selection.HoveredFrameTimeMs = 0.0;
+			Selection.HoveredFrameIndex = -1;
 		}
 	}
 
@@ -325,13 +323,13 @@ public sealed class FrameTimelineControl : UserControl
 		double frameCoordinate = PointToFrameCoordinate(position);
 		if (m_RenderModel.TryHitFrameCoordinate(frameCoordinate, out FrameTimelineRenderItem item))
 		{
-			Selection.HoveredFrameIndex = item.Index;
 			Selection.HoveredFrameTimeMs = item.DurationMs;
+			Selection.HoveredFrameIndex = item.Index;
 		}
 		else
 		{
-			Selection.HoveredFrameIndex = -1;
 			Selection.HoveredFrameTimeMs = 0.0;
+			Selection.HoveredFrameIndex = -1;
 		}
 	}
 
@@ -345,10 +343,10 @@ public sealed class FrameTimelineControl : UserControl
 		double frameCoordinate = PointToFrameCoordinate(position);
 		if (m_RenderModel.TryHitFrameCoordinate(frameCoordinate, out FrameTimelineRenderItem item))
 		{
-			Selection.SelectedFrameIndex = item.Index;
 			Selection.SelectedFrameTimeMs = item.DurationMs;
-			Selection.HoveredFrameIndex = item.Index;
+			Selection.SelectedFrameIndex = item.Index;
 			Selection.HoveredFrameTimeMs = item.DurationMs;
+			Selection.HoveredFrameIndex = item.Index;
 		}
 	}
 
