@@ -54,6 +54,7 @@ internal static class ProfilerReportFormatter
 			builder.AppendLine("## Frame");
 			AppendKeyValues(builder, frame);
 		}
+		AppendProfilerOverhead(builder, result);
 		AppendTable(builder, "Slow Frames", result, "slowFrames", new[] { "index", "durationMs", "timeSpanCount", "bytesSent" });
 		AppendTable(builder, "Scope Hotspots", result, "scopeHotspots", new[] { "name", "totalMs", "totalCount", "maxMsPerFrame" });
 		AppendFlameGraphs(builder, result);
@@ -89,6 +90,36 @@ internal static class ProfilerReportFormatter
 			AppendKeyValues(builder, telemetry);
 		}
 		return builder.ToString().TrimEnd();
+	}
+
+	private static void AppendProfilerOverhead(StringBuilder builder, Dictionary<string, object> result)
+	{
+		if (!result.TryGetValue("profilerOverhead", out object overheadObj) || !(overheadObj is Dictionary<string, object> overhead))
+		{
+			return;
+		}
+		builder.AppendLine();
+		builder.AppendLine("## Profiler Overhead");
+		if (overhead.TryGetValue("memoryOverhead", out object memoryObj) && memoryObj is Dictionary<string, object> memory)
+		{
+			builder.AppendLine();
+			builder.AppendLine("### Memory");
+			AppendKeyValues(builder, memory);
+		}
+		if (overhead.TryGetValue("frameOverhead", out object frameObj) && frameObj is Dictionary<string, object> frame)
+		{
+			builder.AppendLine();
+			builder.AppendLine("### Frame");
+			AppendKeyValues(builder, frame);
+		}
+		AppendTable(builder, "Top Profiler Wait Frames", overhead, "topWaitFrames", new[] { "index", "durationMs", "bytesSent", "waitForSendCompleteMs", "prevFrameSendMs" });
+		AppendTable(builder, "Top Profiler Bytes Frames", overhead, "topBytesFrames", new[] { "index", "durationMs", "bytesSent", "waitForSendCompleteMs", "prevFrameSendMs" });
+		if (overhead.TryGetValue("diagnostics", out object diagnosticsObj) && diagnosticsObj is Dictionary<string, object> diagnostics)
+		{
+			builder.AppendLine();
+			builder.AppendLine("### Diagnostics");
+			AppendKeyValues(builder, diagnostics);
+		}
 	}
 
 	private static void AppendKeyValues(StringBuilder builder, Dictionary<string, object> values)

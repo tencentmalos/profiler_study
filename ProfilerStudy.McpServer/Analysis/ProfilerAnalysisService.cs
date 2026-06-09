@@ -218,6 +218,20 @@ internal sealed class ProfilerAnalysisService
 		};
 	}
 
+	public Dictionary<string, object> GetProfilerOverhead(string sessionId, int startFrame, int endFrame, int top)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		Session session = loaded.Session;
+		NormalizeFrameRange(session, ref startFrame, ref endFrame);
+		double tickToMs = TickToMs(session);
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["range"] = BuildRangeDictionary(session, startFrame, endFrame),
+			["profilerOverhead"] = BuildProfilerOverhead(session, tickToMs, startFrame, endFrame, top)
+		};
+	}
+
 	public Dictionary<string, object> ListCounters(string sessionId, int top, string filter)
 	{
 		LoadedSession loaded = GetLoadedSession(sessionId);
@@ -432,6 +446,7 @@ internal sealed class ProfilerAnalysisService
 			["sessionId"] = loaded.Id,
 			["range"] = range,
 			["summary"] = GetRangeSummary(session, tickToMs, startFrame, endFrame),
+			["profilerOverhead"] = BuildProfilerOverhead(session, tickToMs, startFrame, endFrame, top),
 			["slowFrames"] = GetSlowFrames(session, top, tickToMs, resolvedThreshold, startFrame, endFrame),
 			["scopeHotspots"] = hotspots,
 			["slowFramePattern"] = ProfilerDiagnostics.AnalyzeSlowFramePattern(samples, resolvedThreshold),
@@ -460,10 +475,14 @@ internal sealed class ProfilerAnalysisService
 		ArrayList hotspots = GetScopeHotspots(session, top, tickToMs);
 		ArrayList customStats = GetCustomStats(session, top);
 		ArrayList threads = GetThreads(session, top);
+		Dictionary<string, object> profilerOverhead = session.FrameCount == 0
+			? BuildProfilerOverhead(session, tickToMs, 0, -1, top)
+			: BuildProfilerOverhead(session, tickToMs, 0, session.FrameCount - 1, top);
 
 		return new Dictionary<string, object>
 		{
 			["summary"] = GetSummary(session, tickToMs),
+			["profilerOverhead"] = profilerOverhead,
 			["slowFrames"] = slowFrames,
 			["scopeHotspots"] = hotspots,
 			["customStats"] = customStats,
@@ -610,6 +629,86 @@ internal sealed class ProfilerAnalysisService
 				["firstFrameSeen"] = stat.m_FirstFrameSeen
 			};
 		}
+	}
+
+	private static Dictionary<string, object> BuildProfilerOverhead(Session session, double tickToMs, int startFrame, int endFrame, int top)
+	{
+		List<Frame> frames = endFrame >= startFrame
+			? GetFrames(session, startFrame, endFrame).ToList()
+			: new List<Frame>();
+		long sendBufferBytes = session.SendBufferSize;
+		long stringBytes = session.StringMemorySize;
+		long miscBytes = session.MiscMemorySize;
+		long recordingFileBytes = session.RecordingFileSize;
+		long totalBytesSent = frames.Sum(frame => (long)frame.BytesSent);
+		long totalWaitTicks = frames.Sum(frame => frame.WaitForSendCompleteTime);
+		long totalPrevSendTicks = frames.Sum(frame => frame.PrevFrameSendTime);
+		double totalFrameMs = frames.Sum(frame => frame.Duration * tickToMs);
+		double totalWaitMs = totalWaitTicks * tickToMs;
+		double totalPrevSendMs = totalPrevSendTicks * tickToMs;
+		long stallThresholdTicks = session.FrameCount == 0 ? 0L : (session.LastFrameEndTime - session.FirstFrameTime) / session.FrameCount;
+		int stalledFrameCount = stallThresholdTicks <= 0L ? 0 : frames.Count(frame => frame.WaitForSendCompleteTime > stallThresholdTicks);
+		int count = frames.Count;
+
+		return new Dictionary<string, object>
+		{
+			["memoryOverhead"] = new Dictionary<string, object>
+			{
+				["sendBufferBytes"] = sendBufferBytes,
+				["stringBytes"] = stringBytes,
+				["miscBytes"] = miscBytes,
+				["totalBytes"] = sendBufferBytes + stringBytes + miscBytes,
+				["recordingFileBytes"] = recordingFileBytes
+			},
+			["frameOverhead"] = new Dictionary<string, object>
+			{
+				["frameCount"] = count,
+				["totalFrameMs"] = Round(totalFrameMs),
+				["totalBytesSent"] = totalBytesSent,
+				["averageBytesSentPerFrame"] = count == 0 ? 0.0 : Round((double)totalBytesSent / count),
+				["maxBytesSentPerFrame"] = count == 0 ? 0 : frames.Max(frame => frame.BytesSent),
+				["totalWaitForSendCompleteMs"] = Round(totalWaitMs),
+				["averageWaitForSendCompleteMs"] = count == 0 ? 0.0 : Round(totalWaitMs / count),
+				["maxWaitForSendCompleteMs"] = count == 0 ? 0.0 : Round(frames.Max(frame => frame.WaitForSendCompleteTime) * tickToMs),
+				["totalPrevFrameSendMs"] = Round(totalPrevSendMs),
+				["averagePrevFrameSendMs"] = count == 0 ? 0.0 : Round(totalPrevSendMs / count),
+				["maxPrevFrameSendMs"] = count == 0 ? 0.0 : Round(frames.Max(frame => frame.PrevFrameSendTime) * tickToMs),
+				["waitPercentOfFrameTime"] = totalFrameMs <= 0.0 ? 0.0 : Round(totalWaitMs * 100.0 / totalFrameMs),
+				["stallThresholdMs"] = Round(stallThresholdTicks * tickToMs),
+				["stalledFrameCount"] = stalledFrameCount
+			},
+			["topWaitFrames"] = ToArrayList(frames
+				.Where(frame => frame.WaitForSendCompleteTime > 0L)
+				.OrderByDescending(frame => frame.WaitForSendCompleteTime)
+				.ThenBy(frame => frame.Index)
+				.Take(top)
+				.Select(frame => FrameOverheadToDictionary(frame, tickToMs))),
+			["topBytesFrames"] = ToArrayList(frames
+				.Where(frame => frame.BytesSent > 0)
+				.OrderByDescending(frame => frame.BytesSent)
+				.ThenBy(frame => frame.Index)
+				.Take(top)
+				.Select(frame => FrameOverheadToDictionary(frame, tickToMs))),
+			["diagnostics"] = new Dictionary<string, object>
+			{
+				["hasObservedProfilerWait"] = totalWaitTicks > 0L,
+				["hasObservedProfilerSend"] = totalBytesSent > 0L || totalPrevSendTicks > 0L,
+				["hasProfilerMemoryStats"] = sendBufferBytes > 0L || stringBytes > 0L || miscBytes > 0L,
+				["stalledFrameCount"] = stalledFrameCount
+			}
+		};
+	}
+
+	private static Dictionary<string, object> FrameOverheadToDictionary(Frame frame, double tickToMs)
+	{
+		return new Dictionary<string, object>
+		{
+			["index"] = frame.Index,
+			["durationMs"] = Round(frame.Duration * tickToMs),
+			["bytesSent"] = frame.BytesSent,
+			["waitForSendCompleteMs"] = Round(frame.WaitForSendCompleteTime * tickToMs),
+			["prevFrameSendMs"] = Round(frame.PrevFrameSendTime * tickToMs)
+		};
 	}
 
 	private static bool CounterMatchesFilter(Dictionary<string, object> counter, string filter)

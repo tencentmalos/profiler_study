@@ -144,6 +144,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "get_profiler_overhead",
+				["description"] = "Return ProfilerStudy profiler overhead for a loaded session, including target-side profiler memory, bytes sent, wait-for-send stalls, and previous-frame send time.",
+				["inputSchema"] = ProfilerOverheadSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "find_slow_frames",
 				["description"] = "Find slow frames in a loaded session, including cadence and clustering diagnostics.",
 				["inputSchema"] = QuerySchema(includeThreshold: true, includeFrameRange: false)
@@ -226,6 +232,13 @@ internal sealed class ProfilerMcpTools
 					break;
 				case "get_session_summary":
 					structured = m_AnalysisService.GetSessionSummary(GetString(arguments, "session_id", string.Empty));
+					break;
+				case "get_profiler_overhead":
+					structured = m_AnalysisService.GetProfilerOverhead(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "start_frame", -1, -1, int.MaxValue),
+						GetInt(arguments, "end_frame", -1, -1, int.MaxValue),
+						GetInt(arguments, "top", 10, 1, 50));
 					break;
 				case "find_slow_frames":
 					structured = m_AnalysisService.FindSlowFrames(
@@ -391,6 +404,29 @@ internal sealed class ProfilerMcpTools
 			["type"] = "object",
 			["required"] = new ArrayList { "session_id" },
 			["properties"] = properties
+		};
+	}
+
+	private static Dictionary<string, object> ProfilerOverheadSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["start_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["end_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["top"] = new Dictionary<string, object>
+				{
+					["type"] = "integer",
+					["minimum"] = 1,
+					["maximum"] = 50,
+					["default"] = 10,
+					["description"] = "Maximum number of wait-heavy and bytes-heavy frames to return."
+				}
+			}
 		};
 	}
 

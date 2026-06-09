@@ -4,7 +4,7 @@
 
 | Tool | Use |
 | --- | --- |
-| `capture_profile` | Capture FramePro data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Android URLs support default `localfilesystem` paths plus explicit `localfilesystem:<path>`, `localabstract:<name>`, and `tcp:<port>` endpoints. Use `keep_session=true` for follow-ups. |
+| `capture_profile` | Capture ProfilerStudy data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Android URLs support default `localfilesystem` paths plus explicit `localfilesystem:<path>`, `localabstract:<name>`, and `tcp:<port>` endpoints. Use `keep_session=true` for follow-ups. |
 | `capture_android_profile` | Compatibility wrapper for fixed Android debug/release sockets. Prefer `capture_profile` for new live captures. |
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |
@@ -16,6 +16,7 @@
 | Tool | Key args |
 | --- | --- |
 | `get_session_summary` | `session_id` |
+| `get_profiler_overhead` | `session_id`, optional `start_frame`, `end_frame`, `top` |
 | `find_slow_frames` | `session_id`, `top`, optional `threshold_ms` |
 | `find_scope_hotspots` | `session_id`, `top`, optional `start_frame`, `end_frame` |
 | `analyze_frame` | `session_id`, `frame_index`, `top`, `neighbor_count` |
@@ -29,7 +30,13 @@
 Existing file:
 
 ```text
-Use profiler-study load_session_file for C:\workspace\captures\run.profiler, then summarize slow frames, scope hotspots, and counters.
+Use profiler-study load_session_file for C:\workspace\captures\run.profiler, then summarize profiler overhead, slow frames, scope hotspots, and counters.
+```
+
+Profiler overhead:
+
+```text
+For session s1, call get_profiler_overhead for frames 1200-1300 and explain target-side profiler memory, bytes sent, wait-for-send stalls, and previous-frame send time.
 ```
 
 Counter investigation:

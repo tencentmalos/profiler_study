@@ -99,7 +99,9 @@ internal static class ProfilerDiagnosticsSelfTest
 		InvokePrivate(session, "AssignUnassignedTimeSpans");
 		PopulateTimerNamesFromStats(session);
 		PopulateCounter(session);
+		PopulateProfilerOverhead(session);
 		string sessionId = AddSession(service, session);
+		AssertProfilerOverheadContract(service, sessionId);
 		Dictionary<string, object> hotspots = service.FindScopeHotspots(sessionId, 10, -1, -1);
 		AssertHasItems(hotspots["scopeHotspots"], "scope hotspots");
 
@@ -116,6 +118,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(12.0, frameDetailCounter["value"], "frame detail counter value");
 
 		AssertFrameDetailDefaults();
+		AssertProfilerOverheadTool();
 
 		Dictionary<string, object> range = service.AnalyzeTimeRange(sessionId, 18, 24, 10, 0.0);
 		AssertHasItems(range["scopeHotspots"], "range scope hotspots");
@@ -128,6 +131,17 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(counterName, counterSamples["counterName"], "counter name");
 		AssertHasItems(counterSamples["samples"], "counter samples");
 		service.CloseSession(sessionId);
+	}
+
+	private static void AssertProfilerOverheadContract(ProfilerAnalysisService service, string sessionId)
+	{
+		Dictionary<string, object> summary = service.GetSessionSummary(sessionId);
+		IDictionary summaryOverhead = summary["profilerOverhead"] as IDictionary;
+		AssertProfilerOverhead(summaryOverhead, "summary profiler overhead");
+
+		Dictionary<string, object> rangeOverhead = service.GetProfilerOverhead(sessionId, 18, 20, 5);
+		AssertEqual(sessionId, rangeOverhead["sessionId"], "profiler overhead session id");
+		AssertProfilerOverhead(rangeOverhead["profilerOverhead"] as IDictionary, "range profiler overhead");
 	}
 
 	private static void AssertFrameDetailDefaults()
@@ -152,6 +166,41 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(300, ((IDictionary)properties["max_nodes"])["default"], "max_nodes default");
 		AssertEqual(12, ((IDictionary)properties["max_depth"])["default"], "max_depth default");
 		AssertEqual(0.01, ((IDictionary)properties["min_duration_ms"])["default"], "min_duration_ms default");
+	}
+
+	private static void AssertProfilerOverheadTool()
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "get_profiler_overhead")
+			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IList required = inputSchema["required"] as IList;
+				if (required == null || !required.Contains("session_id"))
+				{
+					throw new InvalidOperationException("get_profiler_overhead must require session_id.");
+				}
+				return;
+			}
+		}
+		throw new InvalidOperationException("get_profiler_overhead tool is missing.");
+	}
+
+	private static void AssertProfilerOverhead(IDictionary overhead, string name)
+	{
+		if (overhead == null)
+		{
+			throw new InvalidOperationException(name + " expected profilerOverhead object.");
+		}
+		IDictionary memory = overhead["memoryOverhead"] as IDictionary;
+		IDictionary frame = overhead["frameOverhead"] as IDictionary;
+		AssertEqual(448L, memory["totalBytes"], name + " memory total bytes");
+		AssertEqual(1800L, frame["totalBytesSent"], name + " total bytes sent");
+		AssertEqual(6.0, frame["totalWaitForSendCompleteMs"], name + " total wait ms");
+		AssertHasItems(overhead["topWaitFrames"], name + " top wait frames");
+		AssertHasItems(overhead["topBytesFrames"], name + " top bytes frames");
 	}
 
 	private static string AddSession(ProfilerAnalysisService service, Session session)
@@ -209,10 +258,31 @@ internal static class ProfilerDiagnosticsSelfTest
 		}
 	}
 
+	private static void PopulateProfilerOverhead(Session session)
+	{
+		SetPrivateField(session, "m_SendBufferSize", 128L);
+		SetPrivateField(session, "m_StringMemorySize", 64L);
+		SetPrivateField(session, "m_MiscMemorySize", 256L);
+		SetPrivateField(session, "m_RecordingFileSize", 4096L);
+		for (int frameIndex = 18; frameIndex <= 20; frameIndex++)
+		{
+			Frame frame = session.GetFrame(frameIndex);
+			long waitTicks = (frameIndex - 17) * session.TimerFrequency / 1000;
+			long sendTicks = (frameIndex - 17) * session.TimerFrequency / 500;
+			frame.Finalise(frame.EndTime, frame.TimeSpanCount, (frameIndex - 17) * 300, waitTicks, sendTicks);
+		}
+	}
+
 	private static object GetPrivateField(object target, string name)
 	{
 		FieldInfo field = target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
 		return field.GetValue(target);
+	}
+
+	private static void SetPrivateField(object target, string name, object value)
+	{
+		FieldInfo field = target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+		field.SetValue(target, value);
 	}
 
 	private static void AssertHasItems(object actual, string name)
