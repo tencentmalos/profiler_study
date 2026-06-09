@@ -55,6 +55,7 @@ internal static class AvaloniaSmokeTest
 			AssertThemeSettings();
 			AssertTableSorting();
 			AssertFlameChartControl();
+			AssertTimelineSelectionContract();
 			AssertTimelineZoomCommands(document);
 			AssertFrameTimelinePointerGestureContract();
 			AssertFrameTimelineRenderModel(document);
@@ -112,6 +113,23 @@ internal static class AvaloniaSmokeTest
 		int visibleBeforeZoomOut = viewModel.Viewport.VisibleFrameCount;
 		viewModel.ZoomTimelineOutCommand.Execute(null);
 		Assert(viewModel.Viewport.VisibleFrameCount > visibleBeforeZoomOut, "timeline zoom out command widens visible range");
+	}
+
+	private static void AssertTimelineSelectionContract()
+	{
+		Assert(typeof(TimelineSelection).GetProperty(nameof(TimelineSelection.SelectedFrameIndex))?.SetMethod?.IsPublic is false, "timeline selection selected index setter hidden");
+		Assert(typeof(TimelineSelection).GetProperty(nameof(TimelineSelection.SelectedFrameTimeMs))?.SetMethod?.IsPublic is false, "timeline selection selected time setter hidden");
+		Assert(typeof(TimelineSelection).GetProperty(nameof(TimelineSelection.HoveredFrameIndex))?.SetMethod?.IsPublic is false, "timeline selection hovered index setter hidden");
+		Assert(typeof(TimelineSelection).GetProperty(nameof(TimelineSelection.HoveredFrameTimeMs))?.SetMethod?.IsPublic is false, "timeline selection hovered time setter hidden");
+
+		TimelineSelection selection = new TimelineSelection();
+		selection.SelectFrame(7, 18.25);
+		Assert(selection.SelectedFrameIndex == 7 && selection.SelectedFrameTimeMs == 18.25, "timeline selection selected pair");
+		selection.HoverFrame(9, 20.5);
+		Assert(selection.HoveredFrameIndex == 9 && selection.HoveredFrameTimeMs == 20.5, "timeline selection hovered pair");
+		selection.Clear();
+		Assert(selection.SelectedFrameIndex == -1 && selection.SelectedFrameTimeMs == 0.0, "timeline selection selected pair clear");
+		Assert(selection.HoveredFrameIndex == -1 && selection.HoveredFrameTimeMs == 0.0, "timeline selection hovered pair clear");
 	}
 
 	private static void AssertFrameTimelinePointerGestureContract()

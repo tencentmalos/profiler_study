@@ -10,25 +10,25 @@ public sealed class TimelineSelection : ObservableObject
 	public int SelectedFrameIndex
 	{
 		get => m_SelectedFrameIndex;
-		set => SetProperty(ref m_SelectedFrameIndex, value);
+		private set => SetProperty(ref m_SelectedFrameIndex, value);
 	}
 
 	public int HoveredFrameIndex
 	{
 		get => m_HoveredFrameIndex;
-		set => SetProperty(ref m_HoveredFrameIndex, value);
+		private set => SetProperty(ref m_HoveredFrameIndex, value);
 	}
 
 	public double SelectedFrameTimeMs
 	{
 		get => m_SelectedFrameTimeMs;
-		set => SetProperty(ref m_SelectedFrameTimeMs, value);
+		private set => SetProperty(ref m_SelectedFrameTimeMs, value);
 	}
 
 	public double HoveredFrameTimeMs
 	{
 		get => m_HoveredFrameTimeMs;
-		set => SetProperty(ref m_HoveredFrameTimeMs, value);
+		private set => SetProperty(ref m_HoveredFrameTimeMs, value);
 	}
 
 	public void SelectFrame(int frameIndex, double frameTimeMs)
