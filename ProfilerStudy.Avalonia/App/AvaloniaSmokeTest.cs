@@ -119,15 +119,16 @@ internal static class AvaloniaSmokeTest
 		};
 		TimelineViewport sparseViewport = TimelineViewport.CreateForFrames(11);
 		FrameTimelineRenderModel sparseModel = FrameTimelineRenderModel.Create(sparseSamples, sparseViewport, 16.0);
-		Assert(sparseModel.TryHitFrameCoordinate(5.49, out FrameTimelineRenderItem sparseHit), "frame timeline sparse band hit");
+		Assert(sparseModel.TryHitFrameCoordinate(5.99, out FrameTimelineRenderItem sparseHit), "frame timeline sparse band hit");
 		Assert(sparseHit.Index == 5, "frame timeline sparse band hit identity");
+		Assert(sparseModel.TryHitFrameCoordinate(6.0, out _) is false, "frame timeline sparse next gap miss");
 		Assert(sparseModel.TryHitFrameCoordinate(2.5, out _) is false, "frame timeline sparse gap miss");
 
 		FrameTimelinePixelLayout layout = FrameTimelinePixelLayout.Create(sparseModel, new global::Avalonia.Rect(0, 0, 110, 55));
-		Assert(layout.TryHit(new global::Avalonia.Point(54.9, 20), out FrameTimelineRenderItem pixelHit), "frame timeline pixel hit");
+		Assert(layout.TryHit(new global::Avalonia.Point(59.9, 20), out FrameTimelineRenderItem pixelHit), "frame timeline pixel hit");
 		Assert(pixelHit.Index == 5, "frame timeline pixel hit identity");
 		Assert(Math.Abs(layout.GetFrameCoordinate(new global::Avalonia.Point(55, 20)) - 5.5) < 0.0001, "frame timeline pixel coordinate");
-		Assert(layout.TryHit(new global::Avalonia.Point(55, 20), out _) is false, "frame timeline sparse pixel band miss");
+		Assert(layout.TryHit(new global::Avalonia.Point(60, 20), out _) is false, "frame timeline sparse pixel gap miss");
 
 		FrameSample[] denseSamples = Enumerable.Range(0, 20)
 			.Select(index => new FrameSample(index, index == 7 ? 80.0 : 5.0))

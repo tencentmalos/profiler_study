@@ -146,13 +146,8 @@ internal sealed class FrameTimelineRenderModel
 
 	public bool TryHitFrameCoordinate(double frameCoordinate, out FrameTimelineRenderItem item)
 	{
-		int frameIndex = (int)Math.Floor(frameCoordinate + 0.5);
-		if (TryGetItem(frameIndex, out item) is false)
-		{
-			return false;
-		}
-
-		return frameCoordinate >= item.Index - 0.5 && frameCoordinate < item.Index + 0.5;
+		int frameIndex = (int)Math.Floor(frameCoordinate);
+		return TryGetItem(frameIndex, out item);
 	}
 }
 

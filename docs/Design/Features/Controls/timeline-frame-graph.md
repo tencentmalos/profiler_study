@@ -69,7 +69,7 @@
 - 帧数据重绘与交互覆盖层刷新需要分离：`Samples`、`TargetFrameMs`、`Viewport` 变化可以重建 bars、target line、坐标轴；`SelectedFrameIndex`、`HoveredFrameIndex` 变化只应替换 selected/hover overlay，不应重建所有 frame items。
 - `FrameTimelineRenderModel` 构建可见 items 时应按 viewport 起点定位到首个可见 sample，不能在长 session 下每次从 samples 开头线性扫描到可见范围。
 - 当可见帧数大于可用像素宽度时，frame graph 的视觉绘制可以按像素列聚合，但每列必须保留该列覆盖范围内最需要用户关注的帧：优先保留分类最严重、同类中耗时最高的 sample。聚合只影响绘制 bars 数量和颜色表达，不能改变 `FrameTimelineRenderModel` 中的真实 frame items。
-- 采样或稀疏 `FrameSample` 只能扩大视觉表达，不能扩大 hover/selection 的命中范围；pixel hit 必须复用真实 sample 的 half-frame band 语义，避免点击采样间隙时误选临近采样帧。
+- `FrameSample.Index` 与 WinForms `FrameIndexToX` 一样表示该帧左边界；单帧命中区间应为 `[Index, Index + 1)`，bar rect、hover/selection overlay、wheel anchor 必须复用这套左边界坐标。采样或稀疏 `FrameSample` 只能扩大视觉表达，不能把未采样的帧间隙命中到临近 sample。
 - frame item 颜色按 WinForms `FrameGraphPanel.GetFrameBrush` 的语义分组：低于目标帧耗时为正常，达到目标帧耗时为 warning，达到两倍目标帧耗时为 alert。
 - frame bar 高度应表达 frame duration 在当前显示 scale 下的比例，不能因为 target frame ms 变化而整体重新归一化；target frame ms 只影响颜色分类和 target line 位置。Avalonia 暂未实现 WinForms 可拖拽 y-axis scale 时，渲染模型至少要保证同一组可见帧在不同 target 下高度稳定。
 - target line 保持横向参考线；selected frame 与 hovered frame 应明确绑定到整帧索引，保证状态栏、selected frame scopes、selected frame counters 和 thread timeline 能跟随变化。
