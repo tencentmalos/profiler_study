@@ -67,11 +67,12 @@
 - 像素布局必须同时服务绘制、命中和滚轮缩放锚点；不能让 bar rect 使用一套 frame-to-x 映射，而 pointer/zoom 使用另一套近似映射。
 - 帧数据重绘与交互覆盖层刷新需要分离：`Samples`、`TargetFrameMs`、`Viewport` 变化可以重建 bars、target line、坐标轴；`SelectedFrameIndex`、`HoveredFrameIndex` 变化只应替换 selected/hover overlay，不应重建所有 frame items。
 - `FrameTimelineRenderModel` 构建可见 items 时应按 viewport 起点定位到首个可见 sample，不能在长 session 下每次从 samples 开头线性扫描到可见范围。
+- 当可见帧数大于可用像素宽度时，frame graph 的视觉绘制可以按像素列聚合，但每列必须保留该列覆盖范围内最需要用户关注的帧：优先保留分类最严重、同类中耗时最高的 sample。聚合只影响绘制 bars 数量和颜色表达，不能改变 `FrameTimelineRenderModel` 中的真实 frame items。
 - frame item 颜色按 WinForms `FrameGraphPanel.GetFrameBrush` 的语义分组：低于目标帧耗时为正常，达到目标帧耗时为 warning，达到两倍目标帧耗时为 alert。
 - target line 保持横向参考线；selected frame 与 hovered frame 应明确绑定到整帧索引，保证状态栏、selected frame scopes、selected frame counters 和 thread timeline 能跟随变化。
 - `TimelineSelection` 应以 frame index 和 frame duration 成对更新为默认入口；外部控件不应只写 index 或只写 duration，避免状态栏、ProfilerStats marker、selected frame scopes 使用不一致的选择状态。
 - 本轮不新增 WinForms 的 selected range、time span overlay、event label；这些依赖额外 selection/event 状态，后续应在状态模型扩展后再补齐。
-- 大范围显示仍允许绘制采样后的 `FrameSample`，但鼠标命中和选择必须使用样本的真实 `Index`，不能用绘制数组下标替代帧号。
+- 大范围显示仍允许绘制采样或像素列聚合后的 `FrameSample`，但鼠标命中和选择必须使用样本的真实 `Index`，不能用绘制数组下标或聚合列号替代帧号。
 
 ## 数据流与状态归属
 

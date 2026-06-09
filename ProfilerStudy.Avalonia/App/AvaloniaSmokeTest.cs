@@ -127,6 +127,17 @@ internal static class AvaloniaSmokeTest
 		Assert(pixelHit.Index == 5, "frame timeline pixel hit identity");
 		Assert(Math.Abs(layout.GetFrameCoordinate(new global::Avalonia.Point(55, 20)) - 5.5) < 0.0001, "frame timeline pixel coordinate");
 
+		FrameSample[] denseSamples = Enumerable.Range(0, 20)
+			.Select(index => new FrameSample(index, index == 7 ? 80.0 : 5.0))
+			.ToArray();
+		TimelineViewport denseViewport = TimelineViewport.CreateForFrames(denseSamples.Length);
+		FrameTimelineRenderModel denseModel = FrameTimelineRenderModel.Create(denseSamples, denseViewport, 16.0);
+		FrameTimelinePixelLayout denseLayout = FrameTimelinePixelLayout.Create(denseModel, new global::Avalonia.Rect(0, 0, 5, 50));
+		Assert(denseLayout.Bars.Count <= 5, "frame timeline dense pixel columns");
+		Assert(denseLayout.Bars.Any(bar => bar.Item.Index == 7 && bar.Item.Category == CoreUtils.FrameTimeCategory.Alert), "frame timeline dense keeps alert frame");
+		Assert(denseLayout.TryHit(new global::Avalonia.Point(1.875, 20), out FrameTimelineRenderItem denseHit), "frame timeline dense exact hit");
+		Assert(denseHit.Index == 7, "frame timeline dense exact hit identity");
+
 		CountingFrameSampleList manySamples = new CountingFrameSampleList(10000);
 		TimelineViewport tailViewport = TimelineViewport.CreateForFrames(10000);
 		tailViewport.SetRange(9900, 9910);

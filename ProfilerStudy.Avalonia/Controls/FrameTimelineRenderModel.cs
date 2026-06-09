@@ -214,18 +214,84 @@ internal sealed class FrameTimelinePixelLayout
 		int visibleFrameCount = Math.Max(1, model.EndFrame - model.StartFrame + 1);
 		double frameWidth = bounds.Width / visibleFrameCount;
 		double maxDurationMs = Math.Max(1.0, model.MaxDurationMs);
-		List<FrameTimelinePixelBar> bars = new List<FrameTimelinePixelBar>(model.Items.Count);
-		foreach (FrameTimelineRenderItem item in model.Items)
+		List<FrameTimelinePixelBar> bars = frameWidth < 1.0
+			? CreateDenseBars(model, bounds, frameWidth, maxDurationMs)
+			: CreateFrameBars(model.Items, model.StartFrame, bounds, frameWidth, maxDurationMs);
+
+		double targetLineY = bounds.Bottom - Math.Min(bounds.Height, Math.Max(0.0, model.TargetFrameMs) * bounds.Height / maxDurationMs);
+		return new FrameTimelinePixelLayout(model, bounds, bars, frameWidth, targetLineY);
+	}
+
+	private static List<FrameTimelinePixelBar> CreateFrameBars(
+		IReadOnlyList<FrameTimelineRenderItem> items,
+		int startFrame,
+		Rect bounds,
+		double frameWidth,
+		double maxDurationMs)
+	{
+		List<FrameTimelinePixelBar> bars = new List<FrameTimelinePixelBar>(items.Count);
+		foreach (FrameTimelineRenderItem item in items)
 		{
-			double x = bounds.X + ((item.Index - model.StartFrame) * frameWidth);
+			double x = bounds.X + ((item.Index - startFrame) * frameWidth);
 			double height = Math.Max(1.0, Math.Min(bounds.Height, item.DurationMs * bounds.Height / maxDurationMs));
 			double y = bounds.Bottom - height;
 			double width = Math.Max(1.0, frameWidth);
 			bars.Add(new FrameTimelinePixelBar(item, new Rect(x, y, width, height)));
 		}
 
-		double targetLineY = bounds.Bottom - Math.Min(bounds.Height, Math.Max(0.0, model.TargetFrameMs) * bounds.Height / maxDurationMs);
-		return new FrameTimelinePixelLayout(model, bounds, bars, frameWidth, targetLineY);
+		return bars;
+	}
+
+	private static List<FrameTimelinePixelBar> CreateDenseBars(
+		FrameTimelineRenderModel model,
+		Rect bounds,
+		double frameWidth,
+		double maxDurationMs)
+	{
+		int columnCount = Math.Max(1, (int)Math.Ceiling(bounds.Width));
+		FrameTimelineRenderItem[] columnItems = new FrameTimelineRenderItem[columnCount];
+		bool[] hasColumnItem = new bool[columnCount];
+		foreach (FrameTimelineRenderItem item in model.Items)
+		{
+			int column = (int)Math.Floor((item.Index - model.StartFrame) * frameWidth);
+			column = Math.Max(0, Math.Min(columnCount - 1, column));
+			if (hasColumnItem[column] is false || IsMoreImportantFrame(item, columnItems[column]))
+			{
+				columnItems[column] = item;
+				hasColumnItem[column] = true;
+			}
+		}
+
+		List<FrameTimelinePixelBar> bars = new List<FrameTimelinePixelBar>(columnCount);
+		for (int i = 0; i < columnItems.Length; i++)
+		{
+			if (hasColumnItem[i] is false)
+			{
+				continue;
+			}
+
+			FrameTimelineRenderItem item = columnItems[i];
+			double height = Math.Max(1.0, Math.Min(bounds.Height, item.DurationMs * bounds.Height / maxDurationMs));
+			double y = bounds.Bottom - height;
+			bars.Add(new FrameTimelinePixelBar(item, new Rect(bounds.X + i, y, 1.0, height)));
+		}
+
+		return bars;
+	}
+
+	private static bool IsMoreImportantFrame(FrameTimelineRenderItem candidate, FrameTimelineRenderItem current)
+	{
+		if (candidate.Category != current.Category)
+		{
+			return candidate.Category > current.Category;
+		}
+
+		if (candidate.DurationMs != current.DurationMs)
+		{
+			return candidate.DurationMs > current.DurationMs;
+		}
+
+		return candidate.Index < current.Index;
 	}
 
 	public bool TryHit(Point point, out FrameTimelineRenderItem item)
@@ -243,7 +309,7 @@ internal sealed class FrameTimelinePixelLayout
 
 	public double GetFrameCoordinate(Point point)
 	{
-		return Model.StartFrame + ((point.X - Bounds.X) / Math.Max(1.0, FrameWidth));
+		return Model.StartFrame + ((point.X - Bounds.X) / Math.Max(double.Epsilon, FrameWidth));
 	}
 }
 
