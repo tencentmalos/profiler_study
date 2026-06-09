@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Avalonia;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -136,6 +137,92 @@ internal sealed class FrameTimelineRenderModel
 		}
 
 		return frameCoordinate >= item.Index - 0.5 && frameCoordinate < item.Index + 0.5;
+	}
+}
+
+internal readonly struct FrameTimelinePixelBar
+{
+	public FrameTimelinePixelBar(FrameTimelineRenderItem item, Rect rect)
+	{
+		Item = item;
+		Rect = rect;
+	}
+
+	public FrameTimelineRenderItem Item { get; }
+
+	public Rect Rect { get; }
+}
+
+internal sealed class FrameTimelinePixelLayout
+{
+	public static readonly FrameTimelinePixelLayout Empty = new FrameTimelinePixelLayout(
+		FrameTimelineRenderModel.Empty,
+		default,
+		Array.Empty<FrameTimelinePixelBar>(),
+		0.0,
+		0.0);
+
+	private FrameTimelinePixelLayout(
+		FrameTimelineRenderModel model,
+		Rect bounds,
+		IReadOnlyList<FrameTimelinePixelBar> bars,
+		double frameWidth,
+		double targetLineY)
+	{
+		Model = model;
+		Bounds = bounds;
+		Bars = bars;
+		FrameWidth = frameWidth;
+		TargetLineY = targetLineY;
+	}
+
+	public FrameTimelineRenderModel Model { get; }
+
+	public Rect Bounds { get; }
+
+	public IReadOnlyList<FrameTimelinePixelBar> Bars { get; }
+
+	public double FrameWidth { get; }
+
+	public double TargetLineY { get; }
+
+	public bool HasBars => Bars.Count > 0;
+
+	public static FrameTimelinePixelLayout Create(FrameTimelineRenderModel model, Rect bounds)
+	{
+		if (model == null || model.HasItems is false || bounds.Width <= 0.0 || bounds.Height <= 0.0)
+		{
+			return Empty;
+		}
+
+		int visibleFrameCount = Math.Max(1, model.EndFrame - model.StartFrame + 1);
+		double frameWidth = bounds.Width / visibleFrameCount;
+		double maxDurationMs = Math.Max(1.0, model.MaxDurationMs);
+		List<FrameTimelinePixelBar> bars = new List<FrameTimelinePixelBar>(model.Items.Count);
+		foreach (FrameTimelineRenderItem item in model.Items)
+		{
+			double x = bounds.X + ((item.Index - model.StartFrame) * frameWidth);
+			double height = Math.Max(1.0, Math.Min(bounds.Height, item.DurationMs * bounds.Height / maxDurationMs));
+			double y = bounds.Bottom - height;
+			double width = Math.Max(1.0, frameWidth);
+			bars.Add(new FrameTimelinePixelBar(item, new Rect(x, y, width, height)));
+		}
+
+		double targetLineY = bounds.Bottom - Math.Min(bounds.Height, Math.Max(0.0, model.TargetFrameMs) * bounds.Height / maxDurationMs);
+		return new FrameTimelinePixelLayout(model, bounds, bars, frameWidth, targetLineY);
+	}
+
+	public bool TryHit(Point point, out FrameTimelineRenderItem item)
+	{
+		if (Bounds.Contains(point) is false)
+		{
+			item = default;
+			return false;
+		}
+
+		double frameCoordinate = Model.StartFrame + ((point.X - Bounds.X) / Math.Max(1.0, FrameWidth));
+		int frameIndex = (int)Math.Floor(frameCoordinate);
+		return Model.TryGetItem(frameIndex, out item);
 	}
 }
 
