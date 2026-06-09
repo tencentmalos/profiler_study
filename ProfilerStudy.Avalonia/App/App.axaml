@@ -48,7 +48,7 @@
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="avares://ProfilerStudy.Avalonia/TimelineScope/TimelineScopeThemeResources.axaml" />
+        <ResourceInclude Source="avares://ProfilerStudy.Avalonia/Features/TimelineScope/TimelineScopeThemeResources.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

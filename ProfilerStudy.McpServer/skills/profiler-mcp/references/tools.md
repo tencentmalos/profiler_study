@@ -4,7 +4,7 @@
 
 | Tool | Use |
 | --- | --- |
-| `capture_profile` | Capture FramePro data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Android URLs support default `localfilesystem` paths plus explicit `localfilesystem:<path>`, `localabstract:<name>`, and `tcp:<port>` endpoints. Use `keep_session=true` for follow-ups. |
+| `capture_profile` | Capture ProfilerStudy data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Android URLs support default `localfilesystem` paths plus explicit `localfilesystem:<path>`, `localabstract:<name>`, and `tcp:<port>` endpoints. Use `keep_session=true` for follow-ups. |
 | `capture_android_profile` | Compatibility wrapper for fixed Android debug/release sockets. Prefer `capture_profile` for new live captures. |
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |

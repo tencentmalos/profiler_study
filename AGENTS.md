@@ -4,8 +4,8 @@
 
 This is a Visual Studio 2022 C# Windows Forms profiler UI targeting `.NET Framework 4.7.2`. The root solution is `ProfilerForStudy.sln`.
 
-- `ProfilerStudy/` contains the main WinForms application and `FramePro` UI views.
-- `ProfilerStudyCore/` contains core FramePro session, packet, timing, and data model logic.
+- `ProfilerStudy/` contains the legacy WinForms application under `LegacyWinForms/`.
+- `ProfilerStudyCore/` contains core session, packet, transport, timing, and data model logic grouped by feature.
 - `ProfilerCanvas/` and `CanvasDataGrid/` contain reusable editor, canvas, and grid controls.
 - `CoreUtils/` contains shared utility types under `SCLCoreCLR`.
 - `docker/` contains docking and MDI UI infrastructure.
@@ -25,11 +25,11 @@ dotnet build ProfilerForStudy.sln -c Release
 
 ## Coding Style & Naming Conventions
 
-Use C# 11 syntax only where compatible with `net472`. Follow the existing style: braces on new lines, project-local indentation preserved, PascalCase for types and public members, camelCase for locals and parameters, and event handler delegates named with a `Handler` suffix. Keep namespaces and folders aligned with `FramePro`, `SCL`, and `SCLCoreCLR`.
+Use C# 11 syntax only where compatible with `net472`. Follow the existing style: braces on new lines, project-local indentation preserved, PascalCase for types and public members, camelCase for locals and parameters, and event handler delegates named with a `Handler` suffix. Keep namespaces and folders aligned with `ProfilerStudy`, `SCL`, and `SCLCoreCLR`.
 
 ## Testing Guidelines
 
-There is no dedicated test project. Before submitting changes, build the full solution and manually exercise affected UI paths in `ProfilerStudy`. Existing lightweight checks appear in `ProfilerStudy/FramePro/Tests.cs`; keep new diagnostics similarly scoped unless adding a formal test project. Name verification helpers after the behavior they validate.
+There is no dedicated test project. Before submitting changes, build the full solution and manually exercise affected UI paths in `ProfilerStudy`. Existing lightweight checks appear in `ProfilerStudy/LegacyWinForms/Tests.cs`; keep new diagnostics similarly scoped unless adding a formal test project. Name verification helpers after the behavior they validate.
 
 ## Commit & Pull Request Guidelines
 

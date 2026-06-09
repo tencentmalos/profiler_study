@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Markup.Xaml;
 using System;
 using System.Windows.Input;
 using System.ComponentModel;
@@ -11,6 +12,10 @@ namespace ProfilerStudy.Avalonia;
 
 public sealed partial class MainWindow : SukiWindow
 {
+	private ucProfilerStats ProfilerStatsControl;
+	private ucProfilerStats ThreadsProfilerStatsControl;
+	private ucProfilerStats CoresProfilerStatsControl;
+	private ucProfilerStats ScopesProfilerStatsControl;
 	private MainWindowViewModel m_ViewModel;
 	private TimelineViewport m_AttachedViewport;
 	private TimelineSelection m_AttachedSelection;
@@ -48,6 +53,15 @@ public sealed partial class MainWindow : SukiWindow
 		DataContextChanged += OnDataContextChanged;
 		Loaded += OnLoaded;
 		Unloaded += OnUnloaded;
+	}
+
+	private void InitializeComponent()
+	{
+		AvaloniaXamlLoader.Load(this);
+		ProfilerStatsControl = this.FindControl<ucProfilerStats>(nameof(ProfilerStatsControl));
+		ThreadsProfilerStatsControl = this.FindControl<ucProfilerStats>(nameof(ThreadsProfilerStatsControl));
+		CoresProfilerStatsControl = this.FindControl<ucProfilerStats>(nameof(CoresProfilerStatsControl));
+		ScopesProfilerStatsControl = this.FindControl<ucProfilerStats>(nameof(ScopesProfilerStatsControl));
 	}
 
 	private void OnLoaded(object sender, global::Avalonia.Interactivity.RoutedEventArgs e)

@@ -12,7 +12,7 @@
 
 主要原因：
 
-- `ProfilerStudy/FramePro/*` 是核心 UI，包含大量 WinForms 控件、自绘、事件处理、滚动、选择、浮窗和对话框。
+- `ProfilerStudy/LegacyWinForms/*` 是核心 UI，包含大量 WinForms 控件、自绘、事件处理、滚动、选择、浮窗和对话框。
 - `CanvasDataGrid/`、`ProfilerCanvas/`、`docker/` 都是 WinForms 控件库，不能直接在 Avalonia 中复用。
 - `CoreUtils/` 和 `ProfilerStudyCore/` 也混入了 `System.Windows.Forms`、Win32 P/Invoke、Windows 路径和进程调用。
 - `Profiler_GameSimulator.exe`、`Profiler_RecordingPlayer.exe`、`VisualStudioOpenFileAndLine.exe` 是 Windows 二进制，macOS 原生版需要替代或降级。

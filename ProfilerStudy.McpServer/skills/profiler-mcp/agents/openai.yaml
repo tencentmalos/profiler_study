@@ -1,4 +1,4 @@
 interface:
   display_name: "Profiler MCP"
-  short_description: "Analyze FramePro captures through MCP"
-  default_prompt: "Use $profiler-mcp to analyze a FramePro capture with the profiler-study MCP server."
+  short_description: "Analyze ProfilerStudy captures through MCP"
+  default_prompt: "Use $profiler-mcp to analyze a ProfilerStudy capture with the profiler-study MCP server."

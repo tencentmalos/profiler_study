@@ -17,20 +17,20 @@
 
 - `ProfilerStudy/ProfilerStudy.csproj`、`ProfilerCanvas/ProfilerCanvas.csproj`、`CanvasDataGrid/CanvasDataGrid.csproj`、`docker/docker.csproj`、`CoreUtils/CoreUtils.csproj` 都使用 `Microsoft.NET.Sdk.WindowsDesktop`、`UseWindowsForms=True`、`TargetFramework=net472`。
 - `ProfilerStudyCore/ProfilerStudyCore.csproj` 虽然是普通 SDK 项目，但仍引用 `System.Windows.Forms`，并依赖 `CoreUtils`。
-- `ProfilerStudy` 是 `WinExe`，入口在 `ProfilerStudy/FramePro/Program.cs`，直接调用 `Application.Run(new MainForm(...))`。
+- `ProfilerStudy` 是 `WinExe`，入口在 `ProfilerStudy/LegacyWinForms/Program.cs`，直接调用 `Application.Run(new MainForm(...))`。
 
 ### Win32 和 Windows 专用 API
 
 - `CoreUtils/SCLCoreCLR/Time.cs` 使用 `Kernel32.dll` 的 `QueryPerformanceCounter/Frequency`，macOS 原生不可用。
 - `CoreUtils/SCLCoreCLR/ControlTaskDispatcher.cs` 使用 `user32.dll` `PostMessage`。
-- `docker/Docker/DockManager.cs`、`docker/Docker/NativeMethods.cs`、`ProfilerStudy/FramePro/HoverBox.cs` 使用 `user32.dll`。
-- `ProfilerStudyCore/FramePro/Platform.cs` 通过 `ntdll.dll` 的 `wine_get_version` 判断 Wine，这说明当前 macOS 方案已经偏向 Wine，而非原生 macOS。
+- `docker/Docker/DockManager.cs`、`docker/Docker/NativeMethods.cs`、`ProfilerStudy/LegacyWinForms/HoverBox.cs` 使用 `user32.dll`。
+- `ProfilerStudyCore/Infrastructure/Platform.cs` 通过 `ntdll.dll` 的 `wine_get_version` 判断 Wine，这说明当前 macOS 方案已经偏向 Wine，而非原生 macOS。
 
 ### 外部工具和路径
 
-- `ProfilerStudy/FramePro/Utils.cs` 打开源码时在 Windows 下调用 `cmd.exe /C code`、`clion64.exe` 或 `VisualStudioOpenFileAndLine.exe`。
+- `ProfilerStudy/LegacyWinForms/Utils.cs` 打开源码时在 Windows 下调用 `cmd.exe /C code`、`clion64.exe` 或 `VisualStudioOpenFileAndLine.exe`。
 - Wine 分支会调用 `open_source_vscode.sh`、`open_source_clion.sh`，这是当前最接近 macOS 可用的部分。
-- `ProfilerStudy/FramePro/MainForm.cs` 启动 `Profiler_GameSimulator.exe`、`Profiler_RecordingPlayer.exe`，这两个是 Windows 二进制。
+- `ProfilerStudy/LegacyWinForms/MainForm.cs` 启动 `Profiler_GameSimulator.exe`、`Profiler_RecordingPlayer.exe`，这两个是 Windows 二进制。
 - 多处代码假设 Windows 路径，例如 `\\cache\\`、`platform-tools\\adb.exe`、`FramePro\\FramePro.etl`。
 
 ## 方案 A：Wine 兼容运行版
@@ -111,7 +111,7 @@
 
 ### 成本和风险
 
-- UI 重写成本高，尤其是 `ProfilerStudy/FramePro/*`、`CanvasDataGrid/`、`ProfilerCanvas/`、`docker/`。
+- UI 重写成本高，尤其是 `ProfilerStudy/LegacyWinForms/*`、`CanvasDataGrid/`、`ProfilerCanvas/`、`docker/`。
 - 需要重新验证大量交互细节：缩放、滚动、选择、拖拽、Dock、绘图性能。
 - 不能一次性替换全部功能，必须分阶段交付。
 

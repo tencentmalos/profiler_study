@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using ProfilerStudy;
 using ProfilerStudy.Avalonia.Timeline;
 using System;
@@ -11,6 +12,16 @@ public partial class ucProfilerStats : UserControl
 	public static readonly StyledProperty<bool> IsCompactModeProperty =
 		AvaloniaProperty.Register<ucProfilerStats, bool>(nameof(IsCompactMode));
 
+	private Grid RootGrid;
+	private StackPanel ControlsPanel;
+	private CheckBox AutoFollowCheckBox;
+	private CheckBox AutoScaleCheckBox;
+	private CheckBox ShowDetailPlotsCheckBox;
+	private Button ShowAllPlotsButton;
+	private Button HideAllPlotsButton;
+	private ComboBox PlotHeightComboBox;
+	private StackPanel DetailPlotControlsPanel;
+	internal ucTimelineScope TimelineScope;
 	private readonly ProfilerStatsController m_Controller;
 
 	internal event Action<int, int> ViewportChangedByUser;
@@ -124,5 +135,20 @@ public partial class ucProfilerStats : UserControl
 				_ => PlotHeight.Medium
 			});
 		}
+	}
+
+	private void InitializeComponent()
+	{
+		AvaloniaXamlLoader.Load(this);
+		RootGrid = this.FindControl<Grid>(nameof(RootGrid));
+		ControlsPanel = this.FindControl<StackPanel>(nameof(ControlsPanel));
+		AutoFollowCheckBox = this.FindControl<CheckBox>(nameof(AutoFollowCheckBox));
+		AutoScaleCheckBox = this.FindControl<CheckBox>(nameof(AutoScaleCheckBox));
+		ShowDetailPlotsCheckBox = this.FindControl<CheckBox>(nameof(ShowDetailPlotsCheckBox));
+		ShowAllPlotsButton = this.FindControl<Button>(nameof(ShowAllPlotsButton));
+		HideAllPlotsButton = this.FindControl<Button>(nameof(HideAllPlotsButton));
+		PlotHeightComboBox = this.FindControl<ComboBox>(nameof(PlotHeightComboBox));
+		DetailPlotControlsPanel = this.FindControl<StackPanel>(nameof(DetailPlotControlsPanel));
+		TimelineScope = this.FindControl<ucTimelineScope>(nameof(TimelineScope));
 	}
 }

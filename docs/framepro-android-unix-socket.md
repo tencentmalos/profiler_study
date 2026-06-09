@@ -19,7 +19,7 @@ Android 侧 FramePro endpoint 使用 `localfilesystem` 类型，而不是 `local
 
 ### 普通 Connect 保持原逻辑
 
-`ProfilerStudy/FramePro/ConnectSettingsDialog.cs` 已恢复为传统 IP / Port 设置入口，只保留：
+`ProfilerStudy/LegacyWinForms/ConnectSettingsDialog.cs` 已恢复为传统 IP / Port 设置入口，只保留：
 
 - `8428 (PC)`
 - `4420 (XBox)`
@@ -28,7 +28,7 @@ Android 侧 FramePro endpoint 使用 `localfilesystem` 类型，而不是 `local
 
 ### 新增 Android 工具栏按钮
 
-`ProfilerStudy/FramePro/MainForm.cs` 新增独立工具栏按钮 `Android`。该按钮不复用普通 `Connect` 的设置对话框，而是进入专用 Android 连接流程：
+`ProfilerStudy/LegacyWinForms/MainForm.cs` 新增独立工具栏按钮 `Android`。该按钮不复用普通 `Connect` 的设置对话框，而是进入专用 Android 连接流程：
 
 1. 打开 Android socket 选择对话框。
 2. 让用户选择 Debug 或 Release。
@@ -39,11 +39,11 @@ Android 侧 FramePro endpoint 使用 `localfilesystem` 类型，而不是 `local
 
 ### 新增 AndroidConnectDialog
 
-`ProfilerStudy/FramePro/AndroidConnectDialog.cs` 是专用 Android 连接对话框。对话框只提供 Debug / Release 两个固定选项，不再枚举设备侧 socket。
+`ProfilerStudy/LegacyWinForms/AndroidConnectDialog.cs` 是专用 Android 连接对话框。对话框只提供 Debug / Release 两个固定选项，不再枚举设备侧 socket。
 
 ### 新增 AdbSocketDiscovery
 
-`ProfilerStudyCore/FramePro/AdbSocketDiscovery.cs` 集中处理 adb 相关逻辑：
+`ProfilerStudyCore/Transport/AdbSocketDiscovery.cs` 集中处理 adb 相关逻辑：
 
 - 解析和定位 adb 可执行文件。
 - 提供 Debug / Release 固定 socket endpoint。
@@ -54,7 +54,7 @@ Android 侧 FramePro endpoint 使用 `localfilesystem` 类型，而不是 `local
 
 ### Session 分流
 
-`ProfilerStudyCore/FramePro/Session.cs` 现在分为两条入口：
+`ProfilerStudyCore/Sessions/Session.cs` 现在分为两条入口：
 
 - `Connect()`：普通 IP / Port TCP 连接。
 - `ConnectToAndroid(string adbEndpoint)`：Android 专用流程。

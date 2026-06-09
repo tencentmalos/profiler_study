@@ -18,6 +18,15 @@ namespace ProfilerStudy.Avalonia.Timeline;
 
 public partial class ucTimelineScope : UserControl
 {
+    private Grid RootGrid = null!;
+    private Border TimelineBorder = null!;
+    private TextBlock TimelineTitleTextBlock = null!;
+    private Border SharedXAxisBorder = null!;
+    private Grid DetailViewArea = null!;
+    private AvaPlot TimelinePlot = null!;
+    private AvaPlot SharedXAxisPlot = null!;
+    private StackPanel DetailViewContainer = null!;
+
     // Main components using the new manager classes
     private ucChildSelectScope _scopeRegion = null!;
     private ucChildMainStats _mainStatsRegion = null!;
@@ -93,6 +102,19 @@ public partial class ucTimelineScope : UserControl
 
         _sharedXAxisRegion.UpdateXRange(initialScopeStart, initialScopeEnd);
         _detailsRegion.UpdateXRange(initialScopeStart, initialScopeEnd, EnableAutoScaleY);
+    }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+        RootGrid = this.FindControl<Grid>(nameof(RootGrid));
+        TimelineBorder = this.FindControl<Border>(nameof(TimelineBorder));
+        TimelineTitleTextBlock = this.FindControl<TextBlock>(nameof(TimelineTitleTextBlock));
+        SharedXAxisBorder = this.FindControl<Border>(nameof(SharedXAxisBorder));
+        DetailViewArea = this.FindControl<Grid>(nameof(DetailViewArea));
+        TimelinePlot = this.FindControl<AvaPlot>(nameof(TimelinePlot));
+        SharedXAxisPlot = this.FindControl<AvaPlot>(nameof(SharedXAxisPlot));
+        DetailViewContainer = this.FindControl<StackPanel>(nameof(DetailViewContainer));
     }
 
     private void InitializeManagers()

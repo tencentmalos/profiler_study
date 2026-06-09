@@ -85,7 +85,7 @@ Sidecar MCP Server 是一个独立进程，优先使用 `stdio` transport，适�
 建议命名：
 
 ```text
-ProfilerStudyCore/FramePro/Analysis/
+ProfilerStudyCore/Analysis/
   ProfilerAnalysisService.cs
   ProfilerSessionHandle.cs
   ProfilerSummaryDto.cs
@@ -351,11 +351,12 @@ timestamp, client, tool, arguments_summary, result_status, duration_ms
 
 ```text
 ProfilerStudyCore/
-  FramePro/
-    Analysis/
-      ProfilerAnalysisService.cs
-      ProfilerAnalysisOptions.cs
-      Dtos/
+  Analysis/
+  Sessions/
+  Model/
+  Protocol/
+  Transport/
+  Infrastructure/
 
 ProfilerStudy.McpServer/
   ProfilerStudy.McpServer.csproj

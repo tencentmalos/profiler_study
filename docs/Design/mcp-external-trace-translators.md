@@ -23,18 +23,18 @@
 当前已有三条相关链路：
 
 1. **WinForms legacy UI**
-   - `ProfilerStudy/FramePro/MainForm.cs` 的 `Read(string filename)` 只读取 FramePro session/recording。
-   - UI 视图普遍直接持有 `FramePro.Session`。
+   - `ProfilerStudy/LegacyWinForms/MainForm.cs` 的 `Read(string filename)` 只读取 FramePro session/recording。
+   - UI 视图普遍直接持有 legacy `Session`。
 
 2. **Avalonia UI**
-   - `ProfilerStudy.Avalonia/Sessions/SessionLoader.cs` 只通过 `FramePro.Session.Read` 加载 FramePro 文件。
+   - `ProfilerStudy.Avalonia/Features/Sessions/SessionLoader.cs` 只通过 `Session.Read` 加载 FramePro 文件。
    - `SessionDocument` 已经包含 `Id`、`SourcePath`、`Session`、`Summary`、`FrameSamples`、`Selection`、`Viewport`。
    - `MainWindowViewModel` 已有 open/recent/live connection、shared `TimelineSelection`、shared `TimelineViewport`、多视图刷新逻辑。
    - 这条链路更适合扩展成 Perfetto/Tracy 统一可视化 document；selection/viewport 留在 UI 层，不进入 MCP contract。
 
 3. **MCP server**
    - `ProfilerStudy.McpServer` 当前是独立 stdio server。
-   - `ProfilerAnalysisService` 自己维护 `LoadedSession` 字典，直接持有 `FramePro.Session`。
+   - `ProfilerAnalysisService` 自己维护 `LoadedSession` 字典，直接持有 `Session`。
    - MCP 可以独立读取 FramePro 文件，但不知道 UI 当前打开了什么。本阶段接受这一点，优先统一“文件/Artifact 可访问性”和“查询模型”。
 
 因此，一体化不应该只改 MCP，也不应该只让 UI shell out 到外部 Perfetto/Tracy UI。合理方向是抽出一个 **ProfilerStudy Trace Workspace**，让 UI 和 MCP 使用同一套 document/query/import 概念。
@@ -87,7 +87,7 @@
 
 ## Trace Workspace 数据模型
 
-新增一个 UI/MCP 共用模型，不再让所有消费者直接依赖 `FramePro.Session`：
+新增一个 UI/MCP 共用模型，不再让所有消费者直接依赖 `Session`：
 
 ```text
 TraceDocument
@@ -293,14 +293,14 @@ Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`�
 ### Phase 1：Trace Workspace 抽象
 
 - 定义 `TraceDocument`、`TraceArtifactManifest`、`ITraceQuerySession`。
-- 用 `FrameProTraceQuerySession` 包住现有 `FramePro.Session`。
+- 用 `FrameProTraceQuerySession` 包住现有 `Session`。
 - 将 Avalonia `SessionDocument` 迁移为或包裹为 `TraceDocument`；selection/viewport 作为 UI view state 保留。
 - MCP `LoadedSession` 改为持有 `ITraceQuerySession`，FramePro 行为保持兼容。
 
 验收：
 
 - FramePro 文件仍能在 UI 和 MCP 中按原行为打开/分析。
-- MCP 分析工具不再直接依赖 `FramePro.Session`。
+- MCP 分析工具不再直接依赖 `Session`。
 
 ### Phase 2：Artifact Store 和 MCP 文件/Artifact 访问
 

@@ -122,7 +122,7 @@ SukiUI 用于应用外壳和常规 UI，不用于高密度 profiler 绘图。
 
 ## 视觉还原策略
 
-Avalonia 版本的主工作区必须以旧版 WinForms `ProfilerStudy/FramePro` 的视觉语言为基准，而不是另起一套现代 dashboard 风格。SukiUI 只补足窗口、按钮、对话框、导航等通用外壳；用户真正用于分析的区域需要尽量还原旧版 FramePro 的工程化界面。
+Avalonia 版本的主工作区必须以旧版 WinForms `ProfilerStudy/LegacyWinForms` 的视觉语言为基准，而不是另起一套现代 dashboard 风格。SukiUI 只补足窗口、按钮、对话框、导航等通用外壳；用户真正用于分析的区域需要尽量还原旧版 ProfilerStudy 的工程化界面。
 
 还原优先级：
 
@@ -176,7 +176,7 @@ SkiaSharp 负责：
 
 ## Session 数据模型
 
-Avalonia 客户端不直接把 `FramePro.Session` 暴露给所有 ViewModel。使用 `SessionDocument` 作为 UI 文档模型：
+Avalonia 客户端不直接把 `Session` 暴露给所有 ViewModel。使用 `SessionDocument` 作为 UI 文档模型：
 
 ```csharp
 internal sealed class SessionDocument

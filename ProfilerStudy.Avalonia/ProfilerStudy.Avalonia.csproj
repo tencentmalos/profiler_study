@@ -15,6 +15,11 @@
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="App\App.axaml" />
+    <AvaloniaResource Include="App\Shell\MainWindow.axaml" />
+    <AvaloniaResource Include="Features\ProfilerStats\ucProfilerStats.axaml" />
+    <AvaloniaResource Include="Features\TimelineScope\ucTimelineScope.axaml" />
+    <AvaloniaResource Include="Features\TimelineScope\TimelineScopeThemeResources.axaml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProfilerStudyCore\ProfilerStudyCore.csproj" />
