@@ -33,6 +33,7 @@
 - `ProfilerStudy.Avalonia/Features/ProfilerStats/ProfilerTimelinePlotModel.cs`
 - `ProfilerStudy.Avalonia/Features/ProfilerStats/Timeline/*`
 - `ProfilerStudy.Avalonia/Features/TimelineScope/Generators/Curve2DGenerator.cs`
+- `third_party/ScottPlot/`：ProfilerStats / TimelineScope plotting 的源码级定制入口。
 
 Core 数据来源：
 
@@ -54,6 +55,7 @@ Core 数据来源：
 
 - WinForms custom stats 是 legacy 行为参考，尤其是 graph/unit、可见性、x-axis mode。
 - Avalonia `ProfilerStats` / `TimelineScope` 是更适合后续 Perfetto/Tracy counter 的承载点。
+- Avalonia 使用 `third_party/ScottPlot/` 中的源码级 ScottPlot，而不是 NuGet `ScottPlot.Avalonia`。plot 交互、axis、tooltip、marker 或性能问题可以在子仓内做针对性调整。
 - 对齐优先级：数据语义 > x-axis/单位 > 选择/hover > 视觉样式。
 
 ## 数据流与状态归属
@@ -69,3 +71,4 @@ Counter 数据来自 Core，曲线采样和可见性是 UI/feature 状态。控�
 3. 检查 WinForms `CustomStatSelector` 与 Avalonia detail plot visibility 是否需要同步。
 4. 验证 int64/double counter、缺 unit、缺 graph、超大 session。
 5. 验证曲线采样不改变 min/max/selected frame 明细语义。
+6. 如果修改 ScottPlot 子仓，记录子仓提交并验证 Avalonia 项目使用的是源码引用。

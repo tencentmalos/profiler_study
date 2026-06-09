@@ -38,6 +38,7 @@
 - `ProfilerStudy.Avalonia/Timeline/TimelineViewport.cs`
 - `ProfilerStudy.Avalonia/Features/Sessions/SessionQueryService.cs`
 - `ProfilerStudy.Avalonia/App/Shell/MainWindowViewModel.cs`
+- `third_party/ScottPlot/`：Avalonia plotting 的源码级定制入口。
 
 `FrameTimelineControl` 应只接收已经准备好的 `FrameSample`、viewport、selection，不直接读取文件或遍历完整 session。
 
@@ -53,6 +54,7 @@
 
 - WinForms 的 `Timeline` + `FrameGraphPanel` 是视觉参考：上方 timeline、frame strip、目标线、warning/alert 颜色。
 - Avalonia 的 `FrameTimelineControl` 是对齐承载点，应逐步合并 frame strip 和 graph 的用户语义。
+- Avalonia 使用 `third_party/ScottPlot/` 中的源码级 ScottPlot，而不是 NuGet `ScottPlot.Avalonia`。如果现有 ScottPlot API 无法表达逐帧 frame strip、固定像素高度、hover/selection 覆盖层，应优先在子仓做有边界的定制。
 - 当前可接受差异：绘制技术不同，Avalonia 可用不同图标/字体；不可接受差异：同一帧在两个 UI 中分类不同、选中范围不同。
 
 ## 数据流与状态归属
@@ -76,3 +78,4 @@ Session
 3. 检查 WinForms 和 Avalonia 是否都需要同步。
 4. 验证 loaded session、live session、空 session 三种状态。
 5. 验证长 session 下滚动/缩放不卡顿，选中帧精确。
+6. 如果修改 ScottPlot 子仓，记录子仓提交并验证 Avalonia 项目使用的是源码引用。
