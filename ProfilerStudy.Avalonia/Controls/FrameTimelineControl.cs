@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -43,6 +42,7 @@ public sealed class FrameTimelineControl : UserControl
 	private bool m_IsRefreshing;
 	private double m_LastPanX;
 	private int m_LastPanStartFrame;
+	private FrameTimelineRenderModel m_RenderModel = FrameTimelineRenderModel.Empty;
 
 	public FrameTimelineControl()
 	{
@@ -155,9 +155,8 @@ public sealed class FrameTimelineControl : UserControl
 			ConfigurePlotChrome();
 			m_Plot.Plot.Clear();
 
-			IReadOnlyList<FrameSample> samples = Samples;
-			TimelineViewport viewport = Viewport;
-			if (samples == null || samples.Count == 0 || viewport == null || viewport.FrameCount == 0)
+			m_RenderModel = FrameTimelineRenderModel.Create(Samples, Viewport, TargetFrameMs);
+			if (Samples == null || Samples.Count == 0 || Viewport == null || Viewport.FrameCount == 0)
 			{
 				m_Plot.Plot.Add.Text("No frame samples", 0, 0);
 				m_Plot.Plot.Axes.SetLimits(-1, 1, -1, 1);
@@ -165,32 +164,24 @@ public sealed class FrameTimelineControl : UserControl
 				return;
 			}
 
-			int startFrame = Math.Max(0, viewport.StartFrame);
-			int endFrame = Math.Min(viewport.EndFrame, samples[samples.Count - 1].Index);
-			List<FrameSample> visibleSamples = samples
-				.Where(item => item.Index >= startFrame && item.Index <= endFrame)
-				.OrderBy(item => item.Index)
-				.ToList();
-
-			if (visibleSamples.Count == 0)
+			if (m_RenderModel.HasItems is false)
 			{
-				m_Plot.Plot.Add.Text("No frame samples in visible range", startFrame, 0);
-				m_Plot.Plot.Axes.SetLimits(startFrame, Math.Max(startFrame + 1, endFrame), -1, 1);
+				m_Plot.Plot.Add.Text("No frame samples in visible range", m_RenderModel.StartFrame, 0);
+				m_Plot.Plot.Axes.SetLimits(m_RenderModel.StartFrame, Math.Max(m_RenderModel.StartFrame + 1, m_RenderModel.EndFrame), -1, 1);
 				m_Plot.Refresh();
 				return;
 			}
 
-			double maxMs = Math.Max(TargetFrameMs * 2.0, visibleSamples.Max(item => item.DurationMs));
-			List<ScottPlot.Bar> bars = new List<ScottPlot.Bar>(visibleSamples.Count);
-			foreach (FrameSample item in visibleSamples)
+			List<ScottPlot.Bar> bars = new List<ScottPlot.Bar>(m_RenderModel.Items.Count);
+			foreach (FrameTimelineRenderItem item in m_RenderModel.Items)
 			{
-				ScottPlotColor color = GetFrameColor(GetFrameTimeCategory(item.DurationMs, TargetFrameMs));
+				ScottPlotColor color = GetFrameColor(item.Category);
 				bars.Add(new ScottPlot.Bar
 				{
 					Position = item.Index,
 					Value = item.DurationMs,
 					ValueBase = 0.0,
-					Size = GetFrameBarSize(visibleSamples.Count),
+					Size = m_RenderModel.BarSize,
 					FillColor = color,
 					LineColor = color,
 					LineWidth = 0
@@ -198,17 +189,17 @@ public sealed class FrameTimelineControl : UserControl
 			}
 			m_Plot.Plot.Add.Bars(bars);
 
-			AddHorizontalGuide(TargetFrameMs, startFrame, endFrame, TargetLineColor);
-			if (Selection != null && Selection.SelectedFrameIndex >= startFrame && Selection.SelectedFrameIndex <= endFrame)
+			AddHorizontalGuide(TargetFrameMs, m_RenderModel.StartFrame, m_RenderModel.EndFrame, TargetLineColor);
+			if (Selection != null && Selection.SelectedFrameIndex >= m_RenderModel.StartFrame && Selection.SelectedFrameIndex <= m_RenderModel.EndFrame)
 			{
-				AddFrameOverlay(Selection.SelectedFrameIndex, maxMs, SelectionFillColor, SelectionLineColor);
+				AddFrameOverlay(Selection.SelectedFrameIndex, m_RenderModel.MaxDurationMs, SelectionFillColor, SelectionLineColor);
 			}
-			if (Selection != null && Selection.HoveredFrameIndex >= startFrame && Selection.HoveredFrameIndex <= endFrame)
+			if (Selection != null && Selection.HoveredFrameIndex >= m_RenderModel.StartFrame && Selection.HoveredFrameIndex <= m_RenderModel.EndFrame)
 			{
-				AddFrameOverlay(Selection.HoveredFrameIndex, maxMs, HoverFillColor, HoverLineColor);
+				AddFrameOverlay(Selection.HoveredFrameIndex, m_RenderModel.MaxDurationMs, HoverFillColor, HoverLineColor);
 			}
 
-			m_Plot.Plot.Axes.SetLimits(startFrame, Math.Max(startFrame + 1, endFrame), 0, Math.Max(1.0, maxMs * 1.1));
+			m_Plot.Plot.Axes.SetLimits(m_RenderModel.StartFrame, Math.Max(m_RenderModel.StartFrame + 1, m_RenderModel.EndFrame), 0, Math.Max(1.0, m_RenderModel.MaxDurationMs * 1.1));
 			m_Plot.Refresh();
 		}
 		finally
@@ -332,10 +323,10 @@ public sealed class FrameTimelineControl : UserControl
 		}
 
 		int frameIndex = PointToFrameIndex(position);
-		if (TryGetSample(Samples, frameIndex, out FrameSample sample))
+		if (m_RenderModel.TryGetItem(frameIndex, out FrameTimelineRenderItem item))
 		{
-			Selection.HoveredFrameIndex = sample.Index;
-			Selection.HoveredFrameTimeMs = sample.DurationMs;
+			Selection.HoveredFrameIndex = item.Index;
+			Selection.HoveredFrameTimeMs = item.DurationMs;
 		}
 		else
 		{
@@ -352,12 +343,12 @@ public sealed class FrameTimelineControl : UserControl
 		}
 
 		int frameIndex = PointToFrameIndex(position);
-		if (TryGetSample(Samples, frameIndex, out FrameSample sample))
+		if (m_RenderModel.TryGetItem(frameIndex, out FrameTimelineRenderItem item))
 		{
-			Selection.SelectedFrameIndex = sample.Index;
-			Selection.SelectedFrameTimeMs = sample.DurationMs;
-			Selection.HoveredFrameIndex = sample.Index;
-			Selection.HoveredFrameTimeMs = sample.DurationMs;
+			Selection.SelectedFrameIndex = item.Index;
+			Selection.SelectedFrameTimeMs = item.DurationMs;
+			Selection.HoveredFrameIndex = item.Index;
+			Selection.HoveredFrameTimeMs = item.DurationMs;
 		}
 	}
 
@@ -382,39 +373,6 @@ public sealed class FrameTimelineControl : UserControl
 		return Math.Clamp(coordinates.X, Viewport.StartFrame, Viewport.EndFrame);
 	}
 
-	private static bool TryGetSample(IReadOnlyList<FrameSample> samples, int frameIndex, out FrameSample sample)
-	{
-		foreach (FrameSample candidate in samples)
-		{
-			if (candidate.Index == frameIndex)
-			{
-				sample = candidate;
-				return true;
-			}
-		}
-		sample = default;
-		return false;
-	}
-
-	internal static CoreUtils.FrameTimeCategory GetFrameTimeCategory(double durationMs, double targetFrameMs)
-	{
-		if (targetFrameMs <= 0.0)
-		{
-			return CoreUtils.FrameTimeCategory.InBudget;
-		}
-
-		double percentOverTarget = durationMs * 100.0 / targetFrameMs - 100.0;
-		if (percentOverTarget > 100.0)
-		{
-			return CoreUtils.FrameTimeCategory.Alert;
-		}
-		if (percentOverTarget > 0.0)
-		{
-			return CoreUtils.FrameTimeCategory.Warning;
-		}
-		return CoreUtils.FrameTimeCategory.InBudget;
-	}
-
 	private static ScottPlotColor GetFrameColor(CoreUtils.FrameTimeCategory category)
 	{
 		return category switch
@@ -426,8 +384,4 @@ public sealed class FrameTimelineControl : UserControl
 		};
 	}
 
-	private static double GetFrameBarSize(int visibleSampleCount)
-	{
-		return visibleSampleCount <= 180 ? 0.86 : 1.0;
-	}
 }

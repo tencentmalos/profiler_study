@@ -52,7 +52,7 @@ internal static class AvaloniaSmokeTest
 			AssertThemeSettings();
 			AssertTableSorting();
 			AssertFlameChartControl();
-			AssertFrameTimelineCategories();
+			AssertFrameTimelineRenderModel(document);
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -88,12 +88,25 @@ internal static class AvaloniaSmokeTest
 		}
 	}
 
-	private static void AssertFrameTimelineCategories()
+	private static void AssertFrameTimelineRenderModel(SessionDocument document)
 	{
-		Assert(FrameTimelineControl.GetFrameTimeCategory(16.0, 16.0) == CoreUtils.FrameTimeCategory.InBudget, "frame category target boundary");
-		Assert(FrameTimelineControl.GetFrameTimeCategory(16.001, 16.0) == CoreUtils.FrameTimeCategory.Warning, "frame category warning boundary");
-		Assert(FrameTimelineControl.GetFrameTimeCategory(32.0, 16.0) == CoreUtils.FrameTimeCategory.Warning, "frame category alert boundary");
-		Assert(FrameTimelineControl.GetFrameTimeCategory(32.001, 16.0) == CoreUtils.FrameTimeCategory.Alert, "frame category alert over boundary");
+		Assert(FrameTimelineFrameClassifier.GetFrameTimeCategory(16.0, 16.0) == CoreUtils.FrameTimeCategory.InBudget, "frame category target boundary");
+		Assert(FrameTimelineFrameClassifier.GetFrameTimeCategory(16.001, 16.0) == CoreUtils.FrameTimeCategory.Warning, "frame category warning boundary");
+		Assert(FrameTimelineFrameClassifier.GetFrameTimeCategory(32.0, 16.0) == CoreUtils.FrameTimeCategory.Warning, "frame category alert boundary");
+		Assert(FrameTimelineFrameClassifier.GetFrameTimeCategory(32.001, 16.0) == CoreUtils.FrameTimeCategory.Alert, "frame category alert over boundary");
+
+		document.Viewport.SetRange(10, 20);
+		FrameTimelineRenderModel model = FrameTimelineRenderModel.Create(
+			document.FrameSamples,
+			document.Viewport,
+			document.Summary.TargetFrameTimeMs);
+		Assert(model.HasItems, "frame timeline render model items");
+		Assert(model.StartFrame == 10 && model.EndFrame == 20, "frame timeline render model range");
+		Assert(model.Items[0].Index >= 10, "frame timeline first item range");
+		Assert(model.Items[model.Items.Count - 1].Index <= 20, "frame timeline last item range");
+		FrameTimelineRenderItem middleItem = model.Items[model.Items.Count / 2];
+		Assert(model.TryGetItem(middleItem.Index, out FrameTimelineRenderItem hitItem), "frame timeline hit item");
+		Assert(hitItem.Index == middleItem.Index && hitItem.DurationMs == middleItem.DurationMs, "frame timeline hit item identity");
 	}
 
 	private static void AssertSourcePathMapping()

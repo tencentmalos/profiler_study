@@ -33,6 +33,7 @@
 主要文件：
 
 - `ProfilerStudy.Avalonia/Controls/FrameTimelineControl.cs`
+- `ProfilerStudy.Avalonia/Controls/FrameTimelineRenderModel.cs`
 - `ProfilerStudy.Avalonia/Models/FrameSample.cs`
 - `ProfilerStudy.Avalonia/Timeline/TimelineSelection.cs`
 - `ProfilerStudy.Avalonia/Timeline/TimelineViewport.cs`
@@ -60,6 +61,7 @@
 ## 本轮 Avalonia 对齐方案
 
 - 重点不是复刻 WinForms 外观，而是让 timeline-frame-graph 自成闭环：可见帧、帧分类、hover、selection、viewport、下游 scope/counter/timeline 刷新必须使用同一套帧索引语义。
+- `FrameTimelineRenderModel` 是非可视闭环核心，负责从 `FrameSample`、viewport、target frame ms 生成可见 frame item；绘制和命中都应依赖它，避免 ScottPlot 调用与交互逻辑各自计算一套帧范围。
 - `FrameTimelineControl` 不应把帧耗时只表达为连续折线；可见范围内的每个 `FrameSample` 应以独立 frame item 表达，避免折线插值弱化逐帧定位与命中语义。
 - frame item 颜色按 WinForms `FrameGraphPanel.GetFrameBrush` 的语义分组：低于目标帧耗时为正常，达到目标帧耗时为 warning，达到两倍目标帧耗时为 alert。
 - target line 保持横向参考线；selected frame 与 hovered frame 应明确绑定到整帧索引，保证状态栏、selected frame scopes、selected frame counters 和 thread timeline 能跟随变化。
