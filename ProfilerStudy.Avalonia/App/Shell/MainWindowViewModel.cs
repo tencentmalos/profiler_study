@@ -219,11 +219,26 @@ internal sealed class MainWindowViewModel : ObservableObject
 	}
 
 	internal MainWindowViewModel(ISourceViewerLauncher sourceViewerLauncher, IAppSettingsService appSettingsService, bool loadSampleOnStartup = false, string startupProfilerPath = null)
+		: this(
+			sourceViewerLauncher,
+			appSettingsService,
+			null,
+			loadSampleOnStartup,
+			startupProfilerPath)
+	{
+	}
+
+	internal MainWindowViewModel(
+		ISourceViewerLauncher sourceViewerLauncher,
+		IAppSettingsService appSettingsService,
+		AppThemeService appThemeService,
+		bool loadSampleOnStartup = false,
+		string startupProfilerPath = null)
 	{
 		m_SourceViewerLauncher = sourceViewerLauncher ?? new SourceViewerLauncher();
 		m_AppSettingsService = appSettingsService ?? new AppSettingsService();
 		m_AppSettings = m_AppSettingsService.Load() ?? new AppSettings();
-		m_AppThemeService = AppThemeService.Create(m_AppSettings, SaveAppSettings);
+		m_AppThemeService = appThemeService ?? AppThemeService.Create(m_AppSettings, SaveAppSettings);
 		m_AppThemeService.Changed += OnThemeServiceChanged;
 		Summary = new SessionSummaryViewModel();
 		m_OpenSessionCommand = new RelayCommand(_ => _ = OpenSessionAsync());
@@ -243,8 +258,8 @@ internal sealed class MainWindowViewModel : ObservableObject
 		m_SelectNextSpikeCommand = new RelayCommand(_ => SelectAdjacentSpike(1), _ => CurrentDocument?.FrameSamples?.Length > 0);
 		m_PanTimelineLeftCommand = new RelayCommand(_ => PanTimeline(-1), _ => CurrentDocument != null);
 		m_PanTimelineRightCommand = new RelayCommand(_ => PanTimeline(1), _ => CurrentDocument != null);
-		m_ZoomTimelineInCommand = new RelayCommand(_ => ZoomTimeline(0.8), _ => CurrentDocument != null);
-		m_ZoomTimelineOutCommand = new RelayCommand(_ => ZoomTimeline(1.25), _ => CurrentDocument != null);
+		m_ZoomTimelineInCommand = new RelayCommand(_ => ZoomTimeline(1.25), _ => CurrentDocument != null);
+		m_ZoomTimelineOutCommand = new RelayCommand(_ => ZoomTimeline(0.8), _ => CurrentDocument != null);
 		m_OpenRecentSessionCommand = new RelayCommand(parameter => _ = OpenRecentSessionAsync(parameter as string ?? SelectedRecentFile), _ => !string.IsNullOrWhiteSpace(SelectedRecentFile));
 		m_OpenScopeSourceCommand = new RelayCommand(OpenScopeSource, parameter => parameter is ScopeFrameDetailRow row && row.CanOpenSource);
 		m_SortTableCommand = new RelayCommand(SortTable);
@@ -3377,7 +3392,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		Viewport.Zoom(factor, 0.5);
-		StatusText = factor < 1.0
+		StatusText = factor > 1.0
 			? "Zoomed timeline in to " + Viewport.RangeText + "."
 			: "Zoomed timeline out to " + Viewport.RangeText + ".";
 	}

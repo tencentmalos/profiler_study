@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using ProfilerStudy.Avalonia.ProfilerStats;
 
@@ -54,6 +55,7 @@ internal static class AvaloniaSmokeTest
 			AssertThemeSettings();
 			AssertTableSorting();
 			AssertFlameChartControl();
+			AssertTimelineZoomCommands(document);
 			AssertFrameTimelineRenderModel(document);
 			AssertFrameTimelineNavigationContract();
 			AssertSessionScrollbarFrameStripContract();
@@ -90,6 +92,25 @@ internal static class AvaloniaSmokeTest
 		{
 			throw new InvalidOperationException("Smoke test failed: " + name);
 		}
+	}
+
+	private static void AssertTimelineZoomCommands(SessionDocument document)
+	{
+		document.Viewport.SetRange(10, 109);
+		SmokeAppSettingsService appSettingsService = new SmokeAppSettingsService();
+		AppThemeService appThemeService = new AppThemeService(appSettingsService.Load(), new SmokeThemeHost(), appSettingsService.Save);
+		MainWindowViewModel viewModel = new MainWindowViewModel(new SmokeSourceViewerLauncher(), appSettingsService, appThemeService);
+		MethodInfo applyDocument = typeof(MainWindowViewModel).GetMethod("ApplyDocument", BindingFlags.Instance | BindingFlags.NonPublic);
+		Assert(applyDocument != null, "timeline zoom command apply document hook");
+		applyDocument.Invoke(viewModel, new object[] { document });
+
+		int visibleBeforeZoomIn = viewModel.Viewport.VisibleFrameCount;
+		viewModel.ZoomTimelineInCommand.Execute(null);
+		Assert(viewModel.Viewport.VisibleFrameCount < visibleBeforeZoomIn, "timeline zoom in command narrows visible range");
+
+		int visibleBeforeZoomOut = viewModel.Viewport.VisibleFrameCount;
+		viewModel.ZoomTimelineOutCommand.Execute(null);
+		Assert(viewModel.Viewport.VisibleFrameCount > visibleBeforeZoomOut, "timeline zoom out command widens visible range");
 	}
 
 	private static void AssertFrameTimelineRenderModel(SessionDocument document)
@@ -377,5 +398,42 @@ internal static class AvaloniaSmokeTest
 		}
 
 		return loader.LoadFileAsync(profilerPath, CancellationToken.None).GetAwaiter().GetResult();
+	}
+
+	private sealed class SmokeSourceViewerLauncher : ISourceViewerLauncher
+	{
+		public bool TryLaunch(string sourceFile, int sourceLine, out string error)
+		{
+			error = string.Empty;
+			return false;
+		}
+	}
+
+	private sealed class SmokeAppSettingsService : IAppSettingsService
+	{
+		private AppSettings m_Settings = new AppSettings();
+
+		public AppSettings Load()
+		{
+			return m_Settings;
+		}
+
+		public void Save(AppSettings settings)
+		{
+			m_Settings = settings ?? new AppSettings();
+		}
+	}
+
+	private sealed class SmokeThemeHost : AppThemeService.IThemeHost
+	{
+		public IReadOnlyList<AppThemeColorOption> ColorThemes { get; } = new[] { new AppThemeColorOption("Blue") };
+
+		public void ChangeBaseTheme(string baseThemeName)
+		{
+		}
+
+		public void ChangeColorTheme(string colorThemeName)
+		{
+		}
 	}
 }
