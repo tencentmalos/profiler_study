@@ -56,6 +56,7 @@ internal static class AvaloniaSmokeTest
 			AssertTableSorting();
 			AssertFlameChartControl();
 			AssertTimelineSelectionContract();
+			AssertTimelineSelectionStatusContract(document);
 			AssertTimelineZoomCommands(document);
 			AssertFrameTimelinePointerGestureContract();
 			AssertFrameTimelineRenderModel(document);
@@ -99,12 +100,7 @@ internal static class AvaloniaSmokeTest
 	private static void AssertTimelineZoomCommands(SessionDocument document)
 	{
 		document.Viewport.SetRange(10, 109);
-		SmokeAppSettingsService appSettingsService = new SmokeAppSettingsService();
-		AppThemeService appThemeService = new AppThemeService(appSettingsService.Load(), new SmokeThemeHost(), appSettingsService.Save);
-		MainWindowViewModel viewModel = new MainWindowViewModel(new SmokeSourceViewerLauncher(), appSettingsService, appThemeService);
-		MethodInfo applyDocument = typeof(MainWindowViewModel).GetMethod("ApplyDocument", BindingFlags.Instance | BindingFlags.NonPublic);
-		Assert(applyDocument != null, "timeline zoom command apply document hook");
-		applyDocument.Invoke(viewModel, new object[] { document });
+		MainWindowViewModel viewModel = CreateSmokeViewModel(document);
 
 		int visibleBeforeZoomIn = viewModel.Viewport.VisibleFrameCount;
 		viewModel.ZoomTimelineInCommand.Execute(null);
@@ -130,6 +126,20 @@ internal static class AvaloniaSmokeTest
 		selection.Clear();
 		Assert(selection.SelectedFrameIndex == -1 && selection.SelectedFrameTimeMs == 0.0, "timeline selection selected pair clear");
 		Assert(selection.HoveredFrameIndex == -1 && selection.HoveredFrameTimeMs == 0.0, "timeline selection hovered pair clear");
+	}
+
+	private static void AssertTimelineSelectionStatusContract(SessionDocument document)
+	{
+		document.Selection.Clear();
+		MainWindowViewModel viewModel = CreateSmokeViewModel(document);
+		viewModel.Selection.SelectFrame(17, 23.5);
+		Assert(viewModel.SelectedFrameStatusText == "Frame: 17 (23.5 ms)", "timeline selected frame main status updates");
+		Assert(viewModel.StatusBarSelectedFrameText == "17 (23.5 ms)", "timeline selected frame statusbar updates");
+		Assert(viewModel.FooterText.Contains("selected frame 17 (23.5 ms)", StringComparison.Ordinal), "timeline selected frame footer updates");
+
+		viewModel.Selection.HoverFrame(19, 24.75);
+		Assert(viewModel.StatusBarHoveredFrameText == "19 (24.75 ms)", "timeline hovered frame statusbar updates");
+		Assert(viewModel.FooterText.Contains("hover frame 19 (24.75 ms)", StringComparison.Ordinal), "timeline hovered frame footer updates");
 	}
 
 	private static void AssertFrameTimelinePointerGestureContract()
@@ -276,6 +286,17 @@ internal static class AvaloniaSmokeTest
 		global::Avalonia.Rect fractionalTrack = new global::Avalonia.Rect(0, 0, 5.5, 8);
 		SessionScrollbarFrameStripLayout fractionalLayout = SessionScrollbarFrameStripLayout.Create(samples, viewport, 16.0, fractionalTrack);
 		Assert(fractionalLayout.Bars.All(bar => bar.Rect.Right <= fractionalTrack.Right), "session scrollbar frame strip clipped to track");
+	}
+
+	private static MainWindowViewModel CreateSmokeViewModel(SessionDocument document)
+	{
+		SmokeAppSettingsService appSettingsService = new SmokeAppSettingsService();
+		AppThemeService appThemeService = new AppThemeService(appSettingsService.Load(), new SmokeThemeHost(), appSettingsService.Save);
+		MainWindowViewModel viewModel = new MainWindowViewModel(new SmokeSourceViewerLauncher(), appSettingsService, appThemeService);
+		MethodInfo applyDocument = typeof(MainWindowViewModel).GetMethod("ApplyDocument", BindingFlags.Instance | BindingFlags.NonPublic);
+		Assert(applyDocument != null, "timeline smoke apply document hook");
+		applyDocument.Invoke(viewModel, new object[] { document });
+		return viewModel;
 	}
 
 	private sealed class CountingFrameSampleList : IReadOnlyList<FrameSample>

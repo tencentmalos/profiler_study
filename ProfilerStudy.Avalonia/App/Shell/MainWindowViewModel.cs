@@ -3750,6 +3750,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		if (CurrentDocument == null)
 		{
 			FooterText = "No profiler session loaded";
+			SelectedFrameStatusText = "Frame: none";
 			StatusBarSessionText = "none";
 			StatusBarSelectedFrameText = "none";
 			StatusBarHoveredFrameText = "none";
@@ -3763,6 +3764,9 @@ internal sealed class MainWindowViewModel : ObservableObject
 			? $"hover frame {Selection.HoveredFrameIndex} ({Selection.HoveredFrameTimeMs:0.###} ms)"
 			: "hover none";
 		StatusBarSessionText = $"{CurrentDocument.Summary.FrameCount} frames";
+		SelectedFrameStatusText = Selection.SelectedFrameIndex >= 0
+			? $"Frame: {Selection.SelectedFrameIndex} ({Selection.SelectedFrameTimeMs:0.###} ms)"
+			: "Frame: none";
 		StatusBarSelectedFrameText = Selection.SelectedFrameIndex >= 0
 			? $"{Selection.SelectedFrameIndex} ({Selection.SelectedFrameTimeMs:0.###} ms)"
 			: "none";
