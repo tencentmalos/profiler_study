@@ -267,11 +267,18 @@ internal sealed class SessionScrollbarFrameStripLayout
 				continue;
 			}
 
+			double x = trackRect.X + i;
+			double width = Math.Min(1.0, trackRect.Right - x);
+			if (width <= 0.0)
+			{
+				continue;
+			}
+
 			double height = columnCategories[i] == CoreUtils.FrameTimeCategory.Alert ? 4.0 : 2.0;
 			height = Math.Min(trackRect.Height, height);
 			bars.Add(new SessionScrollbarFrameStripBar(
 				columnCategories[i],
-				new Rect(trackRect.X + i, trackRect.Bottom - height, 1.0, height)));
+				new Rect(x, trackRect.Bottom - height, width, height)));
 		}
 
 		return new SessionScrollbarFrameStripLayout(bars);

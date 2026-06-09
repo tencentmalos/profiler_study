@@ -174,6 +174,10 @@ internal static class AvaloniaSmokeTest
 		SessionScrollbarFrameStripLayout layout = SessionScrollbarFrameStripLayout.Create(samples, viewport, 16.0, new global::Avalonia.Rect(0, 0, 5, 8));
 		Assert(layout.Bars.Count <= 5, "session scrollbar frame strip dense columns");
 		Assert(layout.Bars.Any(bar => bar.Category == CoreUtils.FrameTimeCategory.Alert), "session scrollbar frame strip keeps alert");
+
+		global::Avalonia.Rect fractionalTrack = new global::Avalonia.Rect(0, 0, 5.5, 8);
+		SessionScrollbarFrameStripLayout fractionalLayout = SessionScrollbarFrameStripLayout.Create(samples, viewport, 16.0, fractionalTrack);
+		Assert(fractionalLayout.Bars.All(bar => bar.Rect.Right <= fractionalTrack.Right), "session scrollbar frame strip clipped to track");
 	}
 
 	private sealed class CountingFrameSampleList : IReadOnlyList<FrameSample>
