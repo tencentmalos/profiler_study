@@ -100,10 +100,10 @@ internal sealed class FrameTimelineRenderModel
 		return new FrameTimelineRenderModel(items, startFrame, endFrame, targetFrameMs, maxDurationMs);
 	}
 
-	public bool TryGetItem(int frameIndex, out FrameTimelineRenderItem item)
-	{
-		int left = 0;
-		int right = Items.Count - 1;
+		public bool TryGetItem(int frameIndex, out FrameTimelineRenderItem item)
+		{
+			int left = 0;
+			int right = Items.Count - 1;
 		while (left <= right)
 		{
 			int mid = left + ((right - left) / 2);
@@ -123,10 +123,21 @@ internal sealed class FrameTimelineRenderModel
 			}
 		}
 
-		item = default;
-		return false;
+			item = default;
+			return false;
+		}
+
+		public bool TryHitFrameCoordinate(double frameCoordinate, out FrameTimelineRenderItem item)
+		{
+			int frameIndex = (int)Math.Floor(frameCoordinate + 0.5);
+			if (TryGetItem(frameIndex, out item) is false)
+			{
+				return false;
+			}
+
+			return frameCoordinate >= item.Index - 0.5 && frameCoordinate < item.Index + 0.5;
+		}
 	}
-}
 
 internal static class FrameTimelineFrameClassifier
 {

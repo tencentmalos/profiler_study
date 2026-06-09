@@ -322,8 +322,8 @@ public sealed class FrameTimelineControl : UserControl
 			return;
 		}
 
-		int frameIndex = PointToFrameIndex(position);
-		if (m_RenderModel.TryGetItem(frameIndex, out FrameTimelineRenderItem item))
+		double frameCoordinate = PointToFrameCoordinate(position);
+		if (m_RenderModel.TryHitFrameCoordinate(frameCoordinate, out FrameTimelineRenderItem item))
 		{
 			Selection.HoveredFrameIndex = item.Index;
 			Selection.HoveredFrameTimeMs = item.DurationMs;
@@ -342,24 +342,14 @@ public sealed class FrameTimelineControl : UserControl
 			return;
 		}
 
-		int frameIndex = PointToFrameIndex(position);
-		if (m_RenderModel.TryGetItem(frameIndex, out FrameTimelineRenderItem item))
+		double frameCoordinate = PointToFrameCoordinate(position);
+		if (m_RenderModel.TryHitFrameCoordinate(frameCoordinate, out FrameTimelineRenderItem item))
 		{
 			Selection.SelectedFrameIndex = item.Index;
 			Selection.SelectedFrameTimeMs = item.DurationMs;
 			Selection.HoveredFrameIndex = item.Index;
 			Selection.HoveredFrameTimeMs = item.DurationMs;
 		}
-	}
-
-	private int PointToFrameIndex(Point position)
-	{
-		if (Viewport == null)
-		{
-			return 0;
-		}
-
-		return (int)Math.Round(PointToFrameCoordinate(position));
 	}
 
 	private double PointToFrameCoordinate(Point position)

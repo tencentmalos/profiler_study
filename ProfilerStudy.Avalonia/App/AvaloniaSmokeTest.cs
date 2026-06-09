@@ -107,6 +107,18 @@ internal static class AvaloniaSmokeTest
 		FrameTimelineRenderItem middleItem = model.Items[model.Items.Count / 2];
 		Assert(model.TryGetItem(middleItem.Index, out FrameTimelineRenderItem hitItem), "frame timeline hit item");
 		Assert(hitItem.Index == middleItem.Index && hitItem.DurationMs == middleItem.DurationMs, "frame timeline hit item identity");
+
+		FrameSample[] sparseSamples =
+		{
+			new FrameSample(0, 10.0),
+			new FrameSample(5, 20.0),
+			new FrameSample(10, 40.0)
+		};
+		TimelineViewport sparseViewport = TimelineViewport.CreateForFrames(11);
+		FrameTimelineRenderModel sparseModel = FrameTimelineRenderModel.Create(sparseSamples, sparseViewport, 16.0);
+		Assert(sparseModel.TryHitFrameCoordinate(5.49, out FrameTimelineRenderItem sparseHit), "frame timeline sparse band hit");
+		Assert(sparseHit.Index == 5, "frame timeline sparse band hit identity");
+		Assert(sparseModel.TryHitFrameCoordinate(2.5, out _) is false, "frame timeline sparse gap miss");
 	}
 
 	private static void AssertSourcePathMapping()
