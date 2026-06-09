@@ -63,6 +63,7 @@
 - 重点不是复刻 WinForms 外观，而是让 timeline-frame-graph 自成闭环：可见帧、帧分类、hover、selection、viewport、下游 scope/counter/timeline 刷新必须使用同一套帧索引语义。
 - `FrameTimelineRenderModel` 是非可视闭环核心，负责从 `FrameSample`、viewport、target frame ms 生成可见 frame item；绘制和命中都应依赖它，避免 ScottPlot 调用与交互逻辑各自计算一套帧范围。
 - `FrameTimelineControl` 不应把帧耗时只表达为连续折线；可见范围内的每个 `FrameSample` 应以独立 frame item 表达，避免折线插值弱化逐帧定位与命中语义。
+- 帧数据重绘与交互覆盖层刷新需要分离：`Samples`、`TargetFrameMs`、`Viewport` 变化可以重建 bars、target line、坐标轴；`SelectedFrameIndex`、`HoveredFrameIndex` 变化只应替换 selected/hover overlay，不应重建所有 frame items。
 - frame item 颜色按 WinForms `FrameGraphPanel.GetFrameBrush` 的语义分组：低于目标帧耗时为正常，达到目标帧耗时为 warning，达到两倍目标帧耗时为 alert。
 - target line 保持横向参考线；selected frame 与 hovered frame 应明确绑定到整帧索引，保证状态栏、selected frame scopes、selected frame counters 和 thread timeline 能跟随变化。
 - 本轮不新增 WinForms 的 selected range、time span overlay、event label；这些依赖额外 selection/event 状态，后续应在状态模型扩展后再补齐。

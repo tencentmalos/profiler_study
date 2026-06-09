@@ -43,6 +43,7 @@ public sealed class FrameTimelineControl : UserControl
 	private double m_LastPanX;
 	private int m_LastPanStartFrame;
 	private FrameTimelineRenderModel m_RenderModel = FrameTimelineRenderModel.Empty;
+	private readonly List<IPlottable> m_OverlayPlottables = new List<IPlottable>();
 
 	public FrameTimelineControl()
 	{
@@ -119,11 +120,14 @@ public sealed class FrameTimelineControl : UserControl
 	private void TimelineStatePropertyChanged(object sender, PropertyChangedEventArgs e)
 	{
 		if (e.PropertyName == nameof(TimelineViewport.StartFrame) ||
-			e.PropertyName == nameof(TimelineViewport.EndFrame) ||
-			e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
-			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex))
+			e.PropertyName == nameof(TimelineViewport.EndFrame))
 		{
 			RefreshPlot();
+		}
+		else if (e.PropertyName == nameof(TimelineSelection.SelectedFrameIndex) ||
+			e.PropertyName == nameof(TimelineSelection.HoveredFrameIndex))
+		{
+			RefreshSelectionOverlay();
 		}
 	}
 
@@ -152,6 +156,7 @@ public sealed class FrameTimelineControl : UserControl
 		{
 			ConfigurePlotChrome();
 			m_Plot.Plot.Clear();
+			m_OverlayPlottables.Clear();
 
 			m_RenderModel = FrameTimelineRenderModel.Create(Samples, Viewport, TargetFrameMs);
 			if (Samples == null || Samples.Count == 0 || Viewport == null || Viewport.FrameCount == 0)
@@ -188,16 +193,8 @@ public sealed class FrameTimelineControl : UserControl
 			m_Plot.Plot.Add.Bars(bars);
 
 			AddHorizontalGuide(TargetFrameMs, m_RenderModel.StartFrame, m_RenderModel.EndFrame, TargetLineColor);
-			if (Selection != null && Selection.SelectedFrameIndex >= m_RenderModel.StartFrame && Selection.SelectedFrameIndex <= m_RenderModel.EndFrame)
-			{
-				AddFrameOverlay(Selection.SelectedFrameIndex, m_RenderModel.MaxDurationMs, SelectionFillColor, SelectionLineColor);
-			}
-			if (Selection != null && Selection.HoveredFrameIndex >= m_RenderModel.StartFrame && Selection.HoveredFrameIndex <= m_RenderModel.EndFrame)
-			{
-				AddFrameOverlay(Selection.HoveredFrameIndex, m_RenderModel.MaxDurationMs, HoverFillColor, HoverLineColor);
-			}
-
-			m_Plot.Plot.Axes.SetLimits(m_RenderModel.StartFrame, Math.Max(m_RenderModel.StartFrame + 1, m_RenderModel.EndFrame), 0, Math.Max(1.0, m_RenderModel.MaxDurationMs * 1.1));
+			AddSelectionOverlay();
+			ApplyFrameAxisLimits();
 			m_Plot.Refresh();
 		}
 		finally
@@ -208,26 +205,83 @@ public sealed class FrameTimelineControl : UserControl
 
 	private void AddHorizontalGuide(double y, double xStart, double xEnd, ScottPlotColor color)
 	{
-		var guide = m_Plot.Plot.Add.Scatter(new[] { xStart, xEnd }, new[] { y, y });
-		guide.LineStyle.Color = color;
-		guide.MarkerSize = 0;
+		var guide = m_Plot.Plot.Add.HorizontalLine(y, 1, color);
+		guide.Minimum = xStart;
+		guide.Maximum = xEnd;
+		guide.EnableAutoscale = false;
 	}
 
-	private void AddFrameOverlay(double frameIndex, double maxMs, ScottPlotColor fillColor, ScottPlotColor lineColor)
+	private void RefreshSelectionOverlay()
+	{
+		if (m_IsRefreshing)
+		{
+			return;
+		}
+
+		RemoveSelectionOverlay();
+		AddSelectionOverlay();
+		ApplyFrameAxisLimits();
+		m_Plot.Refresh();
+	}
+
+	private void RemoveSelectionOverlay()
+	{
+		foreach (IPlottable plottable in m_OverlayPlottables)
+		{
+			m_Plot.Plot.Remove(plottable);
+		}
+		m_OverlayPlottables.Clear();
+	}
+
+	private void AddSelectionOverlay()
+	{
+		if (Selection == null || m_RenderModel.HasItems is false)
+		{
+			return;
+		}
+
+		if (Selection.SelectedFrameIndex >= m_RenderModel.StartFrame && Selection.SelectedFrameIndex <= m_RenderModel.EndFrame)
+		{
+			AddFrameOverlay(Selection.SelectedFrameIndex, SelectionFillColor, SelectionLineColor);
+		}
+		if (Selection.HoveredFrameIndex >= m_RenderModel.StartFrame && Selection.HoveredFrameIndex <= m_RenderModel.EndFrame)
+		{
+			AddFrameOverlay(Selection.HoveredFrameIndex, HoverFillColor, HoverLineColor);
+		}
+	}
+
+	private void AddFrameOverlay(double frameIndex, ScottPlotColor fillColor, ScottPlotColor lineColor)
 	{
 		var span = m_Plot.Plot.Add.HorizontalSpan(frameIndex - 0.5, frameIndex + 0.5, fillColor);
 		span.LineStyle.Color = lineColor;
 		span.LineStyle.Width = 1;
 		span.EnableAutoscale = false;
-		AddVerticalGuide(frameIndex - 0.5, maxMs, lineColor);
-		AddVerticalGuide(frameIndex + 0.5, maxMs, lineColor);
+		m_OverlayPlottables.Add(span);
+		AddVerticalGuide(frameIndex - 0.5, lineColor);
+		AddVerticalGuide(frameIndex + 0.5, lineColor);
 	}
 
-	private void AddVerticalGuide(double frameIndex, double maxMs, ScottPlotColor color)
+	private void AddVerticalGuide(double frameIndex, ScottPlotColor color)
 	{
-		var guide = m_Plot.Plot.Add.Scatter(new[] { frameIndex, frameIndex }, new[] { 0.0, maxMs * 1.1 });
-		guide.LineStyle.Color = color;
-		guide.MarkerSize = 0;
+		var guide = m_Plot.Plot.Add.VerticalLine(frameIndex, 1, color);
+		guide.Minimum = 0.0;
+		guide.Maximum = Math.Max(1.0, m_RenderModel.MaxDurationMs * 1.1);
+		guide.EnableAutoscale = false;
+		m_OverlayPlottables.Add(guide);
+	}
+
+	private void ApplyFrameAxisLimits()
+	{
+		if (m_RenderModel.HasItems is false)
+		{
+			return;
+		}
+
+		m_Plot.Plot.Axes.SetLimits(
+			m_RenderModel.StartFrame,
+			Math.Max(m_RenderModel.StartFrame + 1, m_RenderModel.EndFrame),
+			0,
+			Math.Max(1.0, m_RenderModel.MaxDurationMs * 1.1));
 	}
 
 	private void PlotPointerMoved(object sender, PointerEventArgs e)
