@@ -43,6 +43,9 @@ public sealed class FrameTimelineControl : Control
 		AvaloniaProperty.Register<FrameTimelineControl, TimelineSelection>(nameof(Selection));
 
 	private bool m_IsPanning;
+	private bool m_IsLeftPressTracking;
+	private bool m_LeftPressExceededDrag;
+	private Point m_LeftPressPosition;
 	private double m_LastPanX;
 	private int m_LastPanStartFrame;
 	private FrameTimelineRenderModel m_RenderModel = FrameTimelineRenderModel.Empty;
@@ -162,12 +165,21 @@ public sealed class FrameTimelineControl : Control
 	{
 		base.OnPointerMoved(e);
 		Point position = e.GetPosition(this);
+		if (m_IsLeftPressTracking && m_IsPanning is false)
+		{
+			if (FrameTimelinePointerGesture.IsDragDistanceExceeded(m_LeftPressPosition.X, position.X))
+			{
+				m_LeftPressExceededDrag = true;
+				StartPan(m_LeftPressPosition, e.Pointer);
+				PanTo(position);
+				e.Handled = true;
+				return;
+			}
+		}
+
 		if (m_IsPanning && Viewport != null)
 		{
-			int visibleCount = Math.Max(1, Viewport.VisibleFrameCount);
-			double graphWidth = Math.Max(1.0, GetGraphBounds().Width);
-			int deltaFrames = (int)Math.Round(-(position.X - m_LastPanX) * visibleCount / graphWidth);
-			Viewport.ScrollFrames(m_LastPanStartFrame + deltaFrames - Viewport.StartFrame);
+			PanTo(position);
 			e.Handled = true;
 			return;
 		}
@@ -179,7 +191,10 @@ public sealed class FrameTimelineControl : Control
 	{
 		base.OnPointerExited(e);
 		Selection?.ClearHoveredFrame();
+		m_IsLeftPressTracking = false;
+		m_LeftPressExceededDrag = false;
 		m_IsPanning = false;
+		e.Pointer.Capture(null);
 	}
 
 	protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -189,7 +204,7 @@ public sealed class FrameTimelineControl : Control
 		PointerPointProperties properties = e.GetCurrentPoint(this).Properties;
 		if (properties.IsLeftButtonPressed)
 		{
-			SelectFrameAt(position);
+			BeginLeftPress(position, e.Pointer);
 			e.Handled = true;
 		}
 		else if (properties.IsMiddleButtonPressed || properties.IsRightButtonPressed)
@@ -202,6 +217,22 @@ public sealed class FrameTimelineControl : Control
 	protected override void OnPointerReleased(PointerReleasedEventArgs e)
 	{
 		base.OnPointerReleased(e);
+		Point position = e.GetPosition(this);
+		if (m_IsLeftPressTracking)
+		{
+			if (m_LeftPressExceededDrag is false)
+			{
+				SelectFrameAt(position);
+			}
+
+			m_IsLeftPressTracking = false;
+			m_LeftPressExceededDrag = false;
+			m_IsPanning = false;
+			e.Pointer.Capture(null);
+			e.Handled = true;
+			return;
+		}
+
 		if (m_IsPanning)
 		{
 			m_IsPanning = false;
@@ -303,6 +334,30 @@ public sealed class FrameTimelineControl : Control
 		m_LastPanX = position.X;
 		m_LastPanStartFrame = Viewport.StartFrame;
 		pointer.Capture(this);
+	}
+
+	private void BeginLeftPress(Point position, IPointer pointer)
+	{
+		m_IsLeftPressTracking = true;
+		m_LeftPressExceededDrag = false;
+		m_LeftPressPosition = position;
+		m_IsPanning = false;
+		pointer.Capture(this);
+	}
+
+	private void PanTo(Point position)
+	{
+		if (Viewport == null)
+		{
+			return;
+		}
+
+		int deltaFrames = FrameTimelinePointerGesture.CalculatePanDeltaFrames(
+			position.X,
+			m_LastPanX,
+			Viewport.VisibleFrameCount,
+			GetGraphBounds().Width);
+		Viewport.ScrollFrames(m_LastPanStartFrame + deltaFrames - Viewport.StartFrame);
 	}
 
 	private void UpdateHover(Point position)

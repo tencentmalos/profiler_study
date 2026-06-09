@@ -56,6 +56,7 @@ internal static class AvaloniaSmokeTest
 			AssertTableSorting();
 			AssertFlameChartControl();
 			AssertTimelineZoomCommands(document);
+			AssertFrameTimelinePointerGestureContract();
 			AssertFrameTimelineRenderModel(document);
 			AssertFrameTimelineNavigationContract();
 			AssertSessionScrollbarFrameStripContract();
@@ -111,6 +112,27 @@ internal static class AvaloniaSmokeTest
 		int visibleBeforeZoomOut = viewModel.Viewport.VisibleFrameCount;
 		viewModel.ZoomTimelineOutCommand.Execute(null);
 		Assert(viewModel.Viewport.VisibleFrameCount > visibleBeforeZoomOut, "timeline zoom out command widens visible range");
+	}
+
+	private static void AssertFrameTimelinePointerGestureContract()
+	{
+		Type gestureType = typeof(FrameTimelineControl).Assembly.GetType("ProfilerStudy.Avalonia.FrameTimelinePointerGesture");
+		Assert(gestureType != null, "frame timeline pointer gesture type");
+		MethodInfo isDragDistanceExceeded = gestureType.GetMethod("IsDragDistanceExceeded", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+		MethodInfo calculatePanDeltaFrames = gestureType.GetMethod("CalculatePanDeltaFrames", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+		Assert(isDragDistanceExceeded != null, "frame timeline pointer drag threshold method");
+		Assert(calculatePanDeltaFrames != null, "frame timeline pointer pan delta method");
+
+		bool smallMoveIsDrag = (bool)isDragDistanceExceeded.Invoke(null, new object[] { 40.0, 42.0 });
+		bool largeMoveIsDrag = (bool)isDragDistanceExceeded.Invoke(null, new object[] { 40.0, 48.0 });
+		Assert(smallMoveIsDrag is false, "frame timeline click movement stays selection");
+		Assert(largeMoveIsDrag, "frame timeline drag movement starts pan");
+
+		int rightDragDelta = (int)calculatePanDeltaFrames.Invoke(null, new object[] { 80.0, 40.0, 100, 200.0 });
+		int leftDragDelta = (int)calculatePanDeltaFrames.Invoke(null, new object[] { 40.0, 80.0, 100, 200.0 });
+		Assert(rightDragDelta < 0, "frame timeline right drag pans earlier frames");
+		Assert(leftDragDelta > 0, "frame timeline left drag pans later frames");
+		Assert(Math.Abs(leftDragDelta) == Math.Abs(rightDragDelta), "frame timeline pan delta symmetric");
 	}
 
 	private static void AssertFrameTimelineRenderModel(SessionDocument document)
