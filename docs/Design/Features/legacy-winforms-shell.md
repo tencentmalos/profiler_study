@@ -1,12 +1,12 @@
 # Legacy WinForms Shell 与 MainForm
 
-## 范围
+## 设计定位
 
-本文只记录 `ProfilerStudy/LegacyWinForms/MainForm.cs` 的主体构成、菜单/工具栏、session 生命周期和 docking/output shell。基础控件按控件族维护在 `Controls/`，具体分析视图见 `legacy-winforms-profiler-views.md`。
+`MainForm` 是 legacy Windows UI 的 shell，也是当前最完整的 profiler 工作流参考。本文只维护 shell 级职责：菜单、toolbar、session 生命周期、docking、output window、Android 入口和全局状态协调。
 
-Legacy WinForms 是当前 Windows 兼容 UI，也是 Avalonia 行为对齐的重要参考。
+基础控件按控件族维护在 `Controls/`，具体分析视图见 `legacy-winforms-profiler-views.md`。
 
-## MainForm 主体区域
+## MainForm 组成
 
 `MainForm` 是 WinForms `Form`，主要由以下区域组成：
 
@@ -18,6 +18,24 @@ Legacy WinForms 是当前 Windows 兼容 UI，也是 Avalonia 行为对齐的重
 - `m_HoverBox`：跨 profiler 控件共享的 hover 提示。
 
 初始化顺序包括设置加载、DPI 缩放、输出窗口、DockManager、定时器、启动文件/recording 参数和 update thread。
+
+## Shell 职责边界
+
+`MainForm` 可以负责：
+
+- 创建、读取、保存、关闭 session。
+- 创建 `MainSessionView` 并放入 `DockManager`。
+- 维护 active session/view。
+- 同步菜单和 toolbar 状态。
+- 持久化全局 settings，例如最近文件、output window、连接设置。
+- 处理 shell 级 Android、demo、about、settings 入口。
+
+`MainForm` 不应该负责：
+
+- 在 paint 路径中计算具体 graph 数据。
+- 直接实现 scope/counter/core 分析算法。
+- 绕开 `SessionViewSaveData` 保存具体 view 状态。
+- 把 Avalonia 对齐逻辑写进 WinForms 控件。
 
 ## 菜单职责
 
@@ -40,7 +58,7 @@ Legacy WinForms 是当前 Windows 兼容 UI，也是 Avalonia 行为对齐的重
 
 `UpdateButtonStates` 及相关方法是按钮 enabled/checked 的权威入口。不要在零散事件里重复写状态规则。
 
-## Session 管理
+## Session 生命周期
 
 `MainForm` 持有：
 
@@ -56,6 +74,13 @@ Legacy WinForms 是当前 Windows 兼容 UI，也是 Avalonia 行为对齐的重
 - `Write()`：从活动 view 收集 `SessionViewSaveData` 并保存。
 - `CreateSessionFromSelection`：通过 `Session.CopyTo` 复制选区成新 session。
 - Close/CloseAll：处理保存提示、事件解绑、DockManager child 移除和 active view 更新。
+
+关键约束：
+
+- 读写耗时操作走后台 `ThreadJob`，UI 线程只负责进度和结果处理。
+- session close 必须先处理 dirty/save prompt。
+- active view 变化必须同步按钮状态、菜单 checked 状态和 view-specific panel 状态。
+- `SessionViewSaveData` 是 session view 布局和选择状态的持久化边界。
 
 ## Output Window
 
@@ -78,12 +103,25 @@ Android 相关入口保留在 Tools 菜单和 Android toolbar button：
 
 普通连接设置对话框不负责枚举 Android endpoint。
 
-## 修改规则
+## 与 Avalonia 对齐
 
-修改 `MainForm` 前：
+Avalonia shell 不复用 `MainForm` 或 `docker/`，但应对齐这些用户语义：
 
-1. 如果改变菜单、工具栏、session 生命周期、docking/output 结构，先更新本文。
-2. 如果改变基础控件行为，先更新 `Controls/` 下对应控件族文档。
-3. 如果改变 Threads/Scopes/Cores 等分析视图，先更新 `legacy-winforms-profiler-views.md`。
-4. 保留保存提示、最近文件、active view、button state 的既有行为。
-5. WinForms 行为变更需要在 Windows 环境构建并手工验证受影响路径。
+- File/View/Connection/Tools/Help 的命令分组。
+- 连接、断开、Android 工具、Recent Files、Create Session from Selection。
+- Output window 的可见性和日志角色。
+- Threads/Cores/Scopes 的 active view 切换。
+- Track end、frame navigation、scope colouring、callstack 入口。
+
+如果 Avalonia 为跨平台体验改了呈现方式，应在 `avalonia-shell.md` 和对应控件族文档记录“语义对齐、视觉不完全一致”的原因。
+
+## 验收清单
+
+修改 `MainForm` 前先更新本文；实现后按影响范围验证：
+
+- 菜单和 toolbar 两个入口都能触发同一命令。
+- 打开文件、保存、关闭、关闭全部、最近文件行为不回退。
+- 连接/断开/Android 连接状态正确更新按钮 enable。
+- active view 切换后 toolbar checked 状态正确。
+- Output window 显隐和高度持久化。
+- Windows 环境完整 build，并手工验证受影响路径。

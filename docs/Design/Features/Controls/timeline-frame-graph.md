@@ -1,10 +1,12 @@
 # 时间线与 Frame Graph
 
-## 范围
+## 用户场景
 
-本文维护全局时间线、frame strip、frame graph、目标帧耗时线、帧 hover/selection、帧 spike 导航的 WinForms/Avalonia 对齐。
+用户通过时间线观察帧耗时、定位 spike、选择当前帧、缩放/滚动可视范围，并把后续 Threads/Scopes/Counters 视图同步到同一时间上下文。
 
-## WinForms 实现
+## 当前实现映射
+
+### WinForms
 
 主要文件：
 
@@ -26,7 +28,7 @@
 - `Session.TimeToFrameX`
 - `CoreUtils.GetFrameTimeCategory`
 
-## Avalonia 实现
+### Avalonia
 
 主要文件：
 
@@ -39,7 +41,7 @@
 
 `FrameTimelineControl` 应只接收已经准备好的 `FrameSample`、viewport、selection，不直接读取文件或遍历完整 session。
 
-## 对齐要求
+## 行为契约
 
 - 帧颜色分类与 WinForms 保持一致：正常、warning、alert、target line。
 - Hover、selected frame、visible range 的语义一致。
@@ -47,7 +49,25 @@
 - 目标帧耗时来自 settings/session 语义，不由控件硬编码。
 - 大 session 下 Avalonia 可以采样绘制，但采样不能改变选择和导出语义。
 
-## 修改流程
+## 对齐状态与目标
+
+- WinForms 的 `Timeline` + `FrameGraphPanel` 是视觉参考：上方 timeline、frame strip、目标线、warning/alert 颜色。
+- Avalonia 的 `FrameTimelineControl` 是对齐承载点，应逐步合并 frame strip 和 graph 的用户语义。
+- 当前可接受差异：绘制技术不同，Avalonia 可用不同图标/字体；不可接受差异：同一帧在两个 UI 中分类不同、选中范围不同。
+
+## 数据流与状态归属
+
+```text
+Session
+  -> SessionQueryService / FrameSample
+  -> FrameTimelineControl
+  -> TimelineSelection / TimelineViewport
+  -> Threads/Scopes/Counters view refresh
+```
+
+控件可以改变 selection/viewport，不能修改 session frame 数据。
+
+## 验收清单
 
 改 timeline/frame graph 前：
 
@@ -55,3 +75,4 @@
 2. 明确改动影响的是绘制、交互、帧分类、viewport 还是 selection。
 3. 检查 WinForms 和 Avalonia 是否都需要同步。
 4. 验证 loaded session、live session、空 session 三种状态。
+5. 验证长 session 下滚动/缩放不卡顿，选中帧精确。

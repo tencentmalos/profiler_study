@@ -11,7 +11,7 @@ This is a Visual Studio 2022 C# Windows Forms profiler UI targeting `.NET Framew
 - `CoreUtils/` contains shared utility types under `SCLCoreCLR`.
 - `docker/` contains docking and MDI UI infrastructure.
 - `tools/` and checked-in `.exe` files support source navigation and profiler demos.
-- `docs/Design/Features/` contains feature design documents. `docs/Design/Features/Controls/` contains per-control-family WinForms/Avalonia alignment documents.
+- `docs/Design/Features/` contains feature design documents. Start with `docs/Design/Features/README.md`; `docs/Design/Features/Controls/` contains per-control-family WinForms/Avalonia alignment documents.
 
 ## Build, Test, and Development Commands
 
@@ -43,6 +43,6 @@ Pull requests should include a concise description, the affected projects or UI 
 
 Preserve legacy behavior unless the task explicitly calls for a redesign. Avoid broad refactors across UI projects when a targeted change in one module is sufficient. Treat checked-in binary tools as project assets and do not replace them without a clear reason.
 
-Before changing a subfeature, update the corresponding design document first, then implement the code. For Core behavior, use `docs/Design/Features/core-foundation.md`. For WinForms shell changes, use `docs/Design/Features/legacy-winforms-shell.md`. For Avalonia shell changes, use `docs/Design/Features/avalonia-shell.md`. For shared/basic UI controls, update the relevant per-control-family document under `docs/Design/Features/Controls/` so WinForms and Avalonia stay aligned.
+Before changing a subfeature, update the corresponding design document first, then implement the code. Feature design documents under `docs/Design/Features/` should be written in Chinese and should describe behavior contracts, data/state ownership, WinForms/Avalonia alignment, and verification, not just list files. For Core behavior, use `docs/Design/Features/core-foundation.md`. For WinForms shell changes, use `docs/Design/Features/legacy-winforms-shell.md`. For Avalonia shell changes, use `docs/Design/Features/avalonia-shell.md`. For shared/basic UI controls, update the relevant per-control-family document under `docs/Design/Features/Controls/` so WinForms and Avalonia stay aligned.
 
 After each code change that successfully builds, automatically create a focused git commit for the verified changes before reporting completion. Include the build evidence in the response. Do not include unrelated dirty or untracked files in that commit.

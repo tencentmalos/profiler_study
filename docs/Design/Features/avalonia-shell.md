@@ -1,8 +1,10 @@
 # Avalonia Shell
 
-## 范围
+## 设计定位
 
-本文记录 `ProfilerStudy.Avalonia` 的应用启动、`MainWindow` 主体结构、native menu、toolbar、overlay、status/output shell 和 `MainWindowViewModel` 的职责边界。基础控件和功能控件按控件族维护在 `Controls/`。
+Avalonia 是后续跨平台 UI 和外部 trace 工作流的主线 shell。本文维护应用启动、`MainWindow` 结构、native menu、toolbar、overlay、status/output shell 和 `MainWindowViewModel` 职责边界。基础控件和功能控件按控件族维护在 `Controls/`。
+
+Avalonia 要对齐 legacy WinForms 的 profiler 语义，但不复制 WinForms 的 docking、GDI 控件或固定像素实现。
 
 ## 应用入口
 
@@ -22,6 +24,23 @@
 - Row 4：status bar。
 
 Shell 应始终以可用 profiler 工作区为首屏，不做 landing page。
+
+## Shell 职责边界
+
+Avalonia shell 可以负责：
+
+- 应用窗口、菜单、toolbar、status/output/overlay 布局。
+- 组合 feature 控件和 view model 状态。
+- 路由 command 到 feature service/controller。
+- 管理 theme、平台 source viewer、app settings。
+- 同步 native menu 和 Avalonia menu 的 checked/enabled 状态。
+
+Avalonia shell 不应该负责：
+
+- 在 `MainWindow.axaml.cs` 中读取 profiler 文件或计算分析结果。
+- 在 XAML code-behind 中直接遍历 Core `Session`。
+- 引用 WinForms 控件、dialog 或 `docker/`。
+- 把一个具体 feature 的大量状态继续塞进 shell，而不拆 service/controller。
 
 ## Code-behind 职责
 
@@ -52,6 +71,20 @@ Shell 应始终以可用 profiler 工作区为首屏，不做 landing page。
 
 当新功能逻辑超过简单命令转发时，应拆到 `Features/*` 的 service/controller/analyzer，`MainWindowViewModel` 只负责组合和发布状态。
 
+## Session 数据流
+
+Avalonia session 数据流应保持单向：
+
+```text
+SessionLoader
+  -> SessionDocument
+  -> SessionQueryService / Feature Analyzer
+  -> Row model / plot model / control input
+  -> TimelineSelection / TimelineViewport / command
+```
+
+控件不直接打开文件，不直接保存 session，不在 render 中重新跑完整分析。需要共享给 MCP 的分析逻辑，不应只写在 Avalonia row model 中。
+
 ## 菜单和 Toolbar
 
 Avalonia menu 与 native menu 应保持语义一致：
@@ -75,11 +108,28 @@ Toolbar 使用 icon button / toggle button，并通过 tooltip 解释。不要�
 - 具体 overlay 内容可以拆到 feature 控件。
 - 不引用 WinForms docking 代码。
 
-## 修改流程
+## 与 WinForms 对齐
 
-修改 Avalonia shell 前：
+必须对齐的语义：
 
-1. 先更新本文。
-2. 如果涉及控件实现，同步更新 `Controls/` 下对应控件族文档。
-3. 保持 `MainWindow.axaml` 负责组合，业务计算放入 feature 层。
-4. 构建 `ProfilerStudy.Avalonia`，并手工检查桌面和窄窗口布局。
+- File/View/Connection/Tools/Help 分组和核心命令。
+- 连接/断开、Android 工具、recent files、create session from selection。
+- Threads/Cores/Scopes active view。
+- Timeline navigation、track end、scope colouring、find。
+- Output window 作为诊断日志区域。
+
+可以不同的实现：
+
+- Avalonia 使用 overlay 和 bound state，不复刻 WinForms MDI dock。
+- Avalonia toolbar 可使用 Material icon，不强制使用 legacy bitmap。
+- Avalonia 可以以跨平台文件 picker/source viewer 替代 WinForms 对话框。
+
+## 验收清单
+
+修改 Avalonia shell 前先更新本文；实现后按影响范围验证：
+
+- `dotnet build ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -c Debug -p:TargetFrameworks=net8.0`
+- 如果当前环境需要，带上 `AvaloniaBuildTasksLocation` workaround。
+- 桌面和窄窗口下菜单、toolbar、status/output 不重叠。
+- native menu 和 XAML menu 的 command/checked 状态一致。
+- 打开 session、切换 active view、timeline navigation、output toggle 的基本路径可用。

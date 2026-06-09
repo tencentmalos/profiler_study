@@ -1,10 +1,17 @@
 # Core 基础能力
 
-## 范围
+## 设计目标
 
-本文记录 `ProfilerStudyCore` 的 UI 无关基础能力，包括 ProfilerStudy session 格式、实时抓取 packet 流、文件读写、核心数据模型、分析迭代器和跨 UI/MCP 共享查询能力。
+`ProfilerStudyCore` 是所有 UI 和 MCP 的共同基础。它负责把 ProfilerStudy 协议数据转成稳定的 session 模型，并提供不依赖 UI 的查询、统计和读写能力。
 
-Perfetto、systrace、Tracy 等外部 trace 格式后续应通过独立 importer/query adapter 接入，不应把外部格式强行伪装成现有 ProfilerStudy packet。
+设计目标：
+
+- 保持现有 `.profiler` / recording / dump 行为兼容。
+- 让 WinForms、Avalonia、MCP 共享同一份 session 语义。
+- 把协议、transport、model、analysis 与 UI 控件隔离。
+- 为 Perfetto、systrace、Tracy 等外部 trace importer 预留 query adapter 接入点。
+
+外部 trace 格式不应强行伪装成 ProfilerStudy packet。正确方向是新增共享 trace document/query 层，再让 ProfilerStudy `Session` 作为其中一个 adapter。
 
 ## 目录职责
 
@@ -17,6 +24,24 @@ Perfetto、systrace、Tracy 等外部 trace 格式后续应通过独立 importer
 - `Infrastructure/`：计时、锁、数组、设置接口、序列化、颜色、平台辅助。
 
 当前 namespace 仍保留 `ProfilerStudy`，这是兼容旧 WinForms 和 MCP 的约束。不要在普通功能修改中顺手迁移 namespace。
+
+## 核心边界
+
+Core 可以做：
+
+- 连接、接收、反序列化、处理 ProfilerStudy packet。
+- 保存和读取 ProfilerStudy session 文件。
+- 维护帧、线程、scope、counter、context switch、log 等模型。
+- 提供 UI/MCP 可复用的查询和统计。
+- 通过事件通知外部 session 状态变化。
+
+Core 不应该做：
+
+- 打开 WinForms/Avalonia 对话框。
+- 直接依赖具体 UI 控件或窗口。
+- 生成 MCP markdown 或 Avalonia row model。
+- 在绘制路径中临时计算 UI 专用布局。
+- 把外部 trace 格式硬塞进 ProfilerStudy packet 处理链。
 
 ## Session 聚合模型
 
@@ -31,7 +56,7 @@ Perfetto、systrace、Tracy 等外部 trace 格式后续应通过独立 importer
 
 时间单位以采集端 timer tick 为主。UI 和 MCP 输出必须通过 `TimerFrequency`、`FrameXToTime`、`TimeToFrameX`、已有单位换算工具转换，不要直接假定毫秒。
 
-## 生命周期
+## 数据流
 
 ### 实时连接
 
@@ -49,6 +74,17 @@ Perfetto、systrace、Tracy 等外部 trace 格式后续应通过独立 importer
 - send queue 用于发送 callstack 开关、string 请求、custom stat 颜色等控制 packet。
 
 修改实时处理时必须保留现有线程安全语义：`ReadWriteLock`、`lock`、packet queue、dispose/join 顺序都是行为约束。
+
+实时连接数据流：
+
+```text
+Connection/ReceiveStream
+  -> ReceivedPacket
+  -> Session.ProcessPacket
+  -> Frame/Thread/Scope/Counter/ContextSwitch model
+  -> Core events
+  -> WinForms / Avalonia / MCP query
+```
 
 ### 文件读取
 
@@ -69,6 +105,19 @@ Perfetto、systrace、Tracy 等外部 trace 格式后续应通过独立 importer
 ### 选区复制
 
 `Session.CopyTo(...)` 将时间范围复制成新 session。它复制帧、scope、counter、线程元数据、context switch、进程名，并重新计算 session stats。该行为支撑 UI 的 "Create Session from Selection"，必须保持确定性。
+
+## 线程与锁约定
+
+Core 当前不是不可变模型。读写大型集合时必须遵守现有锁约定：
+
+- `m_FramesLock` 保护 frame 集合。
+- `m_ThreadsLock` 保护 thread metadata。
+- `m_TimeSpansLock` 保护每线程 scope 列表。
+- `m_TimeSpanInfoSetLock` 保护 scope metadata。
+- `m_CustomStatSessionInfoLock` 和相关 lock 保护 counter 元数据和值。
+- context switch arrays 和 cache 使用各自 lock。
+
+新增查询方法优先返回 snapshot、只读 list 或 DTO。不要把内部可变集合直接暴露给新 UI。
 
 ## Packet 扩展规则
 
@@ -93,6 +142,29 @@ Core 当前提供的低层查询能力：
 
 UI 无关且可被 MCP 复用的分析逻辑放在 `ProfilerStudyCore/Analysis`。MCP markdown/JSON 格式化放在 `ProfilerStudy.McpServer`。Avalonia 行模型和控件状态放在 `ProfilerStudy.Avalonia`。
 
+## 与 UI/MCP 的协作方式
+
+WinForms 当前直接持有 `Session`，这是 legacy 行为。Avalonia 应通过 `SessionDocument`、`SessionQueryService`、feature analyzer 读取 Core 数据。MCP 应通过 server-side analysis service 读取 Core 数据并输出结构化结果。
+
+新共享分析能力的推荐路径：
+
+1. 在 Core 中提供 UI 无关查询或统计。
+2. 在 Avalonia/MCP 分别做展示层转换。
+3. WinForms 如需复用，再从 legacy view 调用 Core 查询。
+
+不要为了某个 UI 的表格列，把 UI 文案或排序状态写进 Core。
+
+## 外部 Trace 预留方向
+
+Perfetto/Tracy/systrace 接入时建议新增：
+
+- `TraceDocument`：统一描述 trace 文件、时间范围、线程、slice、counter。
+- `ITraceQuerySession`：提供按时间范围、线程、counter、slice 查询。
+- `ProfilerStudyTraceQuerySession`：用现有 `Session` 适配统一 query。
+- `PerfettoTraceQuerySession` / `TracyTraceQuerySession`：外部格式 importer 的输出。
+
+这样 WinForms/Avalonia/MCP 可以逐步迁移到共享 query，而不是把所有格式塞进 `Session`。
+
 ## 修改原则
 
 - 不在 Core 中添加 WinForms/Avalonia 控件引用。
@@ -100,3 +172,14 @@ UI 无关且可被 MCP 复用的分析逻辑放在 `ProfilerStudyCore/Analysis`�
 - 不从 Core 弹 UI 对话框；Core 应返回错误或触发 UI 无关事件。
 - 长耗时读写/复制通过 `ThreadJobContext` 或等价 UI 无关进度机制报告。
 - 涉及协议、文件兼容、线程模型的改动必须有明确验证方案。
+
+## 验收清单
+
+Core 改动至少选择匹配的验证项：
+
+- `dotnet build ProfilerStudy.McpServer/ProfilerStudy.McpServer.csproj -c Debug -p:TargetFrameworks=net8.0`
+- `dotnet run --project ProfilerStudy.McpServer/ProfilerStudy.McpServer.csproj -c Debug -p:TargetFrameworks=net8.0 -- --self-test`
+- Avalonia session load smoke test。
+- Windows 上完整 solution build。
+- 使用真实 `.profiler` / `.profiler_recording` 文件做读写回归。
+- 如果改 live capture，验证普通 TCP 和 Android adb forward 两条路径。
