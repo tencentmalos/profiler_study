@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class PacketAllocatorT<T> where T : new()
 {

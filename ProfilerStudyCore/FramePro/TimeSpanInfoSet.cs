@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public class TimeSpanInfoSet : IFrameProSerialisable
+public class TimeSpanInfoSet : IProfilerStudySerialisable
 {
 	private Dictionary<TimeSpanInfo, int> m_TimeSpanInfoMap = new Dictionary<TimeSpanInfo, int>();
 

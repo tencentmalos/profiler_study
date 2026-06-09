@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class CustomStatsGraph : UserControl
 {
@@ -136,7 +136,7 @@ internal class CustomStatsGraph : UserControl
 
 	private void InitializeComponent()
 	{
-		this.m_LineGraph = new FramePro.LineGraph();
+		this.m_LineGraph = new ProfilerStudy.LineGraph();
 		base.SuspendLayout();
 		this.m_LineGraph.Dock = System.Windows.Forms.DockStyle.Fill;
 		this.m_LineGraph.GetGraphValuesPerFrameFunction = null;
@@ -146,7 +146,7 @@ internal class CustomStatsGraph : UserControl
 		this.m_LineGraph.Size = new System.Drawing.Size(1057, 84);
 		this.m_LineGraph.TabIndex = 0;
 		this.m_LineGraph.Unit = "";
-		this.m_LineGraph.XAxisMode = FramePro.XAxisMode.Frame;
+		this.m_LineGraph.XAxisMode = ProfilerStudy.XAxisMode.Frame;
 		this.m_LineGraph.YOffset = 0.0;
 		this.m_LineGraph.YScale = 1.0;
 		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);

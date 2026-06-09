@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class FrameGraphYAxis : UserControl
 {

@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using SCL;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class SettingsDialog : Form
 {
@@ -53,7 +53,7 @@ internal class SettingsDialog : Form
 	private Label label4;
     private Label label5;
     private ComboBox cbSourceViewer;
-    private TextBox m_FrameProThreadAffinityTextBox;
+    private TextBox m_ProfilerStudyThreadAffinityTextBox;
 
 	public bool SymbolPathsChanged => m_SymbolPathsChanged;
 
@@ -68,7 +68,7 @@ internal class SettingsDialog : Form
 		m_ShowContextSwitchWarningDialogCheckBox.Checked = settings.ShowContextSwitchWarningBox;
 		m_MaxVisibleThreadsTextBox.Text = settings.CoreSettings.MaxVisibleThreads.ToString();
 		m_ThreadScopeHeightTextBox.Text = settings.ThreadScopeHeight.ToString();
-		m_FrameProThreadAffinityTextBox.Text = settings.FrameProThreadAffinity.ToString("X");
+		m_ProfilerStudyThreadAffinityTextBox.Text = settings.ProfilerStudyThreadAffinity.ToString("X");
 		InitialiseSourceRootPathsDataGrid();
 		UpdateSourceRootPathsDataGrid();
 
@@ -183,10 +183,10 @@ internal class SettingsDialog : Form
 			m_Settings.SourceRoots = list3;
 		}
 		ulong value = 0uL;
-		if (Misc.HexStringToULong(m_FrameProThreadAffinityTextBox.Text, ref value) && value != 0L && m_Settings.FrameProThreadAffinity != value)
+		if (Misc.HexStringToULong(m_ProfilerStudyThreadAffinityTextBox.Text, ref value) && value != 0L && m_Settings.ProfilerStudyThreadAffinity != value)
 		{
-			m_Settings.FrameProThreadAffinity = value;
-			Utils.SetProcessAffinity(m_Settings.FrameProThreadAffinity);
+			m_Settings.ProfilerStudyThreadAffinity = value;
+			Utils.SetProcessAffinity(m_Settings.ProfilerStudyThreadAffinity);
 		}
 
         var viewer = (string)cbSourceViewer.SelectedItem;
@@ -223,7 +223,7 @@ internal class SettingsDialog : Form
             this.m_DisableInteractiveSessionsforLocalProfiles = new System.Windows.Forms.CheckBox();
             this.m_ShowContextSwitchWarningDialogCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.m_FrameProThreadAffinityTextBox = new System.Windows.Forms.TextBox();
+            this.m_ProfilerStudyThreadAffinityTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.m_ThreadScopeHeightTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -375,7 +375,7 @@ internal class SettingsDialog : Form
             this.groupBox3.Controls.Add(this.m_DisableInteractiveSessionsforLocalProfiles);
             this.groupBox3.Controls.Add(this.m_ShowContextSwitchWarningDialogCheckBox);
             this.groupBox3.Controls.Add(this.label4);
-            this.groupBox3.Controls.Add(this.m_FrameProThreadAffinityTextBox);
+            this.groupBox3.Controls.Add(this.m_ProfilerStudyThreadAffinityTextBox);
             this.groupBox3.Controls.Add(this.label2);
             this.groupBox3.Controls.Add(this.m_ThreadScopeHeightTextBox);
             this.groupBox3.Controls.Add(this.label1);
@@ -444,13 +444,13 @@ internal class SettingsDialog : Form
             this.label4.TabIndex = 11;
             this.label4.Text = "ProfilerStudy Thread Affinity";
             // 
-            // m_FrameProThreadAffinityTextBox
+            // m_ProfilerStudyThreadAffinityTextBox
             // 
-            this.m_FrameProThreadAffinityTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_FrameProThreadAffinityTextBox.Location = new System.Drawing.Point(632, 178);
-            this.m_FrameProThreadAffinityTextBox.Name = "m_FrameProThreadAffinityTextBox";
-            this.m_FrameProThreadAffinityTextBox.Size = new System.Drawing.Size(158, 26);
-            this.m_FrameProThreadAffinityTextBox.TabIndex = 10;
+            this.m_ProfilerStudyThreadAffinityTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_ProfilerStudyThreadAffinityTextBox.Location = new System.Drawing.Point(632, 178);
+            this.m_ProfilerStudyThreadAffinityTextBox.Name = "m_ProfilerStudyThreadAffinityTextBox";
+            this.m_ProfilerStudyThreadAffinityTextBox.Size = new System.Drawing.Size(158, 26);
+            this.m_ProfilerStudyThreadAffinityTextBox.TabIndex = 10;
             // 
             // label2
             // 

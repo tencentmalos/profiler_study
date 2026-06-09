@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class TimeSpanArray
 {

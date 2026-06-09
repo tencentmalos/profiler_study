@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class BrushSet : IDisposable
 {

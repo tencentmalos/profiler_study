@@ -5,11 +5,11 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Editor;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 using SCL;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ScopesView : SessionView
 {
@@ -501,7 +501,7 @@ internal class ScopesView : SessionView
 		this.label1 = new System.Windows.Forms.Label();
 		this.m_FilterTextBox = new System.Windows.Forms.TextBox();
 		this.splitter1 = new System.Windows.Forms.Splitter();
-		this.m_ScopeGraph = new FramePro.LineGraph();
+		this.m_ScopeGraph = new ProfilerStudy.LineGraph();
 		this.m_ContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
 		this.goToSourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 		this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -617,7 +617,7 @@ internal class ScopesView : SessionView
 		this.m_ScopeGraph.Size = new System.Drawing.Size(820, 196);
 		this.m_ScopeGraph.TabIndex = 4;
 		this.m_ScopeGraph.Unit = "cycles";
-		this.m_ScopeGraph.XAxisMode = FramePro.XAxisMode.Frame;
+		this.m_ScopeGraph.XAxisMode = ProfilerStudy.XAxisMode.Frame;
 		this.m_ScopeGraph.YOffset = 0.0;
 		this.m_ScopeGraph.YScale = 1.0;
 		this.m_ScopeGraph.Resize += new System.EventHandler(GraphResize);

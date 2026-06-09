@@ -1,5 +1,5 @@
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public delegate void ThreadRowPanelMouseDownHandler(MouseButtons button);

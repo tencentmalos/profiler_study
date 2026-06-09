@@ -7,7 +7,7 @@ using SCLCoreCLR;
 using System.Windows.Forms;
 #endif
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class CoreSettings : ISettings
 {
@@ -157,7 +157,7 @@ public class CoreSettings : ISettings
 
 	public CoreSettings()
 	{
-		m_CallstackFilters.Add("FramePro::*");
+		m_CallstackFilters.Add("ProfilerStudy::*");
 	}
 
 	public bool Read()
@@ -168,7 +168,7 @@ public class CoreSettings : ISettings
 		}
 		XmlReadStream xmlReadStream = new XmlReadStream();
 		xmlReadStream.Load(m_Path);
-		if (xmlReadStream.StartElement("FramePro"))
+		if (xmlReadStream.StartElement("ProfilerStudy"))
 		{
 			Read(xmlReadStream);
 			xmlReadStream.EndElement();

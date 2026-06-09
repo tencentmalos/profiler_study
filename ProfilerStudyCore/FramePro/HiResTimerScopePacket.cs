@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal sealed class HiResTimerScopePacket : IPacket
 {

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class LineGraph : UserControl
 {

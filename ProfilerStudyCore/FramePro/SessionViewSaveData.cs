@@ -1,8 +1,8 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public class SessionViewSaveData : IFrameProSerialisable
+public class SessionViewSaveData : IProfilerStudySerialisable
 {
 	public long m_FrameGraphVisibleRangeStart;
 

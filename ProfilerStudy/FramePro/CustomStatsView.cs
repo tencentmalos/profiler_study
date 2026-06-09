@@ -4,11 +4,11 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using Editor;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 using SCL;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class CustomStatsView : SessionView
 {
@@ -1193,14 +1193,14 @@ internal class CustomStatsView : SessionView
 	private void InitializeComponent()
 	{
 		SCL.RowCollection rows = new SCL.RowCollection();
-		this.m_GraphsPanel = new FramePro.ScrollPanel();
+		this.m_GraphsPanel = new ProfilerStudy.ScrollPanel();
 		this.splitter2 = new System.Windows.Forms.Splitter();
 		this.m_DataGrid = new SCL.HDataGrid();
 		this.panel1 = new System.Windows.Forms.Panel();
 		this.button4 = new System.Windows.Forms.Button();
 		this.label2 = new System.Windows.Forms.Label();
-		this.m_XAxisTimeButton = new FramePro.CheckButton();
-		this.m_XAxisFrameButton = new FramePro.CheckButton();
+		this.m_XAxisTimeButton = new ProfilerStudy.CheckButton();
+		this.m_XAxisFrameButton = new ProfilerStudy.CheckButton();
 		this.button3 = new System.Windows.Forms.Button();
 		this.button2 = new System.Windows.Forms.Button();
 		this.button1 = new Editor.Button();
@@ -1308,7 +1308,7 @@ internal class CustomStatsView : SessionView
 		this.m_XAxisTimeButton.Name = "m_XAxisTimeButton";
 		this.m_XAxisTimeButton.Size = new System.Drawing.Size(69, 22);
 		this.m_XAxisTimeButton.TabIndex = 6;
-		this.m_XAxisTimeButton.CheckChange += new FramePro.CheckButtonCheckChangedHandler(XAxisTimeButtonCheckChanged);
+		this.m_XAxisTimeButton.CheckChange += new ProfilerStudy.CheckButtonCheckChangedHandler(XAxisTimeButtonCheckChanged);
 		this.m_XAxisFrameButton.BackColor = System.Drawing.SystemColors.Control;
 		this.m_XAxisFrameButton.BorderColour = System.Drawing.Color.LightGray;
 		this.m_XAxisFrameButton.ButtonText = "Frame";
@@ -1319,7 +1319,7 @@ internal class CustomStatsView : SessionView
 		this.m_XAxisFrameButton.Name = "m_XAxisFrameButton";
 		this.m_XAxisFrameButton.Size = new System.Drawing.Size(69, 22);
 		this.m_XAxisFrameButton.TabIndex = 5;
-		this.m_XAxisFrameButton.CheckChange += new FramePro.CheckButtonCheckChangedHandler(XAxisFrameButtonCheckChanged);
+		this.m_XAxisFrameButton.CheckChange += new ProfilerStudy.CheckButtonCheckChangedHandler(XAxisFrameButtonCheckChanged);
 		this.button3.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
 		this.button3.Location = new System.Drawing.Point(437, 4);
 		this.button3.Name = "button3";

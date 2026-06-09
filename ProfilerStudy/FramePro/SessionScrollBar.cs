@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class SessionScrollBar : UserControl
 {

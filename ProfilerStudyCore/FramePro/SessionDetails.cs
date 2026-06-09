@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public class SessionDetails : IFrameProSerialisable
+public class SessionDetails : IProfilerStudySerialisable
 {
 	public static string DefaultName = "Unnamed Session";
 

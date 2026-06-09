@@ -1,7 +1,7 @@
 using System.Drawing;
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class Event
 {

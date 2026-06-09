@@ -1,5 +1,5 @@
 using System;
-using FramePro;
+using ProfilerStudy;
 
 namespace ProfilerStudy.Avalonia;
 

@@ -1,8 +1,8 @@
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal sealed class ConnectPacket : IPacket
 {
-	public int m_FrameProLibVersion;
+	public int m_ProfilerStudyLibVersion;
 
 	public long m_TimerFrequency;
 
@@ -12,7 +12,7 @@ internal sealed class ConnectPacket : IPacket
 
 	public void Read(ReceiveStream reader, int packed_value)
 	{
-		m_FrameProLibVersion = reader.ReadInt32();
+		m_ProfilerStudyLibVersion = reader.ReadInt32();
 		m_TimerFrequency = reader.ReadInt64();
 		m_ProcessId = reader.ReadInt32();
 		m_Platform = (Platform)reader.ReadInt32();

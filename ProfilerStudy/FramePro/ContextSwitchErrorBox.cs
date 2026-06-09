@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class ContextSwitchErrorBox : Form
 {
@@ -46,7 +46,7 @@ public class ContextSwitchErrorBox : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.ContextSwitchErrorBox));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.ContextSwitchErrorBox));
 		this.pictureBox1 = new System.Windows.Forms.PictureBox();
 		this.m_TextBox = new System.Windows.Forms.TextBox();
 		this.button1 = new System.Windows.Forms.Button();
@@ -54,7 +54,7 @@ public class ContextSwitchErrorBox : Form
 		this.linkLabel1 = new System.Windows.Forms.LinkLabel();
 		((System.ComponentModel.ISupportInitialize)this.pictureBox1).BeginInit();
 		base.SuspendLayout();
-		this.pictureBox1.Image = FramePro.Properties.Resources.warning;
+		this.pictureBox1.Image = ProfilerStudy.Properties.Resources.warning;
 		this.pictureBox1.Location = new System.Drawing.Point(14, 14);
 		this.pictureBox1.Name = "pictureBox1";
 		this.pictureBox1.Size = new System.Drawing.Size(35, 31);

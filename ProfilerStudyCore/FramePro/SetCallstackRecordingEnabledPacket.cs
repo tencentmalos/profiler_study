@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal sealed class SetCallstackRecordingEnabledPacket : SendPacket
 {

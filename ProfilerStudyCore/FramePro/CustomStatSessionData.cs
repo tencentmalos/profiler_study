@@ -1,8 +1,8 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public class CustomStatSessionData : IFrameProSerialisable
+public class CustomStatSessionData : IProfilerStudySerialisable
 {
 	private long m_Name;
 

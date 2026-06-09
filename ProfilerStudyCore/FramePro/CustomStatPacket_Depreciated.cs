@@ -1,4 +1,4 @@
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal sealed class CustomStatPacket_Depreciated : IPacket
 {

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ConnectSettingsDialog : Form
 {
@@ -196,7 +196,7 @@ internal class ConnectSettingsDialog : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.ConnectSettingsDialog));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.ConnectSettingsDialog));
 		this.label1 = new System.Windows.Forms.Label();
 		this.label2 = new System.Windows.Forms.Label();
 		this.button1 = new System.Windows.Forms.Button();

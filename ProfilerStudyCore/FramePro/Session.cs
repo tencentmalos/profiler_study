@@ -10,7 +10,7 @@ using System.Threading;
 using SCLCoreCLR;
 ////using SymLibCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class Session : IDisposable
 {
@@ -42,7 +42,7 @@ public class Session : IDisposable
 		public long m_Time;
 	}
 
-	private const int m_FrameProLibVersion = 17;
+	private const int m_ProfilerStudyLibVersion = 17;
 
 	private const int m_SaveFileVersion = 47;
 
@@ -106,7 +106,7 @@ public class Session : IDisposable
 
 	private DisconnectReason m_DisconnectReason;
 
-	private volatile int m_ReceivedFrameProLibVersion = -1;
+	private volatile int m_ReceivedProfilerStudyLibVersion = -1;
 
 	private long m_TotalTimeSpanCount;
 
@@ -428,9 +428,9 @@ public class Session : IDisposable
 
 	public DisconnectReason DisconnectReason => m_DisconnectReason;
 
-	public int ReceivedFrameProLibVersion => m_ReceivedFrameProLibVersion;
+	public int ReceivedProfilerStudyLibVersion => m_ReceivedProfilerStudyLibVersion;
 
-	public static int FrameProLibVersion => 17;
+	public static int ProfilerStudyLibVersion => 17;
 
 	public long AverageFrameTime
 	{
@@ -1029,7 +1029,7 @@ public class Session : IDisposable
 			this.ShowError("Failed to copy context switch trace from XBoxOne");
 			return false;
 		}
-		string text = Path.GetTempPath() + "FramePro\\FramePro.etl";
+		string text = Path.GetTempPath() + "ProfilerStudy\\ProfilerStudy.etl";
 		if (File.Exists(text))
 		{
 			ReadXBoxOneEtlTrace(text);
@@ -1079,7 +1079,7 @@ public class Session : IDisposable
 		}
 		m_FrameBytesSentCount += packet.GetSize();
 		m_Platform = packet.m_Platform;
-		if (!IsValidFrameProLibVersion(17, packet.m_FrameProLibVersion))
+		if (!IsValidProfilerStudyLibVersion(17, packet.m_ProfilerStudyLibVersion))
 		{
 			Disconnect(DisconnectReason.BadVersion);
 		}
@@ -1098,7 +1098,7 @@ public class Session : IDisposable
 		m_PacketAllocator.Free(packet);
 	}
 
-	private bool IsValidFrameProLibVersion(int local_version, int remote_version)
+	private bool IsValidProfilerStudyLibVersion(int local_version, int remote_version)
 	{
 		if (remote_version >= 14)
 		{
@@ -3101,8 +3101,8 @@ public class Session : IDisposable
 				}
 				flag = true;
 				ConnectPacket connectPacket = (ConnectPacket)item.m_Packet;
-				m_ReceivedFrameProLibVersion = connectPacket.m_FrameProLibVersion;
-				if (IsValidFrameProLibVersion(17, connectPacket.m_FrameProLibVersion))
+				m_ReceivedProfilerStudyLibVersion = connectPacket.m_ProfilerStudyLibVersion;
+				if (IsValidProfilerStudyLibVersion(17, connectPacket.m_ProfilerStudyLibVersion))
 				{
 					goto IL_0579;
 				}
@@ -3301,9 +3301,9 @@ public class Session : IDisposable
 		switch (m_DisconnectReason)
 		{
 		case DisconnectReason.BadVersion:
-			error = "Incorrect FrameProLib version.";
-			error += "Your version of FramePro does not match the version of FrameProLib compiled into your app.\n";
-			error = error + "Found version " + m_ReceivedFrameProLibVersion + ", expected version " + 17;
+			error = "Incorrect ProfilerStudyLib version.";
+			error += "Your version of ProfilerStudy does not match the version of ProfilerStudyLib compiled into your app.\n";
+			error = error + "Found version " + m_ReceivedProfilerStudyLibVersion + ", expected version " + 17;
 			break;
 		case DisconnectReason.UnexpectedPacket:
 		case DisconnectReason.NoData:
@@ -3376,7 +3376,7 @@ public class Session : IDisposable
 		return false;
 	}
 
-	private bool ReadInternal(string filename, IFrameProSerialisable session_gui_data, ThreadJobContext context, ref string error)
+	private bool ReadInternal(string filename, IProfilerStudySerialisable session_gui_data, ThreadJobContext context, ref string error)
 	{
 		try
 		{
@@ -3400,7 +3400,7 @@ public class Session : IDisposable
 		}
 	}
 
-	private bool ReadInternal(BinaryReader binary_reader, IFrameProSerialisable session_gui_data, ThreadJobContext context, ref string error)
+	private bool ReadInternal(BinaryReader binary_reader, IProfilerStudySerialisable session_gui_data, ThreadJobContext context, ref string error)
 	{
 		long length = binary_reader.BaseStream.Length;
 		try
@@ -3410,11 +3410,11 @@ public class Session : IDisposable
 			{
 				if (num < 47)
 				{
-					error = "Unable to open file because it was saved with an old version of FramePro";
+					error = "Unable to open file because it was saved with an old version of ProfilerStudy";
 				}
 				else
 				{
-					error = "Unable to open file because it was saved with a newer version of FramePro";
+					error = "Unable to open file because it was saved with a newer version of ProfilerStudy";
 				}
 				return false;
 			}
@@ -3917,12 +3917,12 @@ public class Session : IDisposable
 		return true;
 	}
 
-	public bool Write(IFrameProSerialisable session_gui_data, ThreadJobContext context, ref string error)
+	public bool Write(IProfilerStudySerialisable session_gui_data, ThreadJobContext context, ref string error)
 	{
 		return Write(m_SessionFilename, session_gui_data, context, ref error);
 	}
 
-	private bool Write(string filename, IFrameProSerialisable session_gui_data, ThreadJobContext context, ref string error)
+	private bool Write(string filename, IProfilerStudySerialisable session_gui_data, ThreadJobContext context, ref string error)
 	{
 		int tickCount = Environment.TickCount;
 		try
@@ -3951,7 +3951,7 @@ public class Session : IDisposable
 		return true;
 	}
 
-	private void Write(BinaryWriter binary_writer, IFrameProSerialisable session_gui_data, ThreadJobContext context)
+	private void Write(BinaryWriter binary_writer, IProfilerStudySerialisable session_gui_data, ThreadJobContext context)
 	{
 		binary_writer.Write(47);
 		session_gui_data.Write(binary_writer);
@@ -4351,7 +4351,7 @@ public class Session : IDisposable
 		LogLine("ADB endpoint check: " + target);
 		if (!AdbSocketDiscovery.IsAdbSocketEndpoint(target))
 		{
-			SetLastConnectionError("Invalid Android FramePro endpoint: " + target);
+			SetLastConnectionError("Invalid Android ProfilerStudy endpoint: " + target);
 			return false;
 		}
 
@@ -4360,7 +4360,7 @@ public class Session : IDisposable
 		string adb = AdbSocketDiscovery.ResolveAdbExecutable();
 		LogLine("ADB executable: " + adb);
 		LogLine("ADB forward command: " + adb + " forward tcp:" + localPort + " " + target);
-		FramePro.AdbResult forwardResult = AdbSocketDiscovery.RunAdb(adb, new[] { "forward", "tcp:" + localPort, target });
+		ProfilerStudy.AdbResult forwardResult = AdbSocketDiscovery.RunAdb(adb, new[] { "forward", "tcp:" + localPort, target });
 		LogLine("ADB forward exit=" + forwardResult.ExitCode + ", output=" + AdbSocketDiscovery.NormalizeCommandOutput(forwardResult.Output));
 		if (!forwardResult.Success)
 		{
@@ -4368,7 +4368,7 @@ public class Session : IDisposable
 			return false;
 		}
 
-		FramePro.AdbResult listResult = AdbSocketDiscovery.RunAdb(adb, new[] { "forward", "--list" });
+		ProfilerStudy.AdbResult listResult = AdbSocketDiscovery.RunAdb(adb, new[] { "forward", "--list" });
 		LogLine("ADB forward --list exit=" + listResult.ExitCode + ", output=" + AdbSocketDiscovery.NormalizeCommandOutput(listResult.Output));
 		string expected = "tcp:" + localPort + " " + target;
 		if (!listResult.Output.Contains(expected))
@@ -4391,7 +4391,7 @@ public class Session : IDisposable
 			return;
 		}
 
-		FramePro.AdbResult result = AdbSocketDiscovery.RunAdb(AdbSocketDiscovery.ResolveAdbExecutable(), new[] { "forward", "--remove", "tcp:" + m_AdbForwardedPort });
+		ProfilerStudy.AdbResult result = AdbSocketDiscovery.RunAdb(AdbSocketDiscovery.ResolveAdbExecutable(), new[] { "forward", "--remove", "tcp:" + m_AdbForwardedPort });
 		LogLine("ADB forward removed: tcp:" + m_AdbForwardedPort + " -> " + m_AdbForwardTarget + ", exit=" + result.ExitCode + ", output=" + AdbSocketDiscovery.NormalizeCommandOutput(result.Output));
 		m_AdbForwardedPort = 0;
 		m_AdbForwardTarget = null;
@@ -4584,14 +4584,14 @@ public class Session : IDisposable
 		}
 	}
 
-	public bool FrameProStall(Frame frame, Frame next_frame)
+	public bool ProfilerStudyStall(Frame frame, Frame next_frame)
 	{
 		int frameCount = FrameCount;
 		long num = ((frameCount != 0) ? ((LastFrameEndTime - FirstFrameTime) / frameCount) : 0);
 		return frame.WaitForSendCompleteTime > num;
 	}
 
-	public bool FrameProTimeSpanSpike(Frame frame, Frame next_frame)
+	public bool ProfilerStudyTimeSpanSpike(Frame frame, Frame next_frame)
 	{
 		if (frame.TimeSpanCount > 1000)
 		{
@@ -5523,7 +5523,7 @@ public class Session : IDisposable
 			if (m_TimeSpanInfoSet.Count == int.MaxValue && !m_ShownTimeSpanInfoErrorMessageBox)
 			{
 				m_ShownTimeSpanInfoErrorMessageBox = true;
-				string text = "ERROR: FramePro can not handle more than 0xffff unique scopes. Additional scopes will have incorrect names.";
+				string text = "ERROR: ProfilerStudy can not handle more than 0xffff unique scopes. Additional scopes will have incorrect names.";
 				if (this.ShowError != null)
 				{
 					this.ShowWarning(text);
@@ -5744,7 +5744,7 @@ public class Session : IDisposable
 		session.m_MainThreadId = m_MainThreadId;
 		session.m_StringMemorySize = m_StringMemorySize;
 		session.m_MiscMemorySize = m_MiscMemorySize;
-		session.m_ReceivedFrameProLibVersion = m_ReceivedFrameProLibVersion;
+		session.m_ReceivedProfilerStudyLibVersion = m_ReceivedProfilerStudyLibVersion;
 		session.m_TotalTimeSpanCount = m_TotalTimeSpanCount;
 		session.m_SessionDetails = CoreUtils.Clone(m_SessionDetails);
 		session.m_TimerFrequency = m_TimerFrequency;

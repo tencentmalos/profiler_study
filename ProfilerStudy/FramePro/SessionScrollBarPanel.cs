@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class SessionScrollBarPanel : UserControl
 {
@@ -17,9 +17,9 @@ internal class SessionScrollBarPanel : UserControl
 
 	private Panel panel2;
 
-	private FrameProButton m_TimeModeButton;
+	private ProfilerStudyButton m_TimeModeButton;
 
-	private FrameProButton m_FrameModeButton;
+	private ProfilerStudyButton m_FrameModeButton;
 
 	private Panel panel3;
 
@@ -127,10 +127,10 @@ internal class SessionScrollBarPanel : UserControl
 		this.panel1 = new System.Windows.Forms.Panel();
 		this.panel2 = new System.Windows.Forms.Panel();
 		this.panel3 = new System.Windows.Forms.Panel();
-		this.verticalLabelPanel3 = new FramePro.VerticalLabelPanel();
-		this.m_TimeModeButton = new FramePro.FrameProButton();
-		this.m_FrameModeButton = new FramePro.FrameProButton();
-		this.m_SessionScrollBar = new FramePro.SessionScrollBar();
+		this.verticalLabelPanel3 = new ProfilerStudy.VerticalLabelPanel();
+		this.m_TimeModeButton = new ProfilerStudy.ProfilerStudyButton();
+		this.m_FrameModeButton = new ProfilerStudy.ProfilerStudyButton();
+		this.m_SessionScrollBar = new ProfilerStudy.SessionScrollBar();
 		this.panel1.SuspendLayout();
 		this.panel2.SuspendLayout();
 		base.SuspendLayout();
@@ -192,12 +192,12 @@ internal class SessionScrollBarPanel : UserControl
 		this.m_FrameModeButton.Click += new System.EventHandler(FrameModeButtonClick);
 		this.m_SessionScrollBar.Dock = System.Windows.Forms.DockStyle.Fill;
 		this.m_SessionScrollBar.Location = new System.Drawing.Point(173, 0);
-		this.m_SessionScrollBar.Mode = FramePro.SessionScrollBar.EMode.Frame;
+		this.m_SessionScrollBar.Mode = ProfilerStudy.SessionScrollBar.EMode.Frame;
 		this.m_SessionScrollBar.Name = "m_SessionScrollBar";
 		this.m_SessionScrollBar.Size = new System.Drawing.Size(904, 61);
 		this.m_SessionScrollBar.TabIndex = 1;
 		this.m_SessionScrollBar.TargetFrameMS = 0.0;
-		this.m_SessionScrollBar.SessionScrollBarChanged += new FramePro.SessionScrollBarChangedHandler(ScrollBarChangedEvent);
+		this.m_SessionScrollBar.SessionScrollBarChanged += new ProfilerStudy.SessionScrollBarChangedHandler(ScrollBarChangedEvent);
 		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
 		base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		base.Controls.Add(this.m_SessionScrollBar);

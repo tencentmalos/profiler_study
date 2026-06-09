@@ -5,13 +5,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public static class AdbSocketDiscovery
 {
-	public const string DebugFrameProEndpoint = "localfilesystem:/data/user_de/0/org.azahar_emu.azahar.debug/files/framepro";
-	public const string ReleaseFrameProEndpoint = "localfilesystem:/data/user_de/0/org.azahar_emu.azahar/files/framepro";
-	private const int FrameProDefaultTcpPort = 8428;
+	public const string DebugProfilerStudyEndpoint = "localfilesystem:/data/user_de/0/org.azahar_emu.azahar.debug/files/framepro";
+	public const string ReleaseProfilerStudyEndpoint = "localfilesystem:/data/user_de/0/org.azahar_emu.azahar/files/framepro";
+	private const int ProfilerStudyDefaultTcpPort = 8428;
 
 	public static bool IsAdbSocketEndpoint(string endpoint)
 	{
@@ -40,7 +40,7 @@ public static class AdbSocketDiscovery
 			listener.Start();
 			int port = ((IPEndPoint)listener.LocalEndpoint).Port;
 			listener.Stop();
-			if (port != FrameProDefaultTcpPort)
+			if (port != ProfilerStudyDefaultTcpPort)
 			{
 				return port;
 			}

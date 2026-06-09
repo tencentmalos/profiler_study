@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class StringReader
 {

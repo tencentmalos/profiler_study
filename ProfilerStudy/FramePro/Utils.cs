@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using SCLCoreCLR;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class Utils
 {

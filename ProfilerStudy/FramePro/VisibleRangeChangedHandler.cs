@@ -1,5 +1,5 @@
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal delegate void VisibleRangeChangedHandler(Control sender, long start_time, long end_time);

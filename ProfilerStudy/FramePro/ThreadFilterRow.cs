@@ -1,6 +1,6 @@
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ThreadFilterRow
 {

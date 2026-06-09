@@ -1,6 +1,6 @@
 using System.Threading;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class ReadWriteLock
 {

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Editor;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class TimeSpanGraph : UserControl
 {

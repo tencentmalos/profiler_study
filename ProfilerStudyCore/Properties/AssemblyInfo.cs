@@ -4,11 +4,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-////[assembly: AssemblyTitle("FrameProCore")]
+////[assembly: AssemblyTitle("ProfilerStudyCore")]
 ////[assembly: AssemblyDescription("")]
 ////[assembly: AssemblyConfiguration("")]
 ////[assembly: AssemblyCompany("")]
-////[assembly: AssemblyProduct("FrameProCore")]
+////[assembly: AssemblyProduct("ProfilerStudyCore")]
 ////[assembly: AssemblyCopyright("Copyright ©  2016")]
 ////[assembly: AssemblyTrademark("")]
 ////[assembly: ComVisible(false)]

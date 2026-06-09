@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class InfoPanel : UserControl
 {
@@ -37,7 +37,7 @@ internal class InfoPanel : UserControl
 
 	private SessionInfoDataGrid m_SessionStatsDataGrid;
 
-	private SessionInfoDataGrid m_FrameProMemoryDataGrid;
+	private SessionInfoDataGrid m_ProfilerStudyMemoryDataGrid;
 
 	private SessionInfoDataGrid m_SessionDetailsDataGrid;
 
@@ -53,7 +53,7 @@ internal class InfoPanel : UserControl
 		InitialiseSessionInfoDataGrid();
 		InitialiseMemoryDataGrid();
 		InitialiseSessionDataGrid();
-		InitialiseFrameProMemoryDataGrid();
+		InitialiseProfilerStudyMemoryDataGrid();
 	}
 
 	public void SetSession(Session session)
@@ -104,9 +104,9 @@ internal class InfoPanel : UserControl
 		m_SessionStatsDataGrid.DataGrid.Rows.Add("Scopes / frame", "0");
 	}
 
-	private void InitialiseFrameProMemoryDataGrid()
+	private void InitialiseProfilerStudyMemoryDataGrid()
 	{
-		m_FrameProMemoryDataGrid.DataGrid.Rows.Add("Memory (working set)", "0");
+		m_ProfilerStudyMemoryDataGrid.DataGrid.Rows.Add("Memory (working set)", "0");
 	}
 
 	protected override void OnVisibleChanged(EventArgs e)
@@ -125,7 +125,7 @@ internal class InfoPanel : UserControl
 		UpdateSessionInfoDataGrid();
 		UpdateMemoryDartaGrid();
 		UpdateSessionDataGrid();
-		UpdateFrameProMemoryDataGrid();
+		UpdateProfilerStudyMemoryDataGrid();
 	}
 
 	private void UpdateConnectionDataGrid()
@@ -249,12 +249,12 @@ internal class InfoPanel : UserControl
 		m_SessionStatsDataGrid.DataGrid.Refresh();
 	}
 
-	private void UpdateFrameProMemoryDataGrid()
+	private void UpdateProfilerStudyMemoryDataGrid()
 	{
 		long workingSet = Process.GetCurrentProcess().WorkingSet64;
 		int num = 0;
-		m_FrameProMemoryDataGrid.DataGrid.Rows[num++].Cells[1].Value = workingSet / 1024 / 1024 + " MB";
-		m_FrameProMemoryDataGrid.DataGrid.Refresh();
+		m_ProfilerStudyMemoryDataGrid.DataGrid.Rows[num++].Cells[1].Value = workingSet / 1024 / 1024 + " MB";
+		m_ProfilerStudyMemoryDataGrid.DataGrid.Refresh();
 	}
 
 	protected override void Dispose(bool disposing)
@@ -268,19 +268,19 @@ internal class InfoPanel : UserControl
 
 	private void InitializeComponent()
 	{
-		this.m_FrameProMemoryDataGrid = new FramePro.SessionInfoDataGrid();
-		this.m_SessionStatsDataGrid = new FramePro.SessionInfoDataGrid();
-		this.m_MemoryDataGrid = new FramePro.SessionInfoDataGrid();
-		this.m_SessionDetailsDataGrid = new FramePro.SessionInfoDataGrid();
-		this.m_ConnectionDataGrid = new FramePro.SessionInfoDataGrid();
-		this.m_SessionInfoDataGrid = new FramePro.SessionInfoDataGrid();
+		this.m_ProfilerStudyMemoryDataGrid = new ProfilerStudy.SessionInfoDataGrid();
+		this.m_SessionStatsDataGrid = new ProfilerStudy.SessionInfoDataGrid();
+		this.m_MemoryDataGrid = new ProfilerStudy.SessionInfoDataGrid();
+		this.m_SessionDetailsDataGrid = new ProfilerStudy.SessionInfoDataGrid();
+		this.m_ConnectionDataGrid = new ProfilerStudy.SessionInfoDataGrid();
+		this.m_SessionInfoDataGrid = new ProfilerStudy.SessionInfoDataGrid();
 		base.SuspendLayout();
-		this.m_FrameProMemoryDataGrid.Dock = System.Windows.Forms.DockStyle.Left;
-		this.m_FrameProMemoryDataGrid.Location = new System.Drawing.Point(1150, 0);
-		this.m_FrameProMemoryDataGrid.Name = "m_FrameProMemoryDataGrid";
-		this.m_FrameProMemoryDataGrid.Size = new System.Drawing.Size(230, 78);
-		this.m_FrameProMemoryDataGrid.TabIndex = 5;
-		this.m_FrameProMemoryDataGrid.Title = "FramePro Memory";
+		this.m_ProfilerStudyMemoryDataGrid.Dock = System.Windows.Forms.DockStyle.Left;
+		this.m_ProfilerStudyMemoryDataGrid.Location = new System.Drawing.Point(1150, 0);
+		this.m_ProfilerStudyMemoryDataGrid.Name = "m_ProfilerStudyMemoryDataGrid";
+		this.m_ProfilerStudyMemoryDataGrid.Size = new System.Drawing.Size(230, 78);
+		this.m_ProfilerStudyMemoryDataGrid.TabIndex = 5;
+		this.m_ProfilerStudyMemoryDataGrid.Title = "ProfilerStudy Memory";
 		this.m_SessionStatsDataGrid.Dock = System.Windows.Forms.DockStyle.Left;
 		this.m_SessionStatsDataGrid.Location = new System.Drawing.Point(920, 0);
 		this.m_SessionStatsDataGrid.Name = "m_SessionStatsDataGrid";
@@ -314,7 +314,7 @@ internal class InfoPanel : UserControl
 		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
 		base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		this.BackColor = System.Drawing.Color.WhiteSmoke;
-		base.Controls.Add(this.m_FrameProMemoryDataGrid);
+		base.Controls.Add(this.m_ProfilerStudyMemoryDataGrid);
 		base.Controls.Add(this.m_SessionStatsDataGrid);
 		base.Controls.Add(this.m_MemoryDataGrid);
 		base.Controls.Add(this.m_SessionInfoDataGrid);

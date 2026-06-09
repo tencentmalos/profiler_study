@@ -2,9 +2,9 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-internal class FrameProButton : UserControl
+internal class ProfilerStudyButton : UserControl
 {
 	private string m_Text = "Button";
 
@@ -86,7 +86,7 @@ internal class FrameProButton : UserControl
 		}
 	}
 
-	public FrameProButton()
+	public ProfilerStudyButton()
 	{
 		base.Size = new Size(65, 65);
 	}

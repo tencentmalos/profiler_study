@@ -4,7 +4,7 @@ using System.IO;
 using System.Numerics;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class ValuePerSecArray
 {

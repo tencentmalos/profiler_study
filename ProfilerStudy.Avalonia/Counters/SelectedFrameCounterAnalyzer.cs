@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using FramePro;
+using ProfilerStudy;
 using ProfilerStudy.Avalonia.ProfilerStats;
 
 namespace ProfilerStudy.Avalonia;

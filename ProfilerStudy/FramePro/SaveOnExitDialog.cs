@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class SaveOnExitDialog : Form
 {
@@ -45,7 +45,7 @@ internal class SaveOnExitDialog : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.SaveOnExitDialog));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.SaveOnExitDialog));
 		this.label1 = new System.Windows.Forms.Label();
 		this.button1 = new System.Windows.Forms.Button();
 		this.button2 = new System.Windows.Forms.Button();

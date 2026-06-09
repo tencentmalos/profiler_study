@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 ////using Registration;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class AboutDialog : Form
 {
@@ -42,13 +42,13 @@ internal class AboutDialog : Form
 	public AboutDialog(Settings settings)
 	{
 		InitializeComponent();
-		m_VersionLabel.Text = Utils.TrimVersionString(FrameProCore.Version);
+		m_VersionLabel.Text = Utils.TrimVersionString(ProfilerStudyCore.Version);
 		bool registered = true;
 		////if (settings.RegisterUsingPureDevReg)
 		////{
-		////	registered = FrameProCore.Registrar.Registered;
+		////	registered = ProfilerStudyCore.Registrar.Registered;
 		////	flag = true;
-		////	num = FrameProCore.Registrar.TrialDaysLeft;
+		////	num = ProfilerStudyCore.Registrar.TrialDaysLeft;
 		////}
 		////else
 		////{
@@ -73,7 +73,7 @@ internal class AboutDialog : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.AboutDialog));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.AboutDialog));
 		this.label8 = new System.Windows.Forms.Label();
 		this.label9 = new System.Windows.Forms.Label();
 		this.label7 = new System.Windows.Forms.Label();

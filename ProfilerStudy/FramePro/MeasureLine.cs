@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class MeasureLine
 {

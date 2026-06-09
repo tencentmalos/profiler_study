@@ -193,7 +193,7 @@ public sealed partial class MainWindow : SukiWindow
 			Item("_Check for Updates", viewModel.OpenUpdateCheckCommand),
 			Separator(),
 			SubMenu("_Demo",
-				Item("_Launch FramePro Game Simulator", viewModel.DemoActionCommand, "LaunchGameSimulator"),
+				Item("_Launch ProfilerStudy Game Simulator", viewModel.DemoActionCommand, "LaunchGameSimulator"),
 				Item("_Playback Recording File...", viewModel.DemoActionCommand, "PlaybackRecordingFile")),
 			Item("_Show Startup Page", viewModel.ShowStartupPageCommand),
 			Separator(),

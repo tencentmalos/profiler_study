@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class HatchBrushManager
 {

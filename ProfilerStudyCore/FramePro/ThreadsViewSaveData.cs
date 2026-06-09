@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class ThreadsViewSaveData
 {

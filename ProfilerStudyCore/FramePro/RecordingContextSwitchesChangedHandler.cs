@@ -1,3 +1,3 @@
-namespace FramePro;
+namespace ProfilerStudy;
 
 public delegate void RecordingContextSwitchesChangedHandler();

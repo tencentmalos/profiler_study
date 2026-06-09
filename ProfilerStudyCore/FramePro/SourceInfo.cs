@@ -1,8 +1,8 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public class SourceInfo : IFrameProSerialisable
+public class SourceInfo : IProfilerStudySerialisable
 {
 	private string m_Filename = "";
 

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class TimeSpanEx : TimeSpan
 {

@@ -5,11 +5,11 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Editor;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 using SCL;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class TimeSpanGraphView : UserControl
 {
@@ -432,20 +432,20 @@ internal class TimeSpanGraphView : UserControl
 		this.m_TopPanel = new System.Windows.Forms.Panel();
 		this.m_TimeSpanTextBox = new Editor.DropDownTextBox();
 		this.horz_line = new System.Windows.Forms.Panel();
-		this.m_GraphPanel = new FramePro.FrameGraphPanel();
-		this.leftBackPanel2 = new FramePro.LeftBackPanel();
+		this.m_GraphPanel = new ProfilerStudy.FrameGraphPanel();
+		this.leftBackPanel2 = new ProfilerStudy.LeftBackPanel();
 		this.panel2 = new System.Windows.Forms.Panel();
 		this.panel4 = new System.Windows.Forms.Panel();
 		this.m_DataGrid = new SCL.HDataGrid();
 		this.panel3 = new System.Windows.Forms.Panel();
 		this.label1 = new System.Windows.Forms.Label();
 		this.m_TimeLabel = new System.Windows.Forms.Label();
-		this.m_FrameGraphYAxis = new FramePro.FrameGraphYAxis();
+		this.m_FrameGraphYAxis = new ProfilerStudy.FrameGraphYAxis();
 		this.top = new System.Windows.Forms.Panel();
 		this.m_SelectedScopeDropDownButton = new System.Windows.Forms.Button();
 		this.panel1 = new System.Windows.Forms.Panel();
 		this.button3 = new System.Windows.Forms.Button();
-		this.verticalLabelPanelScope = new FramePro.VerticalLabelPanel();
+		this.verticalLabelPanelScope = new ProfilerStudy.VerticalLabelPanel();
 		this.m_TopPanel.SuspendLayout();
 		this.leftBackPanel2.SuspendLayout();
 		this.panel2.SuspendLayout();
@@ -491,9 +491,9 @@ internal class TimeSpanGraphView : UserControl
 		this.m_GraphPanel.TabIndex = 13;
 		this.m_GraphPanel.TargetFrameMS = 0.0;
 		this.m_GraphPanel.YScale = 0.0;
-		this.m_GraphPanel.VisibleRangeChanged += new FramePro.VisibleRangeChangedHandler(GraphSelectedRangeChanged);
-		this.m_GraphPanel.RangeChanged += new FramePro.RangeChangedHandler(GraphRangeChanged);
-		this.m_GraphPanel.SelectedRangeChanged += new FramePro.SelectedRangeChangedHandler(GraphSelectedRangeChanged);
+		this.m_GraphPanel.VisibleRangeChanged += new ProfilerStudy.VisibleRangeChangedHandler(GraphSelectedRangeChanged);
+		this.m_GraphPanel.RangeChanged += new ProfilerStudy.RangeChangedHandler(GraphRangeChanged);
+		this.m_GraphPanel.SelectedRangeChanged += new ProfilerStudy.SelectedRangeChangedHandler(GraphSelectedRangeChanged);
 		this.leftBackPanel2.Controls.Add(this.panel2);
 		this.leftBackPanel2.Controls.Add(this.m_FrameGraphYAxis);
 		this.leftBackPanel2.Controls.Add(this.top);
@@ -588,8 +588,8 @@ internal class TimeSpanGraphView : UserControl
 		this.m_FrameGraphYAxis.TabIndex = 2;
 		this.m_FrameGraphYAxis.TargetFrameMS = 0.0;
 		this.m_FrameGraphYAxis.YScale = 0.0;
-		this.m_FrameGraphYAxis.FrameGraphYAxisScaleChanged += new FramePro.FrameGraphYAxisScaleChangedHandler(FrameGraphYAxisScaleCahnged);
-		this.m_FrameGraphYAxis.FrameGraphYAxisTargetMSChanged += new FramePro.FrameGraphYAxisTargetMSChangedHandler(FrameGraphYAxisTargetMsChanged);
+		this.m_FrameGraphYAxis.FrameGraphYAxisScaleChanged += new ProfilerStudy.FrameGraphYAxisScaleChangedHandler(FrameGraphYAxisScaleCahnged);
+		this.m_FrameGraphYAxis.FrameGraphYAxisTargetMSChanged += new ProfilerStudy.FrameGraphYAxisTargetMSChangedHandler(FrameGraphYAxisTargetMsChanged);
 		this.top.BackColor = System.Drawing.Color.FromArgb(196, 196, 196);
 		this.top.Controls.Add(this.m_SelectedScopeDropDownButton);
 		this.top.Controls.Add(this.panel1);
@@ -601,7 +601,7 @@ internal class TimeSpanGraphView : UserControl
 		this.top.TabIndex = 3;
 		this.m_SelectedScopeDropDownButton.FlatAppearance.BorderSize = 0;
 		this.m_SelectedScopeDropDownButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		this.m_SelectedScopeDropDownButton.Image = FramePro.Properties.Resources.dropdown;
+		this.m_SelectedScopeDropDownButton.Image = ProfilerStudy.Properties.Resources.dropdown;
 		this.m_SelectedScopeDropDownButton.Location = new System.Drawing.Point(128, 0);
 		this.m_SelectedScopeDropDownButton.Name = "m_SelectedScopeDropDownButton";
 		this.m_SelectedScopeDropDownButton.Size = new System.Drawing.Size(22, 23);

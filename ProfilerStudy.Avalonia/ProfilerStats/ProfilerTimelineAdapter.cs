@@ -1,4 +1,4 @@
-using FramePro;
+using ProfilerStudy;
 using ProfilerStudy.Avalonia.ProfilerStats.Timeline;
 using ProfilerStudy.Avalonia.Timeline;
 using ScottPlot;

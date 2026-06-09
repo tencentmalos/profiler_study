@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Editor;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ThreadsView : SessionView
 {
@@ -2075,43 +2075,43 @@ internal class ThreadsView : SessionView
         this.m_ThreadsPanel = new System.Windows.Forms.Panel();
         this.m_TimeSpanGraphPanel = new System.Windows.Forms.Panel();
         this.m_TimeSpanGraphPanelInner = new System.Windows.Forms.Panel();
-        this.verticalLabelPanelThreads = new FramePro.VerticalLabelPanel();
+        this.verticalLabelPanelThreads = new ProfilerStudy.VerticalLabelPanel();
         this.m_VScrollBar = new System.Windows.Forms.VScrollBar();
         this.m_TimelinePanel = new System.Windows.Forms.Panel();
-        this.m_Timeline = new FramePro.Timeline();
-        this.timelineInfoPanel1 = new FramePro.LeftBackPanel();
+        this.m_Timeline = new ProfilerStudy.Timeline();
+        this.timelineInfoPanel1 = new ProfilerStudy.LeftBackPanel();
         this.button2 = new System.Windows.Forms.Button();
         this.m_ThreadFilterTextBox = new System.Windows.Forms.TextBox();
         this.button1 = new System.Windows.Forms.Button();
         this.m_ThreadIdModeButton = new Editor.Button();
-        this.verticalLabelPanel3 = new FramePro.VerticalLabelPanel();
+        this.verticalLabelPanel3 = new ProfilerStudy.VerticalLabelPanel();
         this.m_CoreViewSplitter = new System.Windows.Forms.Splitter();
         this.m_CoreBackPanel = new System.Windows.Forms.Panel();
-        this.m_CoreGraph = new FramePro.CoreGraphPanel();
-        this.verticalLabelPanelCores = new FramePro.VerticalLabelPanel();
+        this.m_CoreGraph = new ProfilerStudy.CoreGraphPanel();
+        this.verticalLabelPanelCores = new ProfilerStudy.VerticalLabelPanel();
         this.m_TimeSpanGraphSplitter = new System.Windows.Forms.Splitter();
         this.m_FrameGraphSplitter = new System.Windows.Forms.Splitter();
         this.m_FrameGraphPanel = new System.Windows.Forms.Panel();
-        this.m_FrameGraph = new FramePro.FrameGraphPanel();
-        this.leftBackPanel1 = new FramePro.LeftBackPanel();
+        this.m_FrameGraph = new ProfilerStudy.FrameGraphPanel();
+        this.leftBackPanel1 = new ProfilerStudy.LeftBackPanel();
         this.panel2 = new System.Windows.Forms.Panel();
-        this.m_FrameInfoPanel = new FramePro.FrameInfoPanel();
-        this.m_FrameGraphYAxis = new FramePro.FrameGraphYAxis();
-        this.verticalLabelPanelFrame = new FramePro.VerticalLabelPanel();
+        this.m_FrameInfoPanel = new ProfilerStudy.FrameInfoPanel();
+        this.m_FrameGraphYAxis = new ProfilerStudy.FrameGraphYAxis();
+        this.verticalLabelPanelFrame = new ProfilerStudy.VerticalLabelPanel();
         this.panel4 = new System.Windows.Forms.Panel();
         this.m_InfoPanelPanel = new System.Windows.Forms.Panel();
-        this.m_InfoPanel = new FramePro.InfoPanel();
-        this.verticalLabelPanelInfo = new FramePro.VerticalLabelPanel();
-        this.m_SessionScrollBarPanel = new FramePro.SessionScrollBarPanel();
+        this.m_InfoPanel = new ProfilerStudy.InfoPanel();
+        this.verticalLabelPanelInfo = new ProfilerStudy.VerticalLabelPanel();
+        this.m_SessionScrollBarPanel = new ProfilerStudy.SessionScrollBarPanel();
         this.m_CustomGraphPanel = new System.Windows.Forms.Panel();
-        this.m_CustomStatsGraph = new FramePro.CustomStatsGraph();
-        this.leftBackPanel2 = new FramePro.LeftBackPanel();
+        this.m_CustomStatsGraph = new ProfilerStudy.CustomStatsGraph();
+        this.leftBackPanel2 = new ProfilerStudy.LeftBackPanel();
         this.panel1 = new System.Windows.Forms.Panel();
         this.m_CustomStatSelectorButton = new System.Windows.Forms.Button();
-        this.verticalLabelPanel4 = new FramePro.VerticalLabelPanel();
+        this.verticalLabelPanel4 = new ProfilerStudy.VerticalLabelPanel();
         this.m_CustomGraphPanelSplitter = new System.Windows.Forms.Splitter();
-        this.m_TimespanGraphView = new FramePro.TimeSpanGraphView();
-        this.m_ScopeDataGrid = new FramePro.ScopeDataGrid();
+        this.m_TimespanGraphView = new ProfilerStudy.TimeSpanGraphView();
+        this.m_ScopeDataGrid = new ProfilerStudy.ScopeDataGrid();
         this.m_DataGridSplitter = new System.Windows.Forms.Splitter();
         this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
         this.m_ThreadsPanel.SuspendLayout();
@@ -2204,7 +2204,7 @@ internal class ThreadsView : SessionView
         this.m_Timeline.Name = "m_Timeline";
         this.m_Timeline.Size = new System.Drawing.Size(1389, 69);
         this.m_Timeline.TabIndex = 1;
-        this.m_Timeline.MeasureLineChanged += new FramePro.MeasureLineChangedHandler(this.MeasureLineChanged);
+        this.m_Timeline.MeasureLineChanged += new ProfilerStudy.MeasureLineChangedHandler(this.MeasureLineChanged);
         // 
         // timelineInfoPanel1
         // 
@@ -2326,13 +2326,13 @@ internal class ThreadsView : SessionView
         this.m_CoreGraph.Size = new System.Drawing.Size(1614, 242);
         this.m_CoreGraph.TabIndex = 9;
         this.m_CoreGraph.WaitEventsVisible = false;
-        this.m_CoreGraph.ContextSwitchesVisibleChanged += new FramePro.ContextSwitchesVisibleChangedHandler(this.CoreContextSwitchesVisibleChanged);
-        this.m_CoreGraph.WaitEventsVisibleChanged += new FramePro.WaitEventsVisibleChangedHandler(this.CoreGraphWaitEventsVisibleChanged);
-        this.m_CoreGraph.TimeRangeChanged += new FramePro.CoreGraphTimeRangeChangedHandler(this.CoreGraphTimeRangeChanged);
-        this.m_CoreGraph.CoreGraphShowThread += new FramePro.CoreGraphShowThreadHandler(this.CoreGraphShowThread);
-        this.m_CoreGraph.MeasureLineChanged += new FramePro.MeasureLineChangedHandler(this.MeasureLineChanged);
-        this.m_CoreGraph.SelectedTimeSpanChanged += new FramePro.SelectedTimeSpanChangedHandler(this.SelectedTimeSpanChangedEvent);
-        this.m_CoreGraph.StopTrackingEnd += new FramePro.StopTrackingEndHandler(this.CoreGraphStopTrackingEnd);
+        this.m_CoreGraph.ContextSwitchesVisibleChanged += new ProfilerStudy.ContextSwitchesVisibleChangedHandler(this.CoreContextSwitchesVisibleChanged);
+        this.m_CoreGraph.WaitEventsVisibleChanged += new ProfilerStudy.WaitEventsVisibleChangedHandler(this.CoreGraphWaitEventsVisibleChanged);
+        this.m_CoreGraph.TimeRangeChanged += new ProfilerStudy.CoreGraphTimeRangeChangedHandler(this.CoreGraphTimeRangeChanged);
+        this.m_CoreGraph.CoreGraphShowThread += new ProfilerStudy.CoreGraphShowThreadHandler(this.CoreGraphShowThread);
+        this.m_CoreGraph.MeasureLineChanged += new ProfilerStudy.MeasureLineChangedHandler(this.MeasureLineChanged);
+        this.m_CoreGraph.SelectedTimeSpanChanged += new ProfilerStudy.SelectedTimeSpanChangedHandler(this.SelectedTimeSpanChangedEvent);
+        this.m_CoreGraph.StopTrackingEnd += new ProfilerStudy.StopTrackingEndHandler(this.CoreGraphStopTrackingEnd);
         // 
         // verticalLabelPanelCores
         // 
@@ -2395,9 +2395,9 @@ internal class ThreadsView : SessionView
         this.m_FrameGraph.TabIndex = 5;
         this.m_FrameGraph.TargetFrameMS = 0D;
         this.m_FrameGraph.YScale = 1D;
-        this.m_FrameGraph.VisibleRangeChanged += new FramePro.VisibleRangeChangedHandler(this.FrameGraphSelectionChanged);
-        this.m_FrameGraph.RangeChanged += new FramePro.RangeChangedHandler(this.OnFrameGraphRangeChanged);
-        this.m_FrameGraph.SelectedRangeChanged += new FramePro.SelectedRangeChangedHandler(this.FrameGraphSelectedRangeChanged);
+        this.m_FrameGraph.VisibleRangeChanged += new ProfilerStudy.VisibleRangeChangedHandler(this.FrameGraphSelectionChanged);
+        this.m_FrameGraph.RangeChanged += new ProfilerStudy.RangeChangedHandler(this.OnFrameGraphRangeChanged);
+        this.m_FrameGraph.SelectedRangeChanged += new ProfilerStudy.SelectedRangeChangedHandler(this.FrameGraphSelectedRangeChanged);
         // 
         // leftBackPanel1
         // 
@@ -2439,8 +2439,8 @@ internal class ThreadsView : SessionView
         this.m_FrameGraphYAxis.TabIndex = 1;
         this.m_FrameGraphYAxis.TargetFrameMS = 0D;
         this.m_FrameGraphYAxis.YScale = 0D;
-        this.m_FrameGraphYAxis.FrameGraphYAxisScaleChanged += new FramePro.FrameGraphYAxisScaleChangedHandler(this.FrameGraphYAxisScaleChanged);
-        this.m_FrameGraphYAxis.FrameGraphYAxisTargetMSChanged += new FramePro.FrameGraphYAxisTargetMSChangedHandler(this.FrameGraphYAxisTargetMsChanged);
+        this.m_FrameGraphYAxis.FrameGraphYAxisScaleChanged += new ProfilerStudy.FrameGraphYAxisScaleChangedHandler(this.FrameGraphYAxisScaleChanged);
+        this.m_FrameGraphYAxis.FrameGraphYAxisTargetMSChanged += new ProfilerStudy.FrameGraphYAxisTargetMSChangedHandler(this.FrameGraphYAxisTargetMsChanged);
         // 
         // verticalLabelPanelFrame
         // 
@@ -2506,7 +2506,7 @@ internal class ThreadsView : SessionView
         this.m_SessionScrollBarPanel.Size = new System.Drawing.Size(1648, 56);
         this.m_SessionScrollBarPanel.TabIndex = 20;
         this.m_SessionScrollBarPanel.TargetFrameMS = 0D;
-        this.m_SessionScrollBarPanel.ScrollBarChanged += new FramePro.SessionScrollBarChangedHandler(this.SessionScrollBarChanged);
+        this.m_SessionScrollBarPanel.ScrollBarChanged += new ProfilerStudy.SessionScrollBarChangedHandler(this.SessionScrollBarChanged);
         // 
         // m_CustomGraphPanel
         // 
@@ -2529,7 +2529,7 @@ internal class ThreadsView : SessionView
         this.m_CustomStatsGraph.Size = new System.Drawing.Size(1389, 32);
         this.m_CustomStatsGraph.TabIndex = 12;
         this.m_CustomStatsGraph.YScale = 1D;
-        this.m_CustomStatsGraph.TimeRangeChanged += new FramePro.ValueGraphTimeRangeChangedHandler(this.CustomStatGraphTimeRangeChanged);
+        this.m_CustomStatsGraph.TimeRangeChanged += new ProfilerStudy.ValueGraphTimeRangeChangedHandler(this.CustomStatGraphTimeRangeChanged);
         // 
         // leftBackPanel2
         // 
@@ -2602,12 +2602,12 @@ internal class ThreadsView : SessionView
         this.m_TimespanGraphView.Size = new System.Drawing.Size(1648, 195);
         this.m_TimespanGraphView.TabIndex = 19;
         this.m_TimespanGraphView.YScale = 0D;
-        this.m_TimespanGraphView.VisibleRangeChanged += new FramePro.VisibleRangeChangedHandler(this.FrameGraphSelectionChanged);
-        this.m_TimespanGraphView.RangeChanged += new FramePro.RangeChangedHandler(this.OnFrameGraphRangeChanged);
-        this.m_TimespanGraphView.SelectionChanged += new FramePro.TimeSpanGraphViewSelectionChangedHandler(this.SelectedTimeSpanChangedEvent);
-        this.m_TimespanGraphView.FrameGraphYAxisScaleChanged += new FramePro.FrameGraphYAxisScaleChangedHandler(this.TimeSpanGraphViewYAxisScaleChanged);
-        this.m_TimespanGraphView.TimeSpanGraphViewTargetMSChanged += new FramePro.TimeSpanGraphViewTargetMSChangedHandler(this.TimeSpanGraphViewTargetMSChanged);
-        this.m_TimespanGraphView.SelectedRangeChanged += new FramePro.SelectedRangeChangedHandler(this.FrameGraphSelectedRangeChanged);
+        this.m_TimespanGraphView.VisibleRangeChanged += new ProfilerStudy.VisibleRangeChangedHandler(this.FrameGraphSelectionChanged);
+        this.m_TimespanGraphView.RangeChanged += new ProfilerStudy.RangeChangedHandler(this.OnFrameGraphRangeChanged);
+        this.m_TimespanGraphView.SelectionChanged += new ProfilerStudy.TimeSpanGraphViewSelectionChangedHandler(this.SelectedTimeSpanChangedEvent);
+        this.m_TimespanGraphView.FrameGraphYAxisScaleChanged += new ProfilerStudy.FrameGraphYAxisScaleChangedHandler(this.TimeSpanGraphViewYAxisScaleChanged);
+        this.m_TimespanGraphView.TimeSpanGraphViewTargetMSChanged += new ProfilerStudy.TimeSpanGraphViewTargetMSChangedHandler(this.TimeSpanGraphViewTargetMSChanged);
+        this.m_TimespanGraphView.SelectedRangeChanged += new ProfilerStudy.SelectedRangeChangedHandler(this.FrameGraphSelectedRangeChanged);
         // 
         // m_ScopeDataGrid
         // 

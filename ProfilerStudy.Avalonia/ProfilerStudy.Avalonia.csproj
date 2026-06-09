@@ -8,7 +8,7 @@
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
     <AssemblyTitle>ProfilerStudy</AssemblyTitle>
     <Product>ProfilerStudy</Product>
-    <Description>Cross-platform FramePro profiler viewer built with Avalonia.</Description>
+    <Description>Cross-platform ProfilerStudy profiler viewer built with Avalonia.</Description>
     <Company>ProfilerStudy</Company>
     <Copyright>Copyright (c) 2026 ProfilerStudy contributors</Copyright>
     <ApplicationIcon Condition="'$(RuntimeIdentifier)' == 'win-x64'">Assets\AppIcon.ico</ApplicationIcon>

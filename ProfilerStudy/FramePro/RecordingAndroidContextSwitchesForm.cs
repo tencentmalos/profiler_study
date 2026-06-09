@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class RecordingAndroidContextSwitchesForm : Form
 {
@@ -28,7 +28,7 @@ public class RecordingAndroidContextSwitchesForm : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.RecordingAndroidContextSwitchesForm));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.RecordingAndroidContextSwitchesForm));
 		this.textBox1 = new System.Windows.Forms.TextBox();
 		this.button1 = new System.Windows.Forms.Button();
 		base.SuspendLayout();

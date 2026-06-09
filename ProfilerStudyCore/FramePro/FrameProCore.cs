@@ -3,9 +3,9 @@ using System.IO;
 using SCLCoreCLR;
 ////using SymLibCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public class FrameProCore
+public class ProfilerStudyCore
 {
 	private static string m_Version = "1.10.17.0";
 
@@ -81,9 +81,9 @@ public class FrameProCore
 			log.Write("Creating directory " + CoreSettings.UserLocalFolder + "\n");
 			Directory.CreateDirectory(CoreSettings.UserLocalFolder);
 		}
-		Log.OpenFile(Path.Combine(CoreSettings.UserLocalFolder, "FramePro.log"), 1048576);
+		Log.OpenFile(Path.Combine(CoreSettings.UserLocalFolder, "ProfilerStudy.log"), 1048576);
 		Log.WriteLine("-----------------------------------------------");
-		Log.WriteLine("Starting FramePro");
+		Log.WriteLine("Starting ProfilerStudy");
 		Log.WriteLine("Version: " + m_Version);
 		settings.WriteToLog();
 		////Demo.DemoLength = 30;
@@ -122,9 +122,9 @@ public class FrameProCore
 
 	////private static void OnRegistrarInitialiseComplete(bool result, string result_Text)
 	////{
-	////	if (FrameProCore.RegistrarInitialiseComplete != null)
+	////	if (ProfilerStudyCore.RegistrarInitialiseComplete != null)
 	////	{
-	////		FrameProCore.RegistrarInitialiseComplete(result, result_Text);
+	////		ProfilerStudyCore.RegistrarInitialiseComplete(result, result_Text);
 	////	}
 	////}
 

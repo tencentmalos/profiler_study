@@ -1,5 +1,5 @@
 using System.Drawing;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public delegate void ThreadRowPanelMouseMoveHandler(Point location);

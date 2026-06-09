@@ -4,7 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class GetAndroidSDKPathForm : Form
 {
@@ -54,7 +54,7 @@ public class GetAndroidSDKPathForm : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.GetAndroidSDKPathForm));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.GetAndroidSDKPathForm));
 		this.textBox1 = new System.Windows.Forms.TextBox();
 		this.m_ADBPathTextBox = new System.Windows.Forms.TextBox();
 		this.button1 = new System.Windows.Forms.Button();

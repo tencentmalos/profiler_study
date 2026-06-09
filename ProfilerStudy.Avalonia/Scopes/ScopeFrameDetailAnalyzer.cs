@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using FramePro;
+using ProfilerStudy;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -19,7 +19,7 @@ internal static class ScopeFrameDetailAnalyzer
 		List<ScopeFrameDetailRow> rows = new List<ScopeFrameDetailRow>();
 		foreach (int threadId in session.GetThreadIds())
 		{
-			FramePro.TimeSpan span = session.GetTimeSpan(threadId, frameStart);
+			ProfilerStudy.TimeSpan span = session.GetTimeSpan(threadId, frameStart);
 			if (span == null)
 			{
 				continue;
@@ -40,7 +40,7 @@ internal static class ScopeFrameDetailAnalyzer
 		return rows;
 	}
 
-	private static void AppendRows(Session session, List<ScopeFrameDetailRow> rows, string threadName, FramePro.TimeSpan span, long frameStart, long frameEnd, double ticksToMs, int depth, int maxRows)
+	private static void AppendRows(Session session, List<ScopeFrameDetailRow> rows, string threadName, ProfilerStudy.TimeSpan span, long frameStart, long frameEnd, double ticksToMs, int depth, int maxRows)
 	{
 		if (span == null || rows.Count >= maxRows)
 		{
@@ -62,7 +62,7 @@ internal static class ScopeFrameDetailAnalyzer
 				sourceInfo.IsValid ? sourceInfo.Line : -1));
 		}
 
-		for (FramePro.TimeSpan child = span.Children; child != null && rows.Count < maxRows; child = child.Next)
+		for (ProfilerStudy.TimeSpan child = span.Children; child != null && rows.Count < maxRows; child = child.Next)
 		{
 			if (child.EndTime <= frameStart)
 			{

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public class Frame : IFrameProSerialisable
+public class Frame : IProfilerStudySerialisable
 {
 	private int m_Index;
 

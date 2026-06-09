@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class TimeSpanList
 {

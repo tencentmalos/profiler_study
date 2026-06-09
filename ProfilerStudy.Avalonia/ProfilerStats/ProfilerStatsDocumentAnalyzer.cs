@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using FramePro;
+using ProfilerStudy;
 
 namespace ProfilerStudy.Avalonia.ProfilerStats;
 

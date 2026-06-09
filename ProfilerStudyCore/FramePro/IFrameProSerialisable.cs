@@ -1,8 +1,8 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-public interface IFrameProSerialisable
+public interface IProfilerStudySerialisable
 {
 	void Read(BinaryReader binary_reader, int version);
 

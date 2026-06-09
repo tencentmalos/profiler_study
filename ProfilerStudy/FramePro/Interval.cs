@@ -1,4 +1,4 @@
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal struct Interval
 {

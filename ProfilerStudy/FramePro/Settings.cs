@@ -4,7 +4,7 @@ using System.Drawing;
 using System.IO;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class Settings : ISettings
 {
@@ -128,7 +128,7 @@ internal class Settings : ISettings
 
 	private List<string> m_SourceRoots = new List<string>();
 
-	private ulong m_FrameProThreadAffinity = 4294967295uL;
+	private ulong m_ProfilerStudyThreadAffinity = 4294967295uL;
 
 	private ThreadIdMode m_ThreadIdMode;
 
@@ -860,15 +860,15 @@ internal class Settings : ISettings
 		}
 	}
 
-	public ulong FrameProThreadAffinity
+	public ulong ProfilerStudyThreadAffinity
 	{
 		get
 		{
-			return m_FrameProThreadAffinity;
+			return m_ProfilerStudyThreadAffinity;
 		}
 		set
 		{
-			m_FrameProThreadAffinity = value;
+			m_ProfilerStudyThreadAffinity = value;
 		}
 	}
 
@@ -1009,7 +1009,7 @@ internal class Settings : ISettings
 				xmlReadStream.Read("CustomStatsSortedColumnIncreasing", ref m_CustomStatsSortedColumnIncreasing);
 				xmlReadStream.Read("ThreadScopeHeight", ref m_ThreadScopeHeight);
 				xmlReadStream.Read("SourceRoots", ref m_SourceRoots);
-				xmlReadStream.Read("ProfilerStudyThreadAffinity", ref m_FrameProThreadAffinity);
+				xmlReadStream.Read("ProfilerStudyThreadAffinity", ref m_ProfilerStudyThreadAffinity);
 				xmlReadStream.Read("ThreadIdMode", ref m_ThreadIdMode);
 				string viewerTool = "";
 				xmlReadStream.Read("SourceViewerTool", ref viewerTool);
@@ -1110,7 +1110,7 @@ internal class Settings : ISettings
 		xmlWriteStream.Write("CustomStatsSortedColumnIncreasing", m_CustomStatsSortedColumnIncreasing);
 		xmlWriteStream.Write("ThreadScopeHeight", m_ThreadScopeHeight);
 		xmlWriteStream.Write("SourceRoots", m_SourceRoots);
-		xmlWriteStream.Write("ProfilerStudyThreadAffinity", m_FrameProThreadAffinity);
+		xmlWriteStream.Write("ProfilerStudyThreadAffinity", m_ProfilerStudyThreadAffinity);
 		xmlWriteStream.Write("ThreadIdMode", m_ThreadIdMode);
         xmlWriteStream.Write("SourceViewerTool", SourceViewerTool);
         xmlWriteStream.EndElement();

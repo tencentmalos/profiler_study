@@ -11,7 +11,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using FramePro;
+using ProfilerStudy;
 using SCLCoreCLR;
 
 namespace ProfilerStudy.Avalonia;
@@ -175,7 +175,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private bool m_IsSettingsPanelVisible;
 	private bool m_IsAndroidPanelVisible;
 	private string m_AndroidPanelStatusText = "No Android recording loaded.";
-	private string m_AndroidEndpoint = AdbSocketDiscovery.DebugFrameProEndpoint;
+	private string m_AndroidEndpoint = AdbSocketDiscovery.DebugProfilerStudyEndpoint;
 	private string m_AndroidRecordingDuration = "5";
 	private bool m_IsConnectionPanelVisible;
 	private bool m_IsConnecting;
@@ -1238,7 +1238,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_IsUpdateCheckPanelVisible, value);
 	}
 
-	public string AboutVersionText => FrameProCore.Version;
+	public string AboutVersionText => ProfilerStudyCore.Version;
 
 	public string AboutProductText => "ProfilerStudy";
 
@@ -1559,7 +1559,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		try
 		{
 			m_GameSimulatorProcess = StartProfilerTool(toolPath, null);
-			StatusText = "Launched FramePro Game Simulator.";
+			StatusText = "Launched ProfilerStudy Game Simulator.";
 		}
 		catch (Exception ex)
 		{
@@ -1775,13 +1775,13 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 		else if (string.Equals(actionName, "UseDebugEndpoint", StringComparison.Ordinal))
 		{
-			AndroidEndpoint = AdbSocketDiscovery.DebugFrameProEndpoint;
+			AndroidEndpoint = AdbSocketDiscovery.DebugProfilerStudyEndpoint;
 			AndroidPanelStatusText = "Android target set to debug endpoint.";
 			StatusText = AndroidPanelStatusText;
 		}
 		else if (string.Equals(actionName, "UseReleaseEndpoint", StringComparison.Ordinal))
 		{
-			AndroidEndpoint = AdbSocketDiscovery.ReleaseFrameProEndpoint;
+			AndroidEndpoint = AdbSocketDiscovery.ReleaseProfilerStudyEndpoint;
 			AndroidPanelStatusText = "Android target set to release endpoint.";
 			StatusText = AndroidPanelStatusText;
 		}
@@ -1937,12 +1937,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 		string endpoint = (AndroidEndpoint ?? string.Empty).Trim();
 		if (!AdbSocketDiscovery.IsAdbSocketEndpoint(endpoint))
 		{
-			AndroidPanelStatusText = "Invalid Android FramePro endpoint: " + endpoint;
+			AndroidPanelStatusText = "Invalid Android ProfilerStudy endpoint: " + endpoint;
 			StatusText = AndroidPanelStatusText;
 			return;
 		}
 
-		DisconnectFromFramePro(updateStatus: false);
+		DisconnectFromProfilerStudy(updateStatus: false);
 		m_IsConnecting = true;
 		AndroidPanelStatusText = "Connecting to Android endpoint...";
 		ConnectionPanelStatusText = AndroidPanelStatusText;
@@ -2084,11 +2084,11 @@ internal sealed class MainWindowViewModel : ObservableObject
 		string actionName = parameter as string;
 		if (string.Equals(actionName, "Connect", StringComparison.Ordinal))
 		{
-			await ConnectToFrameProAsync();
+			await ConnectToProfilerStudyAsync();
 		}
 		else if (string.Equals(actionName, "Disconnect", StringComparison.Ordinal))
 		{
-			DisconnectFromFramePro();
+			DisconnectFromProfilerStudy();
 		}
 		else
 		{
@@ -2098,7 +2098,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 	}
 
-	private async Task ConnectToFrameProAsync()
+	private async Task ConnectToProfilerStudyAsync()
 	{
 		if (m_IsConnecting)
 		{
@@ -2122,7 +2122,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 			return;
 		}
 
-		DisconnectFromFramePro(updateStatus: false);
+		DisconnectFromProfilerStudy(updateStatus: false);
 		m_IsConnecting = true;
 		ConnectionPanelStatusText = "Connecting to " + host + ":" + port + "...";
 		StatusText = ConnectionPanelStatusText;
@@ -2255,12 +2255,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 			return;
 		}
 
-		ConnectionPanelStatusText = "FramePro transport disconnected: " + session.DisconnectReason + ".";
+		ConnectionPanelStatusText = "ProfilerStudy transport disconnected: " + session.DisconnectReason + ".";
 		StopLiveConnectionRefreshTimer();
 		StatusText = ConnectionPanelStatusText;
 	}
 
-	private void DisconnectFromFramePro(bool updateStatus = true)
+	private void DisconnectFromProfilerStudy(bool updateStatus = true)
 	{
 		if (m_LiveConnectionSession != null)
 		{
@@ -2273,7 +2273,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 
 		if (updateStatus)
 		{
-			ConnectionPanelStatusText = "Disconnected from FramePro transport.";
+			ConnectionPanelStatusText = "Disconnected from ProfilerStudy transport.";
 			UpdateShellStatusSegments();
 			StatusText = ConnectionPanelStatusText;
 		}

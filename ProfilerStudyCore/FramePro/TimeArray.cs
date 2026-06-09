@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class TimeArray<T> : IEnumerable<T>, IEnumerable where T : TimeItem
 {

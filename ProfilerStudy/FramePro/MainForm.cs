@@ -7,13 +7,13 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using Docker;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 ////using PureDev.PureDevReg;
 ////using PureDev.PureDevRegCLR;
 ////using Registration;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class MainForm : Form
 {
@@ -76,7 +76,7 @@ internal class MainForm : Form
 
 	private Settings m_Settings;
 
-	private CallbackLog m_FrameProCoreLog = new CallbackLog();
+	private CallbackLog m_ProfilerStudyCoreLog = new CallbackLog();
 
 	private ControlTaskDispatcher m_ControlTaskDispatcher = new ControlTaskDispatcher();
 
@@ -114,29 +114,29 @@ internal class MainForm : Form
 
 	private volatile bool m_VersionUpdateCheckSucceeded;
 
-	private const string m_DownloadInstallerAddress = "https://www.puredevsoftware.com/8358782/FramePro_x64_setup.exe";
+	private const string m_DownloadInstallerAddress = "https://www.puredevsoftware.com/8358782/ProfilerStudy_x64_setup.exe";
 
 	private float m_DPIScale = 1f;
 
 	private IContainer components;
 
-	private FrameProButton m_ConnectButton;
+	private ProfilerStudyButton m_ConnectButton;
 
-	private FrameProButton m_ConnectAndroidButton;
+	private ProfilerStudyButton m_ConnectAndroidButton;
 
-	private FrameProButton m_DisconnectButton;
+	private ProfilerStudyButton m_DisconnectButton;
 
 	private Panel panel1;
 
-	private FrameProButton m_ConnectSettingsButton;
+	private ProfilerStudyButton m_ConnectSettingsButton;
 
 	private Panel m_MainPanel;
 
-	private FrameProButton m_TrackEndButton;
+	private ProfilerStudyButton m_TrackEndButton;
 
-	private FrameProButton m_GotoStartButton;
+	private ProfilerStudyButton m_GotoStartButton;
 
-	private FrameProButton m_GotoEndButton;
+	private ProfilerStudyButton m_GotoEndButton;
 
 	private ConditionalScopeTimeSlider m_ConditionalScopeTimeSlider;
 
@@ -150,9 +150,9 @@ internal class MainForm : Form
 
 	private ViewButton m_InfoViewButton;
 
-	private FrameProButton m_GotoPrevSpikeButton;
+	private ProfilerStudyButton m_GotoPrevSpikeButton;
 
-	private FrameProButton m_GotoNextSpikeButton;
+	private ProfilerStudyButton m_GotoNextSpikeButton;
 
 	private ToolStripMenuItem fileToolStripMenuItem;
 
@@ -224,7 +224,7 @@ internal class MainForm : Form
 
 	private ToolStripMenuItem demoToolStripMenuItem;
 
-	private ToolStripMenuItem launchFrameProGameSimulatorToolStripMenuItem;
+	private ToolStripMenuItem launchProfilerStudyGameSimulatorToolStripMenuItem;
 
 	private ToolStripMenuItem playbackDumpFileInRealtimeToolStripMenuItem;
 
@@ -256,13 +256,13 @@ internal class MainForm : Form
 
 	private ToolStripMenuItem m_ColourByScopeMenuItem;
 
-	private FrameProButton m_ScopeColourModeButton;
+	private ProfilerStudyButton m_ScopeColourModeButton;
 
 	private ViewButton m_CustomStatsGraphButton;
 
 	private ViewButton m_DataGridViewButton;
 
-	private FrameProButton m_CallstackButton;
+	private ProfilerStudyButton m_CallstackButton;
 
 	private ToolStripMenuItem m_CustomStatsGraphMenuItem;
 
@@ -276,7 +276,7 @@ internal class MainForm : Form
 
 	private ToolStripMenuItem loadContextSwitchFileAndroidToolStripMenuItem;
 
-	private FrameProButton m_GotoMaxFrameButton;
+	private ProfilerStudyButton m_GotoMaxFrameButton;
 
 	private ToolStripMenuItem m_ExportFrameGraphToCSVMenuItem;
 
@@ -340,9 +340,9 @@ internal class MainForm : Form
 	public MainForm(Settings settings, string file_to_open)
 	{
 		m_Inst = this;
-		Utils.SetProcessAffinity(settings.FrameProThreadAffinity);
-		m_FrameProCoreLog.WriteEvent += FrameProCoreLog;
-		m_FrameProCoreLog.DebugWriteEvent += FrameProCoreDebugLog;
+		Utils.SetProcessAffinity(settings.ProfilerStudyThreadAffinity);
+		m_ProfilerStudyCoreLog.WriteEvent += ProfilerStudyCoreLog;
+		m_ProfilerStudyCoreLog.DebugWriteEvent += ProfilerStudyCoreDebugLog;
 		m_DPIScale = (float)base.DeviceDpi / 96f;
 		Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
 		bool num = !File.Exists(CoreSettings.Path);
@@ -367,12 +367,12 @@ internal class MainForm : Form
 		UpdateMenuItemStates();
 		////if (settings.RegisterUsingPureDevReg)
 		////{
-		////	FrameProCore.Registrar.VerifyInstallComplete += VerifyInstallComplete;
-		////	FrameProCore.Registrar.VerifyRegistrationComplete += VerifyRegistrationComplete;
-		////	FrameProCore.Registrar.CheckForUpdateComplete += CheckForUpdateComplete;
-		////	FrameProCore.Registrar.UnregisterComplete += UnregisterComplete;
-		////	FrameProCore.Registrar.Initialise();
-		////	FrameProCore.Registrar.CheckForUpdates();
+		////	ProfilerStudyCore.Registrar.VerifyInstallComplete += VerifyInstallComplete;
+		////	ProfilerStudyCore.Registrar.VerifyRegistrationComplete += VerifyRegistrationComplete;
+		////	ProfilerStudyCore.Registrar.CheckForUpdateComplete += CheckForUpdateComplete;
+		////	ProfilerStudyCore.Registrar.UnregisterComplete += UnregisterComplete;
+		////	ProfilerStudyCore.Registrar.Initialise();
+		////	ProfilerStudyCore.Registrar.CheckForUpdates();
 		////}
 		UpdateTitle();
 		m_OnScopeColourChangedTimer.Tick += OnScopeColourChangedTick;
@@ -391,18 +391,18 @@ internal class MainForm : Form
 		return (int)((float)value * m_DPIScale);
 	}
 
-	private void FrameProCoreLog(string text)
+	private void ProfilerStudyCoreLog(string text)
 	{
 		Inst.Log(text);
 	}
 
-	private void FrameProCoreDebugLog(string text)
+	private void ProfilerStudyCoreDebugLog(string text)
 	{
 	}
 
 	////private void CheckRegistration()
 	////{
-	////	if (FrameProCore.Registrar.TrialExpired && !FrameProCore.Registrar.Registered)
+	////	if (ProfilerStudyCore.Registrar.TrialExpired && !ProfilerStudyCore.Registrar.Registered)
 	////	{
 	////		ShowRegistrationForm(show_in_task_bar: true);
 	////	}
@@ -418,7 +418,7 @@ internal class MainForm : Form
 
 	////private void UnregisterComplete_Main()
 	////{
-	////	FrameProCore.Registrar.SetRegisterUsingGUID(m_Settings.RegisterUsingGUID);
+	////	ProfilerStudyCore.Registrar.SetRegisterUsingGUID(m_Settings.RegisterUsingGUID);
 	////	UpdateTitle();
 	////	CheckRegistration();
 	////}
@@ -441,7 +441,7 @@ internal class MainForm : Form
 
 	////private void VerifyRegistrationComplete_Main(VerifyRegistrationResult result)
 	////{
-	////	VerifyResultHandler.Handle(result, FrameProCore.Registrar);
+	////	VerifyResultHandler.Handle(result, ProfilerStudyCore.Registrar);
 	////	UpdateRegistrationSettings();
 	////}
 
@@ -455,7 +455,7 @@ internal class MainForm : Form
 
 	////private void UpdateAvailableEvent_Main(bool succeeded, bool update_available, string new_version)
 	////{
-	////	FramePro.Update.OnCheckForUpdateComplete(succeeded, update_available, new_version, m_Settings);
+	////	ProfilerStudy.Update.OnCheckForUpdateComplete(succeeded, update_available, new_version, m_Settings);
 	////}
 
 	////private void UpdateRegistrationSettings()
@@ -572,10 +572,10 @@ internal class MainForm : Form
 	////private void NotifyNewVersion()
 	////{
 	////	LogLine("Update available");
-	////	if (FramePro.Update.NotifyNewVersion(m_Settings))
+	////	if (ProfilerStudy.Update.NotifyNewVersion(m_Settings))
 	////	{
 	////		string error = "";
-	////		if (new UpdateInstaller().InstallUpdate(this, FrameProCore.Registrar, "https://www.puredevsoftware.com/8358782/FramePro_x64_setup.exe", ref error))
+	////		if (new UpdateInstaller().InstallUpdate(this, ProfilerStudyCore.Registrar, "https://www.puredevsoftware.com/8358782/ProfilerStudy_x64_setup.exe", ref error))
 	////		{
 	////			m_Settings.NewVersionAvailable = false;
 	////			m_Settings.NotifyNewVersion = false;
@@ -591,15 +591,15 @@ internal class MainForm : Form
 
 	////private object CheckForUpdate_PureDevReg(object arg, ThreadJobContext context)
 	////{
-	////	FrameProCore.Registrar.CheckForUpdates();
-	////	m_VersionUpdateCheckSucceeded = FrameProCore.Registrar.WaitForCheckForUpdatesCompleted(10000);
+	////	ProfilerStudyCore.Registrar.CheckForUpdates();
+	////	m_VersionUpdateCheckSucceeded = ProfilerStudyCore.Registrar.WaitForCheckForUpdatesCompleted(10000);
 	////	return null;
 	////}
 
 	////private object CheckForUpdate(object arg, ThreadJobContext context)
 	////{
 	////	LogLine("Checking for update");
-	////	FramePro.Update.CheckForUpdate(m_Settings);
+	////	ProfilerStudy.Update.CheckForUpdate(m_Settings);
 	////	return null;
 	////}
 
@@ -623,7 +623,7 @@ internal class MainForm : Form
 	////	{
 	////	case FullVerificationResult.DemoCheckFailed:
 	////	{
-	////		string text = "There is a problem with the FramePro installation. Please re-install FramePro.";
+	////		string text = "There is a problem with the ProfilerStudy installation. Please re-install ProfilerStudy.";
 	////		if (error != null)
 	////		{
 	////			text = text + "\n\nDetails:\n" + error;
@@ -635,7 +635,7 @@ internal class MainForm : Form
 	////	}
 	////	case FullVerificationResult.RegistrationCheckFailed:
 	////	{
-	////		string message = ((error == "invalidated") ? "Your registration has been invalidated because it has moved to another machine. Please register this software again" : ((!(error == "terminated")) ? "Your registration key is not valid. Please register FramePro again." : "Your registration has been terminated. Please contact slynch@puredevsoftware.com"));
+	////		string message = ((error == "invalidated") ? "Your registration has been invalidated because it has moved to another machine. Please register this software again" : ((!(error == "terminated")) ? "Your registration key is not valid. Please register ProfilerStudy again." : "Your registration has been terminated. Please contact slynch@puredevsoftware.com"));
 	////		MessageBox.Show(message);
 	////		SCLCoreCLR.Log.WriteLine(message);
 	////		if (error != null)
@@ -1133,7 +1133,7 @@ internal class MainForm : Form
 
 	private Session CreateSession()
 	{
-		Session session = new Session(m_Settings.CoreSettings, m_FrameProCoreLog);
+		Session session = new Session(m_Settings.CoreSettings, m_ProfilerStudyCoreLog);
 		HookSession(session);
 		m_Sessions.Add(session);
 		return session;
@@ -1397,7 +1397,7 @@ internal class MainForm : Form
 		UpdateButtonAndMenuItemStates();
 		if (ActiveSession != null && !ActiveSession.Recorded && ActiveSession.DisconnectReason == DisconnectReason.BadVersion)
 		{
-			MessageBox.Show(string.Concat(string.Concat("Incorrect FramePro.cpp version: " + ActiveSession.ReceivedFrameProLibVersion + "\n", "Expected version: ", Session.FrameProLibVersion.ToString(), "\n"), "Please update ProfilerStudy to connect to this app."), "FramePro Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+			MessageBox.Show(string.Concat(string.Concat("Incorrect ProfilerStudy.cpp version: " + ActiveSession.ReceivedProfilerStudyLibVersion + "\n", "Expected version: ", Session.ProfilerStudyLibVersion.ToString(), "\n"), "Please update ProfilerStudy to connect to this app."), "ProfilerStudy Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 		}
 	}
 
@@ -1931,7 +1931,7 @@ internal class MainForm : Form
 	{
 		if (m_UpdateThreadJob != null && !m_UpdateThreadJob.Finished)
 		{
-			FramePro.Update.Terminate();
+			ProfilerStudy.Update.Terminate();
 			m_UpdateThreadJob.Abort();
 		}
 		base.OnClosed(e);
@@ -1988,11 +1988,11 @@ internal class MainForm : Form
 	{
         ////if (m_Settings.RegisterUsingPureDevReg)
         ////{
-        ////	Registration.BusyForm.Show("Checking for updates...", "FramePro Update", CheckForUpdate_PureDevReg);
+        ////	Registration.BusyForm.Show("Checking for updates...", "ProfilerStudy Update", CheckForUpdate_PureDevReg);
         ////}
         ////else
         ////{
-        ////	Registration.BusyForm.Show("Checking for updates...", "FramePro Update", CheckForUpdate);
+        ////	Registration.BusyForm.Show("Checking for updates...", "ProfilerStudy Update", CheckForUpdate);
         ////}
         ////if (m_VersionUpdateCheckSucceeded)
         ////{
@@ -2002,7 +2002,7 @@ internal class MainForm : Form
         ////	}
         ////	else
         ////	{
-        ////		MessageBox.Show("You already have the latest version of FramePro", "FramePro Update", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+        ////		MessageBox.Show("You already have the latest version of ProfilerStudy", "ProfilerStudy Update", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
         ////	}
         ////}
         ////else
@@ -2140,7 +2140,7 @@ internal class MainForm : Form
 	////public static void ShowHelp(string page)
 	////{
 	////	string text = ((!string.IsNullOrEmpty(page)) ? ("::/" + page) : "");
-	////	string text2 = Path.Combine(Environment.CurrentDirectory, "FramePro.chm");
+	////	string text2 = Path.Combine(Environment.CurrentDirectory, "ProfilerStudy.chm");
 	////	Process.Start("hh.exe", text2 + text);
 	////}
 
@@ -2481,26 +2481,26 @@ internal class MainForm : Form
     {
         ComponentResourceManager resources = new ComponentResourceManager(typeof(MainForm));
         panel1 = new Panel();
-        m_GotoMaxFrameButton = new FrameProButton();
-        m_CallstackButton = new FrameProButton();
+        m_GotoMaxFrameButton = new ProfilerStudyButton();
+        m_CallstackButton = new ProfilerStudyButton();
         m_DataGridViewButton = new ViewButton();
         m_CustomStatsGraphButton = new ViewButton();
-        m_ScopeColourModeButton = new FrameProButton();
-        m_GotoNextSpikeButton = new FrameProButton();
-        m_GotoPrevSpikeButton = new FrameProButton();
+        m_ScopeColourModeButton = new ProfilerStudyButton();
+        m_GotoNextSpikeButton = new ProfilerStudyButton();
+        m_GotoPrevSpikeButton = new ProfilerStudyButton();
         m_InfoViewButton = new ViewButton();
         m_FindControl = new FindControl();
-        m_ConnectButton = new FrameProButton();
-        m_ConnectAndroidButton = new FrameProButton();
+        m_ConnectButton = new ProfilerStudyButton();
+        m_ConnectAndroidButton = new ProfilerStudyButton();
         m_CoresViewButton = new ViewButton();
         m_ScopeViewButton = new ViewButton();
         m_FramesViewButton = new ViewButton();
         m_ConditionalScopeTimeSlider = new ConditionalScopeTimeSlider();
-        m_GotoEndButton = new FrameProButton();
-        m_TrackEndButton = new FrameProButton();
-        m_GotoStartButton = new FrameProButton();
-        m_ConnectSettingsButton = new FrameProButton();
-        m_DisconnectButton = new FrameProButton();
+        m_GotoEndButton = new ProfilerStudyButton();
+        m_TrackEndButton = new ProfilerStudyButton();
+        m_GotoStartButton = new ProfilerStudyButton();
+        m_ConnectSettingsButton = new ProfilerStudyButton();
+        m_DisconnectButton = new ProfilerStudyButton();
         m_MainPanel = new Panel();
         fileToolStripMenuItem = new ToolStripMenuItem();
         openToolStripMenuItem = new ToolStripMenuItem();
@@ -2552,7 +2552,7 @@ internal class MainForm : Form
         checkForUpdatesToolStripMenuItem = new ToolStripMenuItem();
         toolStripSeparator3 = new ToolStripSeparator();
         demoToolStripMenuItem = new ToolStripMenuItem();
-        launchFrameProGameSimulatorToolStripMenuItem = new ToolStripMenuItem();
+        launchProfilerStudyGameSimulatorToolStripMenuItem = new ToolStripMenuItem();
         playbackDumpFileInRealtimeToolStripMenuItem = new ToolStripMenuItem();
         showStartupPageToolStripMenuItem = new ToolStripMenuItem();
         toolStripSeparator8 = new ToolStripSeparator();
@@ -3254,17 +3254,17 @@ internal class MainForm : Form
         // 
         // demoToolStripMenuItem
         // 
-        demoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { launchFrameProGameSimulatorToolStripMenuItem, playbackDumpFileInRealtimeToolStripMenuItem });
+        demoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { launchProfilerStudyGameSimulatorToolStripMenuItem, playbackDumpFileInRealtimeToolStripMenuItem });
         demoToolStripMenuItem.Name = "demoToolStripMenuItem";
         demoToolStripMenuItem.Size = new Size(268, 34);
         demoToolStripMenuItem.Text = "Demo";
         // 
-        // launchFrameProGameSimulatorToolStripMenuItem
+        // launchProfilerStudyGameSimulatorToolStripMenuItem
         // 
-        launchFrameProGameSimulatorToolStripMenuItem.Name = "launchFrameProGameSimulatorToolStripMenuItem";
-        launchFrameProGameSimulatorToolStripMenuItem.Size = new Size(402, 34);
-        launchFrameProGameSimulatorToolStripMenuItem.Text = "Launch FramePro Game Simulator";
-        launchFrameProGameSimulatorToolStripMenuItem.Click += LaunchGameSimulatorMenuItem;
+        launchProfilerStudyGameSimulatorToolStripMenuItem.Name = "launchProfilerStudyGameSimulatorToolStripMenuItem";
+        launchProfilerStudyGameSimulatorToolStripMenuItem.Size = new Size(402, 34);
+        launchProfilerStudyGameSimulatorToolStripMenuItem.Text = "Launch ProfilerStudy Game Simulator";
+        launchProfilerStudyGameSimulatorToolStripMenuItem.Click += LaunchGameSimulatorMenuItem;
         // 
         // playbackDumpFileInRealtimeToolStripMenuItem
         // 

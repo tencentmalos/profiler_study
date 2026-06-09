@@ -1,5 +1,5 @@
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal delegate void ValueGraphTimeRangeChangedHandler(Control sender, long start, long end, double scale);

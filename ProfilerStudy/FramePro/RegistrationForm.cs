@@ -5,7 +5,7 @@ using System.Windows.Forms;
 ////using Registration;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class RegistrationForm
 {
@@ -22,9 +22,9 @@ internal class RegistrationForm
 		m_Visible = true;
 		////if (settings.RegisterUsingPureDevReg)
 		////{
-		////	PureDev.PureDevReg.RegistrationForm registrationForm = new PureDev.PureDevReg.RegistrationForm(FrameProCore.Registrar, settings.EMail, settings.RegKey, show_in_taskbar, Resource1.Icon);
+		////	PureDev.PureDevReg.RegistrationForm registrationForm = new PureDev.PureDevReg.RegistrationForm(ProfilerStudyCore.Registrar, settings.EMail, settings.RegKey, show_in_taskbar, Resource1.Icon);
 		////	registrationForm.ShowDialog();
-		////	if (FrameProCore.Registrar.IsValidRegistrationNameKeyPair(registrationForm.EMail, registrationForm.RegKey))
+		////	if (ProfilerStudyCore.Registrar.IsValidRegistrationNameKeyPair(registrationForm.EMail, registrationForm.RegKey))
 		////	{
 		////		settings.EMail = registrationForm.EMail;
 		////		settings.RegKey = registrationForm.RegKey;
@@ -47,8 +47,8 @@ internal class RegistrationForm
 		////bool registered = true;
 		////if (settings.RegisterUsingPureDevReg)
 		////{
-		////	flag = FrameProCore.Registrar.TrialExpired;
-		////	registered = FrameProCore.Registrar.Registered;
+		////	flag = ProfilerStudyCore.Registrar.TrialExpired;
+		////	registered = ProfilerStudyCore.Registrar.Registered;
 		////}
 		////else
 		////{
@@ -60,7 +60,7 @@ internal class RegistrationForm
 		////{
 		////	if (text != null)
 		////	{
-		////		MessageBox.Show("FramePro registered check error:\n" + text);
+		////		MessageBox.Show("ProfilerStudy registered check error:\n" + text);
 		////	}
 		////	Environment.Exit(0);
 		////}
@@ -71,8 +71,8 @@ internal class RegistrationForm
 	////	try
 	////	{
 	////		Process process = new Process();
-	////		process.StartInfo.FileName = "FramePro.exe";
-	////		process.StartInfo.Arguments = "set_reg_key " + email + " " + reg_key + " " + FrameProCore.WebsiteAddr;
+	////		process.StartInfo.FileName = "ProfilerStudy.exe";
+	////		process.StartInfo.Arguments = "set_reg_key " + email + " " + reg_key + " " + ProfilerStudyCore.WebsiteAddr;
 	////		process.StartInfo.Verb = "runas";
 	////		process.StartInfo.UseShellExecute = true;
 	////		Log.WriteLine("Starting process: " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);

@@ -1,6 +1,6 @@
 using System;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public struct ReadLockScope : IDisposable
 {

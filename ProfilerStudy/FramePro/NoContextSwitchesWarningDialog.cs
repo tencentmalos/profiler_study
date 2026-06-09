@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class NoContextSwitchesWarningDialog : Form
 {
@@ -38,7 +38,7 @@ public class NoContextSwitchesWarningDialog : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.NoContextSwitchesWarningDialog));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.NoContextSwitchesWarningDialog));
 		this.button1 = new System.Windows.Forms.Button();
 		this.m_LinkLabel = new System.Windows.Forms.LinkLabel();
 		base.SuspendLayout();

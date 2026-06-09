@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class LargeArray<T> : IEnumerable<T>, IEnumerable
 {

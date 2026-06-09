@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class ClassAllocator<T> where T : new()
 {

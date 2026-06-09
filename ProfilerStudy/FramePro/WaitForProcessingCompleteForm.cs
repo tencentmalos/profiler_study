@@ -4,7 +4,7 @@ using System.Threading;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class WaitForProcessingCompleteForm : Form
 {
@@ -83,7 +83,7 @@ public class WaitForProcessingCompleteForm : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.WaitForProcessingCompleteForm));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.WaitForProcessingCompleteForm));
 		this.textBox1 = new System.Windows.Forms.TextBox();
 		this.button1 = new System.Windows.Forms.Button();
 		this.m_DontWaitButton = new System.Windows.Forms.Button();

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 using SCL;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ThreadFilterForm : Form
 {
@@ -123,7 +123,7 @@ internal class ThreadFilterForm : Form
 	private void InitializeComponent()
 	{
 		SCL.RowCollection rows = new SCL.RowCollection();
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.ThreadFilterForm));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.ThreadFilterForm));
 		this.m_DataGrid = new SCL.HDataGrid();
 		this.button1 = new System.Windows.Forms.Button();
 		this.button2 = new System.Windows.Forms.Button();

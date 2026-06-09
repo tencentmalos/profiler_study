@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class ScrollPanel : Panel
 {

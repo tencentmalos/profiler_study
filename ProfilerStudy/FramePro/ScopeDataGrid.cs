@@ -9,7 +9,7 @@ using SCL;
 using SCLCoreCLR;
 using static System.Collections.Specialized.BitVector32;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ScopeDataGrid : UserControl
 {
@@ -91,7 +91,7 @@ internal class ScopeDataGrid : UserControl
 
 	private float m_DPIScale;
 
-	private string[] m_CallstackExcludeFilters = new string[9] { "FramePro::Platform::GetStackTrace", "FramePro::StackTrace::Capture", "FramePro::FrameProTLS::GetCallstack", "FramePro::FrameProSession::SendScopeCallstack", "FramePro::SendScopeCallstack", "FramePro::AddTimeSpan", "FWindowsPlatformStackWalk::CaptureStackBackTrace", "FFrameProProfiler::PopEvent", "FramePro::TimerScope::~TimerScope" };
+	private string[] m_CallstackExcludeFilters = new string[9] { "ProfilerStudy::Platform::GetStackTrace", "ProfilerStudy::StackTrace::Capture", "ProfilerStudy::ProfilerStudyTLS::GetCallstack", "ProfilerStudy::ProfilerStudySession::SendScopeCallstack", "ProfilerStudy::SendScopeCallstack", "ProfilerStudy::AddTimeSpan", "FWindowsPlatformStackWalk::CaptureStackBackTrace", "FProfilerStudyProfiler::PopEvent", "ProfilerStudy::TimerScope::~TimerScope" };
 
 	private IContainer components;
 

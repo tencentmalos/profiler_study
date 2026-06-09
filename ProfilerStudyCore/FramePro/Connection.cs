@@ -1,7 +1,7 @@
 using System;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class Connection
 {

@@ -1,6 +1,6 @@
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class CustomStatInfo
 {

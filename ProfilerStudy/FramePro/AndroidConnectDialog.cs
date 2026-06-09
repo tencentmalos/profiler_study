@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class AndroidConnectDialog : Form
 {
@@ -43,8 +43,8 @@ internal class AndroidConnectDialog : Form
 	public AndroidConnectDialog()
 	{
 		InitializeComponent();
-		m_EndpointComboBox.Items.Add(new AndroidEndpointOption("Debug", AdbSocketDiscovery.DebugFrameProEndpoint));
-		m_EndpointComboBox.Items.Add(new AndroidEndpointOption("Release", AdbSocketDiscovery.ReleaseFrameProEndpoint));
+		m_EndpointComboBox.Items.Add(new AndroidEndpointOption("Debug", AdbSocketDiscovery.DebugProfilerStudyEndpoint));
+		m_EndpointComboBox.Items.Add(new AndroidEndpointOption("Release", AdbSocketDiscovery.ReleaseProfilerStudyEndpoint));
 		m_EndpointComboBox.SelectedIndex = 0;
 	}
 

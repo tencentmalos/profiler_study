@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace FramePro
+namespace ProfilerStudy
 {
     public static class StringUtil
     {

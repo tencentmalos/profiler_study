@@ -6,7 +6,7 @@ using System.IO;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class MainSessionView : UserControl
 {
@@ -548,7 +548,7 @@ internal class MainSessionView : UserControl
 	private void InitializeComponent()
 	{
 		this.m_MainPanel = new System.Windows.Forms.Panel();
-		this.m_TabsPanel = new FramePro.SessionViewTabsPanel();
+		this.m_TabsPanel = new ProfilerStudy.SessionViewTabsPanel();
 		base.SuspendLayout();
 		this.m_MainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 		this.m_MainPanel.Location = new System.Drawing.Point(0, 0);
@@ -561,7 +561,7 @@ internal class MainSessionView : UserControl
 		this.m_TabsPanel.Name = "m_TabsPanel";
 		this.m_TabsPanel.Size = new System.Drawing.Size(1083, 47);
 		this.m_TabsPanel.TabIndex = 3;
-		this.m_TabsPanel.SessionViewActiveTabChanged += new FramePro.SessionViewActiveTabChangedHandler(ActiveTabChangedEvent);
+		this.m_TabsPanel.SessionViewActiveTabChanged += new ProfilerStudy.SessionViewActiveTabChangedHandler(ActiveTabChangedEvent);
 		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
 		base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		base.Controls.Add(this.m_MainPanel);

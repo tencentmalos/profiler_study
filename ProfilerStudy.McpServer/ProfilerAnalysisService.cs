@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using FramePro;
+using ProfilerStudy;
 using SCLCoreCLR;
 
 namespace ProfilerStudy.McpServer;
@@ -444,9 +444,9 @@ internal sealed class ProfilerAnalysisService
 		switch ((target ?? string.Empty).Trim().ToLowerInvariant())
 		{
 			case "debug":
-				return AdbSocketDiscovery.DebugFrameProEndpoint;
+				return AdbSocketDiscovery.DebugProfilerStudyEndpoint;
 			case "release":
-				return AdbSocketDiscovery.ReleaseFrameProEndpoint;
+				return AdbSocketDiscovery.ReleaseProfilerStudyEndpoint;
 			default:
 				throw new ArgumentException("target must be 'debug' or 'release'.");
 		}
@@ -489,7 +489,7 @@ internal sealed class ProfilerAnalysisService
 			["lastFrameEndTime"] = session.LastFrameEndTime,
 			["disconnectReason"] = session.DisconnectReason.ToString(),
 			["receivedConnectPacket"] = session.ReceivedConnectPacket,
-			["receivedFrameProLibVersion"] = session.ReceivedFrameProLibVersion
+			["receivedProfilerStudyLibVersion"] = session.ReceivedProfilerStudyLibVersion
 		};
 	}
 
@@ -677,7 +677,7 @@ internal sealed class ProfilerAnalysisService
 		foreach (int threadId in threadIds.OrderBy(id => id))
 		{
 			ArrayList roots = new ArrayList();
-			foreach (FramePro.TimeSpan root in EnumerateTopLevelSpansForFrame(session, threadId, frame))
+			foreach (ProfilerStudy.TimeSpan root in EnumerateTopLevelSpansForFrame(session, threadId, frame))
 			{
 				Dictionary<string, object> node = BuildFlameNode(
 					session,
@@ -722,9 +722,9 @@ internal sealed class ProfilerAnalysisService
 		return threads;
 	}
 
-	private static IEnumerable<FramePro.TimeSpan> EnumerateTopLevelSpansForFrame(Session session, int threadId, Frame frame)
+	private static IEnumerable<ProfilerStudy.TimeSpan> EnumerateTopLevelSpansForFrame(Session session, int threadId, Frame frame)
 	{
-		FramePro.TimeSpan span = session.GetTimeSpan(threadId, frame.StartTime);
+		ProfilerStudy.TimeSpan span = session.GetTimeSpan(threadId, frame.StartTime);
 		if (span == null && frame.Duration > 0)
 		{
 			span = session.GetTimeSpan(threadId, frame.StartTime + 1);
@@ -751,7 +751,7 @@ internal sealed class ProfilerAnalysisService
 
 	private static Dictionary<string, object> BuildFlameNode(
 		Session session,
-		FramePro.TimeSpan span,
+		ProfilerStudy.TimeSpan span,
 		Frame frame,
 		double tickToMs,
 		int threadId,
@@ -802,7 +802,7 @@ internal sealed class ProfilerAnalysisService
 
 		includedNodeCount++;
 		ArrayList children = new ArrayList();
-		for (FramePro.TimeSpan child = span.Children; child != null; child = child.Next)
+		for (ProfilerStudy.TimeSpan child = span.Children; child != null; child = child.Next)
 		{
 			if (!OverlapsFrame(child, frame))
 			{
@@ -866,15 +866,15 @@ internal sealed class ProfilerAnalysisService
 		return node;
 	}
 
-	private static bool OverlapsFrame(FramePro.TimeSpan span, Frame frame)
+	private static bool OverlapsFrame(ProfilerStudy.TimeSpan span, Frame frame)
 	{
 		return span.StartTime < frame.EndTime && span.EndTime > frame.StartTime;
 	}
 
-	private static double GetDirectChildDurationMs(FramePro.TimeSpan span, Frame frame, double tickToMs)
+	private static double GetDirectChildDurationMs(ProfilerStudy.TimeSpan span, Frame frame, double tickToMs)
 	{
 		double childDurationMs = 0.0;
-		for (FramePro.TimeSpan child = span.Children; child != null; child = child.Next)
+		for (ProfilerStudy.TimeSpan child = span.Children; child != null; child = child.Next)
 		{
 			if (!OverlapsFrame(child, frame))
 			{
@@ -887,14 +887,14 @@ internal sealed class ProfilerAnalysisService
 		return childDurationMs;
 	}
 
-	private static int CountOverlappingNodes(FramePro.TimeSpan span, Frame frame)
+	private static int CountOverlappingNodes(ProfilerStudy.TimeSpan span, Frame frame)
 	{
 		if (span == null || !OverlapsFrame(span, frame))
 		{
 			return 0;
 		}
 		int count = 1;
-		for (FramePro.TimeSpan child = span.Children; child != null; child = child.Next)
+		for (ProfilerStudy.TimeSpan child = span.Children; child != null; child = child.Next)
 		{
 			count += CountOverlappingNodes(child, frame);
 		}

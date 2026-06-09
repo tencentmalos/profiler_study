@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 using SCL;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class CustomStatSelector : Form
 {
@@ -89,7 +89,7 @@ public class CustomStatSelector : Form
 	private void InitializeComponent()
 	{
 		SCL.RowCollection rows = new SCL.RowCollection();
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.CustomStatSelector));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.CustomStatSelector));
 		this.m_DataGrid = new SCL.HDataGrid();
 		base.SuspendLayout();
 		this.m_DataGrid.AddEmptyRow = false;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ContextSwitchArray
 {

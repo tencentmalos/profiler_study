@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using SCL;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class XAxisDropDownListControl : ComboBox, IHDataGridCellControl, IDataGridEditControl
 {

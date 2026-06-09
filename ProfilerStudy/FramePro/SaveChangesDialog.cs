@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class SaveChangesDialog : Form
 {
@@ -36,7 +36,7 @@ public class SaveChangesDialog : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.SaveChangesDialog));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.SaveChangesDialog));
 		this.button1 = new System.Windows.Forms.Button();
 		this.button2 = new System.Windows.Forms.Button();
 		this.button3 = new System.Windows.Forms.Button();

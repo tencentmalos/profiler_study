@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class FrameArray : IEnumerable<Frame>, IEnumerable
 {

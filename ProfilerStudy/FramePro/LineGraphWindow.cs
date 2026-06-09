@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class LineGraphWindow : UserControl
 {
@@ -232,7 +232,7 @@ internal class LineGraphWindow : UserControl
 		this.m_TitlePanel = new System.Windows.Forms.Panel();
 		this.m_TitleLabel = new System.Windows.Forms.Label();
 		this.button1 = new System.Windows.Forms.Button();
-		this.m_Graph = new FramePro.LineGraph();
+		this.m_Graph = new ProfilerStudy.LineGraph();
 		this.m_TitlePanel.SuspendLayout();
 		base.SuspendLayout();
 		this.m_TitlePanel.BackColor = System.Drawing.Color.Gainsboro;
@@ -267,7 +267,7 @@ internal class LineGraphWindow : UserControl
 		this.m_Graph.Size = new System.Drawing.Size(1100, 238);
 		this.m_Graph.TabIndex = 2;
 		this.m_Graph.Unit = null;
-		this.m_Graph.XAxisMode = FramePro.XAxisMode.Frame;
+		this.m_Graph.XAxisMode = ProfilerStudy.XAxisMode.Frame;
 		this.m_Graph.YOffset = 0.0;
 		this.m_Graph.YScale = 1.0;
 		base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);

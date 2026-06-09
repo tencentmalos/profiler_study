@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public struct TimeSpanInfo : IEquatable<TimeSpanInfo>
 {

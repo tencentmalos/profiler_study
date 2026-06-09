@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 
 
-namespace FramePro
+namespace ProfilerStudy
 {
     public enum Platform
     {

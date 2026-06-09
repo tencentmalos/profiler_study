@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using FramePro;
+using ProfilerStudy;
 
 namespace ProfilerStudy.McpServer;
 
@@ -242,7 +242,7 @@ internal sealed class ProfilerMcpTools
 			new Dictionary<string, object>
 			{
 				["name"] = "capture_android_profile",
-				["description"] = "Compatibility wrapper for fixed Android debug/release FramePro sockets. Prefer capture_profile with android:// or pc:// URLs for new use.",
+				["description"] = "Compatibility wrapper for fixed Android debug/release ProfilerStudy sockets. Prefer capture_profile with android:// or pc:// URLs for new use.",
 				["inputSchema"] = new Dictionary<string, object>
 				{
 					["type"] = "object",
@@ -280,7 +280,7 @@ internal sealed class ProfilerMcpTools
 			new Dictionary<string, object>
 			{
 				["name"] = "analyze_session_file",
-				["description"] = "Load an existing FramePro .profiler, .profiler_recording, or .profiler_dump file and return a compact performance analysis.",
+				["description"] = "Load an existing ProfilerStudy .profiler, .profiler_recording, or .profiler_dump file and return a compact performance analysis.",
 				["inputSchema"] = new Dictionary<string, object>
 				{
 					["type"] = "object",

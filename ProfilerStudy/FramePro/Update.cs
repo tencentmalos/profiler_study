@@ -2,7 +2,7 @@ using System;
 using System.Windows.Forms;
 ////using Registration;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class Update
 {
@@ -36,7 +36,7 @@ internal class Update
 	////	}
 	////	string text2 = text.Trim();
 	////	int[] array = SplitVersion(text2);
-	////	int[] array2 = SplitVersion(FrameProCore.Version);
+	////	int[] array2 = SplitVersion(ProfilerStudyCore.Version);
 	////	bool flag = false;
 	////	for (int i = 0; i < 3; i++)
 	////	{

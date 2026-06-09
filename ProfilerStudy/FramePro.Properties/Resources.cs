@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
-namespace FramePro.Properties;
+namespace ProfilerStudy.Properties;
 
 [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
 [DebuggerNonUserCode]
@@ -24,7 +24,7 @@ internal class Resources
 		{
 			if (resourceMan == null)
 			{
-				resourceMan = new ResourceManager("FramePro.Properties.Resources", typeof(Resources).Assembly);
+				resourceMan = new ResourceManager("ProfilerStudy.Properties.Resources", typeof(Resources).Assembly);
 			}
 			return resourceMan;
 		}

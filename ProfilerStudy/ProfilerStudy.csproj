@@ -20,7 +20,7 @@
     <ApplicationIcon>app.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace />
-    <StartupObject>FramePro.Program</StartupObject>
+    <StartupObject>ProfilerStudy.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="app.ico" />

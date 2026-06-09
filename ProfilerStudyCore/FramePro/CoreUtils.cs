@@ -5,7 +5,7 @@ using System.Drawing;
 using System.IO;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class CoreUtils
 {
@@ -94,14 +94,14 @@ public class CoreUtils
 		return "unknown";
 	}
 
-	public static T Clone<T>(T original) where T : IFrameProSerialisable, new()
+	public static T Clone<T>(T original) where T : IProfilerStudySerialisable, new()
 	{
 		T val = new T();
 		Copy(val, original);
 		return val;
 	}
 
-	public static void Copy<T>(T dest, T source) where T : IFrameProSerialisable
+	public static void Copy<T>(T dest, T source) where T : IProfilerStudySerialisable
 	{
 		using MemoryStream memoryStream = new MemoryStream();
 		BinaryWriter binary_writer = new BinaryWriter(memoryStream);

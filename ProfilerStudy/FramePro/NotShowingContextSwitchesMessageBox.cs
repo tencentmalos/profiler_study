@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class NotShowingContextSwitchesMessageBox : UserControl
 {
@@ -83,7 +83,7 @@ internal class NotShowingContextSwitchesMessageBox : UserControl
 		this.m_LinkLabel.Text = "ProfilerStudy is not tracking context switches.    Load context switch file    Find out more          Dismiss\r\n";
 		this.m_LinkLabel.VisitedLinkColor = System.Drawing.Color.Yellow;
 		this.m_LinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(LinkClicked);
-		this.pictureBox1.Image = FramePro.Properties.Resources.info;
+		this.pictureBox1.Image = ProfilerStudy.Properties.Resources.info;
 		this.pictureBox1.Location = new System.Drawing.Point(0, 0);
 		this.pictureBox1.Name = "pictureBox1";
 		this.pictureBox1.Size = new System.Drawing.Size(22, 22);

@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class ThreadTimeSpanGraph : UserControl
 {
@@ -382,7 +382,7 @@ internal class ThreadTimeSpanGraph : UserControl
 		this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 		this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 		this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-		this.m_ThreadInfoPanel = new FramePro.ThreadRowPanel();
+		this.m_ThreadInfoPanel = new ProfilerStudy.ThreadRowPanel();
 		this.m_ThreadContextMenuStrip.SuspendLayout();
 		base.SuspendLayout();
 		this.m_TimeSpanGraphParentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -446,9 +446,9 @@ internal class ThreadTimeSpanGraph : UserControl
 		this.m_ThreadInfoPanel.Size = new System.Drawing.Size(225, 206);
 		this.m_ThreadInfoPanel.TabIndex = 0;
 		this.m_ThreadInfoPanel.ThreadName = "";
-		this.m_ThreadInfoPanel.CollapseExpandToggle += new FramePro.ThreadRowPanelCollapseExpandToggleHandler(ThreadNamePanelCollapseExpandToggle);
-		this.m_ThreadInfoPanel.ThreadRowPanelMouseMove += new FramePro.ThreadRowPanelMouseMoveHandler(OnThreadRowPanelMouseMove);
-		this.m_ThreadInfoPanel.ThreadRowPanelMouseDown += new FramePro.ThreadRowPanelMouseDownHandler(OnThreadRowPanelMouseDown);
+		this.m_ThreadInfoPanel.CollapseExpandToggle += new ProfilerStudy.ThreadRowPanelCollapseExpandToggleHandler(ThreadNamePanelCollapseExpandToggle);
+		this.m_ThreadInfoPanel.ThreadRowPanelMouseMove += new ProfilerStudy.ThreadRowPanelMouseMoveHandler(OnThreadRowPanelMouseMove);
+		this.m_ThreadInfoPanel.ThreadRowPanelMouseDown += new ProfilerStudy.ThreadRowPanelMouseDownHandler(OnThreadRowPanelMouseDown);
 		this.m_ThreadInfoPanel.MouseClick += new System.Windows.Forms.MouseEventHandler(ThreadInfoPanelMouseClick);
 		this.m_ThreadInfoPanel.MouseLeave += new System.EventHandler(ThreadInfoPanelMouseLeave);
 		base.AutoScaleDimensions = new System.Drawing.SizeF(9f, 20f);

@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class CoreGraphPanel : UserControl
 {
@@ -337,11 +337,11 @@ internal class CoreGraphPanel : UserControl
 	{
 		this.m_TopPanel = new System.Windows.Forms.Panel();
 		this.m_DisplayWaitEventsCheckBox = new System.Windows.Forms.CheckBox();
-		this.m_NotShowingContextSwitchesMessageBox = new FramePro.NotShowingContextSwitchesMessageBox();
+		this.m_NotShowingContextSwitchesMessageBox = new ProfilerStudy.NotShowingContextSwitchesMessageBox();
 		this.m_DisplayContextSwitchesCheckBox = new System.Windows.Forms.CheckBox();
 		this.m_MainPanel = new System.Windows.Forms.Panel();
-		this.m_CoreGraph = new FramePro.CoreGraph();
-		this.m_CorePanel = new FramePro.CorePanel();
+		this.m_CoreGraph = new ProfilerStudy.CoreGraph();
+		this.m_CorePanel = new ProfilerStudy.CorePanel();
 		this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
 		this.m_TopPanel.SuspendLayout();
 		this.m_MainPanel.SuspendLayout();
@@ -372,8 +372,8 @@ internal class CoreGraphPanel : UserControl
 		this.m_NotShowingContextSwitchesMessageBox.Size = new System.Drawing.Size(553, 20);
 		this.m_NotShowingContextSwitchesMessageBox.TabIndex = 2;
 		this.m_NotShowingContextSwitchesMessageBox.Visible = false;
-		this.m_NotShowingContextSwitchesMessageBox.WantsToClose += new FramePro.ContextSwitchMessageBoxWantsToCloseHandler(NotShowingContextSwitchesWantsToClose);
-		this.m_NotShowingContextSwitchesMessageBox.WantsToLoadFile += new FramePro.ContextSwitchMessageBoxWantsToLoadFile(NotShowingContextSwitchesWantsToLoadFile);
+		this.m_NotShowingContextSwitchesMessageBox.WantsToClose += new ProfilerStudy.ContextSwitchMessageBoxWantsToCloseHandler(NotShowingContextSwitchesWantsToClose);
+		this.m_NotShowingContextSwitchesMessageBox.WantsToLoadFile += new ProfilerStudy.ContextSwitchMessageBoxWantsToLoadFile(NotShowingContextSwitchesWantsToLoadFile);
 		this.m_DisplayContextSwitchesCheckBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
 		this.m_DisplayContextSwitchesCheckBox.AutoSize = true;
 		this.m_DisplayContextSwitchesCheckBox.Font = new System.Drawing.Font("Monaco", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
@@ -404,12 +404,12 @@ internal class CoreGraphPanel : UserControl
 		this.m_CoreGraph.ShowWaitEvents = false;
 		this.m_CoreGraph.Size = new System.Drawing.Size(797, 155);
 		this.m_CoreGraph.TabIndex = 0;
-		this.m_CoreGraph.TimeRangeChanged += new FramePro.CoreGraphTimeRangeChangedHandler(CoreGraphTimeRangeChanged);
-		this.m_CoreGraph.CoreGraphShowThread += new FramePro.CoreGraphShowThreadHandler(CoreGraphShowThreadEvent);
-		this.m_CoreGraph.MeasureLineChanged += new FramePro.MeasureLineChangedHandler(MeasureLineChangedEvent);
-		this.m_CoreGraph.CoreScrollChanged += new FramePro.CoreScrollChangedHandler(CoreGraphScrollChanged);
-		this.m_CoreGraph.SelectedTimeSpanChanged += new FramePro.SelectedTimeSpanChangedHandler(OnSelectedTimeSpanChanged);
-		this.m_CoreGraph.StopTrackingEnd += new FramePro.StopTrackingEndHandler(CoreGraphStopTrackingEnd);
+		this.m_CoreGraph.TimeRangeChanged += new ProfilerStudy.CoreGraphTimeRangeChangedHandler(CoreGraphTimeRangeChanged);
+		this.m_CoreGraph.CoreGraphShowThread += new ProfilerStudy.CoreGraphShowThreadHandler(CoreGraphShowThreadEvent);
+		this.m_CoreGraph.MeasureLineChanged += new ProfilerStudy.MeasureLineChangedHandler(MeasureLineChangedEvent);
+		this.m_CoreGraph.CoreScrollChanged += new ProfilerStudy.CoreScrollChangedHandler(CoreGraphScrollChanged);
+		this.m_CoreGraph.SelectedTimeSpanChanged += new ProfilerStudy.SelectedTimeSpanChangedHandler(OnSelectedTimeSpanChanged);
+		this.m_CoreGraph.StopTrackingEnd += new ProfilerStudy.StopTrackingEndHandler(CoreGraphStopTrackingEnd);
 		this.m_CorePanel.BackColor = System.Drawing.Color.FromArgb(81, 81, 81);
 		this.m_CorePanel.CoreYGap = 20;
 		this.m_CorePanel.Dock = System.Windows.Forms.DockStyle.Left;

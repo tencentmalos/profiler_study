@@ -1,5 +1,5 @@
 using System.Drawing;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal delegate Color GetLineColourDelegate(long name);

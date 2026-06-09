@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class RecordingDataForm : Form
 {
@@ -54,7 +54,7 @@ internal class RecordingDataForm : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.RecordingDataForm));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.RecordingDataForm));
 		this.label1 = new System.Windows.Forms.Label();
 		this.m_ProfileSizeLabel = new System.Windows.Forms.Label();
 		this.button1 = new System.Windows.Forms.Button();

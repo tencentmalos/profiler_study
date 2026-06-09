@@ -1,8 +1,8 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
-internal class ThreadInfo : IFrameProSerialisable
+internal class ThreadInfo : IProfilerStudySerialisable
 {
 	public string m_Name;
 

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class AndroidContextSwitchRecordingDialog : Form
 {
@@ -49,7 +49,7 @@ public class AndroidContextSwitchRecordingDialog : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.AndroidContextSwitchRecordingDialog));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.AndroidContextSwitchRecordingDialog));
 		this.button1 = new System.Windows.Forms.Button();
 		this.button2 = new System.Windows.Forms.Button();
 		this.m_DurationTextBox = new System.Windows.Forms.TextBox();

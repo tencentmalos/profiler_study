@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class Timeline : UserControl
 {
@@ -238,14 +238,14 @@ internal class Timeline : UserControl
 			{
 				continue;
 			}
-			if (frame2 != null && m_Session.FrameProStall(frame, frame2))
+			if (frame2 != null && m_Session.ProfilerStudyStall(frame, frame2))
 			{
 				graphics.FillRectangle(m_StallFrameBrush, rectangle);
 				graphics.DrawLine(m_StallFramePen, rectangle.X, rectangle.Y, rectangle.X, rectangle.Bottom);
 				graphics.DrawLine(m_StallFramePen, rectangle.Right, rectangle.Y, rectangle.Right, rectangle.Bottom);
 				graphics.SetClip(rectangle);
 				string timeString = Utils.GetTimeString(frame.WaitForSendCompleteTime, m_Session.TimerFrequency);
-				string s = "Warning: FramePro stall of " + timeString + " due to too many scopes (check previous frames)";
+				string s = "Warning: ProfilerStudy stall of " + timeString + " due to too many scopes (check previous frames)";
 				int num4 = (int)graphics.MeasureString(s, Font).Width;
 				int num5 = Math.Max(rectangle.X, rectangle.X + rectangle.Width / 2 - num4 / 2);
 				int num6 = rectangle.Y + rectangle.Height / 2 - Font.Height / 2;
@@ -253,7 +253,7 @@ internal class Timeline : UserControl
 				graphics.ResetClip();
 				continue;
 			}
-			if (frame2 != null && m_Session.FrameProTimeSpanSpike(frame, frame2))
+			if (frame2 != null && m_Session.ProfilerStudyTimeSpanSpike(frame, frame2))
 			{
 				graphics.FillRectangle(m_TimeSpanSpikeFrameBrush, rectangle);
 				graphics.DrawLine(m_TimeSpanSpikeFramePen, rectangle.X, rectangle.Y, rectangle.X, rectangle.Bottom);

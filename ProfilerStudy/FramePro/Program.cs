@@ -8,7 +8,7 @@ using SCLCoreCLR;
 ////using SymLibCLR;
 ////using SCL;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal static class Program
 {
@@ -35,17 +35,17 @@ internal static class Program
 		////	{
 		////		Directory.CreateDirectory(CoreSettings.UserLocalFolder);
 		////	}
-		////	Log.OpenFile(CoreSettings.UserLocalFolder + "FrameProReg.log", FrameProCore.MaxLogSize);
+		////	Log.OpenFile(CoreSettings.UserLocalFolder + "ProfilerStudyReg.log", ProfilerStudyCore.MaxLogSize);
 		////	Log.WriteLine("\n-------------------------------------------------------");
-		////	Log.WriteLine("FramePro: FramePro setting registry key");
-		////	Log.WriteLine("FramePro: Registration.Initialise");
-		////	Demo.DemoLength = FrameProCore.DemoLength;
-		////	global::Registration.Registration.Initialise(FrameProCore.Manufacturer, FrameProCore.ProductName, FrameProCore.WebsiteAddr, FrameProCore.MachineIdDatabase, FrameProCore.RegistrationDatabase, FrameProCore.PurchaseWebsite, FrameProCore.RegTypes, StoreMode.Registry);
-		////	Log.WriteLine("FramePro: SetRegistryRegKey");
+		////	Log.WriteLine("ProfilerStudy: ProfilerStudy setting registry key");
+		////	Log.WriteLine("ProfilerStudy: Registration.Initialise");
+		////	Demo.DemoLength = ProfilerStudyCore.DemoLength;
+		////	global::Registration.Registration.Initialise(ProfilerStudyCore.Manufacturer, ProfilerStudyCore.ProductName, ProfilerStudyCore.WebsiteAddr, ProfilerStudyCore.MachineIdDatabase, ProfilerStudyCore.RegistrationDatabase, ProfilerStudyCore.PurchaseWebsite, ProfilerStudyCore.RegTypes, StoreMode.Registry);
+		////	Log.WriteLine("ProfilerStudy: SetRegistryRegKey");
 		////	SetRegistryRegKey(commandLineArgs);
 		////	return;
 		////}
-		////FrameProCore.RegistrarInitialiseComplete += OnRegistrarInitialiseComplete;
+		////ProfilerStudyCore.RegistrarInitialiseComplete += OnRegistrarInitialiseComplete;
 		bool num = !File.Exists(CoreSettings.Path);
 		bool register_using_guid = settings.RegisterUsingGUID;
 		if (num)
@@ -53,9 +53,9 @@ internal static class Program
 			register_using_guid = true;
 		}
 		CallbackLog callbackLog = new CallbackLog();
-		callbackLog.WriteEvent += FrameProCoreLog;
-		callbackLog.DebugWriteEvent += FrameProCoreDebugLog;
-		FrameProCore.Initialise(settings, register_using_guid, callbackLog);
+		callbackLog.WriteEvent += ProfilerStudyCoreLog;
+		callbackLog.DebugWriteEvent += ProfilerStudyCoreDebugLog;
+		ProfilerStudyCore.Initialise(settings, register_using_guid, callbackLog);
 		string text = ((commandLineArgs.Length > 1) ? commandLineArgs[1] : null);
 		if (text != null)
 		{
@@ -80,7 +80,7 @@ internal static class Program
 	}
 
 
-    private static void FrameProCoreLog(string text)
+    private static void ProfilerStudyCoreLog(string text)
 	{
 		if (MainForm.Inst != null)
 		{
@@ -101,20 +101,20 @@ internal static class Program
 		}
 	}
 
-	private static void FrameProCoreDebugLog(string text)
+	private static void ProfilerStudyCoreDebugLog(string text)
 	{
 	}
 
 	////private static void OnRegistrarInitialiseComplete(bool result, string result_text)
 	////{
-	////	if (!FrameProCore.Registrar.Installed)
+	////	if (!ProfilerStudyCore.Registrar.Installed)
 	////	{
-	////		MessageBox.Show(string.Concat(string.Concat("" + "ERROR: There is a problem with your installation.\n", "\n"), "Please re-install FramePro\n"), "FramePro ERROR", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+	////		MessageBox.Show(string.Concat(string.Concat("" + "ERROR: There is a problem with your installation.\n", "\n"), "Please re-install ProfilerStudy\n"), "ProfilerStudy ERROR", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 	////		Environment.Exit(1);
 	////	}
 	////	if (!result)
 	////	{
-	////		MessageBox.Show("ERROR: failed to intiialise registration library: " + result_text, "FramePro ERROR", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+	////		MessageBox.Show("ERROR: failed to intiialise registration library: " + result_text, "ProfilerStudy ERROR", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 	////		Environment.Exit(2);
 	////	}
 	////}
@@ -127,11 +127,11 @@ internal static class Program
 	////		string text = args[2];
 	////		string text2 = args[3];
 	////		string error = null;
-	////		Log.WriteLine("FramePro: email: " + text);
-	////		Log.WriteLine("FramePro: reg_key: " + text2);
+	////		Log.WriteLine("ProfilerStudy: email: " + text);
+	////		Log.WriteLine("ProfilerStudy: reg_key: " + text2);
 	////		if (!global::Registration.Registration.SetRegistryRegKey(text, text2, ref error) || error != null)
 	////		{
-	////			Log.WriteLine("FramePro: error: " + ((error != null) ? error : "null"));
+	////			Log.WriteLine("ProfilerStudy: error: " + ((error != null) ? error : "null"));
 	////			Environment.Exit(1);
 	////		}
 	////	}

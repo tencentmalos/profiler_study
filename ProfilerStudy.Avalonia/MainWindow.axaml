@@ -348,7 +348,7 @@
           <MenuItem Header="Check for Updates" Command="{Binding OpenUpdateCheckCommand}" />
           <Separator />
           <MenuItem Header="Demo">
-            <MenuItem Header="Launch FramePro Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
+            <MenuItem Header="Launch ProfilerStudy Game Simulator" Command="{Binding DemoActionCommand}" CommandParameter="LaunchGameSimulator" />
             <MenuItem Header="Playback Recording File..." Command="{Binding DemoActionCommand}" CommandParameter="PlaybackRecordingFile" />
           </MenuItem>
           <MenuItem Header="Show Startup Page" Command="{Binding ShowStartupPageCommand}" />
@@ -366,7 +366,7 @@
         <Border Grid.Column="1" Width="1" Background="{DynamicResource SukiBorderBrush}" Margin="2,6" />
         <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Connect to FramePro">
+            <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding OpenConnectionCommand}" ToolTip.Tip="Connect to ProfilerStudy">
               <material:MaterialIcon Kind="LanConnect" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
             <Button Classes="toolbar-button" Height="40" Width="40" Command="{Binding OpenAndroidCommand}" ToolTip.Tip="Android profiler tools">
@@ -1742,7 +1742,7 @@
                 <TextBlock Text="Open a profiler capture." Foreground="{DynamicResource SukiText}" FontSize="11" TextWrapping="Wrap" />
                 <Button Classes="startup-action" Content="Open Profiler Session..." Command="{Binding OpenSessionCommand}" />
                 <Button Classes="startup-action" Content="Load Generated Sample" Command="{Binding LoadSampleCommand}" />
-                <Button Classes="startup-action" Content="Connect to FramePro..." Command="{Binding OpenConnectionCommand}" />
+                <Button Classes="startup-action" Content="Connect to ProfilerStudy..." Command="{Binding OpenConnectionCommand}" />
                 <Button Classes="startup-action" Content="Connect to Android..." Command="{Binding OpenAndroidCommand}" />
                 <Button Classes="startup-action" Content="Close Startup Page" Command="{Binding CloseStartupPageCommand}" />
                 <TextBlock Text="Views are available after a session is loaded." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" Margin="0,4,0,0" />
@@ -1946,7 +1946,7 @@
           <TextBlock Text="ProfilerStudy Registration" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           <Border Grid.Row="1" Classes="overlay-card">
             <StackPanel Spacing="7">
-              <TextBlock Text="This viewer preserves the original FramePro registration entry point." Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
+              <TextBlock Text="This viewer preserves the original ProfilerStudy registration entry point." Foreground="{DynamicResource SukiText}" TextWrapping="Wrap" />
               <TextBlock Text="No license verification service is bundled with this macOS shell. Existing profiler files and sample data can be opened without registration." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
             </StackPanel>
           </Border>
@@ -2118,7 +2118,7 @@
           </Border>
 
           <TextBlock Grid.Row="2"
-                     Text="This viewer reuses the legacy FramePro session core. The toolbar, startup page, and timeline controls map to the original profiler entry points."
+                     Text="This viewer reuses the legacy ProfilerStudy session core. The toolbar, startup page, and timeline controls map to the original profiler entry points."
                      Foreground="{DynamicResource SukiLowText}"
                      TextWrapping="Wrap" />
 
@@ -2295,7 +2295,7 @@
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
-          <TextBlock Text="FramePro Connection" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
+          <TextBlock Text="ProfilerStudy Connection" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
           <TextBlock Text="Connection controls are represented here to match the original profiler entry points." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="84,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <TextBlock Text="Host" Foreground="{DynamicResource SukiLowText}" VerticalAlignment="Center" />
@@ -2336,7 +2336,7 @@
         </Border>
         <StackPanel Grid.Row="1" Margin="14" Spacing="10">
           <TextBlock Text="Context Switch Tools" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
-          <TextBlock Text="Connect to the FramePro socket exposed by the Android app, or load a recorded context switch file into the active session." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
+          <TextBlock Text="Connect to the ProfilerStudy socket exposed by the Android app, or load a recorded context switch file into the active session." Foreground="{DynamicResource SukiLowText}" TextWrapping="Wrap" />
           <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8" Margin="0,4,0,0">
             <Border Width="42" Height="36" Classes="overlay-icon">
               <material:MaterialIcon Kind="Android" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SukiPrimaryColor}" />
@@ -2423,7 +2423,7 @@
             </Border>
             <StackPanel Grid.Column="1" Spacing="4">
               <TextBlock Text="{Binding AboutProductText}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource SukiText}" />
-              <TextBlock Text="FramePro profiler viewer" Foreground="{DynamicResource SukiLowText}" />
+              <TextBlock Text="ProfilerStudy profiler viewer" Foreground="{DynamicResource SukiLowText}" />
               <TextBlock Text="{Binding AboutCopyrightText}" Foreground="{DynamicResource SukiLowText}" />
             </StackPanel>
           </Grid>
@@ -2440,7 +2440,7 @@
           </Border>
 
           <TextBlock Grid.Row="2"
-                     Text="This Avalonia shell reuses the legacy FramePro session core and preserves the original profiler entry points while bringing the UI to macOS."
+                     Text="This Avalonia shell reuses the legacy ProfilerStudy session core and preserves the original profiler entry points while bringing the UI to macOS."
                      Foreground="{DynamicResource SukiLowText}"
                      TextWrapping="Wrap" />
 

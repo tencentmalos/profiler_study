@@ -4,10 +4,10 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
-using FramePro.Properties;
+using ProfilerStudy.Properties;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 internal class FrameGraphPanel : UserControl
 {

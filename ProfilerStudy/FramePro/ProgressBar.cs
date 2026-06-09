@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using SCLCoreCLR;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public class ProgressBar : Form
 {
@@ -115,7 +115,7 @@ public class ProgressBar : Form
 
 	private void InitializeComponent()
 	{
-		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FramePro.ProgressBar));
+		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerStudy.ProgressBar));
 		this.m_CancelButton = new System.Windows.Forms.Button();
 		this.m_ProgressBar = new System.Windows.Forms.ProgressBar();
 		base.SuspendLayout();

@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace FramePro;
+namespace ProfilerStudy;
 
 public sealed class WaitEvent : TimeItem
 {
