@@ -13,6 +13,16 @@ Avalonia 要对齐 legacy WinForms 的 profiler 语义，但不复制 WinForms �
 - `App/AppThemeService.cs`：Suki/Avalonia 主题切换。
 - `App/AvaloniaSmokeTest.cs`：轻量冒烟入口。
 
+## 项目加载与构建配置
+
+`ProfilerStudy.Avalonia.csproj` 是 Avalonia shell 的 IDE 加载和命令行构建入口。项目文件应保持跨平台可加载：
+
+- 目标框架固定为 `net8.0`，本仓库 Avalonia shell 不要求本机安装 .NET 9/10 SDK。
+- 引用 `third_party/ScottPlot` 源项目时，Avalonia shell 只消费 `net8.0` 目标，避免 IDE restore 枚举 ScottPlot 的更高目标框架。
+- Avalonia `.axaml` 文件由 Avalonia SDK 默认 item 机制纳入编译和资源生成；项目文件不要再次把带 `x:Class` 的 `.axaml` 显式声明为 `AvaloniaResource`。
+- 若 IDE 或 restore 阶段没有从 Avalonia props 中得到 `AvaloniaBuildTasksLocation`，项目文件应提供指向 NuGet 包内 `tools/netstandard2.0/Avalonia.Build.Tasks.dll` 的 fallback，保证 Rider/命令行可以稳定加载项目。
+- 当前 shell code-behind 使用 `AvaloniaXamlLoader.Load` + `FindControl` 手动绑定命名控件字段，项目级关闭 Avalonia name generator，避免生成字段与手写字段重复。
+
 ## MainWindow 布局
 
 `App/Shell/MainWindow.axaml` 使用 `SukiWindow`，主布局为 profiler 工作区：
@@ -128,8 +138,9 @@ Toolbar 使用 icon button / toggle button，并通过 tooltip 解释。不要�
 
 修改 Avalonia shell 前先更新本文；实现后按影响范围验证：
 
-- `dotnet build ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -c Debug -p:TargetFrameworks=net8.0`
-- 如果当前环境需要，带上 `AvaloniaBuildTasksLocation` workaround。
+- `dotnet restore ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj`
+- `dotnet build ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -c Debug`
+- `dotnet run --project ProfilerStudy.Avalonia/ProfilerStudy.Avalonia.csproj -- --smoke-test`
 - 桌面和窄窗口下菜单、toolbar、status/output 不重叠。
 - native menu 和 XAML menu 的 command/checked 状态一致。
 - 打开 session、切换 active view、timeline navigation、output toggle 的基本路径可用。

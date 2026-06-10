@@ -146,6 +146,8 @@ UI 无关且可被 MCP 复用的分析逻辑放在 `ProfilerStudyCore/Analysis`�
 
 WinForms 当前直接持有 `Session`，这是 legacy 行为。Avalonia 应通过 `SessionDocument`、`SessionQueryService`、feature analyzer 读取 Core 数据。MCP 应通过 server-side analysis service 读取 Core 数据并输出结构化结果。
 
+跨平台 shell 引用 Core 时应显式消费 `net8.0` 目标；`ProfilerStudyCore` 和 `CoreUtils` 可以继续保留 `net8.0-windows` 目标给 legacy WinForms 使用，但 macOS/Rider 下的 Avalonia 构建不能被 WindowsDesktop SDK 目标阻塞。
+
 新共享分析能力的推荐路径：
 
 1. 在 Core 中提供 UI 无关查询或统计。

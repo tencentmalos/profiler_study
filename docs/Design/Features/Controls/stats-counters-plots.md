@@ -56,6 +56,7 @@ Core 数据来源：
 - WinForms custom stats 是 legacy 行为参考，尤其是 graph/unit、可见性、x-axis mode。
 - Avalonia `ProfilerStats` / `TimelineScope` 是更适合后续 Perfetto/Tracy counter 的承载点。
 - Avalonia 使用 `third_party/ScottPlot/` 中的源码级 ScottPlot，而不是 NuGet `ScottPlot.Avalonia`。plot 交互、axis、tooltip、marker 或性能问题可以在子仓内做针对性调整。
+- ScottPlot 源项目的目标框架声明必须允许 Avalonia shell 在只安装 .NET 8 SDK 的 macOS/Rider 环境中 restore/build；更高 SDK 专用目标应按 SDK 版本条件化，不能阻塞 `ProfilerStudy.Avalonia` 的 `net8.0` 加载。
 - 对齐优先级：数据语义 > x-axis/单位 > 选择/hover > 视觉样式。
 
 ## 数据流与状态归属

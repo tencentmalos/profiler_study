@@ -6,6 +6,9 @@
     <LangVersion>11.0</LangVersion>
     <RuntimeIdentifiers>osx-arm64;osx-x64;win-x64</RuntimeIdentifiers>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <AvaloniaNameGeneratorIsEnabled>false</AvaloniaNameGeneratorIsEnabled>
+    <AvaloniaBuildTasksLocation Condition="'$(AvaloniaBuildTasksLocation)' == '' and '$(PkgAvalonia)' != ''">$([System.IO.Path]::Combine('$(PkgAvalonia)', 'tools', 'netstandard2.0', 'Avalonia.Build.Tasks.dll'))</AvaloniaBuildTasksLocation>
+    <AvaloniaBuildTasksLocation Condition="'$(AvaloniaBuildTasksLocation)' == '' and '$(NuGetPackageRoot)' != ''">$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'avalonia', '11.3.17', 'tools', 'netstandard2.0', 'Avalonia.Build.Tasks.dll'))</AvaloniaBuildTasksLocation>
     <AssemblyTitle>ProfilerStudy</AssemblyTitle>
     <Product>ProfilerStudy</Product>
     <Description>Cross-platform ProfilerStudy profiler viewer built with Avalonia.</Description>
@@ -15,15 +18,10 @@
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
-    <AvaloniaResource Include="App\App.axaml" />
-    <AvaloniaResource Include="App\Shell\MainWindow.axaml" />
-    <AvaloniaResource Include="Features\ProfilerStats\ucProfilerStats.axaml" />
-    <AvaloniaResource Include="Features\TimelineScope\ucTimelineScope.axaml" />
-    <AvaloniaResource Include="Features\TimelineScope\TimelineScopeThemeResources.axaml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProfilerStudyCore\ProfilerStudyCore.csproj" />
-    <ProjectReference Include="..\third_party\ScottPlot\src\ScottPlot5\ScottPlot5 Controls\ScottPlot.Avalonia\ScottPlot.Avalonia.csproj" />
+    <ProjectReference Include="..\ProfilerStudyCore\ProfilerStudyCore.csproj" Properties="TargetFramework=net8.0;TargetFrameworks=net8.0" />
+    <ProjectReference Include="..\third_party\ScottPlot\src\ScottPlot5\ScottPlot5 Controls\ScottPlot.Avalonia\ScottPlot.Avalonia.csproj" Properties="TargetFramework=net8.0;TargetFrameworks=net8.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="11.3.17" />

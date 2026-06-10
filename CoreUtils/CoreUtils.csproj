@@ -3,7 +3,8 @@
   <PropertyGroup>
     <AssemblyName>CoreUtils</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">net8.0;net8.0-windows</TargetFrameworks>
     <UseWindowsForms Condition="'$(TargetFramework)' == 'net8.0-windows'">True</UseWindowsForms>
     <EnableWindowsTargeting Condition="'$(TargetFramework)' == 'net8.0-windows'">true</EnableWindowsTargeting>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net8.0-windows'">7.0</SupportedOSPlatformVersion>
