@@ -19,6 +19,12 @@ internal sealed class SessionLoader
 			if (IsTracyFile(path))
 			{
 				TraceDocument traceDocument = TracyTraceImporter.Load(path, cancellationToken);
+				TraceArtifactStore.Register(
+					traceDocument,
+					"file-import",
+					TracyVersionRegistry.LockedVersion,
+					traceDocument.ImportDiagnostics,
+					null);
 				return CreateTraceDocument(traceDocument, path);
 			}
 

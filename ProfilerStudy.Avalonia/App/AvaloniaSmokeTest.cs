@@ -475,6 +475,9 @@ internal static class AvaloniaSmokeTest
 	private static void AssertTracyTraceLoad()
 	{
 		string path = Path.Combine(Path.GetTempPath(), "ProfilerStudy.Avalonia.Tracy." + Guid.NewGuid().ToString("N") + ".tracy");
+		string artifactRoot = Path.Combine(Path.GetTempPath(), "ProfilerStudy.Avalonia.TracyFileArtifacts." + Guid.NewGuid().ToString("N"));
+		string previousArtifactRoot = Environment.GetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT");
+		Environment.SetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT", artifactRoot);
 		try
 		{
 			WriteTracyMetadataDump(path);
@@ -486,6 +489,7 @@ internal static class AvaloniaSmokeTest
 			Assert(document.FrameSamples.Length == 2, "tracy frame samples");
 			Assert(Math.Abs(document.FrameSamples[1].DurationMs - 9.0) < 0.0001, "tracy frame duration");
 			Assert(document.Viewport.FrameCount == 2, "tracy viewport frame count");
+			AssertTracyFileLoadArtifact(artifactRoot);
 
 			WriteTracyOnDemandMetadataDump(path);
 			SessionDocument onDemandDocument = loader.LoadFileAsync(path, CancellationToken.None).GetAwaiter().GetResult();
@@ -495,11 +499,29 @@ internal static class AvaloniaSmokeTest
 		}
 		finally
 		{
+			Environment.SetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT", previousArtifactRoot);
 			if (File.Exists(path))
 			{
 				File.Delete(path);
 			}
+			if (Directory.Exists(artifactRoot))
+			{
+				Directory.Delete(artifactRoot, true);
+			}
 		}
+	}
+
+	private static void AssertTracyFileLoadArtifact(string artifactRoot)
+	{
+		ArrayList artifacts = TraceArtifactStore.List("tracy", string.Empty, 10);
+		Assert(artifacts.Count == 1, "tracy file load artifact count");
+		IDictionary artifact = artifacts[0] as IDictionary;
+		Assert(artifact != null, "tracy file load artifact row");
+		string artifactId = Convert.ToString(artifact["artifactId"]);
+		Assert(!string.IsNullOrWhiteSpace(artifactId), "tracy file load artifact id");
+		Assert(Convert.ToString(artifact["sourceKind"]) == "file-import", "tracy file load artifact source kind");
+		string manifestPath = Path.Combine(artifactRoot, artifactId, "manifest.json");
+		Assert(File.Exists(manifestPath), "tracy file load artifact manifest");
 	}
 
 	private static void AssertTracyUiAnalyzers()
