@@ -607,7 +607,7 @@ UI 则显示简短错误，并在 diagnostics panel 展示详细日志。
 
 - MCP 不扫描用户目录，只访问用户显式 path 或 artifact store manifest。
 - Tracy live capture 必须有 connect timeout、capture timeout、cancellation 和最大输出大小限制。
-- `.tracy` reader 必须校验文件大小、section size、compressed block size 和解压后大小。
+- `.tracy` reader 必须校验文件大小、section size、compressed block size 和解压后大小；当前 C# reader 的单文件上限为 512 MiB，超过时返回 `TracyFileSizeLimitExceeded`。
 - Capture duration 有上限，MCP 默认沿用 1 到 300 秒。
 - Normalized reader 应流式读取 NDJSON，避免一次性加载超大 trace。
 - Artifact store 后续需要清理策略；第一阶段先只记录 size 和 created time，不自动删除。

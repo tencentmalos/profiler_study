@@ -9,6 +9,8 @@ namespace ProfilerStudy.Tracy;
 
 public static class Tracy010FileReader
 {
+	public const long MaxFileSizeBytes = 512L * 1024L * 1024L;
+
 	private const int MaxBlockSize = 1024 * 1024;
 	private const int MaxDecodedBlockSize = 64 * 1024;
 	private const int MaxBlockCount = 1_000_000;
@@ -23,6 +25,17 @@ public static class Tracy010FileReader
 		if (string.IsNullOrWhiteSpace(path))
 		{
 			throw new ArgumentException("Tracy file path is required.", nameof(path));
+		}
+
+		FileInfo fileInfo = new FileInfo(path);
+		if (fileInfo.Length > MaxFileSizeBytes)
+		{
+			throw new TracyFileFormatException(
+				"TracyFileSizeLimitExceeded",
+				"Tracy file is larger than the supported C# reader limit of " + MaxFileSizeBytes + " bytes.",
+				"bytes:" + fileInfo.Length,
+				TracyVersionRegistry.SupportedVersions,
+				TracyVersionRegistry.LockedVersion);
 		}
 
 		using FileStream stream = File.OpenRead(path);

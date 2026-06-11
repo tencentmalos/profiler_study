@@ -130,6 +130,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string gpuPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-gpu.tracy");
 		string unsupportedEventsPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported-events.tracy");
 		string oversizedLockPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-oversized-lock.tracy");
+		string oversizedFilePath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-oversized-file.tracy");
 		string dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-lz4-dictionary.tracy");
 		string onDemandPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-on-demand.tracy");
 		try
@@ -201,6 +202,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			WriteTracyDumpWithOversizedLockThreadList(oversizedLockPath);
 			AssertInvalidTracyFileTool(oversizedLockPath);
 
+			WriteOversizedTracyDump(oversizedFilePath);
+			AssertTracyFileSizeLimitTool(oversizedFilePath);
+
 			WriteTracyDumpWithDictionaryBackReference(dictionaryPath);
 			TracyFileHeader dictionaryHeader = Tracy010FileReader.ReadHeader(dictionaryPath);
 			AssertEqual("0.10.0", dictionaryHeader.Version, "dictionary tracy header version");
@@ -249,6 +253,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(oversizedLockPath))
 			{
 				File.Delete(oversizedLockPath);
+			}
+			if (File.Exists(oversizedFilePath))
+			{
+				File.Delete(oversizedFilePath);
 			}
 			if (File.Exists(dictionaryPath))
 			{
@@ -468,6 +476,29 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary structured = result["structuredContent"] as IDictionary;
 			AssertEqual("TracyFileFormatInvalid", structured["errorCode"], "invalid tracy error code");
 			AssertDiagnosticCode(structured["diagnostics"], "TracyFileFormatInvalid", "invalid tracy diagnostics");
+		}
+		finally
+		{
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
+	}
+
+	private static void AssertTracyFileSizeLimitTool(string path)
+	{
+		AssertThrows(() => Tracy010FileReader.ReadHeader(path), "oversized tracy file reader");
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
+		{
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> result = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "tracy"
+			});
+			AssertEqual(true, result["isError"], "oversized tracy load_trace_file isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			AssertEqual("TracyFileSizeLimitExceeded", structured["errorCode"], "oversized tracy error code");
+			AssertDiagnosticCode(structured["diagnostics"], "TracyFileSizeLimitExceeded", "oversized tracy diagnostics");
 		}
 		finally
 		{
@@ -1400,6 +1431,12 @@ internal static class ProfilerDiagnosticsSelfTest
 	{
 		byte[] innerHeader = new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', major, minor, patch };
 		WriteTracyDump(path, innerHeader);
+	}
+
+	private static void WriteOversizedTracyDump(string path)
+	{
+		using FileStream stream = File.Create(path);
+		stream.SetLength(512L * 1024L * 1024L + 1L);
 	}
 
 	private static void WriteTracyDumpWithMetadata(string path)
