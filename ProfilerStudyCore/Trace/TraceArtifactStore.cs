@@ -78,6 +78,7 @@ public static class TraceArtifactStore
 		manifest.DiagnosticsByteCount = GetFileByteCount(diagnosticsPath);
 		WriteLiveCaptureDebugMaterial(artifactDirectory, manifest, diagnostics);
 		File.WriteAllText(Path.Combine(artifactDirectory, "manifest.json"), JsonSerializer.Serialize(manifest, JsonOptions));
+		document.AttachArtifactId(artifactId);
 		return manifest;
 	}
 

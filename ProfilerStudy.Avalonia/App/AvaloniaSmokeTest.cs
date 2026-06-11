@@ -489,7 +489,8 @@ internal static class AvaloniaSmokeTest
 			Assert(document.FrameSamples.Length == 2, "tracy frame samples");
 			Assert(Math.Abs(document.FrameSamples[1].DurationMs - 9.0) < 0.0001, "tracy frame duration");
 			Assert(document.Viewport.FrameCount == 2, "tracy viewport frame count");
-			AssertTracyFileLoadArtifact(artifactRoot);
+			Assert(!string.IsNullOrWhiteSpace(document.TraceDocument.ArtifactId), "tracy file trace document artifact id");
+			AssertTracyFileLoadArtifact(artifactRoot, document.TraceDocument.ArtifactId);
 
 			WriteTracyOnDemandMetadataDump(path);
 			SessionDocument onDemandDocument = loader.LoadFileAsync(path, CancellationToken.None).GetAwaiter().GetResult();
@@ -511,7 +512,7 @@ internal static class AvaloniaSmokeTest
 		}
 	}
 
-	private static void AssertTracyFileLoadArtifact(string artifactRoot)
+	private static void AssertTracyFileLoadArtifact(string artifactRoot, string expectedArtifactId)
 	{
 		ArrayList artifacts = TraceArtifactStore.List("tracy", string.Empty, 10);
 		Assert(artifacts.Count == 1, "tracy file load artifact count");
@@ -519,6 +520,7 @@ internal static class AvaloniaSmokeTest
 		Assert(artifact != null, "tracy file load artifact row");
 		string artifactId = Convert.ToString(artifact["artifactId"]);
 		Assert(!string.IsNullOrWhiteSpace(artifactId), "tracy file load artifact id");
+		Assert(artifactId == expectedArtifactId, "tracy file trace document artifact id matches artifact");
 		Assert(Convert.ToString(artifact["sourceKind"]) == "file-import", "tracy file load artifact source kind");
 		string manifestPath = Path.Combine(artifactRoot, artifactId, "manifest.json");
 		Assert(File.Exists(manifestPath), "tracy file load artifact manifest");
@@ -734,9 +736,10 @@ internal static class AvaloniaSmokeTest
 			WaitUntil(() => viewModel.CurrentDocument?.TraceDocument != null && viewModel.IsLoading == false, 4000, "tracy connection document");
 			Assert(viewModel.CurrentDocument.Session == null, "tracy connection is trace backed");
 			Assert(viewModel.CurrentDocument.TraceDocument.SourceFormat == "tracy", "tracy connection source format");
+			Assert(!string.IsNullOrWhiteSpace(viewModel.CurrentDocument.TraceDocument.ArtifactId), "tracy connection trace document artifact id");
 			Assert(viewModel.ConnectionPanelStatusText.Contains("Tracy", StringComparison.Ordinal), "tracy connection status");
 			Assert(viewModel.StatusBarSessionText.Contains("Tracy", StringComparison.Ordinal) || viewModel.SessionStatusText.Contains("Tracy", StringComparison.Ordinal), "tracy connection session status");
-			AssertTracyConnectionArtifact(artifactRoot);
+			AssertTracyConnectionArtifact(artifactRoot, viewModel.CurrentDocument.TraceDocument.ArtifactId);
 			server.AssertHandshakeReceived();
 		}
 		finally
@@ -749,7 +752,7 @@ internal static class AvaloniaSmokeTest
 		}
 	}
 
-	private static void AssertTracyConnectionArtifact(string artifactRoot)
+	private static void AssertTracyConnectionArtifact(string artifactRoot, string expectedArtifactId)
 	{
 		ArrayList artifacts = TraceArtifactStore.List("tracy", string.Empty, 10);
 		Assert(artifacts.Count == 1, "tracy connection artifact count");
@@ -757,6 +760,7 @@ internal static class AvaloniaSmokeTest
 		Assert(artifact != null, "tracy connection artifact row");
 		string artifactId = Convert.ToString(artifact["artifactId"]);
 		Assert(!string.IsNullOrWhiteSpace(artifactId), "tracy connection artifact id");
+		Assert(artifactId == expectedArtifactId, "tracy connection document artifact id matches artifact");
 		Assert(Convert.ToString(artifact["sourceKind"]) == "tracy-live-normalized-only", "tracy connection artifact source kind");
 		Assert(File.Exists(Path.Combine(artifactRoot, artifactId, "capture.ndjson")), "tracy connection capture debug material");
 	}

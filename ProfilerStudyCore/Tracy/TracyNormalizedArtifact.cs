@@ -59,7 +59,8 @@ public static class TracyNormalizedArtifact
 			artifactManifest.ArtifactId,
 			artifactManifest.GetCreatedUtc() == DateTime.MinValue ? DateTime.UtcNow : artifactManifest.GetCreatedUtc(),
 			querySession,
-			diagnostics);
+			diagnostics,
+			artifactManifest.ArtifactId);
 	}
 
 	private static string ResolveNormalizedDirectory(string artifactDirectory, string relativePath)
