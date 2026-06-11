@@ -1019,7 +1019,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			{
 				throw new InvalidOperationException("tracy live capture must return artifactId.");
 			}
-			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "live-capture");
+			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "tracy-live-normalized-only");
 			string sessionId = Convert.ToString(structured["sessionId"]);
 			if (string.IsNullOrWhiteSpace(sessionId))
 			{
