@@ -2402,12 +2402,12 @@ internal static class ProfilerDiagnosticsSelfTest
 		Dictionary<string, object> frameDetail = querySession.AnalyzeFrameDetail(1, 100, 12, 0.0);
 		AssertEqual(true, frameDetail["supported"], "tracy cpu gpu frame detail supported");
 		IDictionary gpuSummary = frameDetail["gpuSummary"] as IDictionary;
-		AssertEqual(2, gpuSummary["zoneCount"], "tracy frame gpu zone count");
-		AssertEqual(1, gpuSummary["gpuTimeZoneCount"], "tracy frame gpu-time zone count");
+		AssertEqual(3, gpuSummary["zoneCount"], "tracy frame gpu zone count");
+		AssertEqual(2, gpuSummary["gpuTimeZoneCount"], "tracy frame gpu-time zone count");
 		AssertEqual(1, gpuSummary["cpuSubmitFallbackZoneCount"], "tracy frame fallback zone count");
 		AssertEqual("mixed", gpuSummary["timeSource"], "tracy frame gpu summary time source");
 		AssertEqual("medium", gpuSummary["confidence"], "tracy frame gpu confidence");
-		AssertEqual(1, gpuSummary["passCount"], "tracy frame pass count");
+		AssertEqual(2, gpuSummary["passCount"], "tracy frame pass count");
 		AssertEqual(1, gpuSummary["blitCount"], "tracy frame blit count");
 		AssertHasItems(frameDetail["gpuTimeline"], "tracy frame gpu timeline");
 		AssertHasItems(frameDetail["gpuHotspots"], "tracy frame gpu hotspots");
@@ -2417,6 +2417,11 @@ internal static class ProfilerDiagnosticsSelfTest
 		IDictionary firstGpuZone = ((IList)frameDetail["gpuTimeline"])[0] as IDictionary;
 		AssertEqual("PICA Render Pass", firstGpuZone["name"], "tracy gpu timeline order");
 		AssertEqual("pica_gpu.cpp", ((IDictionary)firstGpuZone["source"])["file"], "tracy gpu source file");
+		AssertEqual("GpuSubmitThread", firstGpuZone["threadName"], "tracy gpu submit thread name");
+		AssertEqual(17_000_000L, firstGpuZone["cpuSubmitStart"], "tracy gpu cpu submit start");
+		AssertEqual(18_000_000L, firstGpuZone["cpuSubmitEnd"], "tracy gpu cpu submit end");
+		AssertEqual(1.0, firstGpuZone["cpuSubmitRelativeStartMs"], "tracy gpu cpu submit relative start");
+		AssertEqual(2.0, firstGpuZone["cpuSubmitRelativeEndMs"], "tracy gpu cpu submit relative end");
 
 		Dictionary<string, object> gpuFrames = querySession.AnalyzeGpuFrames(10, 0, 2, "any");
 		AssertEqual(true, gpuFrames["eventsDecoded"], "tracy gpu frame events decoded");
@@ -2500,8 +2505,9 @@ internal static class ProfilerDiagnosticsSelfTest
 		};
 		List<TracyGpuZoneSummary> gpuZones = new List<TracyGpuZoneSummary>
 		{
-			new TracyGpuZoneSummary(2, 7, 345U, 2, "PICA Render Pass", 17_000_000L, 34_000_000L, "gpu-time"),
-			new TracyGpuZoneSummary(2, 9, 345U, 3, "PICA Blit", 30_000_000L, 32_000_000L, "cpu-submit-time")
+			new TracyGpuZoneSummary(0, 2, 7, 345U, 2, "PICA Render Pass", 17_000_000L, 34_000_000L, "gpu-time", 0, -1, "pass", 17_000_000L, 18_000_000L),
+			new TracyGpuZoneSummary(2, 9, 345U, 3, "PICA Blit", 30_000_000L, 32_000_000L, "cpu-submit-time"),
+			new TracyGpuZoneSummary(3, 2, 11, 345U, 2, "PICA Deferred Submit", 60_000_000L, 70_000_000L, "gpu-time", 0, -1, "pass", 17_500_000L, 18_500_000L)
 		};
 		TracyEventStream eventStream = new TracyEventStream(
 			new TracyFileHeader("0.10.0", "self-test"),
@@ -2512,7 +2518,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			metadata,
 			cpuZones,
 			plots,
-			new List<TracyThreadSummary> { new TracyThreadSummary(100UL, "MainThread") },
+			new List<TracyThreadSummary> { new TracyThreadSummary(100UL, "MainThread"), new TracyThreadSummary(345UL, "GpuSubmitThread") },
 			1,
 			new ArrayList(),
 			gpuContexts,

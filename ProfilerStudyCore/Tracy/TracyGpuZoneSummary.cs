@@ -5,11 +5,16 @@ namespace ProfilerStudy.Tracy;
 public sealed class TracyGpuZoneSummary
 {
 	public TracyGpuZoneSummary(byte context, ushort queryId, uint threadId, short sourceLocation, string name, long start, long end, string timeSource)
-		: this(-1, context, queryId, threadId, sourceLocation, name, start, end, timeSource, 0, -1, string.Empty)
+		: this(-1, context, queryId, threadId, sourceLocation, name, start, end, timeSource, 0, -1, string.Empty, start, end)
 	{
 	}
 
 	public TracyGpuZoneSummary(int id, byte context, ushort queryId, uint threadId, short sourceLocation, string name, long start, long end, string timeSource, int depth, int parentId, string zoneKind)
+		: this(id, context, queryId, threadId, sourceLocation, name, start, end, timeSource, depth, parentId, zoneKind, start, end)
+	{
+	}
+
+	public TracyGpuZoneSummary(int id, byte context, ushort queryId, uint threadId, short sourceLocation, string name, long start, long end, string timeSource, int depth, int parentId, string zoneKind, long cpuStart, long cpuEnd)
 	{
 		Id = id;
 		Context = context;
@@ -23,6 +28,8 @@ public sealed class TracyGpuZoneSummary
 		Depth = Math.Max(0, depth);
 		ParentId = parentId;
 		ZoneKind = string.IsNullOrWhiteSpace(zoneKind) ? ClassifyZoneKind(Name) : zoneKind;
+		CpuStart = cpuStart;
+		CpuEnd = cpuEnd >= cpuStart ? cpuEnd : cpuStart;
 	}
 
 	public int Id { get; }
@@ -49,7 +56,13 @@ public sealed class TracyGpuZoneSummary
 
 	public string ZoneKind { get; }
 
+	public long CpuStart { get; }
+
+	public long CpuEnd { get; }
+
 	public long Duration => Math.Max(0L, End - Start);
+
+	public long CpuDuration => Math.Max(0L, CpuEnd - CpuStart);
 
 	private static string ClassifyZoneKind(string name)
 	{

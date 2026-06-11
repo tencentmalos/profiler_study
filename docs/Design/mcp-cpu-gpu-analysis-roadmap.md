@@ -298,6 +298,7 @@ P2 要求：
 - 新增 `get_gpu_timeline`，按 trace-relative start time 返回 frame range 或 time range 内的 GPU zones。
 - `list_gpu_zones` 的 hotspot 已包含 avg/P50/P90/P99/fallback count，zone 输出包含 source 展开、contextNameStatus、zoneKind、depth、parentId。
 - live Tracy source location payload 已进入 `source_locations.ndjson`，artifact reload 后 source 展开不丢失。
+- GPU zone 模型必须同时保留 GPU timeline 时间和 CPU submit 触发时间。`analyze_frame_detail` 以 frame 为入口时，应纳入 GPU 时间落在该帧内的 zone，也应纳入 CPU submit 触发时间落在该帧内的 zone，并在 `gpuTimeline` 中输出 `threadName`、`cpuSubmitStart`、`cpuSubmitEnd`、`cpuSubmitRelativeStartMs` 和 `cpuSubmitRelativeEndMs`。否则实机会出现“GPU zone 可见，但无法回到触发线程/触发帧”的分析断点。
 
 补充优化状态：
 

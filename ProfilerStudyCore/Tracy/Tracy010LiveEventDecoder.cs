@@ -1108,7 +1108,9 @@ internal sealed class Tracy010LiveEventDecoder
 				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? "gpu-time" : "cpu-submit-time",
 				0,
 				-1,
-				ClassifyGpuZoneKind(ResolveSourceLocationName(zone.SourceLocation))))
+				ClassifyGpuZoneKind(ResolveSourceLocationName(zone.SourceLocation)),
+				zone.CpuStart,
+				zone.CpuEnd))
 			.ToList();
 	}
 

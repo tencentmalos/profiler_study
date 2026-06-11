@@ -359,7 +359,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		{
 			ArrayList counters = BuildFrameCounters(frame, frame.FrameIndex, 50);
 			List<TracyGpuZoneSummary> frameZones = m_EventStream.GpuZones
-				.Where(zone => ZoneOverlaps(zone.Start, zone.End, frame.Start, frame.End))
+				.Where(zone => ZoneOverlaps(zone.Start, zone.End, frame.Start, frame.End) ||
+					ZoneOverlaps(zone.CpuStart, zone.CpuEnd, frame.Start, frame.End))
 				.Where(zone => resolvedTimeSource == "any" || string.Equals(zone.TimeSource, resolvedTimeSource, StringComparison.OrdinalIgnoreCase))
 				.ToList();
 			allFrameZones.AddRange(frameZones);
@@ -762,7 +763,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				long clippedEnd = Math.Min(zone.End, resolvedEnd);
 				if (clippedEnd > clippedStart)
 				{
-					yield return new TracyGpuZoneSummary(zone.Context, zone.QueryId, zone.ThreadId, zone.SourceLocation, zone.Name, clippedStart, clippedEnd, zone.TimeSource);
+					yield return new TracyGpuZoneSummary(zone.Id, zone.Context, zone.QueryId, zone.ThreadId, zone.SourceLocation, zone.Name, clippedStart, clippedEnd, zone.TimeSource, zone.Depth, zone.ParentId, zone.ZoneKind, zone.CpuStart, zone.CpuEnd);
 				}
 			}
 			yield break;
@@ -782,7 +783,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		long rangeEnd = frames[last].End;
 		foreach (TracyGpuZoneSummary zone in m_EventStream.GpuZones)
 		{
-			if (zone.End >= rangeStart && zone.Start <= rangeEnd)
+			if (ZoneOverlaps(zone.Start, zone.End, rangeStart, rangeEnd) ||
+				ZoneOverlaps(zone.CpuStart, zone.CpuEnd, rangeStart, rangeEnd))
 			{
 				yield return zone;
 			}
@@ -1338,6 +1340,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 	private Dictionary<string, object> GpuZoneToDictionary(TracyGpuZoneSummary zone, TracyFrameSummary frame)
 	{
 		TracyGpuContextSummary context = m_EventStream.GpuContexts.FirstOrDefault(value => value.Context == zone.Context);
+		Dictionary<ulong, string> threadNames = BuildThreadNameMap();
 		Dictionary<string, object> values = new Dictionary<string, object>
 		{
 			["id"] = zone.Id,
@@ -1346,12 +1349,16 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["contextNameStatus"] = context == null || string.IsNullOrWhiteSpace(context.Name) || context.Name.StartsWith("GPU Context ", StringComparison.Ordinal) ? "defaulted" : "resolved",
 			["queryId"] = zone.QueryId,
 			["threadId"] = zone.ThreadId,
+			["threadName"] = GetThreadName(threadNames, zone.ThreadId),
 			["name"] = zone.Name,
 			["sourceLocation"] = zone.SourceLocation,
 			["source"] = SourceLocationToDictionary(ResolveSourceLocation(zone.SourceLocation), zone.Name),
 			["start"] = zone.Start,
 			["end"] = zone.End,
 			["durationMs"] = Round(zone.Duration / 1_000_000.0),
+			["cpuSubmitStart"] = zone.CpuStart,
+			["cpuSubmitEnd"] = zone.CpuEnd,
+			["cpuSubmitDurationMs"] = Round(zone.CpuDuration / 1_000_000.0),
 			["timeSource"] = zone.TimeSource,
 			["depth"] = zone.Depth,
 			["parentId"] = zone.ParentId,
@@ -1361,8 +1368,17 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		{
 			values["relativeStartMs"] = Round((zone.Start - frame.Start) / 1_000_000.0);
 			values["relativeEndMs"] = Round((zone.End - frame.Start) / 1_000_000.0);
+			values["cpuSubmitRelativeStartMs"] = Round((zone.CpuStart - frame.Start) / 1_000_000.0);
+			values["cpuSubmitRelativeEndMs"] = Round((zone.CpuEnd - frame.Start) / 1_000_000.0);
 		}
 		return values;
+	}
+
+	private Dictionary<ulong, string> BuildThreadNameMap()
+	{
+		return m_EventStream.Threads
+			.GroupBy(thread => thread.ThreadId)
+			.ToDictionary(group => group.Key, group => group.Select(thread => thread.Name).FirstOrDefault(name => !string.IsNullOrWhiteSpace(name)) ?? string.Empty);
 	}
 
 	private static Dictionary<string, object> GpuContextToDictionary(TracyGpuContextSummary context)

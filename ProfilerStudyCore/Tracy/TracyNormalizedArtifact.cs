@@ -236,6 +236,9 @@ public static class TracyNormalizedArtifact
 			["startNs"] = zone.Start,
 			["endNs"] = zone.End,
 			["durationNs"] = zone.Duration,
+			["cpuStartNs"] = zone.CpuStart,
+			["cpuEndNs"] = zone.CpuEnd,
+			["cpuDurationNs"] = zone.CpuDuration,
 			["timeSource"] = zone.TimeSource,
 			["depth"] = zone.Depth,
 			["parentId"] = zone.ParentId,
@@ -386,7 +389,9 @@ public static class TracyNormalizedArtifact
 				GetString(record, "timeSource", "cpu-submit-time"),
 				GetInt(record, "depth", 0),
 				GetInt(record, "parentId", -1),
-				GetString(record, "zoneKind", string.Empty)));
+				GetString(record, "zoneKind", string.Empty),
+				GetLong(record, "cpuStartNs", GetLong(record, "startNs", 0L)),
+				GetLong(record, "cpuEndNs", GetLong(record, "endNs", 0L))));
 		}
 		return zones;
 	}
