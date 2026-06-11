@@ -243,7 +243,7 @@ public static class Tracy010FileReader
 				threadNameCount);
 		}
 
-		List<string> sourceLocationNames = ReadSourceLocationsAndSkipToLocks(reader, pointerMap, stringData);
+		SourceLocationNameTable sourceLocationNames = ReadSourceLocationsAndSkipToLocks(reader, pointerMap, stringData);
 		ulong lockCount = SkipLocks(reader, out ulong lockTimelineEventCount);
 		if (lockCount > 0 || lockTimelineEventCount > 0)
 		{
@@ -344,27 +344,41 @@ public static class Tracy010FileReader
 			threadNameCount);
 	}
 
-	private static List<string> ReadSourceLocationsAndSkipToLocks(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
+	private sealed class SourceLocationNameTable
+	{
+		public SourceLocationNameTable(Dictionary<ulong, string> mappedNames, List<ulong> expandedLocations, List<string> payloadNames)
+		{
+			MappedNames = mappedNames;
+			ExpandedLocations = expandedLocations;
+			PayloadNames = payloadNames;
+		}
+
+		public Dictionary<ulong, string> MappedNames { get; }
+		public List<ulong> ExpandedLocations { get; }
+		public List<string> PayloadNames { get; }
+	}
+
+	private static SourceLocationNameTable ReadSourceLocationsAndSkipToLocks(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
 	{
 		SkipThreadCompress(reader);
 		SkipThreadCompress(reader);
-		SkipSourceLocationMap(reader);
-		SkipUInt64Array(reader);
+		Dictionary<ulong, string> mappedNames = ReadSourceLocationMap(reader, pointerMap, stringData);
+		List<ulong> expandedLocations = ReadUInt64Array(reader);
 
 		ulong payloadCount = reader.ReadUInt64();
 		if (payloadCount > 1_000_000)
 		{
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy file contains too many source locations.");
 		}
-		List<string> names = new List<string>();
+		List<string> payloadNames = new List<string>();
 		for (ulong i = 0; i < payloadCount; i++)
 		{
-			names.Add(ReadSourceLocationName(reader, pointerMap, stringData));
+			payloadNames.Add(ReadSourceLocationName(reader, pointerMap, stringData));
 		}
 
 		SkipSourceLocationZoneReservations(reader);
 		SkipSourceLocationZoneReservations(reader);
-		return names;
+		return new SourceLocationNameTable(mappedNames, expandedLocations, payloadNames);
 	}
 
 	private static void SkipThreadCompress(DecodedBlockReader reader)
@@ -377,38 +391,46 @@ public static class Tracy010FileReader
 		reader.Skip(checked((long)count * 8L));
 	}
 
-	private static void SkipSourceLocationMap(DecodedBlockReader reader)
+	private static Dictionary<ulong, string> ReadSourceLocationMap(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
 	{
 		ulong count = reader.ReadUInt64();
 		if (count > 1_000_000)
 		{
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy source location map is too large.");
 		}
+		Dictionary<ulong, string> names = new Dictionary<ulong, string>();
 		for (ulong i = 0; i < count; i++)
 		{
-			reader.Skip(8);  // pointer
-			reader.Skip(35); // SourceLocationBase
+			ulong pointer = reader.ReadUInt64();
+			names[pointer] = ReadSourceLocationName(reader, pointerMap, stringData);
 		}
+		return names;
 	}
 
-	private static void SkipUInt64Array(DecodedBlockReader reader)
+	private static List<ulong> ReadUInt64Array(DecodedBlockReader reader)
 	{
 		ulong count = reader.ReadUInt64();
 		if (count > 10_000_000)
 		{
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy uint64 array section is too large.");
 		}
-		reader.Skip(checked((long)count * 8L));
+		List<ulong> values = new List<ulong>();
+		for (ulong i = 0; i < count; i++)
+		{
+			values.Add(reader.ReadUInt64());
+		}
+		return values;
 	}
 
 	private static string ReadSourceLocationName(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
 	{
 		string name = ReadStringRef(reader, pointerMap, stringData);
-		ReadStringRef(reader, pointerMap, stringData);
+		string function = ReadStringRef(reader, pointerMap, stringData);
 		ReadStringRef(reader, pointerMap, stringData);
 		reader.Skip(4); // line
 		reader.Skip(4); // color
-		return string.IsNullOrWhiteSpace(name) ? "<unknown>" : name;
+		string resolvedName = string.IsNullOrWhiteSpace(name) ? function : name;
+		return string.IsNullOrWhiteSpace(resolvedName) ? "<unknown>" : resolvedName;
 	}
 
 	private static string ReadStringRef(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
@@ -487,7 +509,7 @@ public static class Tracy010FileReader
 		reader.Skip(checked((long)count * 12L));
 	}
 
-	private static List<TracyCpuZoneSummary> ReadCpuZones(DecodedBlockReader reader, List<string> sourceLocationNames, out int threadCount)
+	private static List<TracyCpuZoneSummary> ReadCpuZones(DecodedBlockReader reader, SourceLocationNameTable sourceLocationNames, out int threadCount)
 	{
 		List<TracyCpuZoneSummary> zones = new List<TracyCpuZoneSummary>();
 		ulong totalZoneCount = reader.ReadUInt64();
@@ -691,7 +713,7 @@ public static class Tracy010FileReader
 		return payloadCount;
 	}
 
-	private static long ReadCpuTimeline(DecodedBlockReader reader, ulong threadId, uint size, long refTime, List<string> sourceLocationNames, List<TracyCpuZoneSummary> zones)
+	private static long ReadCpuTimeline(DecodedBlockReader reader, ulong threadId, uint size, long refTime, SourceLocationNameTable sourceLocationNames, List<TracyCpuZoneSummary> zones)
 	{
 		for (uint i = 0; i < size; i++)
 		{
@@ -704,12 +726,32 @@ public static class Tracy010FileReader
 				refTime = ReadCpuTimeline(reader, threadId, childSize, refTime, sourceLocationNames, zones);
 			}
 			long end = ReadTimeOffset(reader, ref refTime);
-			string name = sourceLocation >= 0 && sourceLocation < sourceLocationNames.Count
-				? sourceLocationNames[sourceLocation]
-				: "<unknown>";
+			string name = ResolveSourceLocationName(sourceLocation, sourceLocationNames);
 			zones.Add(new TracyCpuZoneSummary(threadId, sourceLocation, name, start, end));
 		}
 		return refTime;
+	}
+
+	private static string ResolveSourceLocationName(short sourceLocation, SourceLocationNameTable sourceLocationNames)
+	{
+		if (sourceLocation < 0)
+		{
+			int payloadIndex = -sourceLocation - 1;
+			return payloadIndex >= 0 && payloadIndex < sourceLocationNames.PayloadNames.Count
+				? sourceLocationNames.PayloadNames[payloadIndex]
+				: "<unknown>";
+		}
+
+		int expandIndex = sourceLocation;
+		if (expandIndex >= sourceLocationNames.ExpandedLocations.Count)
+		{
+			return "<unknown>";
+		}
+
+		ulong pointer = sourceLocationNames.ExpandedLocations[expandIndex];
+		return sourceLocationNames.MappedNames.TryGetValue(pointer, out string name)
+			? name
+			: "<unknown>";
 	}
 
 	private static void SkipCpuTopology(DecodedBlockReader reader)

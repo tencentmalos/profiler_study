@@ -1145,12 +1145,14 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteUInt64(inner, 1);                      // localThreadCompress size
 		WriteUInt64(inner, 123);                    // thread id
 		WriteUInt64(inner, 0);                      // externalThreadCompress size
-		WriteUInt64(inner, 0);                      // sourceLocation map count
-		WriteUInt64(inner, 0);                      // sourceLocationExpand count
-		WriteUInt64(inner, 1);                      // sourceLocationPayload count
+		WriteUInt64(inner, 1);                      // sourceLocation map count
+		WriteUInt64(inner, 0x4000);                 // source location pointer
 		WriteSourceLocationBase(inner, nameIndex: 0, line: 77);
+		WriteUInt64(inner, 1);                      // sourceLocationExpand count
+		WriteUInt64(inner, 0x4000);                 // expanded source location pointer
+		WriteUInt64(inner, 0);                      // sourceLocationPayload count
 		WriteUInt64(inner, 1);                      // sourceLocationZones count
-		WriteInt16(inner, 0);                       // source location id
+		WriteInt16(inner, 0);                       // expanded source location id
 		WriteUInt64(inner, 1);                      // zone count for source location
 		WriteUInt64(inner, 0);                      // gpuSourceLocationZones count
 		WriteUInt64(inner, 0);                      // lockMap count
@@ -1455,8 +1457,8 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void WriteSourceLocationBase(Stream stream, uint nameIndex, uint line)
 	{
-		WriteStringRefIndex(stream, nameIndex);
 		WriteInactiveStringRef(stream);
+		WriteStringRefIndex(stream, nameIndex);
 		WriteInactiveStringRef(stream);
 		WriteUInt32(stream, line);
 		WriteUInt32(stream, 0);
