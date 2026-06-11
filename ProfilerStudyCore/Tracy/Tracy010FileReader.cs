@@ -83,7 +83,7 @@ public static class Tracy010FileReader
 		}
 		TracyFileHeader header = new TracyFileHeader(version, "lz4");
 		long payloadByteCount = Math.Max(0, decodedByteCount - 8L);
-		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out int threadCount);
+		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out int threadCount);
 		ArrayList diagnostics = new ArrayList
 		{
 			new Dictionary<string, object>
@@ -97,15 +97,17 @@ public static class Tracy010FileReader
 				["payloadByteCount"] = payloadByteCount,
 				["metadataDecoded"] = metadata != null,
 				["threadCount"] = threadCount,
-				["cpuZoneCount"] = cpuZones.Count
+				["cpuZoneCount"] = cpuZones.Count,
+				["plotCount"] = plots.Count
 			}
 		};
-		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, threadCount, diagnostics);
+		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, plots, threadCount, diagnostics);
 	}
 
-	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out int threadCount)
+	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out int threadCount)
 	{
 		cpuZones = new List<TracyCpuZoneSummary>();
+		plots = new List<TracyPlotSummary>();
 		threadCount = 0;
 		if (payloadByteCount <= 0)
 		{
@@ -223,6 +225,14 @@ public static class Tracy010FileReader
 		SkipMessages(reader);
 		SkipZoneExtra(reader);
 		cpuZones = ReadCpuZones(reader, sourceLocationNames, out threadCount);
+		if (reader.HasRemaining)
+		{
+			SkipGpuZones(reader);
+		}
+		if (reader.HasRemaining)
+		{
+			plots = ReadPlots(reader, pointerMap);
+		}
 
 		return new TracyTraceMetadata(
 			delay,
@@ -411,6 +421,60 @@ public static class Tracy010FileReader
 			reader.Skip(checked((long)sampleCount * 11L));
 		}
 		return zones;
+	}
+
+	private static void SkipGpuZones(DecodedBlockReader reader)
+	{
+		ulong totalGpuZoneCount = reader.ReadUInt64();
+		if (totalGpuZoneCount > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy GPU zone section is too large.");
+		}
+		reader.ReadUInt64(); // gpuChildren count
+		ulong gpuDataCount = reader.ReadUInt64();
+		if (gpuDataCount != 0)
+		{
+			throw new TracyFileFormatException("TracyParserInvariantFailed", "Tracy GPU zone decoding is not implemented yet.");
+		}
+	}
+
+	private static List<TracyPlotSummary> ReadPlots(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap)
+	{
+		ulong plotCount = reader.ReadUInt64();
+		if (plotCount > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy plot section is too large.");
+		}
+		List<TracyPlotSummary> plots = new List<TracyPlotSummary>();
+		for (ulong i = 0; i < plotCount; i++)
+		{
+			byte type = reader.ReadByte();
+			byte format = reader.ReadByte();
+			reader.Skip(1); // showSteps
+			reader.Skip(1); // fill
+			reader.Skip(4); // color
+			ulong namePointer = reader.ReadUInt64();
+			double min = reader.ReadDouble();
+			double max = reader.ReadDouble();
+			double sum = reader.ReadDouble();
+			ulong sampleCount = reader.ReadUInt64();
+			if (sampleCount > 10_000_000)
+			{
+				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy plot has too many samples.");
+			}
+			List<TracyPlotSample> samples = new List<TracyPlotSample>();
+			long refTime = 0;
+			for (ulong sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++)
+			{
+				long delta = reader.ReadInt64();
+				refTime += delta;
+				double value = reader.ReadDouble();
+				samples.Add(new TracyPlotSample(refTime, value));
+			}
+			string name = pointerMap.TryGetValue(namePointer, out string resolvedName) ? resolvedName : namePointer.ToString("X");
+			plots.Add(new TracyPlotSummary(name, type, format, min, max, sum, samples));
+		}
+		return plots;
 	}
 
 	private static long ReadCpuTimeline(DecodedBlockReader reader, ulong threadId, uint size, long refTime, List<string> sourceLocationNames, List<TracyCpuZoneSummary> zones)

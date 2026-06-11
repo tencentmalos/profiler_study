@@ -44,7 +44,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["threadCount"] = m_EventStream.ThreadCount,
 				["frameCount"] = GetMetadataFrameCount(),
 				["zoneCount"] = m_EventStream.CpuZones.Count,
-				["plotCount"] = 0,
+				["plotCount"] = m_EventStream.Plots.Count,
 				["compressedBlockCount"] = m_EventStream.CompressedBlockCount,
 				["compressedByteCount"] = m_EventStream.CompressedByteCount,
 				["decodedByteCount"] = m_EventStream.DecodedByteCount,
@@ -172,6 +172,26 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public Dictionary<string, object> ListCounters(int top, string filter)
 	{
+		List<Dictionary<string, object>> counters = m_EventStream.Plots
+			.Where(plot => string.IsNullOrWhiteSpace(filter) || plot.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+			.Select(PlotToCounterDictionary)
+			.OrderByDescending(counter => Convert.ToInt32(counter["sampleCount"]))
+			.ThenBy(counter => Convert.ToString(counter["name"]))
+			.Take(Math.Max(1, top))
+			.ToList();
+		if (counters.Count > 0)
+		{
+			return new Dictionary<string, object>
+			{
+				["sourceFormat"] = SourceFormat,
+				["filter"] = filter ?? string.Empty,
+				["eventsDecoded"] = true,
+				["counters"] = ToArrayList(counters),
+				["diagnostics"] = Diagnostics("TracyPlotsDecoded", "Counters are read from decoded Tracy plot data."),
+				["top"] = Math.Max(1, top)
+			};
+		}
+
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -188,6 +208,33 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		if (string.IsNullOrWhiteSpace(counterName))
 		{
 			throw new ArgumentException("counter_name is required.", nameof(counterName));
+		}
+
+		TracyPlotSummary plot = m_EventStream.Plots.FirstOrDefault(value => string.Equals(value.Name, counterName, StringComparison.OrdinalIgnoreCase));
+		if (plot != null)
+		{
+			ArrayList samples = ToArrayList(plot.Samples
+				.Take(Math.Max(1, maxSamples))
+				.Select(sample => new Dictionary<string, object>
+				{
+					["time"] = sample.Time,
+					["value"] = Round(sample.Value)
+				}));
+			return new Dictionary<string, object>
+			{
+				["sourceFormat"] = SourceFormat,
+				["counterName"] = plot.Name,
+				["counter"] = PlotToCounterDictionary(plot),
+				["range"] = BuildFrameRange(startFrame, endFrame),
+				["accumulated"] = accumulated,
+				["sampleCount"] = samples.Count,
+				["availableSampleCount"] = plot.Samples.Count,
+				["truncated"] = plot.Samples.Count > samples.Count,
+				["samples"] = samples,
+				["eventsDecoded"] = true,
+				["diagnostics"] = Diagnostics("TracyPlotsDecoded", "Counter samples are read from decoded Tracy plot data."),
+				["maxSamples"] = Math.Max(1, maxSamples)
+			};
 		}
 
 		return new Dictionary<string, object>
@@ -226,7 +273,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 					["frameCount"] = GetMetadataFrameCount(),
 					["threadCount"] = m_EventStream.ThreadCount,
 					["zoneCount"] = zones.Count,
-					["plotCount"] = 0
+					["plotCount"] = m_EventStream.Plots.Count
 				},
 				["profilerOverhead"] = GetProfilerOverhead(startFrame, endFrame, top),
 				["slowFrames"] = FindSlowFrames(top, thresholdMs)["slowFrames"],
@@ -375,6 +422,21 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			.ThenBy(hotspot => Convert.ToString(hotspot["name"]))
 			.Take(Math.Max(1, top));
 		return ToArrayList(hotspots);
+	}
+
+	private static Dictionary<string, object> PlotToCounterDictionary(TracyPlotSummary plot)
+	{
+		return new Dictionary<string, object>
+		{
+			["name"] = plot.Name,
+			["valueType"] = "Double",
+			["format"] = plot.Format,
+			["type"] = plot.Type,
+			["sampleCount"] = plot.Samples.Count,
+			["minValue"] = Round(plot.Min),
+			["maxValue"] = Round(plot.Max),
+			["totalValueDouble"] = Round(plot.Sum)
+		};
 	}
 
 	private static ArrayList ToArrayList(IEnumerable<Dictionary<string, object>> values)

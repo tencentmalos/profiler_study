@@ -13,6 +13,7 @@ public sealed class TracyEventStream
 		long payloadByteCount,
 		TracyTraceMetadata metadata,
 		IReadOnlyList<TracyCpuZoneSummary> cpuZones,
+		IReadOnlyList<TracyPlotSummary> plots,
 		int threadCount,
 		ArrayList diagnostics)
 	{
@@ -23,6 +24,7 @@ public sealed class TracyEventStream
 		PayloadByteCount = payloadByteCount;
 		Metadata = metadata;
 		CpuZones = cpuZones;
+		Plots = plots;
 		ThreadCount = threadCount;
 		Diagnostics = diagnostics;
 	}
@@ -46,6 +48,8 @@ public sealed class TracyEventStream
 	public bool HasMetadata => Metadata != null;
 
 	public IReadOnlyList<TracyCpuZoneSummary> CpuZones { get; }
+
+	public IReadOnlyList<TracyPlotSummary> Plots { get; }
 
 	public int ThreadCount { get; }
 

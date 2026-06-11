@@ -119,6 +119,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string unsupportedPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported.tracy");
 		string metadataPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-metadata.tracy");
 		string zonePath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-zone.tracy");
+		string plotPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-plot.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -153,6 +154,13 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(4_000_000L, zoneStream.CpuZones[0].Duration, "tracy cpu zone duration");
 			AssertTracyZoneQueryTools(zonePath);
 
+			WriteTracyDumpWithPlot(plotPath);
+			TracyEventStream plotStream = Tracy010FileReader.Read(plotPath);
+			AssertEqual(1, plotStream.Plots.Count, "tracy plot count");
+			AssertEqual("FrameTime", plotStream.Plots[0].Name, "tracy plot name");
+			AssertEqual(2, plotStream.Plots[0].Samples.Count, "tracy plot sample count");
+			AssertTracyPlotQueryTools(plotPath);
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 		}
@@ -173,6 +181,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(zonePath))
 			{
 				File.Delete(zonePath);
+			}
+			if (File.Exists(plotPath))
+			{
+				File.Delete(plotPath);
 			}
 		}
 	}
@@ -389,6 +401,53 @@ internal static class ProfilerDiagnosticsSelfTest
 		});
 	}
 
+	private static void AssertTracyPlotQueryTools(string path)
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		{
+			["path"] = path,
+			["format"] = "auto",
+			["keep_session"] = true
+		});
+		AssertEqual(false, keptResult["isError"], "plot load_trace_file isError");
+		IDictionary kept = keptResult["structuredContent"] as IDictionary;
+		string sessionId = Convert.ToString(kept["sessionId"]);
+		IDictionary summary = kept["summary"] as IDictionary;
+		AssertEqual(1, summary["plotCount"], "plot summary plot count");
+
+		Dictionary<string, object> countersResult = tools.CallTool("list_counters", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["top"] = 5
+		});
+		AssertEqual(false, countersResult["isError"], "plot list_counters isError");
+		IDictionary counters = countersResult["structuredContent"] as IDictionary;
+		AssertEqual(true, counters["eventsDecoded"], "plot counters events decoded");
+		AssertHasItems(counters["counters"], "plot counters");
+		IDictionary firstCounter = ((IList)counters["counters"])[0] as IDictionary;
+		AssertEqual("FrameTime", firstCounter["name"], "plot counter name");
+		AssertEqual(2, firstCounter["sampleCount"], "plot counter sample count");
+
+		Dictionary<string, object> samplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["counter_name"] = "FrameTime",
+			["max_samples"] = 10
+		});
+		AssertEqual(false, samplesResult["isError"], "plot query_counter isError");
+		IDictionary samples = samplesResult["structuredContent"] as IDictionary;
+		AssertEqual("FrameTime", samples["counterName"], "plot sample counter name");
+		AssertHasItems(samples["samples"], "plot samples");
+		IDictionary secondSample = ((IList)samples["samples"])[1] as IDictionary;
+		AssertEqual(20.0, secondSample["value"], "plot second sample value");
+
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+	}
+
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)
 	{
 		byte[] innerHeader = new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', major, minor, patch };
@@ -440,7 +499,51 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteTracyDump(path, inner.ToArray());
 	}
 
+	private static void WriteTracyDumpWithPlot(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: false, includePlotString: true);
+		WriteUInt64(inner, 0);                      // localThreadCompress size
+		WriteUInt64(inner, 0);                      // externalThreadCompress size
+		WriteUInt64(inner, 0);                      // sourceLocation map count
+		WriteUInt64(inner, 0);                      // sourceLocationExpand count
+		WriteUInt64(inner, 0);                      // sourceLocationPayload count
+		WriteUInt64(inner, 0);                      // sourceLocationZones count
+		WriteUInt64(inner, 0);                      // gpuSourceLocationZones count
+		WriteUInt64(inner, 0);                      // lockMap count
+		WriteUInt64(inner, 0);                      // messages count
+		WriteUInt64(inner, 1);                      // zoneExtra count
+		inner.Write(new byte[12], 0, 12);           // ZoneExtra
+		WriteUInt64(inner, 0);                      // total CPU zone count
+		WriteUInt64(inner, 0);                      // zoneChildren count
+		WriteUInt64(inner, 0);                      // thread count
+		WriteUInt64(inner, 0);                      // total GPU zone count
+		WriteUInt64(inner, 0);                      // gpuChildren count
+		WriteUInt64(inner, 0);                      // gpuData count
+		WriteUInt64(inner, 1);                      // plot count
+		inner.WriteByte(0);                         // PlotType.User
+		inner.WriteByte(0);                         // PlotValueFormatting.Number
+		inner.WriteByte(0);                         // showSteps
+		inner.WriteByte(1);                         // fill
+		WriteUInt32(inner, 0);                      // color
+		WriteUInt64(inner, 0x2000);                 // name pointer
+		WriteDouble(inner, 10.0);                   // min
+		WriteDouble(inner, 20.0);                   // max
+		WriteDouble(inner, 30.0);                   // sum
+		WriteUInt64(inner, 2);                      // sample count
+		WriteInt64(inner, 1_000_000);               // sample 0 time delta
+		WriteDouble(inner, 10.0);
+		WriteInt64(inner, 1_000_000);               // sample 1 time delta
+		WriteDouble(inner, 20.0);
+		WriteTracyDump(path, inner.ToArray());
+	}
+
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString)
+	{
+		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString: false);
+	}
+
+	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString, bool includePlotString)
 	{
 		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
 		WriteInt64(inner, 0);                       // m_delay
@@ -474,11 +577,17 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteInt64(inner, 1);                       // frame 1 start offset
 		WriteInt64(inner, 9_000_000);               // frame 1 end offset
 		WriteInt32(inner, -1);                      // frame 1 image
-		WriteUInt64(inner, includeZoneString ? 1UL : 0UL); // stringData count
+		ulong stringCount = (includeZoneString ? 1UL : 0UL) + (includePlotString ? 1UL : 0UL);
+		WriteUInt64(inner, stringCount);            // stringData count
 		if (includeZoneString)
 		{
 			WriteUInt64(inner, 0x1000);
 			WriteSizedString(inner, "SelfTestZone");
+		}
+		if (includePlotString)
+		{
+			WriteUInt64(inner, 0x2000);
+			WriteSizedString(inner, "FrameTime");
 		}
 		WriteUInt64(inner, 0);                      // strings count
 		WriteUInt64(inner, 0);                      // threadNames count
