@@ -1314,12 +1314,17 @@ internal static class ProfilerDiagnosticsSelfTest
 			throw new InvalidOperationException("trace artifact manifest is missing: " + manifestPath);
 		}
 		using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
-		AssertEqual("tracy", manifest.RootElement.GetProperty("SourceFormat").GetString(), "trace artifact manifest source format");
-		AssertEqual(sourceKind, manifest.RootElement.GetProperty("SourceKind").GetString(), "trace artifact manifest source kind");
-		AssertEqual("ProfilerStudyCore.Tracy", manifest.RootElement.GetProperty("Implementation").GetString(), "trace artifact manifest implementation");
-		long sourceByteCount = manifest.RootElement.GetProperty("SourceByteCount").GetInt64();
-		long normalizedByteCount = manifest.RootElement.GetProperty("NormalizedByteCount").GetInt64();
-		long diagnosticsByteCount = manifest.RootElement.GetProperty("DiagnosticsByteCount").GetInt64();
+		if (manifest.RootElement.TryGetProperty("ArtifactId", out _))
+		{
+			throw new InvalidOperationException("trace artifact manifest must use camelCase JSON fields.");
+		}
+		AssertEqual(artifactId, manifest.RootElement.GetProperty("artifactId").GetString(), "trace artifact manifest artifact id");
+		AssertEqual("tracy", manifest.RootElement.GetProperty("sourceFormat").GetString(), "trace artifact manifest source format");
+		AssertEqual(sourceKind, manifest.RootElement.GetProperty("sourceKind").GetString(), "trace artifact manifest source kind");
+		AssertEqual("ProfilerStudyCore.Tracy", manifest.RootElement.GetProperty("implementation").GetString(), "trace artifact manifest implementation");
+		long sourceByteCount = manifest.RootElement.GetProperty("sourceByteCount").GetInt64();
+		long normalizedByteCount = manifest.RootElement.GetProperty("normalizedByteCount").GetInt64();
+		long diagnosticsByteCount = manifest.RootElement.GetProperty("diagnosticsByteCount").GetInt64();
 		if (string.Equals(sourceKind, "file-import", StringComparison.OrdinalIgnoreCase) && sourceByteCount <= 0)
 		{
 			throw new InvalidOperationException("file-import artifact manifest must record sourceByteCount.");

@@ -12,7 +12,12 @@ namespace ProfilerStudy.Trace;
 public static class TraceArtifactStore
 {
 	private const string RootEnvironmentVariable = "PROFILER_STUDY_TRACE_ARTIFACT_ROOT";
-	private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions { WriteIndented = true };
+	private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+	{
+		WriteIndented = true,
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		PropertyNameCaseInsensitive = true
+	};
 
 	public static string RootPath
 	{
@@ -221,7 +226,7 @@ public static class TraceArtifactStore
 	{
 		try
 		{
-			return JsonSerializer.Deserialize<TraceArtifactManifest>(File.ReadAllText(path));
+			return JsonSerializer.Deserialize<TraceArtifactManifest>(File.ReadAllText(path), JsonOptions);
 		}
 		catch
 		{
