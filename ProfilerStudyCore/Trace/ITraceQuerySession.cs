@@ -11,4 +11,16 @@ public interface ITraceQuerySession
 	string DisplayName { get; }
 
 	Dictionary<string, object> GetSummary(int top);
+
+	Dictionary<string, object> FindSlowFrames(int top, double thresholdMs);
+
+	Dictionary<string, object> FindScopeHotspots(int top, int startFrame, int endFrame);
+
+	Dictionary<string, object> GetProfilerOverhead(int startFrame, int endFrame, int top);
+
+	Dictionary<string, object> ListCounters(int top, string filter);
+
+	Dictionary<string, object> QueryCounterSamples(string counterName, int startFrame, int endFrame, bool accumulated, int maxSamples);
+
+	Dictionary<string, object> AnalyzeTimeRange(int startFrame, int endFrame, int top, double thresholdMs);
 }

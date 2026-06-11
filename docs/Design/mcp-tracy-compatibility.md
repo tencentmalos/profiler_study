@@ -457,6 +457,7 @@ Phase 4 的第一步允许先落内存级 `TraceDocument/ITraceQuerySession`，�
 - 该 `session_id` 进入同一套 `list_sessions`、`close_session`、`get_session_summary` 管理。
 - Tracy 0.10.0 header 已验证但事件解码尚不完整时，`TracyTraceQuerySession` 必须返回 `sourceFormat=tracy`、`framesUnavailable=true`、`eventsDecoded=false` 和明确 diagnostics，不能假装是空的 ProfilerStudy session。
 - legacy `Session` 仍由 adapter 路径处理，默认 `study` 行为不变。
+- 在真正解码 zones/plots/frame marks 前，`find_slow_frames`、`find_scope_hotspots`、`list_counters`、`query_counter`、`analyze_time_range` 对 Tracy session 返回结构化空集合和 `eventsDecoded=false` diagnostics，不返回空引用或 legacy-only 错误；`get_profiler_overhead` 仍返回 unsupported capability，因为它只描述 ProfilerStudy target-side overhead。
 
 现有 MCP 分析工具兼容策略：
 

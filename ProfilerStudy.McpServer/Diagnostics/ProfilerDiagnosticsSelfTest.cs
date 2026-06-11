@@ -200,10 +200,71 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual("tracy", summaryBlock["sourceFormat"], "tracy summary block source format");
 		AssertEqual(true, summaryBlock["framesUnavailable"], "tracy summary frames unavailable");
 		AssertEqual(false, summaryBlock["eventsDecoded"], "tracy summary events decoded");
+		AssertTracyQueryToolContracts(tools, sessionId);
 		tools.CallTool("close_session", new Dictionary<string, object>
 		{
 			["session_id"] = sessionId
 		});
+	}
+
+	private static void AssertTracyQueryToolContracts(ProfilerMcpTools tools, string sessionId)
+	{
+		Dictionary<string, object> slowFramesResult = tools.CallTool("find_slow_frames", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		AssertEqual(false, slowFramesResult["isError"], "tracy find_slow_frames isError");
+		IDictionary slowFrames = slowFramesResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", slowFrames["sourceFormat"], "tracy slow frames source format");
+		AssertEqual(true, slowFrames["framesUnavailable"], "tracy slow frames unavailable");
+
+		Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		AssertEqual(false, hotspotsResult["isError"], "tracy find_scope_hotspots isError");
+		IDictionary hotspots = hotspotsResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", hotspots["sourceFormat"], "tracy hotspots source format");
+		AssertEqual(false, hotspots["eventsDecoded"], "tracy hotspots events decoded");
+
+		Dictionary<string, object> countersResult = tools.CallTool("list_counters", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		AssertEqual(false, countersResult["isError"], "tracy list_counters isError");
+		IDictionary counters = countersResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", counters["sourceFormat"], "tracy counters source format");
+		AssertEqual(false, counters["eventsDecoded"], "tracy counters events decoded");
+
+		Dictionary<string, object> counterResult = tools.CallTool("query_counter", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["counter_name"] = "FrameTime"
+		});
+		AssertEqual(false, counterResult["isError"], "tracy query_counter isError");
+		IDictionary counter = counterResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", counter["sourceFormat"], "tracy counter source format");
+		AssertEqual("FrameTime", counter["counterName"], "tracy counter name");
+
+		Dictionary<string, object> rangeResult = tools.CallTool("analyze_time_range", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["start_frame"] = 0,
+			["end_frame"] = 0
+		});
+		AssertEqual(false, rangeResult["isError"], "tracy analyze_time_range isError");
+		IDictionary range = rangeResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", range["sourceFormat"], "tracy range source format");
+		AssertEqual(true, range["framesUnavailable"], "tracy range frames unavailable");
+
+		Dictionary<string, object> overheadResult = tools.CallTool("get_profiler_overhead", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		AssertEqual(false, overheadResult["isError"], "tracy get_profiler_overhead isError");
+		IDictionary overhead = overheadResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", overhead["sourceFormat"], "tracy overhead source format");
+		AssertEqual(false, overhead["supported"], "tracy overhead supported");
 	}
 
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)

@@ -284,7 +284,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> FindSlowFrames(string sessionId, int top, double thresholdMs)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "find_slow_frames");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.FindSlowFrames(top, thresholdMs));
+		}
 		double tickToMs = TickToMs(loaded.Session);
 		double resolvedThreshold = ResolveThresholdMs(loaded.Session, thresholdMs, tickToMs);
 		List<ProfilerDiagnostics.FrameSample> samples = GetFrameSamples(loaded.Session, tickToMs).ToList();
@@ -300,7 +304,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> FindScopeHotspots(string sessionId, int top, int startFrame, int endFrame)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "find_scope_hotspots");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.FindScopeHotspots(top, startFrame, endFrame));
+		}
 		Session session = loaded.Session;
 		NormalizeFrameRange(session, ref startFrame, ref endFrame);
 		double tickToMs = TickToMs(session);
@@ -314,7 +322,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> GetProfilerOverhead(string sessionId, int startFrame, int endFrame, int top)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "get_profiler_overhead");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.GetProfilerOverhead(startFrame, endFrame, top));
+		}
 		Session session = loaded.Session;
 		NormalizeFrameRange(session, ref startFrame, ref endFrame);
 		double tickToMs = TickToMs(session);
@@ -328,7 +340,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> ListCounters(string sessionId, int top, string filter)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "list_counters");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.ListCounters(top, filter));
+		}
 		Session session = loaded.Session;
 		IEnumerable<Dictionary<string, object>> counters = GetCounterSummaries(session)
 			.Where(counter => CounterMatchesFilter(counter, filter))
@@ -344,7 +360,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> QueryCounterSamples(string sessionId, string counterName, int startFrame, int endFrame, bool accumulated, int maxSamples)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "query_counter");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.QueryCounterSamples(counterName, startFrame, endFrame, accumulated, maxSamples));
+		}
 		Session session = loaded.Session;
 		if (string.IsNullOrWhiteSpace(counterName))
 		{
@@ -526,7 +546,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> AnalyzeTimeRange(string sessionId, int startFrame, int endFrame, int top, double thresholdMs)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "analyze_time_range");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.AnalyzeTimeRange(startFrame, endFrame, top, thresholdMs));
+		}
 		Session session = loaded.Session;
 		NormalizeFrameRange(session, ref startFrame, ref endFrame);
 		Dictionary<string, object> range = BuildRangeDictionary(session, startFrame, endFrame);
@@ -1337,6 +1361,14 @@ internal sealed class ProfilerAnalysisService
 			throw new InvalidOperationException(capability + " is not supported for sourceFormat=" + loaded.SourceFormat + " yet.");
 		}
 		return loaded;
+	}
+
+	private static Dictionary<string, object> AddLoadedTraceMetadata(LoadedSession loaded, Dictionary<string, object> result)
+	{
+		result["sessionId"] = loaded.Id;
+		result["source"] = loaded.Source;
+		result["sourceFormat"] = loaded.SourceFormat;
+		return result;
 	}
 
 	private static ArrayList ToArrayList(IEnumerable<Dictionary<string, object>> values)
