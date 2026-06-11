@@ -30,7 +30,7 @@ public static class TracyNormalizedArtifact
 
 	public static TraceDocument Load(string artifactDirectory, TraceArtifactManifest artifactManifest)
 	{
-		string normalizedDirectory = Path.Combine(artifactDirectory, artifactManifest.NormalizedPath ?? "normalized");
+		string normalizedDirectory = ResolveNormalizedDirectory(artifactDirectory, artifactManifest.NormalizedPath ?? "normalized");
 		Dictionary<string, object> manifest = ReadDictionary(Path.Combine(normalizedDirectory, "manifest.json"));
 		ArrayList diagnostics = ReadArrayList(Path.Combine(normalizedDirectory, "diagnostics.json"));
 		List<TracyFrameSummary> frames = ReadFrames(Path.Combine(normalizedDirectory, "frames.ndjson"));
@@ -60,6 +60,18 @@ public static class TracyNormalizedArtifact
 			artifactManifest.GetCreatedUtc() == DateTime.MinValue ? DateTime.UtcNow : artifactManifest.GetCreatedUtc(),
 			querySession,
 			diagnostics);
+	}
+
+	private static string ResolveNormalizedDirectory(string artifactDirectory, string relativePath)
+	{
+		string fullArtifactDirectory = Path.GetFullPath(artifactDirectory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+		string fullPath = Path.GetFullPath(Path.Combine(fullArtifactDirectory, relativePath ?? string.Empty));
+		StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+		if (!fullPath.Equals(fullArtifactDirectory, comparison) && !fullPath.StartsWith(fullArtifactDirectory + Path.DirectorySeparatorChar, comparison))
+		{
+			throw new InvalidOperationException("Trace artifact normalized path escapes the artifact directory.");
+		}
+		return fullPath;
 	}
 
 	private static Dictionary<string, object> BuildManifest(TraceDocument document, TracyEventStream eventStream, List<TracyFrameSummary> frames, long startTime, long endTime)

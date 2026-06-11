@@ -268,6 +268,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "file-import");
 			AssertTraceArtifactDiagnostics(tools, artifactId);
 			AssertTraceArtifactDiagnosticsPathContained(tools, artifactRoot);
+			AssertTraceArtifactNormalizedPathContained(tools, artifactRoot);
 
 			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
 			{
@@ -359,6 +360,35 @@ internal static class ProfilerDiagnosticsSelfTest
 			["artifact_id"] = artifactId
 		});
 		AssertEqual(true, diagnosticsResult["isError"], "escaped artifact diagnostics isError");
+	}
+
+	private static void AssertTraceArtifactNormalizedPathContained(ProfilerMcpTools tools, string artifactRoot)
+	{
+		string artifactId = "escaped-normalized";
+		string artifactDirectory = Path.Combine(artifactRoot, artifactId);
+		string escapedNormalizedDirectory = Path.Combine(artifactRoot, "escaped-normalized-cache");
+		Directory.CreateDirectory(artifactDirectory);
+		Directory.CreateDirectory(escapedNormalizedDirectory);
+		File.WriteAllText(
+			Path.Combine(artifactDirectory, "manifest.json"),
+			"{\"ArtifactId\":\"" + artifactId + "\",\"SourceFormat\":\"tracy\",\"SourceKind\":\"file-import\",\"SourcePath\":\"capture.tracy\",\"NormalizedPath\":\"../escaped-normalized-cache\",\"DiagnosticsPath\":\"import-diagnostics.json\",\"CreatedUtc\":\"2026-06-11T00:00:00.0000000Z\",\"Implementation\":\"self-test\",\"ReaderVersion\":\"0.0.0\",\"TracyVersion\":\"0.10.0\"}");
+		File.WriteAllText(
+			Path.Combine(artifactDirectory, "import-diagnostics.json"),
+			"[]");
+		File.WriteAllText(
+			Path.Combine(escapedNormalizedDirectory, "manifest.json"),
+			"{\"schemaVersion\":1,\"sourceFormat\":\"tracy\",\"sourcePath\":\"capture.tracy\",\"implementation\":\"self-test\",\"readerVersion\":\"0.0.0\",\"tracyVersion\":\"0.10.0\",\"compression\":\"lz4\",\"startTimeNs\":0,\"endTimeNs\":0,\"timeBase\":\"trace-relative-ns\",\"frameSource\":\"none\",\"threadCount\":0,\"frameCount\":0,\"zoneCount\":0,\"plotCount\":0,\"compressedBlockCount\":0,\"compressedByteCount\":0,\"decodedByteCount\":0,\"payloadByteCount\":0,\"metadataDecoded\":false}");
+		File.WriteAllText(Path.Combine(escapedNormalizedDirectory, "threads.ndjson"), string.Empty);
+		File.WriteAllText(Path.Combine(escapedNormalizedDirectory, "frames.ndjson"), string.Empty);
+		File.WriteAllText(Path.Combine(escapedNormalizedDirectory, "cpu_zones.ndjson"), string.Empty);
+		File.WriteAllText(Path.Combine(escapedNormalizedDirectory, "plots.ndjson"), string.Empty);
+		File.WriteAllText(Path.Combine(escapedNormalizedDirectory, "diagnostics.json"), "[]");
+
+		Dictionary<string, object> loadResult = tools.CallTool("load_trace_artifact", new Dictionary<string, object>
+		{
+			["artifact_id"] = artifactId
+		});
+		AssertEqual(true, loadResult["isError"], "escaped artifact normalized path isError");
 	}
 
 	private static void AssertUnsupportedTracyFileVersionTool(string path)
