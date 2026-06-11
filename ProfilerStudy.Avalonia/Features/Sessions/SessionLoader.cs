@@ -18,7 +18,7 @@ internal sealed class SessionLoader
 			cancellationToken.ThrowIfCancellationRequested();
 			if (IsTracyFile(path))
 			{
-				TraceDocument traceDocument = TracyTraceImporter.Load(path);
+				TraceDocument traceDocument = TracyTraceImporter.Load(path, cancellationToken);
 				return CreateTraceDocument(traceDocument, path);
 			}
 

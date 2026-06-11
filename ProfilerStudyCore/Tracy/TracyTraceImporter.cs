@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using ProfilerStudy.Trace;
 
 namespace ProfilerStudy.Tracy;
@@ -10,13 +11,20 @@ public static class TracyTraceImporter
 {
 	public static TraceDocument Load(string path)
 	{
+		return Load(path, CancellationToken.None);
+	}
+
+	public static TraceDocument Load(string path, CancellationToken cancellationToken)
+	{
 		if (string.IsNullOrWhiteSpace(path))
 		{
 			throw new ArgumentException("Tracy file path is required.", nameof(path));
 		}
+		cancellationToken.ThrowIfCancellationRequested();
 
 		string fullPath = Path.GetFullPath(path);
-		TracyEventStream eventStream = Tracy010FileReader.Read(fullPath);
+		TracyEventStream eventStream = Tracy010FileReader.Read(fullPath, cancellationToken);
+		cancellationToken.ThrowIfCancellationRequested();
 		ArrayList diagnostics = new ArrayList
 		{
 			new Dictionary<string, object>

@@ -148,6 +148,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			using CancellationTokenSource canceledRead = new CancellationTokenSource();
 			canceledRead.Cancel();
 			AssertThrows(() => Tracy010FileReader.Read(path, canceledRead.Token), "tracy file reader cancellation");
+			AssertThrows(() => TracyTraceImporter.Load(path, canceledRead.Token), "tracy trace importer cancellation");
 			AssertLoadTraceFileTool(path);
 
 			WriteTracyDumpWithMetadata(metadataPath);
