@@ -62,6 +62,7 @@ internal static class AvaloniaSmokeTest
 			AssertFrameTimelineRenderModel(document);
 			AssertFrameTimelineNavigationContract();
 			AssertSessionScrollbarFrameStripContract();
+			AssertTracyTraceLoad();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -459,6 +460,150 @@ internal static class AvaloniaSmokeTest
 		}
 
 		return loader.LoadFileAsync(profilerPath, CancellationToken.None).GetAwaiter().GetResult();
+	}
+
+	private static void AssertTracyTraceLoad()
+	{
+		string path = Path.Combine(Path.GetTempPath(), "ProfilerStudy.Avalonia.Tracy." + Guid.NewGuid().ToString("N") + ".tracy");
+		try
+		{
+			WriteTracyMetadataDump(path);
+			SessionLoader loader = new SessionLoader();
+			SessionDocument document = loader.LoadFileAsync(path, CancellationToken.None).GetAwaiter().GetResult();
+			Assert(document.Session == null, "tracy document is not legacy session");
+			Assert(document.Summary.SourceName == Path.GetFileName(path), "tracy source name");
+			Assert(document.Summary.FrameCount == 2, "tracy frame count");
+			Assert(document.FrameSamples.Length == 2, "tracy frame samples");
+			Assert(Math.Abs(document.FrameSamples[1].DurationMs - 9.0) < 0.0001, "tracy frame duration");
+			Assert(document.Viewport.FrameCount == 2, "tracy viewport frame count");
+		}
+		finally
+		{
+			if (File.Exists(path))
+			{
+				File.Delete(path);
+			}
+		}
+	}
+
+	private static void WriteTracyMetadataDump(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
+		WriteInt64(inner, 0);
+		WriteInt64(inner, 1_000_000_000);
+		WriteDouble(inner, 1.0);
+		WriteInt64(inner, 16_666_667);
+		WriteInt64(inner, 0);
+		WriteUInt64(inner, 4242);
+		WriteInt64(inner, 0);
+		inner.WriteByte(2);
+		WriteUInt32(inner, 0x12345678);
+		WriteFixedAscii(inner, "SelfTestCpu", 12);
+		inner.WriteByte(0);
+		WriteSizedString(inner, "AvaloniaTrace");
+		WriteSizedString(inner, "AvaloniaSmoke");
+		WriteInt64(inner, 1_700_000_000);
+		WriteInt64(inner, 1_699_999_000);
+		WriteSizedString(inner, "AvaloniaHost");
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteUInt32(inner, 0);
+		WriteUInt64(inner, 1);
+		WriteUInt64(inner, 0);
+		inner.WriteByte(0);
+		WriteUInt64(inner, 2);
+		WriteInt64(inner, 0);
+		WriteInt64(inner, 8_333_333);
+		WriteInt32(inner, -1);
+		WriteInt64(inner, 1);
+		WriteInt64(inner, 9_000_000);
+		WriteInt32(inner, -1);
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteTracyDump(path, inner.ToArray());
+	}
+
+	private static void WriteTracyDump(string path, byte[] inner)
+	{
+		byte[] compressed = EncodeLz4LiteralBlock(inner);
+		using FileStream stream = File.Create(path);
+		byte[] outerHeader = System.Text.Encoding.ASCII.GetBytes("tlZ4");
+		stream.Write(outerHeader, 0, outerHeader.Length);
+		byte[] blockSize = BitConverter.GetBytes((uint)compressed.Length);
+		stream.Write(blockSize, 0, blockSize.Length);
+		stream.Write(compressed, 0, compressed.Length);
+	}
+
+	private static byte[] EncodeLz4LiteralBlock(byte[] bytes)
+	{
+		using MemoryStream stream = new MemoryStream();
+		if (bytes.Length < 15)
+		{
+			stream.WriteByte((byte)(bytes.Length << 4));
+		}
+		else
+		{
+			stream.WriteByte(0xF0);
+			int remaining = bytes.Length - 15;
+			while (remaining >= 255)
+			{
+				stream.WriteByte(255);
+				remaining -= 255;
+			}
+			stream.WriteByte((byte)remaining);
+		}
+		stream.Write(bytes, 0, bytes.Length);
+		return stream.ToArray();
+	}
+
+	private static void WriteSizedString(Stream stream, string value)
+	{
+		byte[] bytes = System.Text.Encoding.ASCII.GetBytes(value);
+		WriteUInt64(stream, (ulong)bytes.Length);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteFixedAscii(Stream stream, string value, int size)
+	{
+		byte[] bytes = new byte[size];
+		byte[] text = System.Text.Encoding.ASCII.GetBytes(value);
+		Buffer.BlockCopy(text, 0, bytes, 0, Math.Min(text.Length, bytes.Length));
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteInt32(Stream stream, int value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteUInt32(Stream stream, uint value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteInt64(Stream stream, long value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteUInt64(Stream stream, ulong value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteDouble(Stream stream, double value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
 	}
 
 	private sealed class SmokeSourceViewerLauncher : ISourceViewerLauncher

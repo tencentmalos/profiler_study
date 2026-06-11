@@ -3,6 +3,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using ProfilerStudy;
+using ProfilerStudy.Tracy;
+using ProfilerStudy.Trace;
 using SCLCoreCLR;
 
 namespace ProfilerStudy.Avalonia;
@@ -14,6 +16,12 @@ internal sealed class SessionLoader
 		return Task.Run(() =>
 		{
 			cancellationToken.ThrowIfCancellationRequested();
+			if (IsTracyFile(path))
+			{
+				TraceDocument traceDocument = TracyTraceImporter.Load(path);
+				return CreateTraceDocument(traceDocument, path);
+			}
+
 			CoreSettings settings = new CoreSettings();
 			Session session = new Session(settings, new NullLog());
 			string error = string.Empty;
@@ -74,5 +82,65 @@ internal sealed class SessionLoader
 		}
 
 		return new SessionDocument(sourcePath, session, summary, samples);
+	}
+
+	private static SessionDocument CreateTraceDocument(TraceDocument traceDocument, string sourcePath)
+	{
+		FrameSample[] samples = GetTraceFrameSamples(traceDocument);
+		SessionSummary summary = CreateTraceSummary(traceDocument, sourcePath, samples);
+		return new SessionDocument(sourcePath, null, traceDocument, summary, samples);
+	}
+
+	private static FrameSample[] GetTraceFrameSamples(TraceDocument traceDocument)
+	{
+		if (traceDocument?.QuerySession is not TracyTraceQuerySession tracyQuerySession ||
+			tracyQuerySession.EventStream.Metadata == null)
+		{
+			return Array.Empty<FrameSample>();
+		}
+
+		int frameIndex = 0;
+		var samples = new System.Collections.Generic.List<FrameSample>();
+		foreach (TracyFrameSetSummary frameSet in tracyQuerySession.EventStream.Metadata.FrameSets)
+		{
+			foreach (TracyFrameSummary frame in frameSet.Frames)
+			{
+				samples.Add(new FrameSample(frameIndex++, frame.Duration / 1_000_000.0));
+			}
+		}
+		return samples.ToArray();
+	}
+
+	private static SessionSummary CreateTraceSummary(TraceDocument traceDocument, string sourcePath, FrameSample[] samples)
+	{
+		double totalMs = 0.0;
+		double maxMs = 0.0;
+		foreach (FrameSample sample in samples)
+		{
+			totalMs += sample.DurationMs;
+			maxMs = Math.Max(maxMs, sample.DurationMs);
+		}
+
+		int threadCount = 0;
+		if (traceDocument?.QuerySession is TracyTraceQuerySession tracyQuerySession)
+		{
+			threadCount = tracyQuerySession.EventStream.ThreadCount;
+		}
+		return new SessionSummary
+		{
+			FrameCount = samples.Length,
+			AverageFrameTimeMs = samples.Length == 0 ? 0.0 : totalMs / samples.Length,
+			MaxFrameTimeMs = maxMs,
+			TargetFrameTimeMs = 33.333,
+			FirstFrameIndex = samples.Length == 0 ? 0 : samples[0].Index,
+			LastFrameIndex = samples.Length == 0 ? 0 : samples[samples.Length - 1].Index,
+			ThreadCount = threadCount,
+			SourceName = string.IsNullOrWhiteSpace(sourcePath) ? traceDocument?.DisplayName : Path.GetFileName(sourcePath)
+		};
+	}
+
+	private static bool IsTracyFile(string path)
+	{
+		return string.Equals(Path.GetExtension(path), ".tracy", StringComparison.OrdinalIgnoreCase);
 	}
 }

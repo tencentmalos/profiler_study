@@ -2618,7 +2618,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 				{
 					new FilePickerFileType("Profiler files")
 					{
-						Patterns = new[] { "*.profiler", "*.profiler_recording", "*.profiler_dump", "*" }
+						Patterns = new[] { "*.profiler", "*.profiler_recording", "*.profiler_dump", "*.tracy", "*" }
 					}
 				}
 			});
