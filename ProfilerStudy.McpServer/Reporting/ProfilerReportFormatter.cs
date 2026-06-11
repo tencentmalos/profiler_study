@@ -159,11 +159,25 @@ internal static class ProfilerReportFormatter
 			builder.Append("| ");
 			foreach (string column in columns)
 			{
-				row.TryGetValue(column, out object cell);
+				object cell = ResolveTableCell(row, column);
 				builder.Append(Convert.ToString(cell)).Append(" | ");
 			}
 			builder.AppendLine();
 		}
+	}
+
+	private static object ResolveTableCell(Dictionary<string, object> row, string column)
+	{
+		if (row.TryGetValue(column, out object cell))
+		{
+			return cell;
+		}
+		if (string.Equals(column, "id", StringComparison.Ordinal) &&
+			row.TryGetValue("threadId", out object threadId))
+		{
+			return threadId;
+		}
+		return null;
 	}
 
 	private static void AppendFlameGraphs(StringBuilder builder, Dictionary<string, object> result)

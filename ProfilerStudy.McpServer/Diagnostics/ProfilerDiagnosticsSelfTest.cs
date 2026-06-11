@@ -721,6 +721,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary loadedThread = ((IList)kept["threads"])[0] as IDictionary;
 			AssertEqual(123UL, loadedThread["threadId"], "zone loaded thread id");
 			AssertEqual("RenderThread", loadedThread["name"], "zone loaded thread name");
+			AssertMarkdownContains(keptResult, "| 123 | RenderThread |", "zone markdown thread row");
 			AssertTraceLoadedSessionListed(tools, sessionId, "tracy", 2, 1);
 
 			Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
@@ -2150,6 +2151,18 @@ internal static class ProfilerDiagnosticsSelfTest
 		}
 
 		throw new InvalidOperationException(name + " expected diagnostic code " + expectedCode + ".");
+	}
+
+	private static void AssertMarkdownContains(IDictionary toolResult, string expectedText, string name)
+	{
+		IList content = toolResult["content"] as IList;
+		AssertHasItems(content, name + " content");
+		IDictionary first = content[0] as IDictionary;
+		string text = first == null ? string.Empty : Convert.ToString(first["text"]);
+		if (text == null || text.IndexOf(expectedText, StringComparison.Ordinal) < 0)
+		{
+			throw new InvalidOperationException(name + " expected markdown to contain " + expectedText + ".");
+		}
 	}
 
 	private static void AssertThrows(Action action, string name)
