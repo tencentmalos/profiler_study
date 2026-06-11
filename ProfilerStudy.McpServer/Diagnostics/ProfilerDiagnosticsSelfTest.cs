@@ -145,6 +145,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(1, eventStream.CompressedBlockCount, "tracy compressed block count");
 			AssertEqual(8L, eventStream.DecodedByteCount, "tracy decoded byte count");
 			AssertEqual(0L, eventStream.PayloadByteCount, "tracy payload byte count");
+			using CancellationTokenSource canceledRead = new CancellationTokenSource();
+			canceledRead.Cancel();
+			AssertThrows(() => Tracy010FileReader.Read(path, canceledRead.Token), "tracy file reader cancellation");
 			AssertLoadTraceFileTool(path);
 
 			WriteTracyDumpWithMetadata(metadataPath);

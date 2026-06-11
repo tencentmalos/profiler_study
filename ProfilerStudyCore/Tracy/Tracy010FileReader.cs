@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace ProfilerStudy.Tracy;
 
@@ -22,10 +23,16 @@ public static class Tracy010FileReader
 
 	public static TracyEventStream Read(string path)
 	{
+		return Read(path, CancellationToken.None);
+	}
+
+	public static TracyEventStream Read(string path, CancellationToken cancellationToken)
+	{
 		if (string.IsNullOrWhiteSpace(path))
 		{
 			throw new ArgumentException("Tracy file path is required.", nameof(path));
 		}
+		cancellationToken.ThrowIfCancellationRequested();
 
 		FileInfo fileInfo = new FileInfo(path);
 		if (fileInfo.Length > MaxFileSizeBytes)
@@ -37,9 +44,10 @@ public static class Tracy010FileReader
 				TracyVersionRegistry.SupportedVersions,
 				TracyVersionRegistry.LockedVersion);
 		}
+		cancellationToken.ThrowIfCancellationRequested();
 
 		using FileStream stream = File.OpenRead(path);
-		byte[] compressionHeader = ReadExactly(stream, 4);
+		byte[] compressionHeader = ReadExactly(stream, 4, cancellationToken);
 		if (!IsLz4CompressionHeader(compressionHeader))
 		{
 			string compression = Encoding.ASCII.GetString(compressionHeader);
@@ -54,8 +62,9 @@ public static class Tracy010FileReader
 		long compressedByteCount = 0L;
 		long decodedByteCount = 0L;
 		byte[] previousBlock = null;
-		while (TryReadUInt32(stream, out uint blockSize))
+		while (TryReadUInt32(stream, cancellationToken, out uint blockSize))
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			if (blockSize == 0 || blockSize > MaxBlockSize)
 			{
 				throw new TracyFileFormatException("TracyFileFormatInvalid", "Invalid Tracy block size.");
@@ -64,7 +73,8 @@ public static class Tracy010FileReader
 			{
 				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy file contains too many compressed blocks.");
 			}
-			byte[] compressedBlock = ReadExactly(stream, checked((int)blockSize));
+			byte[] compressedBlock = ReadExactly(stream, checked((int)blockSize), cancellationToken);
+			cancellationToken.ThrowIfCancellationRequested();
 			byte[] decodedBlock = TracyLz4BlockDecoder.Decode(compressedBlock, MaxDecodedBlockSize, previousBlock);
 			decodedBlocks.Add(decodedBlock);
 			previousBlock = decodedBlock;
@@ -102,6 +112,7 @@ public static class Tracy010FileReader
 		}
 		TracyFileHeader header = new TracyFileHeader(version, "lz4");
 		long payloadByteCount = Math.Max(0, decodedByteCount - 8L);
+		cancellationToken.ThrowIfCancellationRequested();
 		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out ArrayList readerDiagnostics);
 		ArrayList diagnostics = new ArrayList
 		{
@@ -859,10 +870,16 @@ public static class Tracy010FileReader
 
 	private static byte[] ReadExactly(Stream stream, int size)
 	{
+		return ReadExactly(stream, size, CancellationToken.None);
+	}
+
+	private static byte[] ReadExactly(Stream stream, int size, CancellationToken cancellationToken)
+	{
 		byte[] buffer = new byte[size];
 		int offset = 0;
 		while (offset < size)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			int read = stream.Read(buffer, offset, size - offset);
 			if (read == 0)
 			{
@@ -875,10 +892,16 @@ public static class Tracy010FileReader
 
 	private static bool TryReadUInt32(Stream stream, out uint value)
 	{
+		return TryReadUInt32(stream, CancellationToken.None, out value);
+	}
+
+	private static bool TryReadUInt32(Stream stream, CancellationToken cancellationToken, out uint value)
+	{
 		byte[] bytes = new byte[4];
 		int offset = 0;
 		while (offset < bytes.Length)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			int read = stream.Read(bytes, offset, bytes.Length - offset);
 			if (read == 0)
 			{
