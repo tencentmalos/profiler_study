@@ -75,7 +75,7 @@ Core 不应该做：
 
 修改实时处理时必须保留现有线程安全语义：`ReadWriteLock`、`lock`、packet queue、dispose/join 顺序都是行为约束。
 
-FramePro/ProfilerStudy live 协议的语义首包仍是 `ConnectPacket`，但 SDK send thread 的实际刷包顺序不能作为强约束。新版 SDK 在连接初始化时可能先把 main-thread buffer 中的 `FrameStart` 刷到 socket，再刷 TLS buffer 中的 `ConnectPacket`。Core deserializer 必须能暂存 `ConnectPacket` 到达前的已知 packet，并在收到 `ConnectPacket` 后先处理 Connect、再回放暂存 packet；不能因为 TCP 首个 packet 不是 Connect 就直接断开。若连接结束仍未收到 Connect，才按无有效数据处理。
+FramePro/ProfilerStudy live 协议要求 target 先发送 `ConnectPacket`，然后再发送 frame、scope、counter 等 payload。SDK 连接初始化必须保证 `ConnectPacket` 先被 send thread 刷到 socket；Core deserializer 保持 Connect-first 的简单状态机，不为 target 侧乱序引入 pre-connect 暂存逻辑。
 
 实时连接数据流：
 
