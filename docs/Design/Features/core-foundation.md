@@ -170,6 +170,7 @@ Perfetto/Tracy/systrace 接入时建议新增：
 - `load_trace_file` 和 `capture_profile(protocol=tracy)` 生成 `manifest.json`、`import-diagnostics.json` 和 `normalized/` cache。
 - `load_trace_artifact` 从 artifact id 重建 `TraceDocument` / `ITraceQuerySession`，不依赖 UI 进程内存。
 - `get_import_diagnostics` 支持 `session_id` 和 `artifact_id` 两种入口；artifact 查询只能读取 artifact store 内 manifest 指向的 diagnostics，不能扫描用户目录。
+- Frame-level MCP 查询也应先经过 `ITraceQuerySession`。外部 trace 缺少 frame 或层级信息时返回 `supported=false`、`framesUnavailable` 和 diagnostics，而不是抛出 legacy `Session` 专属能力错误。
 
 这样 WinForms/Avalonia/MCP 可以逐步迁移到共享 query，而不是把所有格式塞进 `Session`。
 

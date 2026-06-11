@@ -378,6 +378,28 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual("tracy", range["sourceFormat"], "tracy range source format");
 		AssertEqual(true, range["framesUnavailable"], "tracy range frames unavailable");
 
+		Dictionary<string, object> frameResult = tools.CallTool("analyze_frame", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["frame_index"] = 0
+		});
+		AssertEqual(false, frameResult["isError"], "tracy analyze_frame isError");
+		IDictionary frame = frameResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", frame["sourceFormat"], "tracy frame source format");
+		AssertEqual(false, frame["supported"], "tracy frame supported");
+		AssertHasItems(frame["diagnostics"], "tracy frame diagnostics");
+
+		Dictionary<string, object> frameDetailResult = tools.CallTool("analyze_frame_detail", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["frame_index"] = 0
+		});
+		AssertEqual(false, frameDetailResult["isError"], "tracy analyze_frame_detail isError");
+		IDictionary frameDetail = frameDetailResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", frameDetail["sourceFormat"], "tracy frame detail source format");
+		AssertEqual(false, frameDetail["supported"], "tracy frame detail supported");
+		AssertHasItems(frameDetail["diagnostics"], "tracy frame detail diagnostics");
+
 		Dictionary<string, object> overheadResult = tools.CallTool("get_profiler_overhead", new Dictionary<string, object>
 		{
 			["session_id"] = sessionId

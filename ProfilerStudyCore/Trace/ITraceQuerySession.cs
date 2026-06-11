@@ -22,5 +22,9 @@ public interface ITraceQuerySession
 
 	Dictionary<string, object> QueryCounterSamples(string counterName, int startFrame, int endFrame, bool accumulated, int maxSamples);
 
+	Dictionary<string, object> AnalyzeFrame(int frameIndex, int top, int neighborCount);
+
+	Dictionary<string, object> AnalyzeFrameDetail(int frameIndex, int maxNodes, int maxDepth, double minDurationMs);
+
 	Dictionary<string, object> AnalyzeTimeRange(int startFrame, int endFrame, int top, double thresholdMs);
 }

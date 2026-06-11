@@ -258,6 +258,80 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		};
 	}
 
+	public Dictionary<string, object> AnalyzeFrame(int frameIndex, int top, int neighborCount)
+	{
+		if (!TryGetMetadataFrame(frameIndex, out TracyFrameSummary frame))
+		{
+			return BuildUnsupportedFrameResult(
+				"analyzeFrame",
+				frameIndex,
+				"TracyFrameAnalysisUnavailable",
+				HasMetadataFrames() ? "Requested Tracy frame index is outside the decoded frame metadata range." : "Tracy frame metadata is required before frame analysis can return data.");
+		}
+
+		int resolvedNeighborCount = Math.Max(0, neighborCount);
+		int startFrame = Math.Max(0, frameIndex - resolvedNeighborCount);
+		int endFrame = Math.Min(GetMetadataFrameCount() - 1, frameIndex + resolvedNeighborCount);
+		return new Dictionary<string, object>
+		{
+			["sourceFormat"] = SourceFormat,
+			["capability"] = "analyzeFrame",
+			["supported"] = true,
+			["framesUnavailable"] = false,
+			["frameSource"] = "tracy-frame-set-metadata",
+			["frame"] = FrameToDictionary(frame),
+			["range"] = BuildFrameRange(frameIndex, frameIndex),
+			["scopeHotspots"] = BuildScopeHotspots(FilterZonesByFrameRange(frameIndex, frameIndex), top),
+			["neighborRange"] = BuildFrameRange(startFrame, endFrame),
+			["neighborSlowFrames"] = FindSlowFrames(Math.Min(Math.Max(1, top), endFrame + 1 - startFrame), 0.0)["slowFrames"],
+			["diagnostics"] = Diagnostics("TracyFrameSetMetadata", "Frame analysis is based on decoded Tracy frame set metadata; full frame mark and stack hierarchy decoding is pending.")
+		};
+	}
+
+	public Dictionary<string, object> AnalyzeFrameDetail(int frameIndex, int maxNodes, int maxDepth, double minDurationMs)
+	{
+		if (!TryGetMetadataFrame(frameIndex, out TracyFrameSummary frame))
+		{
+			return BuildUnsupportedFrameResult(
+				"analyzeFrameDetail",
+				frameIndex,
+				"TracyFrameDetailUnavailable",
+				HasMetadataFrames() ? "Requested Tracy frame index is outside the decoded frame metadata range." : "Tracy frame metadata is required before frame detail analysis can return data.");
+		}
+
+		return new Dictionary<string, object>
+		{
+			["sourceFormat"] = SourceFormat,
+			["capability"] = "analyzeFrameDetail",
+			["supported"] = true,
+			["framesUnavailable"] = false,
+			["frameSource"] = "tracy-frame-set-metadata",
+			["frame"] = FrameToDictionary(frame),
+			["range"] = BuildFrameRange(frameIndex, frameIndex),
+			["options"] = new Dictionary<string, object>
+			{
+				["maxNodes"] = Math.Max(1, maxNodes),
+				["maxDepth"] = Math.Max(1, maxDepth),
+				["minDurationMs"] = Round(Math.Max(0.0, minDurationMs))
+			},
+			["threadFlameGraphs"] = new ArrayList(),
+			["topSpans"] = ToArrayList(FilterZonesByFrameRange(frameIndex, frameIndex)
+				.OrderByDescending(zone => zone.Duration)
+				.Take(Math.Min(Math.Max(1, maxNodes), 50))
+				.Select(ZoneToSpanDictionary)),
+			["frameCounters"] = new ArrayList(),
+			["nodeStats"] = new Dictionary<string, object>
+			{
+				["includedNodeCount"] = 0,
+				["omittedNodeCount"] = 0,
+				["omittedByDepthCount"] = 0,
+				["omittedByDurationCount"] = 0,
+				["truncated"] = false
+			},
+			["diagnostics"] = Diagnostics("TracyFrameDetailPartial", "Frame detail uses decoded Tracy frame set metadata and flat CPU zones; full Tracy callstack hierarchy decoding is pending.")
+		};
+	}
+
 	public Dictionary<string, object> AnalyzeTimeRange(int startFrame, int endFrame, int top, double thresholdMs)
 	{
 		List<TracyCpuZoneSummary> zones = FilterZonesByFrameRange(startFrame, endFrame).ToList();
@@ -343,6 +417,23 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		return GetMetadataFrameCount() > 0;
 	}
 
+	private bool TryGetMetadataFrame(int frameIndex, out TracyFrameSummary frame)
+	{
+		if (frameIndex >= 0)
+		{
+			foreach (TracyFrameSummary candidate in GetMetadataFrames())
+			{
+				if (candidate.FrameIndex == frameIndex)
+				{
+					frame = candidate;
+					return true;
+				}
+			}
+		}
+		frame = null;
+		return false;
+	}
+
 	private int GetMetadataFrameCount()
 	{
 		return m_EventStream.Metadata == null ? 0 : m_EventStream.Metadata.FrameCount;
@@ -426,6 +517,33 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			.ThenBy(hotspot => Convert.ToString(hotspot["name"]))
 			.Take(Math.Max(1, top));
 		return ToArrayList(hotspots);
+	}
+
+	private Dictionary<string, object> BuildUnsupportedFrameResult(string capability, int frameIndex, string code, string message)
+	{
+		return new Dictionary<string, object>
+		{
+			["sourceFormat"] = SourceFormat,
+			["capability"] = capability,
+			["supported"] = false,
+			["framesUnavailable"] = !HasMetadataFrames(),
+			["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none",
+			["frameIndex"] = frameIndex,
+			["diagnostics"] = Diagnostics(code, message)
+		};
+	}
+
+	private static Dictionary<string, object> ZoneToSpanDictionary(TracyCpuZoneSummary zone)
+	{
+		return new Dictionary<string, object>
+		{
+			["threadId"] = zone.ThreadId,
+			["name"] = zone.Name,
+			["sourceLocation"] = zone.SourceLocation,
+			["start"] = zone.Start,
+			["end"] = zone.End,
+			["durationMs"] = Round(zone.Duration / 1_000_000.0)
+		};
 	}
 
 	private static Dictionary<string, object> PlotToCounterDictionary(TracyPlotSummary plot)

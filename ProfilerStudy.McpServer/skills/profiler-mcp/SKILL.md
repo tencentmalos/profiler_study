@@ -39,6 +39,7 @@ dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release
 - Treat counters as ProfilerStudy custom stats. Use their `valueType`, `unit`, `totalCount`, `maxValuePerFrame`, and per-frame samples to explain behavior.
 - Treat Tracy counters as Tracy plots. Tracy sessions use `sourceFormat=tracy`; not every ProfilerStudy-only analysis field is available.
 - Treat `get_profiler_overhead` as the authoritative target-side ProfilerStudy overhead entry point; on Tracy sessions it returns an unsupported capability result. Do not infer profiler overhead from arbitrary scope or counter names.
+- For Tracy sessions, `analyze_frame` and `analyze_frame_detail` may return partial frame metadata results or `supported=false` diagnostics when frame metadata or hierarchy data is unavailable.
 - Treat `analyze_frame_detail.frameCounters` as the current frame's custom stat samples; use it before issuing separate counter queries for a single suspicious frame.
 - Do not infer missing scope time from nested totals. The server's diagnostics use conservative broad-unattributed estimates.
 - Keep raw output bounded: use `top`, frame ranges, `max_nodes`, `max_depth`, `min_duration_ms`, and `max_samples` instead of requesting whole traces.

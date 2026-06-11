@@ -473,7 +473,7 @@ Phase 4 的第一步允许先落内存级 `TraceDocument/ITraceQuerySession`，�
 - `find_scope_hotspots`：Tracy 下聚合 CPU zones。
 - `list_counters` / `query_counter`：Tracy 下读取 plots。
 - `analyze_time_range`：Tracy 下优先支持 time range；如果用户只传 frame range，则要求 frames 存在。
-- `find_slow_frames` / `analyze_frame_detail`：frames 存在时支持；不存在时返回结构化 diagnostics。
+- `find_slow_frames` / `analyze_frame` / `analyze_frame_detail`：frames 存在时基于 Tracy frame set metadata 提供轻量结果；不存在时返回 `supported=false`、`framesUnavailable=true` 和结构化 diagnostics。
 - `get_profiler_overhead`：仅 ProfilerStudy session 支持；Tracy 下返回 unsupported capability。
 
 ## Avalonia 接入

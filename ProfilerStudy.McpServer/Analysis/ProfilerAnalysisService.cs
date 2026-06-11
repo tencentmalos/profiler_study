@@ -537,7 +537,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> AnalyzeFrame(string sessionId, int frameIndex, int top, int neighborCount)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "analyze_frame");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.AnalyzeFrame(frameIndex, top, neighborCount));
+		}
 		Session session = loaded.Session;
 		if (frameIndex >= session.FrameCount)
 		{
@@ -570,7 +574,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> AnalyzeFrameDetail(string sessionId, int frameIndex, int maxNodes, int maxDepth, double minDurationMs)
 	{
-		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "analyze_frame_detail");
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.AnalyzeFrameDetail(frameIndex, maxNodes, maxDepth, minDurationMs));
+		}
 		Session session = loaded.Session;
 		if (frameIndex >= session.FrameCount)
 		{
