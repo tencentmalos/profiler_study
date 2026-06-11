@@ -170,6 +170,7 @@ TracyVersionRegistry
 - 在 event decoder 完整落地前，先支持遍历 LZ4 block stream，产出 block 数、压缩字节数、解压字节数、payload 字节数和 header diagnostics，作为后续事件解码和大文件边界控制的基础。
 - 保存格式前段 metadata 需要优先解码：`delay/resolution/timerMul/lastTime/frameOffset/pid/samplingPeriod/cpuArch/cpuId/cpuManufacturer/onDemand/captureName/captureProgram/captureTime/executableTime/hostInfo`，以及 frame set 的 `name/continuous/frameCount/firstFrameStart/lastFrameEnd`。这些字段应进入 `TracyEventStream.Metadata` 和 MCP summary。
 - 当 `.tracy` 保存格式中已经包含 frame set metadata 时，`TracyTraceQuerySession` 可以先用 frame set 作为 `frameSource=tracy-frame-set-metadata`，让 `get_session_summary` 和 `find_slow_frames` 返回基础 frame 信息；后续完整 event decoder 再把 frame marks 和 frame images 细化到同一模型。
+- CPU zone 第一阶段按保存格式中的 `sourceLocationPayload` 和 thread timeline 解码，生成 `TracyCpuZoneSummary(threadId, sourceLocation, name, start, end)`；`find_scope_hotspots` 按 zone name 聚合，`analyze_time_range` 先用 frame metadata 推导 frame range 的时间范围。
 - 解码 Tracy `0.10.0` 保存格式中的 CPU zones、thread names、frame marks、plots 和基础 metadata。
 - 对第一版不导出的事件累计 unsupported counts。
 - 输出 `TracyEventStream`，供 normalizer 使用。

@@ -41,9 +41,9 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["sourceFormat"] = "tracy",
 				["tracyVersion"] = m_Header.Version,
 				["compression"] = m_Header.Compression,
-				["threadCount"] = 0,
+				["threadCount"] = m_EventStream.ThreadCount,
 				["frameCount"] = GetMetadataFrameCount(),
-				["zoneCount"] = 0,
+				["zoneCount"] = m_EventStream.CpuZones.Count,
 				["plotCount"] = 0,
 				["compressedBlockCount"] = m_EventStream.CompressedBlockCount,
 				["compressedByteCount"] = m_EventStream.CompressedByteCount,
@@ -57,7 +57,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["resolution"] = m_EventStream.Metadata == null ? 0L : m_EventStream.Metadata.Resolution,
 				["lastTime"] = m_EventStream.Metadata == null ? 0L : m_EventStream.Metadata.LastTime,
 				["frameSetCount"] = m_EventStream.Metadata == null ? 0 : m_EventStream.Metadata.FrameSetCount,
-				["eventsDecoded"] = false,
+				["eventsDecoded"] = m_EventStream.CpuZones.Count > 0,
 				["framesUnavailable"] = !HasMetadataFrames(),
 				["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none",
 				["status"] = "header-loaded"
@@ -131,6 +131,21 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public Dictionary<string, object> FindScopeHotspots(int top, int startFrame, int endFrame)
 	{
+		List<TracyCpuZoneSummary> zones = FilterZonesByFrameRange(startFrame, endFrame).ToList();
+		if (zones.Count > 0)
+		{
+			ArrayList hotspots = BuildScopeHotspots(zones, top);
+			return new Dictionary<string, object>
+			{
+				["sourceFormat"] = SourceFormat,
+				["eventsDecoded"] = true,
+				["scopeHotspots"] = hotspots,
+				["range"] = BuildFrameRange(startFrame, endFrame),
+				["diagnostics"] = Diagnostics("TracyCpuZonesDecoded", "Scope hotspots are aggregated from decoded Tracy CPU zones."),
+				["top"] = Math.Max(1, top)
+			};
+		}
+
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -194,6 +209,39 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public Dictionary<string, object> AnalyzeTimeRange(int startFrame, int endFrame, int top, double thresholdMs)
 	{
+		List<TracyCpuZoneSummary> zones = FilterZonesByFrameRange(startFrame, endFrame).ToList();
+		if (zones.Count > 0 || HasMetadataFrames())
+		{
+			ArrayList hotspots = BuildScopeHotspots(zones, top);
+			return new Dictionary<string, object>
+			{
+				["sourceFormat"] = SourceFormat,
+				["range"] = BuildFrameRange(startFrame, endFrame),
+				["framesUnavailable"] = !HasMetadataFrames(),
+				["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none",
+				["eventsDecoded"] = zones.Count > 0,
+				["summary"] = new Dictionary<string, object>
+				{
+					["sourceFormat"] = SourceFormat,
+					["frameCount"] = GetMetadataFrameCount(),
+					["threadCount"] = m_EventStream.ThreadCount,
+					["zoneCount"] = zones.Count,
+					["plotCount"] = 0
+				},
+				["profilerOverhead"] = GetProfilerOverhead(startFrame, endFrame, top),
+				["slowFrames"] = FindSlowFrames(top, thresholdMs)["slowFrames"],
+				["scopeHotspots"] = hotspots,
+				["slowFramePattern"] = new Dictionary<string, object>
+				{
+					["hasPeriodicSlowFrames"] = false,
+					["reason"] = "Tracy event timeline decoding is partial; cadence analysis uses frame set metadata only."
+				},
+				["diagnostics"] = Diagnostics("TracyCpuZonesDecoded", "Time range analysis is based on decoded Tracy CPU zones and frame set metadata."),
+				["thresholdMs"] = Round(Math.Max(0.0, thresholdMs)),
+				["top"] = Math.Max(1, top)
+			};
+		}
+
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -249,6 +297,40 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		return m_EventStream.Metadata == null ? 0 : m_EventStream.Metadata.FrameCount;
 	}
 
+	private IEnumerable<TracyCpuZoneSummary> FilterZonesByFrameRange(int startFrame, int endFrame)
+	{
+		if (m_EventStream.CpuZones.Count == 0)
+		{
+			yield break;
+		}
+
+		if (!HasMetadataFrames() || startFrame < 0 || endFrame < 0)
+		{
+			foreach (TracyCpuZoneSummary zone in m_EventStream.CpuZones)
+			{
+				yield return zone;
+			}
+			yield break;
+		}
+
+		List<TracyFrameSummary> frames = GetMetadataFrames().ToList();
+		if (frames.Count == 0)
+		{
+			yield break;
+		}
+		int first = Math.Max(0, Math.Min(startFrame, frames.Count - 1));
+		int last = Math.Max(first, Math.Min(endFrame, frames.Count - 1));
+		long rangeStart = frames[first].Start;
+		long rangeEnd = frames[last].End;
+		foreach (TracyCpuZoneSummary zone in m_EventStream.CpuZones)
+		{
+			if (zone.End >= rangeStart && zone.Start <= rangeEnd)
+			{
+				yield return zone;
+			}
+		}
+	}
+
 	private IEnumerable<TracyFrameSummary> GetMetadataFrames()
 	{
 		if (m_EventStream.Metadata == null)
@@ -275,6 +357,24 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["durationNs"] = frame.Duration,
 			["durationMs"] = Round(frame.Duration / 1_000_000.0)
 		};
+	}
+
+	private static ArrayList BuildScopeHotspots(IEnumerable<TracyCpuZoneSummary> zones, int top)
+	{
+		IEnumerable<Dictionary<string, object>> hotspots = zones
+			.GroupBy(zone => zone.Name)
+			.Select(group => new Dictionary<string, object>
+			{
+				["name"] = group.Key,
+				["totalMs"] = Round(group.Sum(zone => zone.Duration) / 1_000_000.0),
+				["totalCount"] = group.Count(),
+				["maxMs"] = Round(group.Max(zone => zone.Duration) / 1_000_000.0),
+				["threadCount"] = group.Select(zone => zone.ThreadId).Distinct().Count()
+			})
+			.OrderByDescending(hotspot => Convert.ToDouble(hotspot["totalMs"]))
+			.ThenBy(hotspot => Convert.ToString(hotspot["name"]))
+			.Take(Math.Max(1, top));
+		return ToArrayList(hotspots);
 	}
 
 	private static ArrayList ToArrayList(IEnumerable<Dictionary<string, object>> values)

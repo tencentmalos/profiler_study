@@ -83,7 +83,7 @@ public static class Tracy010FileReader
 		}
 		TracyFileHeader header = new TracyFileHeader(version, "lz4");
 		long payloadByteCount = Math.Max(0, decodedByteCount - 8L);
-		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount);
+		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out int threadCount);
 		ArrayList diagnostics = new ArrayList
 		{
 			new Dictionary<string, object>
@@ -95,14 +95,18 @@ public static class Tracy010FileReader
 				["compressedByteCount"] = compressedByteCount,
 				["decodedByteCount"] = decodedByteCount,
 				["payloadByteCount"] = payloadByteCount,
-				["metadataDecoded"] = metadata != null
+				["metadataDecoded"] = metadata != null,
+				["threadCount"] = threadCount,
+				["cpuZoneCount"] = cpuZones.Count
 			}
 		};
-		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, diagnostics);
+		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, threadCount, diagnostics);
 	}
 
-	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount)
+	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out int threadCount)
 	{
+		cpuZones = new List<TracyCpuZoneSummary>();
+		threadCount = 0;
 		if (payloadByteCount <= 0)
 		{
 			return null;
@@ -172,6 +176,7 @@ public static class Tracy010FileReader
 		}
 
 		Dictionary<ulong, string> pointerMap = new Dictionary<ulong, string>();
+		List<string> stringData = new List<string>();
 		ulong stringDataCount = reader.ReadUInt64();
 		if (stringDataCount > 10_000_000)
 		{
@@ -182,11 +187,42 @@ public static class Tracy010FileReader
 			ulong pointer = reader.ReadUInt64();
 			string value = reader.ReadSizedAsciiString(1024 * 1024);
 			pointerMap[pointer] = value;
+			stringData.Add(value);
 		}
 
 		SkipPointerMap(reader, pointerMap, out int stringCount);
 		SkipPointerMap(reader, pointerMap, out int threadNameCount);
 		SkipExternalNameMap(reader);
+
+		if (!reader.HasRemaining)
+		{
+			return new TracyTraceMetadata(
+				delay,
+				resolution,
+				timerMultiplier,
+				lastTime,
+				frameOffset,
+				processId,
+				samplingPeriod,
+				cpuArchitecture,
+				cpuId,
+				cpuManufacturer,
+				onDemand,
+				captureName,
+				captureProgram,
+				captureTime,
+				executableTime,
+				hostInfo,
+				frameSets,
+				stringCount,
+				threadNameCount);
+		}
+
+		List<string> sourceLocationNames = ReadSourceLocationsAndSkipToLocks(reader, pointerMap, stringData);
+		SkipLocks(reader);
+		SkipMessages(reader);
+		SkipZoneExtra(reader);
+		cpuZones = ReadCpuZones(reader, sourceLocationNames, out threadCount);
 
 		return new TracyTraceMetadata(
 			delay,
@@ -208,6 +244,194 @@ public static class Tracy010FileReader
 			frameSets,
 			stringCount,
 			threadNameCount);
+	}
+
+	private static List<string> ReadSourceLocationsAndSkipToLocks(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
+	{
+		SkipThreadCompress(reader);
+		SkipThreadCompress(reader);
+		SkipSourceLocationMap(reader);
+		SkipUInt64Array(reader);
+
+		ulong payloadCount = reader.ReadUInt64();
+		if (payloadCount > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy file contains too many source locations.");
+		}
+		List<string> names = new List<string>();
+		for (ulong i = 0; i < payloadCount; i++)
+		{
+			names.Add(ReadSourceLocationName(reader, pointerMap, stringData));
+		}
+
+		SkipSourceLocationZoneReservations(reader);
+		SkipSourceLocationZoneReservations(reader);
+		return names;
+	}
+
+	private static void SkipThreadCompress(DecodedBlockReader reader)
+	{
+		ulong count = reader.ReadUInt64();
+		if (count > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy thread compression table is too large.");
+		}
+		reader.Skip(checked((long)count * 8L));
+	}
+
+	private static void SkipSourceLocationMap(DecodedBlockReader reader)
+	{
+		ulong count = reader.ReadUInt64();
+		if (count > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy source location map is too large.");
+		}
+		for (ulong i = 0; i < count; i++)
+		{
+			reader.Skip(8);  // pointer
+			reader.Skip(35); // SourceLocationBase
+		}
+	}
+
+	private static void SkipUInt64Array(DecodedBlockReader reader)
+	{
+		ulong count = reader.ReadUInt64();
+		if (count > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy uint64 array section is too large.");
+		}
+		reader.Skip(checked((long)count * 8L));
+	}
+
+	private static string ReadSourceLocationName(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
+	{
+		string name = ReadStringRef(reader, pointerMap, stringData);
+		ReadStringRef(reader, pointerMap, stringData);
+		ReadStringRef(reader, pointerMap, stringData);
+		reader.Skip(4); // line
+		reader.Skip(4); // color
+		return string.IsNullOrWhiteSpace(name) ? "<unknown>" : name;
+	}
+
+	private static string ReadStringRef(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
+	{
+		ulong value = reader.ReadUInt64();
+		byte flags = reader.ReadByte();
+		bool isIndex = (flags & 1) != 0;
+		bool active = (flags & 2) != 0;
+		if (!active)
+		{
+			return string.Empty;
+		}
+		if (isIndex)
+		{
+			return value < (ulong)stringData.Count ? stringData[(int)value] : string.Empty;
+		}
+		return pointerMap.TryGetValue(value, out string text) ? text : string.Empty;
+	}
+
+	private static void SkipSourceLocationZoneReservations(DecodedBlockReader reader)
+	{
+		ulong count = reader.ReadUInt64();
+		if (count > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy source-location zone reservation section is too large.");
+		}
+		reader.Skip(checked((long)count * 10L));
+	}
+
+	private static void SkipLocks(DecodedBlockReader reader)
+	{
+		ulong count = reader.ReadUInt64();
+		if (count > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy lock section is too large.");
+		}
+		for (ulong i = 0; i < count; i++)
+		{
+			reader.Skip(4 + 3 + 2 + 1 + 1 + 8 + 8);
+			ulong threadCount = reader.ReadUInt64();
+			reader.Skip(checked((long)threadCount * 8L));
+			ulong eventCount = reader.ReadUInt64();
+			reader.Skip(checked((long)eventCount * 12L));
+		}
+	}
+
+	private static void SkipMessages(DecodedBlockReader reader)
+	{
+		ulong count = reader.ReadUInt64();
+		if (count > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy message section is too large.");
+		}
+		reader.Skip(checked((long)count * 32L));
+	}
+
+	private static void SkipZoneExtra(DecodedBlockReader reader)
+	{
+		ulong count = reader.ReadUInt64();
+		if (count > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy zone extra section is too large.");
+		}
+		reader.Skip(checked((long)count * 12L));
+	}
+
+	private static List<TracyCpuZoneSummary> ReadCpuZones(DecodedBlockReader reader, List<string> sourceLocationNames, out int threadCount)
+	{
+		List<TracyCpuZoneSummary> zones = new List<TracyCpuZoneSummary>();
+		ulong totalZoneCount = reader.ReadUInt64();
+		if (totalZoneCount > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy zone section is too large.");
+		}
+		reader.ReadUInt64(); // zoneChildren count
+		ulong threadSectionCount = reader.ReadUInt64();
+		if (threadSectionCount > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy thread section is too large.");
+		}
+		threadCount = checked((int)threadSectionCount);
+		for (ulong threadIndex = 0; threadIndex < threadSectionCount; threadIndex++)
+		{
+			ulong threadId = reader.ReadUInt64();
+			reader.ReadUInt64(); // thread zone count
+			reader.ReadUInt64(); // kernelSampleCnt
+			reader.Skip(1);      // isFiber
+			uint timelineSize = reader.ReadUInt32();
+			if (timelineSize > 0)
+			{
+				ReadCpuTimeline(reader, threadId, timelineSize, 0L, sourceLocationNames, zones);
+			}
+			ulong messageCount = reader.ReadUInt64();
+			reader.Skip(checked((long)messageCount * 8L));
+			ulong ctxSwitchSampleCount = reader.ReadUInt64();
+			reader.Skip(checked((long)ctxSwitchSampleCount * 11L));
+			ulong sampleCount = reader.ReadUInt64();
+			reader.Skip(checked((long)sampleCount * 11L));
+		}
+		return zones;
+	}
+
+	private static long ReadCpuTimeline(DecodedBlockReader reader, ulong threadId, uint size, long refTime, List<string> sourceLocationNames, List<TracyCpuZoneSummary> zones)
+	{
+		for (uint i = 0; i < size; i++)
+		{
+			short sourceLocation = reader.ReadInt16();
+			long start = ReadTimeOffset(reader, ref refTime);
+			reader.Skip(4); // extra
+			uint childSize = reader.ReadUInt32();
+			if (childSize > 0)
+			{
+				refTime = ReadCpuTimeline(reader, threadId, childSize, refTime, sourceLocationNames, zones);
+			}
+			long end = ReadTimeOffset(reader, ref refTime);
+			string name = sourceLocation >= 0 && sourceLocation < sourceLocationNames.Count
+				? sourceLocationNames[sourceLocation]
+				: "<unknown>";
+			zones.Add(new TracyCpuZoneSummary(threadId, sourceLocation, name, start, end));
+		}
+		return refTime;
 	}
 
 	private static void SkipCpuTopology(DecodedBlockReader reader)
@@ -323,6 +547,21 @@ public static class Tracy010FileReader
 			m_Blocks = blocks;
 		}
 
+		public bool HasRemaining
+		{
+			get
+			{
+				int blockIndex = m_BlockIndex;
+				int blockOffset = m_BlockOffset;
+				while (blockIndex < m_Blocks.Count && blockOffset >= m_Blocks[blockIndex].Length)
+				{
+					blockIndex++;
+					blockOffset = 0;
+				}
+				return blockIndex < m_Blocks.Count;
+			}
+		}
+
 		public byte ReadByte()
 		{
 			MoveToAvailableBlock();
@@ -368,6 +607,11 @@ public static class Tracy010FileReader
 				value |= (uint)ReadByte() << (8 * i);
 			}
 			return value;
+		}
+
+		public short ReadInt16()
+		{
+			return unchecked((short)(ReadByte() | (ReadByte() << 8)));
 		}
 
 		public double ReadDouble()

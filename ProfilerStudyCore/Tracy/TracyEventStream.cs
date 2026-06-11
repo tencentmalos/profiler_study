@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 
 namespace ProfilerStudy.Tracy;
 
@@ -11,6 +12,8 @@ public sealed class TracyEventStream
 		long decodedByteCount,
 		long payloadByteCount,
 		TracyTraceMetadata metadata,
+		IReadOnlyList<TracyCpuZoneSummary> cpuZones,
+		int threadCount,
 		ArrayList diagnostics)
 	{
 		Header = header;
@@ -19,6 +22,8 @@ public sealed class TracyEventStream
 		DecodedByteCount = decodedByteCount;
 		PayloadByteCount = payloadByteCount;
 		Metadata = metadata;
+		CpuZones = cpuZones;
+		ThreadCount = threadCount;
 		Diagnostics = diagnostics;
 	}
 
@@ -39,6 +44,10 @@ public sealed class TracyEventStream
 	public TracyTraceMetadata Metadata { get; }
 
 	public bool HasMetadata => Metadata != null;
+
+	public IReadOnlyList<TracyCpuZoneSummary> CpuZones { get; }
+
+	public int ThreadCount { get; }
 
 	public ArrayList Diagnostics { get; }
 }

@@ -118,6 +118,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test.tracy");
 		string unsupportedPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported.tracy");
 		string metadataPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-metadata.tracy");
+		string zonePath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-zone.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -144,6 +145,14 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(2, metadataStream.Metadata.FrameCount, "tracy metadata frame count");
 			AssertTracyMetadataQueryTools(metadataPath);
 
+			WriteTracyDumpWithCpuZone(zonePath);
+			TracyEventStream zoneStream = Tracy010FileReader.Read(zonePath);
+			AssertEqual(1, zoneStream.ThreadCount, "tracy zone thread count");
+			AssertEqual(1, zoneStream.CpuZones.Count, "tracy cpu zone count");
+			AssertEqual("SelfTestZone", zoneStream.CpuZones[0].Name, "tracy cpu zone name");
+			AssertEqual(4_000_000L, zoneStream.CpuZones[0].Duration, "tracy cpu zone duration");
+			AssertTracyZoneQueryTools(zonePath);
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 		}
@@ -160,6 +169,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(metadataPath))
 			{
 				File.Delete(metadataPath);
+			}
+			if (File.Exists(zonePath))
+			{
+				File.Delete(zonePath);
 			}
 		}
 	}
@@ -327,6 +340,55 @@ internal static class ProfilerDiagnosticsSelfTest
 		});
 	}
 
+	private static void AssertTracyZoneQueryTools(string path)
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		{
+			["path"] = path,
+			["format"] = "auto",
+			["keep_session"] = true
+		});
+		AssertEqual(false, keptResult["isError"], "zone load_trace_file isError");
+		IDictionary kept = keptResult["structuredContent"] as IDictionary;
+		string sessionId = Convert.ToString(kept["sessionId"]);
+		IDictionary summary = kept["summary"] as IDictionary;
+		AssertEqual(1, summary["threadCount"], "zone summary thread count");
+		AssertEqual(1, summary["zoneCount"], "zone summary zone count");
+
+		Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["top"] = 5
+		});
+		AssertEqual(false, hotspotsResult["isError"], "zone find_scope_hotspots isError");
+		IDictionary hotspots = hotspotsResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", hotspots["sourceFormat"], "zone hotspots source format");
+		AssertEqual(true, hotspots["eventsDecoded"], "zone hotspots events decoded");
+		AssertHasItems(hotspots["scopeHotspots"], "zone scope hotspots");
+		IDictionary firstHotspot = ((IList)hotspots["scopeHotspots"])[0] as IDictionary;
+		AssertEqual("SelfTestZone", firstHotspot["name"], "zone hotspot name");
+		AssertEqual(4.0, firstHotspot["totalMs"], "zone hotspot total ms");
+		AssertEqual(1, firstHotspot["totalCount"], "zone hotspot count");
+
+		Dictionary<string, object> rangeResult = tools.CallTool("analyze_time_range", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["start_frame"] = 0,
+			["end_frame"] = 1,
+			["top"] = 5
+		});
+		AssertEqual(false, rangeResult["isError"], "zone analyze_time_range isError");
+		IDictionary range = rangeResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", range["sourceFormat"], "zone range source format");
+		AssertHasItems(range["scopeHotspots"], "zone range hotspots");
+
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+	}
+
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)
 	{
 		byte[] innerHeader = new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', major, minor, patch };
@@ -336,6 +398,50 @@ internal static class ProfilerDiagnosticsSelfTest
 	private static void WriteTracyDumpWithMetadata(string path)
 	{
 		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: false);
+		WriteTracyDump(path, inner.ToArray());
+	}
+
+	private static void WriteTracyDumpWithCpuZone(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: true);
+		WriteUInt64(inner, 1);                      // localThreadCompress size
+		WriteUInt64(inner, 123);                    // thread id
+		WriteUInt64(inner, 0);                      // externalThreadCompress size
+		WriteUInt64(inner, 0);                      // sourceLocation map count
+		WriteUInt64(inner, 0);                      // sourceLocationExpand count
+		WriteUInt64(inner, 1);                      // sourceLocationPayload count
+		WriteSourceLocationBase(inner, nameIndex: 0, line: 77);
+		WriteUInt64(inner, 1);                      // sourceLocationZones count
+		WriteInt16(inner, 0);                       // source location id
+		WriteUInt64(inner, 1);                      // zone count for source location
+		WriteUInt64(inner, 0);                      // gpuSourceLocationZones count
+		WriteUInt64(inner, 0);                      // lockMap count
+		WriteUInt64(inner, 0);                      // messages count
+		WriteUInt64(inner, 1);                      // zoneExtra count
+		inner.Write(new byte[12], 0, 12);           // ZoneExtra
+		WriteUInt64(inner, 1);                      // total zone count
+		WriteUInt64(inner, 0);                      // zoneChildren count
+		WriteUInt64(inner, 1);                      // thread count
+		WriteUInt64(inner, 123);                    // thread id
+		WriteUInt64(inner, 1);                      // thread zone count
+		WriteUInt64(inner, 0);                      // kernelSampleCnt
+		inner.WriteByte(0);                         // isFiber
+		WriteUInt32(inner, 1);                      // timeline size
+		WriteInt16(inner, 0);                       // srcloc
+		WriteInt64(inner, 1_000_000);               // start offset
+		WriteUInt32(inner, 0);                      // extra
+		WriteUInt32(inner, 0);                      // child size
+		WriteInt64(inner, 4_000_000);               // end offset
+		WriteUInt64(inner, 0);                      // thread messages
+		WriteUInt64(inner, 0);                      // ctxSwitchSamples
+		WriteUInt64(inner, 0);                      // samples
+		WriteTracyDump(path, inner.ToArray());
+	}
+
+	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString)
+	{
 		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
 		WriteInt64(inner, 0);                       // m_delay
 		WriteInt64(inner, 1_000_000_000);           // m_resolution
@@ -368,11 +474,36 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteInt64(inner, 1);                       // frame 1 start offset
 		WriteInt64(inner, 9_000_000);               // frame 1 end offset
 		WriteInt32(inner, -1);                      // frame 1 image
-		WriteUInt64(inner, 0);                      // stringData count
+		WriteUInt64(inner, includeZoneString ? 1UL : 0UL); // stringData count
+		if (includeZoneString)
+		{
+			WriteUInt64(inner, 0x1000);
+			WriteSizedString(inner, "SelfTestZone");
+		}
 		WriteUInt64(inner, 0);                      // strings count
 		WriteUInt64(inner, 0);                      // threadNames count
 		WriteUInt64(inner, 0);                      // externalNames count
-		WriteTracyDump(path, inner.ToArray());
+	}
+
+	private static void WriteSourceLocationBase(Stream stream, uint nameIndex, uint line)
+	{
+		WriteStringRefIndex(stream, nameIndex);
+		WriteInactiveStringRef(stream);
+		WriteInactiveStringRef(stream);
+		WriteUInt32(stream, line);
+		WriteUInt32(stream, 0);
+	}
+
+	private static void WriteStringRefIndex(Stream stream, uint index)
+	{
+		WriteUInt64(stream, index);
+		stream.WriteByte(3);
+	}
+
+	private static void WriteInactiveStringRef(Stream stream)
+	{
+		WriteUInt64(stream, 0);
+		stream.WriteByte(0);
 	}
 
 	private static void WriteTracyDump(string path, byte[] inner)
@@ -425,6 +556,12 @@ internal static class ProfilerDiagnosticsSelfTest
 	}
 
 	private static void WriteInt32(Stream stream, int value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteInt16(Stream stream, short value)
 	{
 		byte[] bytes = BitConverter.GetBytes(value);
 		stream.Write(bytes, 0, bytes.Length);
