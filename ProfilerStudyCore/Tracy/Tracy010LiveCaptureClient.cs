@@ -45,11 +45,11 @@ public static class Tracy010LiveCaptureClient
 		int status = stream.ReadByte();
 		if (status < 0)
 		{
-			throw new TracyFileFormatException("TracyProtocolMismatch", "Tracy target closed the connection before handshake status.");
+			throw CreateProtocolMismatch("Tracy target closed the connection before handshake status.", "closed");
 		}
 		if (status != 1)
 		{
-			throw new TracyFileFormatException("TracyProtocolMismatch", "Tracy target rejected protocol version " + ProtocolVersion + " with handshake status " + status + ".");
+			throw CreateProtocolMismatch("Tracy target rejected protocol version " + ProtocolVersion + " with handshake status " + status + ".", status.ToString());
 		}
 
 		byte[] welcomeBytes = ReadExactly(stream, WelcomeMessageSize);
@@ -94,6 +94,16 @@ public static class Tracy010LiveCaptureClient
 			0,
 			diagnostics);
 		return new TracyLiveCaptureResult(eventStream, diagnostics, connectStopwatch.Elapsed.TotalMilliseconds);
+	}
+
+	private static TracyFileFormatException CreateProtocolMismatch(string message, string status)
+	{
+		return new TracyFileFormatException(
+			"TracyProtocolMismatch",
+			message,
+			"protocol:" + ProtocolVersion + ",status:" + status,
+			TracyVersionRegistry.SupportedVersions,
+			TracyVersionRegistry.LockedVersion);
 	}
 
 	private static TracyTraceMetadata ReadWelcomeMetadata(byte[] bytes)

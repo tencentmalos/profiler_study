@@ -796,6 +796,23 @@ internal static class ProfilerDiagnosticsSelfTest
 				["session_id"] = sessionId
 			});
 			server.AssertHandshakeReceived();
+
+			using FakeTracyServer rejectedServer = new FakeTracyServer(2);
+			rejectedServer.Start();
+			Dictionary<string, object> rejectedResult = tools.CallTool("capture_profile", new Dictionary<string, object>
+			{
+				["url"] = "pc://127.0.0.1:" + rejectedServer.Port,
+				["protocol"] = "tracy",
+				["duration_seconds"] = 1
+			});
+			AssertEqual(true, rejectedResult["isError"], "tracy live protocol mismatch isError");
+			IDictionary rejected = rejectedResult["structuredContent"] as IDictionary;
+			AssertEqual("TracyProtocolMismatch", rejected["errorCode"], "tracy live protocol mismatch error code");
+			AssertEqual("protocol:64,status:2", rejected["detectedVersion"], "tracy live protocol mismatch detected version");
+			AssertEqual("0.10.0", rejected["lockedVersion"], "tracy live protocol mismatch locked version");
+			AssertHasItems(rejected["supportedVersions"], "tracy live protocol mismatch supported versions");
+			AssertDiagnosticCode(rejected["diagnostics"], "TracyProtocolMismatch", "tracy live protocol mismatch diagnostics");
+			rejectedServer.AssertHandshakeReceived();
 		}
 		finally
 		{
@@ -1292,9 +1309,20 @@ internal static class ProfilerDiagnosticsSelfTest
 	private sealed class FakeTracyServer : IDisposable
 	{
 		private readonly TcpListener m_Listener = new TcpListener(IPAddress.Loopback, 0);
+		private readonly int m_HandshakeStatus;
 		private Thread m_Thread;
 		private volatile bool m_HandshakeReceived;
 		private Exception m_Exception;
+
+		public FakeTracyServer()
+			: this(1)
+		{
+		}
+
+		public FakeTracyServer(int handshakeStatus)
+		{
+			m_HandshakeStatus = handshakeStatus;
+		}
 
 		public int Port { get; private set; }
 
@@ -1341,7 +1369,11 @@ internal static class ProfilerDiagnosticsSelfTest
 					throw new InvalidOperationException("unexpected Tracy handshake.");
 				}
 				m_HandshakeReceived = true;
-				stream.WriteByte(1); // HandshakeWelcome
+				stream.WriteByte((byte)m_HandshakeStatus);
+				if (m_HandshakeStatus != 1)
+				{
+					return;
+				}
 				WriteWelcomeMessage(stream);
 				Thread.Sleep(250);
 			}
