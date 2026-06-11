@@ -90,6 +90,16 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "get_tracy_status",
+				["description"] = "Return built-in C# Tracy support status, including the locked Tracy version and optional source-reference submodule availability.",
+				["inputSchema"] = new Dictionary<string, object>
+				{
+					["type"] = "object",
+					["properties"] = new Dictionary<string, object>()
+				}
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "analyze_session_file",
 				["description"] = "Load an existing ProfilerStudy .profiler, .profiler_recording, or .profiler_dump file and return a compact performance analysis.",
 				["inputSchema"] = new Dictionary<string, object>
@@ -213,6 +223,9 @@ internal sealed class ProfilerMcpTools
 						GetInt(arguments, "duration_seconds", 60, 1, 300),
 						GetInt(arguments, "top", 10, 1, 50),
 						GetBool(arguments, "keep_session", false));
+					break;
+				case "get_tracy_status":
+					structured = m_AnalysisService.GetTracyStatus();
 					break;
 				case "analyze_session_file":
 					structured = m_AnalysisService.AnalyzeSessionFile(

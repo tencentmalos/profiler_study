@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using ProfilerStudy;
+using ProfilerStudy.Tracy;
 using SCLCoreCLR;
 
 namespace ProfilerStudy.McpServer;
@@ -35,6 +36,19 @@ internal sealed class ProfilerAnalysisService
 	public Dictionary<string, object> CaptureProfile(string url, int durationSeconds, int top, bool keepSession)
 	{
 		return CaptureProfile(ProfilerCaptureTarget.Parse(url), durationSeconds, top, keepSession);
+	}
+
+	public Dictionary<string, object> GetTracyStatus()
+	{
+		TracyStatus status = TracyVersionRegistry.GetStatus();
+		return new Dictionary<string, object>
+		{
+			["lockedVersion"] = status.LockedVersion,
+			["supportedVersions"] = ToArrayList(status.SupportedVersions),
+			["sourceReferencePath"] = status.SourceReferencePath,
+			["sourceReferenceAvailable"] = status.SourceReferenceAvailable,
+			["reason"] = status.Reason
+		};
 	}
 
 	private Dictionary<string, object> CaptureProfile(ProfilerCaptureTarget target, int durationSeconds, int top, bool keepSession)
@@ -1219,6 +1233,16 @@ internal sealed class ProfilerAnalysisService
 	{
 		ArrayList list = new ArrayList();
 		foreach (Dictionary<string, object> value in values)
+		{
+			list.Add(value);
+		}
+		return list;
+	}
+
+	private static ArrayList ToArrayList(IEnumerable<string> values)
+	{
+		ArrayList list = new ArrayList();
+		foreach (string value in values)
 		{
 			list.Add(value);
 		}

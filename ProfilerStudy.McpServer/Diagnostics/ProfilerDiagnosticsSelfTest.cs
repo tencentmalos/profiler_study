@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using ProfilerStudy;
+using ProfilerStudy.Tracy;
 
 namespace ProfilerStudy.McpServer;
 
@@ -25,6 +26,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(true, pattern["hasPeriodicSlowFrames"], "periodic slow frames");
 			AssertEqual(5, pattern["dominantIndexDelta"], "dominant delta");
 			RunCaptureTargetTests();
+			RunTracyStatusTests();
 			RunAnalysisServiceTests();
 
 			return 0;
@@ -89,6 +91,39 @@ internal static class ProfilerDiagnosticsSelfTest
 			}
 		}
 		throw new InvalidOperationException("capture_profile tool is missing.");
+	}
+
+	private static void RunTracyStatusTests()
+	{
+		TracyStatus status = TracyVersionRegistry.GetStatus();
+		AssertEqual("0.10.0", status.LockedVersion, "tracy locked version");
+		AssertEqual(false, string.IsNullOrWhiteSpace(status.SourceReferencePath), "tracy source reference path");
+		AssertHasItems(status.SupportedVersions, "tracy supported versions");
+		AssertTracyStatusTool();
+	}
+
+	private static void AssertTracyStatusTool()
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "get_tracy_status")
+			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IDictionary properties = inputSchema["properties"] as IDictionary;
+				if (properties == null)
+				{
+					throw new InvalidOperationException("get_tracy_status must accept an empty object.");
+				}
+				Dictionary<string, object> result = tools.CallTool("get_tracy_status", new Dictionary<string, object>());
+				IDictionary structured = result["structuredContent"] as IDictionary;
+				AssertEqual("0.10.0", structured["lockedVersion"], "tracy status tool locked version");
+				AssertHasItems(structured["supportedVersions"], "tracy status tool supported versions");
+				return;
+			}
+		}
+		throw new InvalidOperationException("get_tracy_status tool is missing.");
 	}
 
 	private static void RunAnalysisServiceTests()
