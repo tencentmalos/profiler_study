@@ -126,6 +126,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string plotPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-plot.tracy");
 		string gpuPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-gpu.tracy");
 		string unsupportedEventsPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported-events.tracy");
+		string oversizedLockPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-oversized-lock.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -189,6 +190,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyAllocationsUnsupported");
 			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyCallstacksUnsupported");
 
+			WriteTracyDumpWithOversizedLockThreadList(oversizedLockPath);
+			AssertInvalidTracyFileTool(oversizedLockPath);
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 			AssertUnsupportedTracyFileVersionTool(unsupportedPath);
@@ -222,6 +226,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(unsupportedEventsPath))
 			{
 				File.Delete(unsupportedEventsPath);
+			}
+			if (File.Exists(oversizedLockPath))
+			{
+				File.Delete(oversizedLockPath);
 			}
 		}
 	}
@@ -411,6 +419,28 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertDiagnosticCode(structured["diagnostics"], "TracyUnsupportedFileVersion", "unsupported tracy diagnostics");
 			IDictionary tracyStatus = structured["tracyStatus"] as IDictionary;
 			AssertEqual("0.10.0", tracyStatus["lockedVersion"], "unsupported tracy status locked version");
+		}
+		finally
+		{
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
+	}
+
+	private static void AssertInvalidTracyFileTool(string path)
+	{
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
+		{
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> result = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "tracy"
+			});
+			AssertEqual(true, result["isError"], "invalid tracy load_trace_file isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			AssertEqual("TracyFileFormatInvalid", structured["errorCode"], "invalid tracy error code");
+			AssertDiagnosticCode(structured["diagnostics"], "TracyFileFormatInvalid", "invalid tracy diagnostics");
 		}
 		finally
 		{
@@ -1216,6 +1246,29 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteTracyDump(path, inner.ToArray());
 	}
 
+	private static void WriteTracyDumpWithOversizedLockThreadList(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: false);
+		WriteUInt64(inner, 0);                      // localThreadCompress size
+		WriteUInt64(inner, 0);                      // externalThreadCompress size
+		WriteUInt64(inner, 0);                      // sourceLocation map count
+		WriteUInt64(inner, 0);                      // sourceLocationExpand count
+		WriteUInt64(inner, 0);                      // sourceLocationPayload count
+		WriteUInt64(inner, 0);                      // sourceLocationZones count
+		WriteUInt64(inner, 0);                      // gpuSourceLocationZones count
+		WriteUInt64(inner, 1);                      // lockMap count
+		WriteUInt32(inner, 1);                      // lock id
+		inner.Write(new byte[3], 0, 3);             // customName Int24
+		WriteInt16(inner, -1);                      // srcloc
+		inner.WriteByte(0);                         // LockType
+		inner.WriteByte(1);                         // valid
+		WriteInt64(inner, 1_000);                   // timeAnnounce
+		WriteInt64(inner, 2_000);                   // timeTerminate
+		WriteUInt64(inner, ulong.MaxValue);         // invalid thread list count
+		WriteTracyDump(path, inner.ToArray());
+	}
+
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString)
 	{
 		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString: false, includeThreadName: false);
@@ -1313,7 +1366,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		byte[] compressed = EncodeLz4LiteralBlock(inner);
 
 		using FileStream stream = File.Create(path);
-		byte[] outerHeader = Encoding.ASCII.GetBytes("tlZ4");
+		byte[] outerHeader = new byte[] { (byte)'t', (byte)'l', (byte)'Z', 4 };
 		stream.Write(outerHeader, 0, outerHeader.Length);
 		byte[] blockSize = BitConverter.GetBytes((uint)compressed.Length);
 		stream.Write(blockSize, 0, blockSize.Length);

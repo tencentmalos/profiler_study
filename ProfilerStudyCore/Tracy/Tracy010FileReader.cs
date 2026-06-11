@@ -27,9 +27,9 @@ public static class Tracy010FileReader
 
 		using FileStream stream = File.OpenRead(path);
 		byte[] compressionHeader = ReadExactly(stream, 4);
-		string compression = Encoding.ASCII.GetString(compressionHeader);
-		if (compression != "tlZ4")
+		if (!IsLz4CompressionHeader(compressionHeader))
 		{
+			string compression = Encoding.ASCII.GetString(compressionHeader);
 			if (compression == "tZst")
 			{
 				throw new TracyFileFormatException("TracyFileFormatInvalid", "Zstd-compressed Tracy files are not supported by the initial C# reader.");
@@ -110,6 +110,15 @@ public static class Tracy010FileReader
 			diagnostics.Add(diagnostic);
 		}
 		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, plots, threads, threadCount, diagnostics);
+	}
+
+	private static bool IsLz4CompressionHeader(byte[] header)
+	{
+		return header.Length == 4
+			&& header[0] == (byte)'t'
+			&& header[1] == (byte)'l'
+			&& header[2] == (byte)'Z'
+			&& (header[3] == 4 || header[3] == (byte)'4');
 	}
 
 	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out ArrayList readerDiagnostics)
@@ -439,8 +448,16 @@ public static class Tracy010FileReader
 		{
 			reader.Skip(4 + 3 + 2 + 1 + 1 + 8 + 8);
 			ulong threadCount = reader.ReadUInt64();
+			if (threadCount > 1_000_000)
+			{
+				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy lock thread list section is too large.");
+			}
 			reader.Skip(checked((long)threadCount * 8L));
 			ulong eventCount = reader.ReadUInt64();
+			if (eventCount > 10_000_000)
+			{
+				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy lock timeline section is too large.");
+			}
 			timelineEventCount = checked(timelineEventCount + eventCount);
 			reader.Skip(checked((long)eventCount * 12L));
 		}
