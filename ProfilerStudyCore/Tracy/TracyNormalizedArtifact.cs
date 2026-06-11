@@ -16,7 +16,7 @@ public static class TracyNormalizedArtifact
 	{
 		Directory.CreateDirectory(normalizedDirectory);
 		TracyEventStream eventStream = querySession.EventStream;
-		List<TracyFrameSummary> frames = FlattenFrames(eventStream).ToList();
+		List<TracyFrameSummary> frames = querySession.GetVisibleFrames().ToList();
 		long startTime = ResolveStartTime(eventStream, frames);
 		long endTime = ResolveEndTime(eventStream, frames);
 
@@ -90,6 +90,7 @@ public static class TracyNormalizedArtifact
 			["endTimeNs"] = endTime,
 			["timeBase"] = "trace-relative-ns",
 			["frameSource"] = frames.Count > 0 ? "tracy-frame-set-metadata" : "none",
+			["framesAreVisible"] = true,
 			["threadCount"] = eventStream.ThreadCount,
 			["frameCount"] = frames.Count,
 			["zoneCount"] = eventStream.CpuZones.Count,
@@ -180,23 +181,6 @@ public static class TracyNormalizedArtifact
 		};
 	}
 
-	private static IEnumerable<TracyFrameSummary> FlattenFrames(TracyEventStream eventStream)
-	{
-		if (eventStream.Metadata == null)
-		{
-			yield break;
-		}
-
-		int frameIndex = 0;
-		foreach (TracyFrameSetSummary frameSet in eventStream.Metadata.FrameSets)
-		{
-			foreach (TracyFrameSummary frame in frameSet.Frames)
-			{
-				yield return new TracyFrameSummary(frameIndex++, frame.Start, frame.End);
-			}
-		}
-	}
-
 	private static long ResolveStartTime(TracyEventStream eventStream, List<TracyFrameSummary> frames)
 	{
 		List<long> values = new List<long>();
@@ -232,7 +216,8 @@ public static class TracyNormalizedArtifact
 		List<TracyFrameSetSummary> frameSets = new List<TracyFrameSetSummary>();
 		if (frames.Count > 0)
 		{
-			frameSets.Add(new TracyFrameSetSummary(0UL, false, frames));
+			ulong frameSetName = GetBool(manifest, "framesAreVisible", false) ? ulong.MaxValue : 0UL;
+			frameSets.Add(new TracyFrameSetSummary(frameSetName, false, frames));
 		}
 		return new TracyTraceMetadata(
 			GetLong(manifest, "delay", 0L),

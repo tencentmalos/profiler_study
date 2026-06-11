@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using ProfilerStudy;
 using ProfilerStudy.Tracy;
@@ -479,6 +481,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			});
 			AssertEqual(false, result["isError"], "on-demand tracy load_trace_file isError");
 			IDictionary structured = result["structuredContent"] as IDictionary;
+			string artifactId = Convert.ToString(structured["artifactId"]);
+			AssertOnDemandNormalizedFrames(root: artifactRoot, artifactId: artifactId);
+			AssertOnDemandArtifactReloadFrames(tools, artifactId);
 			string sessionId = Convert.ToString(structured["sessionId"]);
 			Dictionary<string, object> slowFramesResult = tools.CallTool("find_slow_frames", new Dictionary<string, object>
 			{
@@ -501,6 +506,55 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			CleanupSelfTestArtifactRoot(artifactRoot);
 		}
+	}
+
+	private static void AssertOnDemandNormalizedFrames(string root, string artifactId)
+	{
+		string normalizedRoot = Path.Combine(root, artifactId, "normalized");
+		string manifestPath = Path.Combine(normalizedRoot, "manifest.json");
+		if (!File.Exists(manifestPath))
+		{
+			throw new InvalidOperationException("on-demand normalized manifest is missing.");
+		}
+		using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+		int frameCount = manifest.RootElement.GetProperty("frameCount").GetInt32();
+		AssertEqual(2, frameCount, "on-demand normalized manifest frame count");
+
+		string framesPath = Path.Combine(normalizedRoot, "frames.ndjson");
+		if (!File.Exists(framesPath))
+		{
+			throw new InvalidOperationException("on-demand normalized frames file is missing.");
+		}
+		int visibleFrameLines = File.ReadLines(framesPath).Count(line => !string.IsNullOrWhiteSpace(line));
+		AssertEqual(2, visibleFrameLines, "on-demand normalized frame line count");
+	}
+
+	private static void AssertOnDemandArtifactReloadFrames(ProfilerMcpTools tools, string artifactId)
+	{
+		Dictionary<string, object> reloadResult = tools.CallTool("load_trace_artifact", new Dictionary<string, object>
+		{
+			["artifact_id"] = artifactId,
+			["keep_session"] = true
+		});
+		AssertEqual(false, reloadResult["isError"], "on-demand artifact reload isError");
+		IDictionary reload = reloadResult["structuredContent"] as IDictionary;
+		IDictionary summary = reload["summary"] as IDictionary;
+		AssertEqual(2, summary["frameCount"], "on-demand artifact summary frame count");
+		string reloadSessionId = Convert.ToString(reload["sessionId"]);
+		Dictionary<string, object> frameResult = tools.CallTool("analyze_frame", new Dictionary<string, object>
+		{
+			["session_id"] = reloadSessionId,
+			["frame_index"] = 0,
+			["neighbor_count"] = 0
+		});
+		AssertEqual(false, frameResult["isError"], "on-demand artifact analyze_frame isError");
+		IDictionary frameAnalysis = frameResult["structuredContent"] as IDictionary;
+		IDictionary frame = frameAnalysis["frame"] as IDictionary;
+		AssertEqual(16.0, frame["durationMs"], "on-demand artifact visible frame duration");
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = reloadSessionId
+		});
 	}
 
 	private static void AssertTracyQueryToolContracts(ProfilerMcpTools tools, string sessionId)
