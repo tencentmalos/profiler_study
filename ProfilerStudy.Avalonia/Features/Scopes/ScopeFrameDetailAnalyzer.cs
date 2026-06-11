@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ProfilerStudy.Tracy;
 using ProfilerStudy;
 
 namespace ProfilerStudy.Avalonia;
@@ -8,6 +9,11 @@ internal static class ScopeFrameDetailAnalyzer
 {
 	public static IReadOnlyList<ScopeFrameDetailRow> Build(SessionDocument document, int frameIndex, int maxRows = 500)
 	{
+		if (document?.TraceDocument?.QuerySession is TracyTraceQuerySession tracyQuerySession)
+		{
+			return BuildTracyRows(tracyQuerySession, frameIndex, maxRows);
+		}
+
 		if (document?.Session == null || document.Session.TimerFrequency <= 0 || frameIndex < 0 || frameIndex >= document.Session.FrameCount)
 		{
 			return Array.Empty<ScopeFrameDetailRow>();
@@ -38,6 +44,71 @@ internal static class ScopeFrameDetailAnalyzer
 		}
 
 		return rows;
+	}
+
+	private static IReadOnlyList<ScopeFrameDetailRow> BuildTracyRows(TracyTraceQuerySession querySession, int frameIndex, int maxRows)
+	{
+		if (querySession.EventStream?.Metadata == null ||
+			querySession.EventStream.CpuZones == null ||
+			querySession.EventStream.CpuZones.Count == 0 ||
+			frameIndex < 0 ||
+			maxRows <= 0)
+		{
+			return Array.Empty<ScopeFrameDetailRow>();
+		}
+
+		TracyFrameSummary frame = FindFrame(querySession, frameIndex);
+		if (frame == null || frame.Duration <= 0)
+		{
+			return Array.Empty<ScopeFrameDetailRow>();
+		}
+
+		List<ScopeFrameDetailRow> rows = new List<ScopeFrameDetailRow>();
+		foreach (TracyCpuZoneSummary zone in querySession.EventStream.CpuZones)
+		{
+			if (rows.Count >= maxRows)
+			{
+				break;
+			}
+
+			long clippedStart = Math.Max(zone.Start, frame.Start);
+			long clippedEnd = Math.Min(zone.End, frame.End);
+			if (clippedEnd <= clippedStart)
+			{
+				continue;
+			}
+
+			rows.Add(new ScopeFrameDetailRow(
+				"Thread " + zone.ThreadId,
+				0,
+				string.IsNullOrWhiteSpace(zone.Name) ? "(unnamed)" : zone.Name,
+				(clippedStart - frame.Start) / 1_000_000.0,
+				(clippedEnd - clippedStart) / 1_000_000.0,
+				string.Empty,
+				string.Empty,
+				-1));
+		}
+
+		return rows;
+	}
+
+	private static TracyFrameSummary FindFrame(TracyTraceQuerySession querySession, int frameIndex)
+	{
+		int globalFrameIndex = 0;
+		foreach (TracyFrameSetSummary frameSet in querySession.EventStream.Metadata.FrameSets)
+		{
+			foreach (TracyFrameSummary frame in frameSet.Frames)
+			{
+				if (globalFrameIndex == frameIndex)
+				{
+					return new TracyFrameSummary(globalFrameIndex, frame.Start, frame.End);
+				}
+
+				globalFrameIndex++;
+			}
+		}
+
+		return null;
 	}
 
 	private static void AppendRows(Session session, List<ScopeFrameDetailRow> rows, string threadName, ProfilerStudy.TimeSpan span, long frameStart, long frameEnd, double ticksToMs, int depth, int maxRows)

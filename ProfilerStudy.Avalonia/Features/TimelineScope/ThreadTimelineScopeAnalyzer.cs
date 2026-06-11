@@ -8,13 +8,19 @@ internal static class ThreadTimelineScopeAnalyzer
 {
 	public static IReadOnlyList<ThreadTimelineScopeRow> Build(SessionDocument document, TimelineViewport viewport, int maxFrames = 90, int maxRows = 5000)
 	{
-		if (document?.Session == null || viewport == null || document.FrameSamples == null || document.FrameSamples.Length == 0)
+		if (document == null || viewport == null || document.FrameSamples == null || document.FrameSamples.Length == 0)
 		{
 			return Array.Empty<ThreadTimelineScopeRow>();
 		}
 
-		int startFrame = Math.Max(0, Math.Min(viewport.StartFrame, document.Session.FrameCount - 1));
-		int endFrame = Math.Max(startFrame, Math.Min(viewport.EndFrame, document.Session.FrameCount - 1));
+		int frameCount = document.Session == null ? document.FrameSamples.Length : document.Session.FrameCount;
+		if (frameCount <= 0)
+		{
+			return Array.Empty<ThreadTimelineScopeRow>();
+		}
+
+		int startFrame = Math.Max(0, Math.Min(viewport.StartFrame, frameCount - 1));
+		int endFrame = Math.Max(startFrame, Math.Min(viewport.EndFrame, frameCount - 1));
 		FrameSample[] visibleSamples = document.FrameSamples
 			.Where(sample => sample.Index >= startFrame && sample.Index <= endFrame && sample.DurationMs > 0.0)
 			.ToArray();

@@ -114,7 +114,7 @@ internal sealed class ProfilerTimelineAdapter
 			FrameHeight = 18.0,
 		};
 
-		if (document?.Session == null || m_FrameSamples.Length == 0 || maxFrames <= 0 || maxScopes <= 0)
+		if (document == null || m_FrameSamples.Length == 0 || maxFrames <= 0 || maxScopes <= 0)
 		{
 			return config;
 		}

@@ -48,7 +48,7 @@
 ## 行为契约
 
 - Scope block 的时间位置、嵌套层级、thread lane 归属一致。
-- Trace-backed Tracy document 中，CPU zones 进入 hotspot 表和后续 thread-lane 输入；当前阶段没有完整嵌套层级时，hotspot 使用 zone name 聚合并保留 diagnostics/降级语义。
+- Trace-backed Tracy document 中，CPU zones 进入 hotspot 表、selected-frame detail、thread timeline lane 和 flame chart 输入；当前阶段没有完整嵌套层级时，detail row 使用 depth 0，hotspot 使用 zone name 聚合并保留 diagnostics/降级语义。
 - Scope 着色支持按 thread 和按 scope 两种语义。
 - Selected scope、highlight scope、find next/prev 使用同一 selection/range 语义。
 - Flame chart 输入来自选中帧 detail，不在 paint 中重扫 session。
@@ -62,7 +62,7 @@
 
 ## 数据流与状态归属
 
-Scope 控件输入应是已经裁剪/分析过的 row 或 block model。控件可以发出 selected scope/hover scope，不应自行遍历所有 thread 的完整 `TimeSpanList`。
+Scope 控件输入应是已经裁剪/分析过的 row 或 block model。控件可以发出 selected scope/hover scope，不应自行遍历所有 thread 的完整 `TimeSpanList`。ProfilerStudy session 从 `Session` 读取层级 scope；Tracy trace 从 `TraceDocument.QuerySession` / `TracyTraceQuerySession.EventStream.CpuZones` 按 frame metadata 裁剪 CPU zones。
 
 线程 hide/collapse/order 是 UI 状态；Core session 数据不随之改变。
 

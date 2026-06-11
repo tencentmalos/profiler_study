@@ -521,6 +521,24 @@ internal static class AvaloniaSmokeTest
 		Assert(hotspots[0].Name == "UITraceZone", "tracy ui hotspot name");
 		Assert(Math.Abs(hotspots[0].TotalTimeMs - 3.0) < 0.0001, "tracy ui hotspot total");
 
+		IReadOnlyList<ScopeFrameDetailRow> frameScopes = ScopeFrameDetailAnalyzer.Build(document, 0);
+		Assert(frameScopes.Count == 1, "tracy ui frame scopes");
+		Assert(frameScopes[0].ThreadName == "Thread 7", "tracy ui frame scope thread");
+		Assert(frameScopes[0].Name == "UITraceZone", "tracy ui frame scope name");
+		Assert(Math.Abs(frameScopes[0].StartOffsetMs - 1.0) < 0.0001, "tracy ui frame scope start");
+		Assert(Math.Abs(frameScopes[0].DurationMs - 3.0) < 0.0001, "tracy ui frame scope duration");
+
+		IReadOnlyList<ThreadTimelineScopeRow> timelineScopes = ThreadTimelineScopeAnalyzer.Build(document, document.Viewport);
+		Assert(timelineScopes.Count == 1, "tracy ui timeline scopes");
+		Assert(timelineScopes[0].ThreadName == "Thread 7", "tracy ui timeline scope thread");
+		Assert(timelineScopes[0].Name == "UITraceZone", "tracy ui timeline scope name");
+
+		ProfilerTimelineAdapter flameAdapter = new ProfilerTimelineAdapter();
+		flameAdapter.CreatePlotModel(document);
+		var flameConfig = flameAdapter.CreateScopeFlameGraphConfig(document);
+		Assert(flameConfig.StackFrames.Count == 1, "tracy ui flame frames");
+		Assert(flameConfig.StackFrames[0].FunctionName == "UITraceZone", "tracy ui flame function");
+
 		IReadOnlyList<SelectedFrameCounterRow> counters = SelectedFrameCounterAnalyzer.Build(document, 0);
 		Assert(counters.Count == 1, "tracy ui selected counters");
 		Assert(counters[0].GraphName == "tracy", "tracy ui counter graph");
