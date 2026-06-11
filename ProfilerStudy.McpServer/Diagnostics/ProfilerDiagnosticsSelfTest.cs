@@ -826,6 +826,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary firstCounter = ((IList)counters["counters"])[0] as IDictionary;
 			AssertEqual("FrameTime", firstCounter["name"], "plot counter name");
 			AssertEqual(2, firstCounter["sampleCount"], "plot counter sample count");
+			AssertMarkdownContains(countersResult, "| FrameTime | Double |  | 2 | 20 |", "plot counter markdown row");
 
 			Dictionary<string, object> samplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
 			{

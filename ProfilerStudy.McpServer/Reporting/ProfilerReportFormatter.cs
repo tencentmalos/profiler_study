@@ -177,6 +177,16 @@ internal static class ProfilerReportFormatter
 		{
 			return threadId;
 		}
+		if (string.Equals(column, "totalCount", StringComparison.Ordinal) &&
+			row.TryGetValue("sampleCount", out object sampleCount))
+		{
+			return sampleCount;
+		}
+		if (string.Equals(column, "maxValuePerFrame", StringComparison.Ordinal) &&
+			row.TryGetValue("maxValue", out object maxValue))
+		{
+			return maxValue;
+		}
 		return null;
 	}
 
