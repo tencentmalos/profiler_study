@@ -4,3 +4,6 @@
 [submodule "tools/profiler_study_sdk"]
 	path = tools/profiler_study_sdk
 	url = git@github.com:tencentmalos/profiler_study_sdk.git
+[submodule "tools/profiler_tracy_bridge"]
+	path = tools/profiler_tracy_bridge
+	url = git@github.com:tencentmalos/profiler_tracy_bridge.git
