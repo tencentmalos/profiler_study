@@ -4,7 +4,7 @@
 
 这份设计聚焦 ProfilerStudy 对 Tracy 的优先接入，覆盖两个核心能力：
 
-- MCP 和 UI 可以按协议选择连接 profiler target，默认仍使用现有 `profiler_study` 协议，显式选择 `tracy` 时直连 Tracy 端口。
+- MCP 和 UI 可以按协议选择连接 profiler target，协议名称固定为 `study`、`tracy`、`perfetto`。默认仍使用 `study`，对应当前已有的 ProfilerStudy 原始实现；显式选择 `tracy` 时直连 Tracy 端口。
 - MCP 和 UI 可以打开、加载并分析 `.tracy` 文件，且 live capture 产物和文件导入产物都能通过 Trace Workspace / Artifact Store 被复用。
 
 Tracy 支持作为可选能力接入。未初始化 Tracy submodule、未构建 bridge、或运行环境缺少 bridge 可执行文件时，现有 ProfilerStudy 文件读取、TCP 捕获、Android adb forward 捕获和 MCP self-test 都不能受影响。
@@ -131,7 +131,7 @@ TracyBridgeStatus
   Reason
 ```
 
-即使未启用 Tracy，`protocol=profiler_study` 的所有现有路径也不能读取这些开关或受其影响。
+即使未启用 Tracy，`protocol=study` 的所有现有路径也不能读取这些开关或受其影响。
 
 ## Bridge CLI Contract
 
@@ -279,7 +279,7 @@ TraceDocument
   Id
   SourcePath
   ArtifactId?
-  SourceFormat: ProfilerStudy | Tracy | Perfetto | Systrace
+  SourceFormat: study | tracy | perfetto | systrace
   DisplayName
   CreatedUtc
   ImportDiagnostics
@@ -354,15 +354,16 @@ TracyCaptureService
 字段：
 
 ```text
-protocol = profiler_study | tracy
-default = profiler_study
+protocol = study | tracy | perfetto
+default = study
 ```
 
 兼容要求：
 
 - 未传 `protocol` 时完全走现有 ProfilerStudy path。
-- `protocol=profiler_study` 时不探测 Tracy bridge。
+- `protocol=study` 时不探测 Tracy bridge。
 - `protocol=tracy` 只支持 TCP host/port；Android Tracy target 需要用户先建立 adb forward，再传 `pc://127.0.0.1:<forwarded-port>`。后续可扩展 `android://tcp:<port>`。
+- `protocol=perfetto` 是后续 Perfetto live/import 接入的保留名称；当前 Tracy 阶段只定义命名，不实现 Perfetto live capture。
 
 新增通用 trace tools：
 
@@ -397,7 +398,7 @@ LoadedTrace
 
 现有 MCP 分析工具兼容策略：
 
-- `get_session_summary`：支持 Tracy，返回 `sourceFormat=Tracy`。
+- `get_session_summary`：支持 Tracy，返回 `sourceFormat=tracy`；当前 ProfilerStudy 原始实现返回 `sourceFormat=study`。
 - `find_scope_hotspots`：Tracy 下聚合 CPU zones。
 - `list_counters` / `query_counter`：Tracy 下读取 plots。
 - `analyze_time_range`：Tracy 下优先支持 time range；如果用户只传 frame range，则要求 frames 存在。
@@ -531,7 +532,7 @@ UI 则显示简短错误，并在 diagnostics panel 展示详细日志。
 验收：
 
 - 文档说明默认构建不依赖 Tracy。
-- 文档说明 `profiler_study` 协议默认不变。
+- 文档说明 `study` 协议默认不变，且 `study` 对应当前 ProfilerStudy 原始实现。
 
 ### Phase 2：Submodule 和 build plumbing
 
@@ -610,7 +611,7 @@ profiler-tracy-bridge info --json
 
 MCP 回归：
 
-- `capture_profile(url="pc://127.0.0.1:8428")` 仍默认 ProfilerStudy。
+- `capture_profile(url="pc://127.0.0.1:8428")` 仍默认 `study`。
 - `capture_profile(url="pc://127.0.0.1:8086", protocol="tracy")` 走 bridge。
 - `load_trace_file(path="sample.tracy")` 走 Tracy importer。
 - `analyze_session_file(path="sample.profiler")` 仍走 legacy session。
@@ -629,4 +630,4 @@ UI 回归：
 
 ## 推荐结论
 
-Tracy 兼容应以 `tools/profiler_tracy_bridge` submodule 为唯一 C++ bridge 来源，主仓库只消费 bridge CLI 和 normalized schema。默认构建保持 Tracy optional，`profiler_study` 协议和现有文件读取不受影响。Tracy live capture 和 `.tracy` import 都先落到 Artifact Store，再通过 `TracyTraceQuerySession` 进入 MCP 和 Avalonia，从而保证同一份 capture 能被 UI 和 MCP 共同访问。
+Tracy 兼容应以 `tools/profiler_tracy_bridge` submodule 为唯一 C++ bridge 来源，主仓库只消费 bridge CLI 和 normalized schema。默认构建保持 Tracy optional，`study` 协议和现有文件读取不受影响。Tracy live capture 和 `.tracy` import 都先落到 Artifact Store，再通过 `TracyTraceQuerySession` 进入 MCP 和 Avalonia，从而保证同一份 capture 能被 UI 和 MCP 共同访问。
