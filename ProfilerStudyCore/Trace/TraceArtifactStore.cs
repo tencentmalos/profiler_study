@@ -58,18 +58,21 @@ public static class TraceArtifactStore
 			SourcePath = document.SourcePath,
 			NormalizedPath = "normalized",
 			DiagnosticsPath = "import-diagnostics.json",
+			SourceByteCount = GetFileByteCount(document.SourcePath),
 			CreatedUtc = DateTime.UtcNow.ToString("o"),
 			Implementation = ResolveImplementation(document.SourceFormat),
 			ReaderVersion = "0.1.0",
 			TracyVersion = tracyVersion,
 			Capture = capture
 		};
-		File.WriteAllText(Path.Combine(artifactDirectory, "manifest.json"), JsonSerializer.Serialize(manifest, JsonOptions));
-		WriteLiveCaptureDebugMaterial(artifactDirectory, manifest, diagnostics);
 		if (document.QuerySession is TracyTraceQuerySession tracyQuerySession)
 		{
 			TracyNormalizedArtifact.Write(normalizedDirectory, document, tracyQuerySession, diagnostics);
 		}
+		manifest.NormalizedByteCount = GetDirectoryByteCount(normalizedDirectory);
+		manifest.DiagnosticsByteCount = GetFileByteCount(diagnosticsPath);
+		WriteLiveCaptureDebugMaterial(artifactDirectory, manifest, diagnostics);
+		File.WriteAllText(Path.Combine(artifactDirectory, "manifest.json"), JsonSerializer.Serialize(manifest, JsonOptions));
 		return manifest;
 	}
 
@@ -191,6 +194,9 @@ public static class TraceArtifactStore
 				["sourcePath"] = manifest.SourcePath,
 				["normalizedPath"] = manifest.NormalizedPath,
 				["diagnosticsPath"] = manifest.DiagnosticsPath,
+				["sourceByteCount"] = manifest.SourceByteCount,
+				["normalizedByteCount"] = manifest.NormalizedByteCount,
+				["diagnosticsByteCount"] = manifest.DiagnosticsByteCount,
 				["createdUtc"] = manifest.CreatedUtc,
 				["tracyVersion"] = manifest.TracyVersion
 			});
@@ -221,6 +227,29 @@ public static class TraceArtifactStore
 		{
 			return null;
 		}
+	}
+
+	private static long GetFileByteCount(string path)
+	{
+		if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+		{
+			return 0;
+		}
+		return new FileInfo(path).Length;
+	}
+
+	private static long GetDirectoryByteCount(string path)
+	{
+		if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+		{
+			return 0;
+		}
+		long total = 0;
+		foreach (string file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
+		{
+			total += new FileInfo(file).Length;
+		}
+		return total;
 	}
 
 	private static ArrayList ReadDiagnostics(string path)

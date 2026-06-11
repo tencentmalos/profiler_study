@@ -17,6 +17,12 @@ public sealed class TraceArtifactManifest
 
 	public string DiagnosticsPath { get; set; }
 
+	public long SourceByteCount { get; set; }
+
+	public long NormalizedByteCount { get; set; }
+
+	public long DiagnosticsByteCount { get; set; }
+
 	public string CreatedUtc { get; set; }
 
 	public string Implementation { get; set; }

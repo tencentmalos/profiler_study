@@ -1222,6 +1222,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			{
 				AssertEqual("tracy", artifact["sourceFormat"], "trace artifact source format");
 				AssertEqual(sourceKind, artifact["sourceKind"], "trace artifact source kind");
+				AssertArtifactListSizeFields(artifact, sourceKind);
 				found = true;
 			}
 		}
@@ -1271,6 +1272,40 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual("tracy", manifest.RootElement.GetProperty("SourceFormat").GetString(), "trace artifact manifest source format");
 		AssertEqual(sourceKind, manifest.RootElement.GetProperty("SourceKind").GetString(), "trace artifact manifest source kind");
 		AssertEqual("ProfilerStudyCore.Tracy", manifest.RootElement.GetProperty("Implementation").GetString(), "trace artifact manifest implementation");
+		long sourceByteCount = manifest.RootElement.GetProperty("SourceByteCount").GetInt64();
+		long normalizedByteCount = manifest.RootElement.GetProperty("NormalizedByteCount").GetInt64();
+		long diagnosticsByteCount = manifest.RootElement.GetProperty("DiagnosticsByteCount").GetInt64();
+		if (string.Equals(sourceKind, "file-import", StringComparison.OrdinalIgnoreCase) && sourceByteCount <= 0)
+		{
+			throw new InvalidOperationException("file-import artifact manifest must record sourceByteCount.");
+		}
+		if (normalizedByteCount <= 0)
+		{
+			throw new InvalidOperationException("trace artifact manifest must record normalizedByteCount.");
+		}
+		if (diagnosticsByteCount <= 0)
+		{
+			throw new InvalidOperationException("trace artifact manifest must record diagnosticsByteCount.");
+		}
+	}
+
+	private static void AssertArtifactListSizeFields(IDictionary artifact, string sourceKind)
+	{
+		long sourceByteCount = Convert.ToInt64(artifact["sourceByteCount"]);
+		long normalizedByteCount = Convert.ToInt64(artifact["normalizedByteCount"]);
+		long diagnosticsByteCount = Convert.ToInt64(artifact["diagnosticsByteCount"]);
+		if (string.Equals(sourceKind, "file-import", StringComparison.OrdinalIgnoreCase) && sourceByteCount <= 0)
+		{
+			throw new InvalidOperationException("list_trace_artifacts must return sourceByteCount for file imports.");
+		}
+		if (normalizedByteCount <= 0)
+		{
+			throw new InvalidOperationException("list_trace_artifacts must return normalizedByteCount.");
+		}
+		if (diagnosticsByteCount <= 0)
+		{
+			throw new InvalidOperationException("list_trace_artifacts must return diagnosticsByteCount.");
+		}
 	}
 
 	private static void AssertTraceArtifactListAllContainsOnlyRegisteredArtifacts(ProfilerMcpTools tools)

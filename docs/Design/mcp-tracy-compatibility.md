@@ -542,6 +542,9 @@ Artifact manifest：
   "sourceKind": "live-capture",
   "sourcePath": "source.tracy",
   "normalizedPath": "normalized",
+  "sourceByteCount": 1048576,
+  "normalizedByteCount": 65536,
+  "diagnosticsByteCount": 2048,
   "createdUtc": "2026-06-11T07:30:00Z",
   "implementation": "ProfilerStudyCore.Tracy",
   "readerVersion": "0.1.0",
@@ -561,7 +564,8 @@ Artifact manifest：
 - 默认根目录为 `~/.profilerstudy/traces/captures`，测试和 headless 环境可通过 `PROFILER_STUDY_TRACE_ARTIFACT_ROOT` 覆盖。
 - `load_trace_file(format=auto|tracy)` 和 `capture_profile(protocol=tracy)` 都登记 `manifest.json` 与 `import-diagnostics.json`，并在 tool 返回中带 `artifactId`。
 - 已解码的 Tracy metadata、frame set、CPU zones、plots 和 diagnostics 写入 `normalized/` 下的 `manifest.json`、`threads.ndjson`、`frames.ndjson`、`cpu_zones.ndjson`、`plots.ndjson`、`diagnostics.json`。
-- `list_trace_artifacts(format, limit)` 只枚举 artifact store 中的 manifest；`format=tracy` 对应 Tracy 导入和 live capture。
+- Artifact manifest 记录 `sourceByteCount`、`normalizedByteCount`、`diagnosticsByteCount`。外部 `.tracy` file import 不复制原文件，但 `sourceByteCount` 仍记录导入时的原文件大小；live normalized-only capture 没有 `source.tracy` 时 `sourceByteCount=0`。
+- `list_trace_artifacts(format, limit)` 只枚举 artifact store 中的 manifest；`format=tracy` 对应 Tracy 导入和 live capture，并返回上述 size 字段，便于 MCP client 做清理和展示。
 - `load_trace_artifact(artifact_id, keep_session)` 从 artifact store 读取 normalized cache，重建 `TracyTraceQuerySession`，让 MCP 可以复用 import/live capture 产物。
 - `get_import_diagnostics(artifact_id)` 从 artifact store 读取 `import-diagnostics.json`，用于 UI 进程退出后仍可追溯导入或 live capture 诊断。
 - `source.tracy` writer 和高级 Tracy 事件仍属于后续阶段，不在当前 artifact store 中声明已完成。
