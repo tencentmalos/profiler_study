@@ -252,7 +252,9 @@ TracyCaptureResult
 
 - 实现 `ITraceQuerySession`。
 - 支持 summary、frames、threads、thread slices、zone hotspots、plots/counters、time range analysis。
-- frame marks 不存在时，frame-centric 工具返回明确 diagnostics，time-range 工具继续可用。
+- frame marks 不存在但保存格式中存在 frame set metadata 时，frame-centric 工具使用 `frameSource=tracy-frame-set-metadata` 返回基础 frame/range 结果。
+- `analyze_frame_detail` 在第一阶段使用 flat CPU zones 作为 frame detail 输入：`topSpans` 按裁剪后耗时排序，`nodeStats.includedNodeCount`、`omittedNodeCount`、`omittedByDurationCount` 和 `truncated` 必须反映 `maxNodes` / `minDurationMs` 后的实际纳入情况。完整 callstack hierarchy 未解码时 `threadFlameGraphs` 可以为空，但不能把已返回的 CPU zones 统计为 0。
+- 有 frame metadata 的 `range` 必须标记 `framesUnavailable=false` 并给出裁剪后的 start/end frame；没有 frame metadata 时才返回 `framesUnavailable=true`，time-range 工具仍可基于全局 CPU zones 降级分析。
 
 ## Normalized 输出格式
 

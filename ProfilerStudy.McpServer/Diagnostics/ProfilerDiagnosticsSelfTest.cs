@@ -506,7 +506,30 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(false, rangeResult["isError"], "zone analyze_time_range isError");
 			IDictionary range = rangeResult["structuredContent"] as IDictionary;
 			AssertEqual("tracy", range["sourceFormat"], "zone range source format");
+			AssertEqual(false, range["framesUnavailable"], "zone range frames unavailable");
+			AssertEqual(false, ((IDictionary)range["range"])["framesUnavailable"], "zone nested range frames unavailable");
 			AssertHasItems(range["scopeHotspots"], "zone range hotspots");
+
+			Dictionary<string, object> frameDetailResult = tools.CallTool("analyze_frame_detail", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["frame_index"] = 0,
+				["max_nodes"] = 1,
+				["min_duration_ms"] = 1.0
+			});
+			AssertEqual(false, frameDetailResult["isError"], "zone analyze_frame_detail isError");
+			IDictionary frameDetail = frameDetailResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", frameDetail["sourceFormat"], "zone frame detail source format");
+			AssertEqual(true, frameDetail["supported"], "zone frame detail supported");
+			AssertEqual(false, ((IDictionary)frameDetail["range"])["framesUnavailable"], "zone frame detail range frames unavailable");
+			AssertHasItems(frameDetail["topSpans"], "zone frame detail top spans");
+			IDictionary topSpan = ((IList)frameDetail["topSpans"])[0] as IDictionary;
+			AssertEqual("SelfTestZone", topSpan["name"], "zone frame detail top span name");
+			AssertEqual(4.0, topSpan["durationMs"], "zone frame detail top span duration");
+			IDictionary nodeStats = frameDetail["nodeStats"] as IDictionary;
+			AssertEqual(1, nodeStats["includedNodeCount"], "zone frame detail included nodes");
+			AssertEqual(0, nodeStats["omittedNodeCount"], "zone frame detail omitted nodes");
+			AssertEqual(false, nodeStats["truncated"], "zone frame detail truncated");
 
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{

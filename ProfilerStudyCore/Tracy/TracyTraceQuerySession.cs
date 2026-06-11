@@ -299,6 +299,12 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				HasMetadataFrames() ? "Requested Tracy frame index is outside the decoded frame metadata range." : "Tracy frame metadata is required before frame detail analysis can return data.");
 		}
 
+		List<Dictionary<string, object>> allSpans = BuildFrameDetailSpans(frameIndex, frame, minDurationMs, out int omittedByDurationCount);
+		int resolvedMaxNodes = Math.Max(1, maxNodes);
+		List<Dictionary<string, object>> includedSpans = allSpans
+			.Take(resolvedMaxNodes)
+			.ToList();
+		int omittedNodeCount = Math.Max(0, allSpans.Count - includedSpans.Count) + omittedByDurationCount;
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -310,23 +316,20 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["range"] = BuildFrameRange(frameIndex, frameIndex),
 			["options"] = new Dictionary<string, object>
 			{
-				["maxNodes"] = Math.Max(1, maxNodes),
+				["maxNodes"] = resolvedMaxNodes,
 				["maxDepth"] = Math.Max(1, maxDepth),
 				["minDurationMs"] = Round(Math.Max(0.0, minDurationMs))
 			},
 			["threadFlameGraphs"] = new ArrayList(),
-			["topSpans"] = ToArrayList(FilterZonesByFrameRange(frameIndex, frameIndex)
-				.OrderByDescending(zone => zone.Duration)
-				.Take(Math.Min(Math.Max(1, maxNodes), 50))
-				.Select(ZoneToSpanDictionary)),
+			["topSpans"] = ToArrayList(includedSpans),
 			["frameCounters"] = new ArrayList(),
 			["nodeStats"] = new Dictionary<string, object>
 			{
-				["includedNodeCount"] = 0,
-				["omittedNodeCount"] = 0,
+				["includedNodeCount"] = includedSpans.Count,
+				["omittedNodeCount"] = omittedNodeCount,
 				["omittedByDepthCount"] = 0,
-				["omittedByDurationCount"] = 0,
-				["truncated"] = false
+				["omittedByDurationCount"] = omittedByDurationCount,
+				["truncated"] = allSpans.Count > includedSpans.Count
 			},
 			["diagnostics"] = Diagnostics("TracyFrameDetailPartial", "Frame detail uses decoded Tracy frame set metadata and flat CPU zones; full Tracy callstack hierarchy decoding is pending.")
 		};
@@ -473,6 +476,47 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		}
 	}
 
+	private List<Dictionary<string, object>> BuildFrameDetailSpans(int frameIndex, TracyFrameSummary frame, double minDurationMs, out int omittedByDurationCount)
+	{
+		long minDurationNs = (long)Math.Ceiling(Math.Max(0.0, minDurationMs) * 1_000_000.0);
+		omittedByDurationCount = 0;
+		List<Dictionary<string, object>> spans = new List<Dictionary<string, object>>();
+		foreach (TracyCpuZoneSummary zone in FilterZonesByFrameRange(frameIndex, frameIndex))
+		{
+			long clippedStart = Math.Max(zone.Start, frame.Start);
+			long clippedEnd = Math.Min(zone.End, frame.End);
+			if (clippedEnd <= clippedStart)
+			{
+				continue;
+			}
+
+			long duration = clippedEnd - clippedStart;
+			if (duration < minDurationNs)
+			{
+				omittedByDurationCount++;
+				continue;
+			}
+
+			spans.Add(new Dictionary<string, object>
+			{
+				["threadId"] = zone.ThreadId,
+				["name"] = zone.Name,
+				["sourceLocation"] = zone.SourceLocation,
+				["start"] = clippedStart,
+				["end"] = clippedEnd,
+				["startOffsetMs"] = Round((clippedStart - frame.Start) / 1_000_000.0),
+				["durationMs"] = Round(duration / 1_000_000.0),
+				["depth"] = 0
+			});
+		}
+
+		return spans
+			.OrderByDescending(span => Convert.ToDouble(span["durationMs"]))
+			.ThenBy(span => Convert.ToString(span["name"]))
+			.ThenBy(span => Convert.ToUInt64(span["threadId"]))
+			.ToList();
+	}
+
 	private IEnumerable<TracyFrameSummary> GetMetadataFrames()
 	{
 		if (m_EventStream.Metadata == null)
@@ -571,13 +615,28 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		return list;
 	}
 
-	private static Dictionary<string, object> BuildFrameRange(int startFrame, int endFrame)
+	private Dictionary<string, object> BuildFrameRange(int startFrame, int endFrame)
 	{
+		if (HasMetadataFrames())
+		{
+			int frameCount = GetMetadataFrameCount();
+			int first = Math.Max(0, Math.Min(startFrame, frameCount - 1));
+			int last = Math.Max(first, Math.Min(endFrame, frameCount - 1));
+			return new Dictionary<string, object>
+			{
+				["startFrame"] = first,
+				["endFrame"] = last,
+				["framesUnavailable"] = false,
+				["frameSource"] = "tracy-frame-set-metadata"
+			};
+		}
+
 		return new Dictionary<string, object>
 		{
 			["startFrame"] = startFrame,
 			["endFrame"] = endFrame,
-			["framesUnavailable"] = true
+			["framesUnavailable"] = true,
+			["frameSource"] = "none"
 		};
 	}
 
