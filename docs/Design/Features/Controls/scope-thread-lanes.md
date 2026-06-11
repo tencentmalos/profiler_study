@@ -29,6 +29,7 @@
 - `TimeSpanList`
 - `TimeSpanInfoSet`
 - `RootFirstTimeSpanIterator`
+- Tracy `TraceDocument.QuerySession` / `TracyTraceQuerySession.EventStream.CpuZones`
 
 ### Avalonia
 
@@ -47,6 +48,7 @@
 ## 行为契约
 
 - Scope block 的时间位置、嵌套层级、thread lane 归属一致。
+- Trace-backed Tracy document 中，CPU zones 进入 hotspot 表和后续 thread-lane 输入；当前阶段没有完整嵌套层级时，hotspot 使用 zone name 聚合并保留 diagnostics/降级语义。
 - Scope 着色支持按 thread 和按 scope 两种语义。
 - Selected scope、highlight scope、find next/prev 使用同一 selection/range 语义。
 - Flame chart 输入来自选中帧 detail，不在 paint 中重扫 session。

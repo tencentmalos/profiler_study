@@ -24,6 +24,16 @@ internal sealed class ProfilerCustomStatTimelineInfo
 		CurveKey = curveKey;
 		StatId = statId;
 		ConvertCyclesToMilliseconds = convertCyclesToMilliseconds;
+		TracePlotName = string.Empty;
+	}
+
+	public ProfilerCustomStatTimelineInfo(string plotKey, string curveKey, string tracePlotName)
+	{
+		PlotKey = plotKey;
+		CurveKey = curveKey;
+		StatId = 0;
+		ConvertCyclesToMilliseconds = false;
+		TracePlotName = tracePlotName ?? string.Empty;
 	}
 
 	public string PlotKey { get; }
@@ -33,4 +43,8 @@ internal sealed class ProfilerCustomStatTimelineInfo
 	public long StatId { get; }
 
 	public bool ConvertCyclesToMilliseconds { get; }
+
+	public string TracePlotName { get; }
+
+	public bool IsTracePlot => !string.IsNullOrWhiteSpace(TracePlotName);
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using ProfilerStudy.Avalonia.ProfilerStats;
+using ProfilerStudy.Avalonia.ProfilerStats.Timeline;
+using ProfilerStudy.Avalonia.Timeline;
+using ProfilerStudy.Tracy;
+using ProfilerStudy.Trace;
 
 namespace ProfilerStudy.Avalonia;
 
@@ -66,6 +71,7 @@ internal static class AvaloniaSmokeTest
 			AssertFrameTimelineNavigationContract();
 			AssertSessionScrollbarFrameStripContract();
 			AssertTracyTraceLoad();
+			AssertTracyUiAnalyzers();
 			AssertTracyConnectionCapture();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -488,6 +494,106 @@ internal static class AvaloniaSmokeTest
 				File.Delete(path);
 			}
 		}
+	}
+
+	private static void AssertTracyUiAnalyzers()
+	{
+		SessionDocument document = CreateTracyUiAnalyzerDocument();
+		ProfilerStatsDocumentSummary statsSummary = ProfilerStatsDocumentAnalyzer.Analyze(document);
+		Assert(statsSummary.FrameSeriesPointCount == 2, "tracy ui frame series");
+		Assert(statsSummary.CustomStatPlotCount == 1, "tracy ui plot count");
+		Assert(statsSummary.CustomStatCurveCount == 1, "tracy ui curve count");
+		ProfilerTimelinePlotModel plotModel = new ProfilerTimelineAdapter().CreatePlotModel(document);
+		Assert(plotModel.Metadata.PlotList.Any(plot => string.Equals(plot.PlotTitle, "Tracy Plots", StringComparison.Ordinal)), "tracy ui plot metadata");
+		Assert(plotModel.CustomStats.Count == 1, "tracy ui plot curves");
+		ProfilerTimelineAdapter plotAdapter = new ProfilerTimelineAdapter();
+		ProfilerTimelinePlotModel fillModel = plotAdapter.CreatePlotModel(document);
+		CurveUiPlotBridgeItem tracyBridge = CreateSmokeCurveBridge(fillModel.CustomStats[0]);
+		plotAdapter.FillCustomStatSeries(fillModel.CustomStats, new Dictionary<string, CurveUiPlotBridgeItem>
+		{
+			[fillModel.CustomStats[0].PlotKey] = tracyBridge
+		});
+		Assert(tracyBridge.CurveList[0].XDatas.Count == 2, "tracy ui plot fill count");
+		Assert(Math.Abs(tracyBridge.CurveList[0].YDatas[0] - 16.0) < 0.0001, "tracy ui plot fill value");
+
+		IReadOnlyList<ScopeHotspotRow> hotspots = ScopeHotspotAnalyzer.Build(document);
+		Assert(hotspots.Count == 1, "tracy ui hotspots");
+		Assert(hotspots[0].Name == "UITraceZone", "tracy ui hotspot name");
+		Assert(Math.Abs(hotspots[0].TotalTimeMs - 3.0) < 0.0001, "tracy ui hotspot total");
+
+		IReadOnlyList<SelectedFrameCounterRow> counters = SelectedFrameCounterAnalyzer.Build(document, 0);
+		Assert(counters.Count == 1, "tracy ui selected counters");
+		Assert(counters[0].GraphName == "tracy", "tracy ui counter graph");
+		Assert(counters[0].Name == "UIFrameTime", "tracy ui counter name");
+		Assert(Math.Abs(counters[0].Value - 16.0) < 0.0001, "tracy ui counter value");
+	}
+
+	private static SessionDocument CreateTracyUiAnalyzerDocument()
+	{
+		TracyTraceMetadata metadata = new TracyTraceMetadata(
+			0,
+			1_000_000_000,
+			1.0,
+			33_000_000,
+			0,
+			1001,
+			0,
+			2,
+			0,
+			"SelfTestCpu",
+			false,
+			"UiAnalyzerCapture",
+			"UiAnalyzerProgram",
+			0,
+			0,
+			"UiAnalyzerHost",
+			new[]
+			{
+				new TracyFrameSetSummary(0, true, new[]
+				{
+					new TracyFrameSummary(0, 0, 16_000_000),
+					new TracyFrameSummary(1, 16_000_000, 33_000_000)
+				})
+			},
+			0,
+			0);
+		TracyEventStream eventStream = new TracyEventStream(
+			new TracyFileHeader("0.10.0", "memory"),
+			0,
+			0,
+			0,
+			0,
+			metadata,
+			new[] { new TracyCpuZoneSummary(7, -1, "UITraceZone", 1_000_000, 4_000_000) },
+			new[]
+			{
+				new TracyPlotSummary("UIFrameTime", 0, 0, 16.0, 17.0, 33.0, new[]
+				{
+					new TracyPlotSample(8_000_000, 16.0),
+					new TracyPlotSample(24_000_000, 17.0)
+				})
+			},
+			1,
+			new ArrayList());
+		TracyTraceQuerySession querySession = new TracyTraceQuerySession("memory://tracy-ui-analyzer", eventStream, new ArrayList());
+		TraceDocument traceDocument = new TraceDocument(
+			Guid.NewGuid().ToString("N"),
+			"memory://tracy-ui-analyzer",
+			"tracy",
+			"tracy-ui-analyzer",
+			DateTime.UtcNow,
+			querySession,
+			new ArrayList());
+		return SessionLoader.CreateTraceDocument(traceDocument, "memory://tracy-ui-analyzer");
+	}
+
+	private static CurveUiPlotBridgeItem CreateSmokeCurveBridge(ProfilerCustomStatTimelineInfo statInfo)
+	{
+		Curve2DGenerator.OneCurve curve = new Curve2DGenerator.OneCurve(null);
+		CurveUiPlotBridgeItem bridge = new CurveUiPlotBridgeItem();
+		bridge.CurveList.Add(curve);
+		bridge.CurveDictionary[statInfo.CurveKey] = curve;
+		return bridge;
 	}
 
 	private static void AssertTracyConnectionCapture()

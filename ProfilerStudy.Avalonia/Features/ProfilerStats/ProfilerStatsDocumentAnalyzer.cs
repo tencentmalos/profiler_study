@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using ProfilerStudy;
+using ProfilerStudy.Tracy;
 
 namespace ProfilerStudy.Avalonia.ProfilerStats;
 
@@ -16,6 +17,11 @@ internal static class ProfilerStatsDocumentAnalyzer
 		Session session = document?.Session;
 		if (session == null)
 		{
+			if (document?.TraceDocument?.QuerySession is TracyTraceQuerySession tracyQuerySession)
+			{
+				int plotCount = tracyQuerySession.EventStream.Plots?.Count ?? 0;
+				return new ProfilerStatsDocumentSummary(frameSeriesPointCount, plotCount == 0 ? 0 : 1, plotCount);
+			}
 			return new ProfilerStatsDocumentSummary(frameSeriesPointCount, 0, 0);
 		}
 

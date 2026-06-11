@@ -5,12 +5,14 @@ using ScottPlot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ProfilerStudy.Tracy;
 
 namespace ProfilerStudy.Avalonia.ProfilerStats;
 
 internal sealed class ProfilerTimelineAdapter
 {
 	private Session m_Session;
+	private TracyTraceQuerySession m_TracyQuerySession;
 	private FrameSample[] m_FrameSamples = Array.Empty<FrameSample>();
 
 	public FrameSample[] FrameSamples => m_FrameSamples;
@@ -18,6 +20,7 @@ internal sealed class ProfilerTimelineAdapter
 	public ProfilerTimelinePlotModel CreatePlotModel(SessionDocument document)
 	{
 		m_Session = document?.Session;
+		m_TracyQuerySession = document?.TraceDocument?.QuerySession as TracyTraceQuerySession;
 		m_FrameSamples = document?.FrameSamples ?? Array.Empty<FrameSample>();
 
 		DiagramMetadata metadata = ProfilerStatisticsProcessor.GetMetadataFromProfilerStatisticsInfo();
@@ -26,6 +29,10 @@ internal sealed class ProfilerTimelineAdapter
 		if (m_Session != null)
 		{
 			AppendCustomStatMetadata(m_Session, metadata, customStats);
+		}
+		else if (m_TracyQuerySession != null)
+		{
+			AppendTracyPlotMetadata(m_TracyQuerySession, metadata, customStats);
 		}
 
 		return new ProfilerTimelinePlotModel(metadata, customStats);
@@ -52,8 +59,14 @@ internal sealed class ProfilerTimelineAdapter
 
 	public void FillCustomStatSeries(IReadOnlyList<ProfilerCustomStatTimelineInfo> customStats, IDictionary<string, CurveUiPlotBridgeItem> plotBridges)
 	{
-		if (m_Session == null || customStats.Count == 0 || m_FrameSamples.Length == 0)
+		if (customStats.Count == 0 || m_FrameSamples.Length == 0)
 		{
+			return;
+		}
+
+		if (m_Session == null)
+		{
+			FillTracyPlotSeries(customStats, plotBridges);
 			return;
 		}
 
@@ -290,6 +303,94 @@ internal sealed class ProfilerTimelineAdapter
 			metadata.PlotList.Add(plotMeta);
 			metadata.PlotDictionary.Add(plotMeta.PropertyName, plotMeta);
 		}
+	}
+
+	private static void AppendTracyPlotMetadata(TracyTraceQuerySession querySession, DiagramMetadata metadata, List<ProfilerCustomStatTimelineInfo> customStats)
+	{
+		if (querySession.EventStream.Plots == null || querySession.EventStream.Plots.Count == 0)
+		{
+			return;
+		}
+
+		string plotProperty = $"TracyPlot_{metadata.PlotList.Count}";
+		var plotMeta = new CurvePlotMetadata
+		{
+			PropertyName = plotProperty,
+			PlotTitle = "Tracy Plots",
+			IsMainPlot = false
+		};
+
+		int curveIndex = 0;
+		foreach (TracyPlotSummary plot in querySession.EventStream.Plots)
+		{
+			string curveProperty = $"Value_{curveIndex}";
+			var curveMeta = new CurveFieldMetadata
+			{
+				PropertyName = curveProperty,
+				CurveLabel = plot.Name,
+				CurveUnit = string.Empty,
+				LineColor = ScottPlotColorUtil.GetMutedColor(curveIndex + 1),
+			};
+			plotMeta.SubFields.Add(curveMeta);
+			plotMeta.FieldDictionary.Add(curveMeta.PropertyName, curveMeta);
+			customStats.Add(new ProfilerCustomStatTimelineInfo(plotMeta.PropertyName, curveMeta.PropertyName, plot.Name));
+			curveIndex++;
+		}
+
+		metadata.PlotList.Add(plotMeta);
+		metadata.PlotDictionary.Add(plotMeta.PropertyName, plotMeta);
+	}
+
+	private void FillTracyPlotSeries(IReadOnlyList<ProfilerCustomStatTimelineInfo> customStats, IDictionary<string, CurveUiPlotBridgeItem> plotBridges)
+	{
+		if (m_TracyQuerySession?.EventStream.Plots == null ||
+			m_TracyQuerySession.EventStream.Metadata == null)
+		{
+			return;
+		}
+
+		foreach (ProfilerCustomStatTimelineInfo statInfo in customStats.Where(item => item.IsTracePlot))
+		{
+			TracyPlotSummary plot = m_TracyQuerySession.EventStream.Plots.FirstOrDefault(item => string.Equals(item.Name, statInfo.TracePlotName, StringComparison.Ordinal));
+			if (plot == null ||
+				plotBridges.TryGetValue(statInfo.PlotKey, out CurveUiPlotBridgeItem bridge) is false ||
+				bridge.CurveDictionary.TryGetValue(statInfo.CurveKey, out Curve2DGenerator.OneCurve curve) is false)
+			{
+				continue;
+			}
+
+			foreach (TracyPlotSample sample in plot.Samples)
+			{
+				if (!TryGetTracyFrameIndex(sample.Time, out int frameIndex))
+				{
+					continue;
+				}
+				int displayIndex = GetDisplaySampleIndex(frameIndex);
+				if (displayIndex < 0)
+				{
+					continue;
+				}
+				curve.AppendData(m_FrameSamples[displayIndex].Index, sample.Value);
+			}
+		}
+	}
+
+	private bool TryGetTracyFrameIndex(long time, out int frameIndex)
+	{
+		frameIndex = 0;
+		foreach (TracyFrameSetSummary frameSet in m_TracyQuerySession.EventStream.Metadata.FrameSets)
+		{
+			foreach (TracyFrameSummary frame in frameSet.Frames)
+			{
+				if (time >= frame.Start && time <= frame.End)
+				{
+					return true;
+				}
+				frameIndex++;
+			}
+		}
+		frameIndex = -1;
+		return false;
 	}
 
 	private static Color ConvertDrawingColor(System.Drawing.Color color)

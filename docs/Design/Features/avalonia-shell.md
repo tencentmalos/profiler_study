@@ -101,7 +101,7 @@ SessionLoader
 - `.tracy` 由 `TracyTraceImporter` 加载，生成 trace-backed `SessionDocument`；`Session` 保持为 `null`，避免把 Tracy 强行伪装成 legacy ProfilerStudy session。
 - Timeline frame samples 第一阶段来自 Tracy frame set metadata；没有 frame metadata 时 document 仍可打开，并在状态/summary 中明确 frame 数为 0。
 - Session-only 操作，例如 Save、Create Session from Selection、Android context switch merge、legacy source detail，继续依赖 `CurrentDocument.Session != null` 的现有 can-execute 约束。
-- Tracy zones/plots 的专用 UI 视图后续应通过 `TraceDocument.QuerySession` 或 feature analyzer 接入，而不是在 shell 中直接解析 Tracy 文件。
+- Tracy zones/plots 的专用 UI 视图通过 `TraceDocument.QuerySession` 或 feature analyzer 接入，而不是在 shell 中直接解析 Tracy 文件；hotspot/counter/stats analyzers 可以读取 `TracyTraceQuerySession.EventStream` 并生成现有 Avalonia row model。
 
 Connection panel 的外部 trace 接入规则：
 
