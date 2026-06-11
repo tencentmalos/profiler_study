@@ -2923,6 +2923,7 @@ public class Session : IDisposable
 	private void DeserialiseThreadMain(ReceiveStream reader, long file_size, ThreadJobContext context)
 	{
 		List<ReceivedPacket> list = new List<ReceivedPacket>();
+		List<ReceivedPacket> preConnectPackets = new List<ReceivedPacket>();
 		int num = Environment.TickCount;
 		bool flag = false;
 		int num2 = 0;
@@ -2938,11 +2939,6 @@ public class Session : IDisposable
 				}
 				item.m_PacketType = (PacketType)(num3 & 0xFFFF);
 				int packed_value = (num3 >> 16) & 0xFFFF;
-				if (!flag && item.m_PacketType != PacketType.Connect)
-				{
-					Disconnect(DisconnectReason.UnexpectedPacket);
-					break;
-				}
 				switch (item.m_PacketType)
 				{
 				case PacketType.Connect:
@@ -3099,11 +3095,29 @@ public class Session : IDisposable
 				{
 					goto IL_0579;
 				}
+				if (item.m_PacketType != PacketType.Connect)
+				{
+					if (preConnectPackets.Count > 4096)
+					{
+						Disconnect(DisconnectReason.UnexpectedPacket);
+						break;
+					}
+					preConnectPackets.Add(item);
+					goto IL_0581;
+				}
 				flag = true;
 				ConnectPacket connectPacket = (ConnectPacket)item.m_Packet;
 				m_ReceivedProfilerStudyLibVersion = connectPacket.m_ProfilerStudyLibVersion;
 				if (IsValidProfilerStudyLibVersion(17, connectPacket.m_ProfilerStudyLibVersion))
 				{
+					if (preConnectPackets.Count > 0)
+					{
+						LogLine("ProfilerStudy live stream received " + preConnectPackets.Count + " packet(s) before ConnectPacket; replaying after ConnectPacket.");
+						list.Add(item);
+						list.AddRange(preConnectPackets);
+						preConnectPackets.Clear();
+						goto IL_0581;
+					}
 					goto IL_0579;
 				}
 				Disconnect(DisconnectReason.BadVersion);
