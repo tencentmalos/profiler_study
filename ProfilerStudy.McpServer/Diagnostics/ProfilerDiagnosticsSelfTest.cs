@@ -848,6 +848,19 @@ internal static class ProfilerDiagnosticsSelfTest
 			});
 			server.AssertHandshakeReceived();
 
+			int refusedPort = ReserveClosedTcpPort();
+			Dictionary<string, object> connectFailedResult = tools.CallTool("capture_profile", new Dictionary<string, object>
+			{
+				["url"] = "pc://127.0.0.1:" + refusedPort,
+				["protocol"] = "tracy",
+				["duration_seconds"] = 1
+			});
+			AssertEqual(true, connectFailedResult["isError"], "tracy live connect failed isError");
+			IDictionary connectFailed = connectFailedResult["structuredContent"] as IDictionary;
+			AssertEqual("TracyConnectFailed", connectFailed["errorCode"], "tracy live connect failed error code");
+			AssertEqual("0.10.0", connectFailed["lockedVersion"], "tracy live connect failed locked version");
+			AssertDiagnosticCode(connectFailed["diagnostics"], "TracyConnectFailed", "tracy live connect failed diagnostics");
+
 			using FakeTracyServer rejectedServer = new FakeTracyServer(2);
 			rejectedServer.Start();
 			Dictionary<string, object> rejectedResult = tools.CallTool("capture_profile", new Dictionary<string, object>
@@ -869,6 +882,13 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			CleanupSelfTestArtifactRoot(artifactRoot);
 		}
+	}
+
+	private static int ReserveClosedTcpPort()
+	{
+		using TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+		listener.Start();
+		return ((IPEndPoint)listener.LocalEndpoint).Port;
 	}
 
 	private static string ResetSelfTestArtifactRoot()

@@ -29,12 +29,23 @@ public static class Tracy010LiveCaptureClient
 
 		Stopwatch connectStopwatch = Stopwatch.StartNew();
 		using TcpClient client = new TcpClient();
-		IAsyncResult connect = client.BeginConnect(host, port, null, null);
-		if (!connect.AsyncWaitHandle.WaitOne(System.TimeSpan.FromSeconds(5)))
+		try
 		{
-			throw new TracyFileFormatException("TracyConnectFailed", "Timed out connecting to Tracy target.");
+			IAsyncResult connect = client.BeginConnect(host, port, null, null);
+			if (!connect.AsyncWaitHandle.WaitOne(System.TimeSpan.FromSeconds(5)))
+			{
+				throw new TracyFileFormatException("TracyConnectFailed", "Timed out connecting to Tracy target.");
+			}
+			client.EndConnect(connect);
 		}
-		client.EndConnect(connect);
+		catch (TracyFileFormatException)
+		{
+			throw;
+		}
+		catch (SocketException ex)
+		{
+			throw new TracyFileFormatException("TracyConnectFailed", "Failed to connect to Tracy target " + host + ":" + port + ": " + ex.Message + ".");
+		}
 		connectStopwatch.Stop();
 		client.ReceiveTimeout = 5000;
 		client.SendTimeout = 5000;
