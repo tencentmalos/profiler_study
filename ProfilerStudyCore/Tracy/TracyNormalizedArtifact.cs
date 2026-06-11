@@ -24,6 +24,7 @@ public static class TracyNormalizedArtifact
 		WriteLines(Path.Combine(normalizedDirectory, "threads.ndjson"), BuildThreads(eventStream));
 		WriteLines(Path.Combine(normalizedDirectory, "frames.ndjson"), frames.Select(FrameToRecord));
 		WriteLines(Path.Combine(normalizedDirectory, "cpu_zones.ndjson"), eventStream.CpuZones.Select(ZoneToRecord));
+		WriteLines(Path.Combine(normalizedDirectory, "source_locations.ndjson"), eventStream.SourceLocations.Select(SourceLocationToRecord));
 		WriteLines(Path.Combine(normalizedDirectory, "gpu_contexts.ndjson"), eventStream.GpuContexts.Select(GpuContextToRecord));
 		WriteLines(Path.Combine(normalizedDirectory, "gpu_zones.ndjson"), eventStream.GpuZones.Select(GpuZoneToRecord));
 		WriteLines(Path.Combine(normalizedDirectory, "plots.ndjson"), BuildPlotRecords(eventStream));
@@ -37,6 +38,7 @@ public static class TracyNormalizedArtifact
 		ArrayList diagnostics = ReadArrayList(Path.Combine(normalizedDirectory, "diagnostics.json"));
 		List<TracyFrameSummary> frames = ReadFrames(Path.Combine(normalizedDirectory, "frames.ndjson"));
 		List<TracyCpuZoneSummary> zones = ReadZones(Path.Combine(normalizedDirectory, "cpu_zones.ndjson"));
+		List<TracySourceLocationSummary> sourceLocations = ReadSourceLocations(Path.Combine(normalizedDirectory, "source_locations.ndjson"));
 		List<TracyGpuContextSummary> gpuContexts = ReadGpuContexts(Path.Combine(normalizedDirectory, "gpu_contexts.ndjson"));
 		List<TracyGpuZoneSummary> gpuZones = ReadGpuZones(Path.Combine(normalizedDirectory, "gpu_zones.ndjson"));
 		List<TracyPlotSummary> plots = ReadPlots(Path.Combine(normalizedDirectory, "plots.ndjson"));
@@ -56,7 +58,8 @@ public static class TracyNormalizedArtifact
 			GetInt(manifest, "threadCount", threads.Count),
 			diagnostics,
 			gpuContexts,
-			gpuZones);
+			gpuZones,
+			sourceLocations);
 		TracyTraceQuerySession querySession = new TracyTraceQuerySession(artifactManifest.SourcePath ?? artifactManifest.ArtifactId, eventStream, diagnostics);
 		return new TraceDocument(
 			Guid.NewGuid().ToString("N"),
@@ -103,6 +106,7 @@ public static class TracyNormalizedArtifact
 			["zoneCount"] = eventStream.CpuZones.Count,
 			["gpuContextCount"] = eventStream.GpuContexts.Count,
 			["gpuZoneCount"] = eventStream.GpuZones.Count,
+			["sourceLocationCount"] = eventStream.SourceLocations.Count,
 			["plotCount"] = eventStream.Plots.Count,
 			["compressedBlockCount"] = eventStream.CompressedBlockCount,
 			["compressedByteCount"] = eventStream.CompressedByteCount,
@@ -206,10 +210,24 @@ public static class TracyNormalizedArtifact
 		};
 	}
 
+	private static Dictionary<string, object> SourceLocationToRecord(TracySourceLocationSummary sourceLocation)
+	{
+		return new Dictionary<string, object>
+		{
+			["id"] = sourceLocation.Id,
+			["name"] = sourceLocation.Name,
+			["function"] = sourceLocation.Function,
+			["file"] = sourceLocation.File,
+			["line"] = sourceLocation.Line,
+			["dynamicName"] = sourceLocation.DynamicName
+		};
+	}
+
 	private static Dictionary<string, object> GpuZoneToRecord(TracyGpuZoneSummary zone)
 	{
 		return new Dictionary<string, object>
 		{
+			["id"] = zone.Id,
 			["context"] = zone.Context,
 			["queryId"] = zone.QueryId,
 			["threadId"] = zone.ThreadId,
@@ -218,7 +236,10 @@ public static class TracyNormalizedArtifact
 			["startNs"] = zone.Start,
 			["endNs"] = zone.End,
 			["durationNs"] = zone.Duration,
-			["timeSource"] = zone.TimeSource
+			["timeSource"] = zone.TimeSource,
+			["depth"] = zone.Depth,
+			["parentId"] = zone.ParentId,
+			["zoneKind"] = zone.ZoneKind
 		};
 	}
 
@@ -332,12 +353,29 @@ public static class TracyNormalizedArtifact
 		return contexts;
 	}
 
+	private static List<TracySourceLocationSummary> ReadSourceLocations(string path)
+	{
+		List<TracySourceLocationSummary> sourceLocations = new List<TracySourceLocationSummary>();
+		foreach (Dictionary<string, object> record in ReadLineDictionaries(path))
+		{
+			sourceLocations.Add(new TracySourceLocationSummary(
+				(short)GetInt(record, "id", -1),
+				GetString(record, "name", string.Empty),
+				GetString(record, "function", string.Empty),
+				GetString(record, "file", string.Empty),
+				(uint)GetInt(record, "line", 0),
+				GetString(record, "dynamicName", string.Empty)));
+		}
+		return sourceLocations;
+	}
+
 	private static List<TracyGpuZoneSummary> ReadGpuZones(string path)
 	{
 		List<TracyGpuZoneSummary> zones = new List<TracyGpuZoneSummary>();
 		foreach (Dictionary<string, object> record in ReadLineDictionaries(path))
 		{
 			zones.Add(new TracyGpuZoneSummary(
+				GetInt(record, "id", zones.Count),
 				(byte)GetInt(record, "context", 0),
 				(ushort)GetInt(record, "queryId", 0),
 				(uint)GetInt(record, "threadId", 0),
@@ -345,7 +383,10 @@ public static class TracyNormalizedArtifact
 				GetString(record, "name", string.Empty),
 				GetLong(record, "startNs", 0L),
 				GetLong(record, "endNs", 0L),
-				GetString(record, "timeSource", "cpu-submit-time")));
+				GetString(record, "timeSource", "cpu-submit-time"),
+				GetInt(record, "depth", 0),
+				GetInt(record, "parentId", -1),
+				GetString(record, "zoneKind", string.Empty)));
 		}
 		return zones;
 	}

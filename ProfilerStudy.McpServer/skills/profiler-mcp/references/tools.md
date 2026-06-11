@@ -32,6 +32,8 @@
 | `list_counters` | `session_id`, optional `top`, `filter` |
 | `query_counter` | `session_id`, `counter_name`, optional `start_frame`, `end_frame`, `accumulated`, `max_samples` |
 | `list_gpu_zones` | `session_id`, optional `top`, `start_frame`, `end_frame`, `start_time_ns`, `end_time_ns`, `time_source` (`any`, `gpu-time`, `cpu-submit-time`) |
+| `analyze_gpu_frames` | `session_id`, optional `top`, `start_frame`, `end_frame`, `time_source`; aggregates GPU zones by frame and joins CPU frame time plus same-frame counter highlights |
+| `get_gpu_timeline` | `session_id`, optional `start_frame`, `end_frame`, `start_time_ns`, `end_time_ns`, `max_zones`, `include_hierarchy`, `time_source`; returns GPU zones ordered by trace time |
 
 ## Prompt Patterns
 
@@ -68,13 +70,19 @@ Capture url=pc://127.0.0.1:8086 protocol=tracy for 10 seconds with keep_session=
 Android Tracy live capture:
 
 ```text
-Capture url=android://localabstract:azahar-tracy protocol=tracy for 10 seconds with keep_session=true, then call list_gpu_zones with time_source=any.
+Capture url=android://localabstract:azahar-tracy protocol=tracy for 10 seconds with keep_session=true, then call analyze_gpu_frames with time_source=any and inspect fallbackZones before drawing GPU timing conclusions.
 ```
 
 Tracy GPU profiler:
 
 ```text
-For Tracy session s1, call list_gpu_zones with time_source=gpu-time and top=20, then summarize GPU contexts, resolved GPU hotspots, and any cpuSubmit fallback count from summary.
+For Tracy session s1, call analyze_gpu_frames with time_source=any and top=20, then call analyze_frame_detail on the worst GPU frame and summarize cpuFrameMs, gpuTotalMs, gpuHotspots, frameCounters, and fallback zone count.
+```
+
+Tracy GPU timeline:
+
+```text
+For Tracy session s1 frame 842, call get_gpu_timeline with start_frame=842 end_frame=842 max_zones=200 time_source=any, then explain the GPU pass/blit/draw order and which entries are cpu-submit-time fallback.
 ```
 
 Tracy time-window analysis:

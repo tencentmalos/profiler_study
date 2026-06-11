@@ -651,6 +651,54 @@ internal sealed class ProfilerAnalysisService
 		};
 	}
 
+	public Dictionary<string, object> AnalyzeGpuFrames(string sessionId, int top, int startFrame, int endFrame, string timeSource)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.AnalyzeGpuFrames(top, startFrame, endFrame, timeSource));
+		}
+		return UnsupportedLegacyGpuResult(sessionId, loaded, "analyzeGpuFrames", timeSource, top);
+	}
+
+	public Dictionary<string, object> GetGpuTimeline(string sessionId, int startFrame, int endFrame, long startTimeNs, long endTimeNs, int maxZones, bool includeHierarchy, string timeSource)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.GetGpuTimeline(startFrame, endFrame, startTimeNs, endTimeNs, maxZones, includeHierarchy, timeSource));
+		}
+		return UnsupportedLegacyGpuResult(sessionId, loaded, "getGpuTimeline", timeSource, maxZones);
+	}
+
+	private static Dictionary<string, object> UnsupportedLegacyGpuResult(string sessionId, LoadedSession loaded, string capability, string timeSource, int top)
+	{
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = sessionId,
+			["source"] = loaded.Source,
+			["sourceFormat"] = loaded.SourceFormat,
+			["supported"] = false,
+			["capability"] = capability,
+			["eventsDecoded"] = false,
+			["timeSource"] = string.IsNullOrWhiteSpace(timeSource) ? "any" : timeSource,
+			["frames"] = new ArrayList(),
+			["zones"] = new ArrayList(),
+			["hotspots"] = new ArrayList(),
+			["fallbackZones"] = new ArrayList(),
+			["diagnostics"] = new ArrayList
+			{
+				new Dictionary<string, object>
+				{
+					["severity"] = "warning",
+					["code"] = "ProfilerStudyGpuUnsupported",
+					["message"] = "GPU analysis queries are currently implemented for Tracy trace sessions."
+				}
+			},
+			["top"] = Math.Max(1, top)
+		};
+	}
+
 	public Dictionary<string, object> AnalyzeFrame(string sessionId, int frameIndex, int top, int neighborCount)
 	{
 		LoadedSession loaded = GetLoadedSession(sessionId);

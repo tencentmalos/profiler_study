@@ -79,6 +79,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["zoneCount"] = m_EventStream.CpuZones.Count,
 				["gpuContextCount"] = m_EventStream.GpuContexts.Count,
 				["gpuZoneCount"] = m_EventStream.GpuZones.Count,
+				["sourceLocationCount"] = m_EventStream.SourceLocations.Count,
 				["gpuTimeZoneCount"] = m_EventStream.GpuZones.Count(zone => string.Equals(zone.TimeSource, "gpu-time", StringComparison.OrdinalIgnoreCase)),
 				["cpuSubmitGpuZoneCount"] = m_EventStream.GpuZones.Count(zone => string.Equals(zone.TimeSource, "cpu-submit-time", StringComparison.OrdinalIgnoreCase)),
 				["plotCount"] = m_EventStream.Plots.Count,
@@ -319,19 +320,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			.ThenBy(zone => zone.Start)
 			.Take(resolvedTop)
 			.Select(GpuZoneToDictionary));
-		ArrayList hotspots = ToArrayList(zones
-			.GroupBy(zone => zone.Name)
-			.Select(group => new Dictionary<string, object>
-			{
-				["name"] = group.Key,
-				["totalMs"] = Round(group.Sum(zone => zone.Duration) / 1_000_000.0),
-				["totalCount"] = group.Count(),
-				["maxMs"] = Round(group.Max(zone => zone.Duration) / 1_000_000.0),
-				["contextCount"] = group.Select(zone => zone.Context).Distinct().Count()
-			})
-			.OrderByDescending(hotspot => Convert.ToDouble(hotspot["totalMs"]))
-			.ThenBy(hotspot => Convert.ToString(hotspot["name"]))
-			.Take(resolvedTop));
+		ArrayList hotspots = BuildGpuHotspots(zones, resolvedTop);
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -356,6 +345,78 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				m_EventStream.GpuZones.Count > 0 ? "TracyGpuZonesDecoded" : "TracyGpuZonesPending",
 				m_EventStream.GpuZones.Count > 0 ? "GPU zones are decoded from Tracy live queue events. time_source=gpu-time returns zones with resolved Tracy GpuTime samples; cpu-submit-time returns submit fallback zones." : "GPU zone decoding requires Tracy live GPU queue events."),
 			["top"] = resolvedTop
+		};
+	}
+
+	public Dictionary<string, object> AnalyzeGpuFrames(int top, int startFrame, int endFrame, string timeSource)
+	{
+		int resolvedTop = Math.Max(1, top);
+		string resolvedTimeSource = NormalizeGpuTimeSource(timeSource);
+		List<TracyFrameSummary> frames = ResolveFramesForRange(startFrame, endFrame);
+		List<Dictionary<string, object>> frameSummaries = new List<Dictionary<string, object>>();
+		List<TracyGpuZoneSummary> allFrameZones = new List<TracyGpuZoneSummary>();
+		foreach (TracyFrameSummary frame in frames)
+		{
+			ArrayList counters = BuildFrameCounters(frame, frame.FrameIndex, 50);
+			List<TracyGpuZoneSummary> frameZones = m_EventStream.GpuZones
+				.Where(zone => ZoneOverlaps(zone.Start, zone.End, frame.Start, frame.End))
+				.Where(zone => resolvedTimeSource == "any" || string.Equals(zone.TimeSource, resolvedTimeSource, StringComparison.OrdinalIgnoreCase))
+				.ToList();
+			allFrameZones.AddRange(frameZones);
+			frameSummaries.Add(BuildGpuFrameSummary(frame, frameZones, counters));
+		}
+
+		return new Dictionary<string, object>
+		{
+			["sourceFormat"] = SourceFormat,
+			["eventsDecoded"] = m_EventStream.GpuZones.Count > 0 || m_EventStream.GpuContexts.Count > 0,
+			["timeSource"] = resolvedTimeSource,
+			["range"] = BuildFrameRange(startFrame, endFrame),
+			["frames"] = ToArrayList(frameSummaries
+				.OrderByDescending(frame => Convert.ToDouble(frame["gpuTotalMs"]))
+				.ThenByDescending(frame => Convert.ToDouble(frame["gpuMaxZoneMs"]))
+				.ThenBy(frame => Convert.ToInt32(frame["frameIndex"]))
+				.Take(resolvedTop)),
+			["hotspots"] = BuildGpuHotspots(allFrameZones, resolvedTop),
+			["fallbackZones"] = ToArrayList(allFrameZones
+				.Where(IsFallbackGpuZone)
+				.OrderBy(zone => zone.Start)
+				.Take(resolvedTop)
+				.Select(GpuZoneToDictionary)),
+			["diagnostics"] = Diagnostics(
+				m_EventStream.GpuZones.Count > 0 ? "TracyGpuFrameSummaryDecoded" : "TracyGpuZonesPending",
+				m_EventStream.GpuZones.Count > 0 ? "GPU frame summaries join Tracy frame metadata, GPU zones, and same-frame counters." : "GPU zone decoding is required before GPU frame summaries can return data."),
+			["top"] = resolvedTop
+		};
+	}
+
+	public Dictionary<string, object> GetGpuTimeline(int startFrame, int endFrame, long startTimeNs, long endTimeNs, int maxZones, bool includeHierarchy, string timeSource)
+	{
+		int resolvedMaxZones = Math.Max(1, maxZones);
+		string resolvedTimeSource = NormalizeGpuTimeSource(timeSource);
+		List<TracyGpuZoneSummary> zones = FilterGpuZones(startFrame, endFrame, startTimeNs, endTimeNs)
+			.Where(zone => resolvedTimeSource == "any" || string.Equals(zone.TimeSource, resolvedTimeSource, StringComparison.OrdinalIgnoreCase))
+			.OrderBy(zone => zone.Start)
+			.ThenByDescending(zone => zone.End)
+			.Take(resolvedMaxZones)
+			.ToList();
+		int availableCount = FilterGpuZones(startFrame, endFrame, startTimeNs, endTimeNs)
+			.Count(zone => resolvedTimeSource == "any" || string.Equals(zone.TimeSource, resolvedTimeSource, StringComparison.OrdinalIgnoreCase));
+		return new Dictionary<string, object>
+		{
+			["sourceFormat"] = SourceFormat,
+			["eventsDecoded"] = m_EventStream.GpuZones.Count > 0 || m_EventStream.GpuContexts.Count > 0,
+			["timeSource"] = resolvedTimeSource,
+			["includeHierarchy"] = includeHierarchy,
+			["range"] = BuildGpuRange(startFrame, endFrame, startTimeNs, endTimeNs),
+			["zones"] = ToArrayList(zones.Select(GpuZoneToDictionary)),
+			["summary"] = BuildGpuZoneSummary(zones),
+			["diagnostics"] = Diagnostics(
+				m_EventStream.GpuZones.Count > 0 ? "TracyGpuTimelineDecoded" : "TracyGpuZonesPending",
+				m_EventStream.GpuZones.Count > 0 ? "GPU timeline is ordered by trace-relative start time." : "GPU zone decoding is required before GPU timeline can return data."),
+			["availableZoneCount"] = availableCount,
+			["maxZones"] = resolvedMaxZones,
+			["truncated"] = availableCount > zones.Count
 		};
 	}
 
@@ -419,6 +480,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			.ThenBy(span => Convert.ToUInt64(span["threadId"]))
 			.Take(resolvedMaxNodes)
 			.ToList();
+		List<TracyGpuZoneSummary> frameGpuZones = FilterGpuZones(frameIndex, frameIndex, 0L, 0L).ToList();
+		ArrayList frameCounters = BuildFrameCounters(frame, frameIndex, 200);
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -436,7 +499,15 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			},
 			["threadFlameGraphs"] = threadFlameGraphs,
 			["topSpans"] = ToArrayList(topSpans),
-			["frameCounters"] = BuildFrameCounters(frame, frameIndex, 200),
+			["frameCounters"] = frameCounters,
+			["gpuSummary"] = BuildGpuFrameSummary(frame, frameGpuZones, frameCounters),
+			["gpuTimeline"] = ToArrayList(frameGpuZones
+				.OrderBy(zone => zone.Start)
+				.ThenByDescending(zone => zone.End)
+				.Take(resolvedMaxNodes)
+				.Select(zone => GpuZoneToDictionary(zone, frame))),
+			["gpuHotspots"] = BuildGpuHotspots(frameGpuZones, Math.Min(resolvedMaxNodes, 50)),
+			["correlation"] = BuildCpuGpuCorrelation(frame, frameGpuZones),
 			["nodeStats"] = new Dictionary<string, object>
 			{
 				["includedNodeCount"] = includedNodeCount,
@@ -884,6 +955,244 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			.Take(Math.Max(1, maxCounters)));
 	}
 
+	private Dictionary<string, object> BuildGpuFrameSummary(TracyFrameSummary frame, List<TracyGpuZoneSummary> zones, ArrayList frameCounters)
+	{
+		double cpuFrameMs = frame.Duration / 1_000_000.0;
+		long gpuTotalDuration = zones.Sum(zone => zone.Duration);
+		long gpuCoveredDuration = CalculateCoveredDuration(zones);
+		TracyGpuZoneSummary dominantZone = zones.OrderByDescending(zone => zone.Duration).FirstOrDefault();
+		int gpuTimeZoneCount = zones.Count(zone => string.Equals(zone.TimeSource, "gpu-time", StringComparison.OrdinalIgnoreCase));
+		int fallbackZoneCount = zones.Count(IsFallbackGpuZone);
+		string timeSource = ResolveGpuSummaryTimeSource(gpuTimeZoneCount, fallbackZoneCount);
+		return new Dictionary<string, object>
+		{
+			["frameIndex"] = frame.FrameIndex,
+			["frameStart"] = frame.Start,
+			["frameEnd"] = frame.End,
+			["cpuFrameMs"] = Round(cpuFrameMs),
+			["gpuTotalMs"] = Round(gpuTotalDuration / 1_000_000.0),
+			["gpuCoveredMs"] = Round(gpuCoveredDuration / 1_000_000.0),
+			["gpuMaxZoneMs"] = Round((dominantZone == null ? 0L : dominantZone.Duration) / 1_000_000.0),
+			["zoneCount"] = zones.Count,
+			["passCount"] = zones.Count(zone => string.Equals(zone.ZoneKind, "pass", StringComparison.OrdinalIgnoreCase)),
+			["blitCount"] = zones.Count(zone => string.Equals(zone.ZoneKind, "blit", StringComparison.OrdinalIgnoreCase)),
+			["drawCount"] = zones.Count(zone => string.Equals(zone.ZoneKind, "draw", StringComparison.OrdinalIgnoreCase)),
+			["contextCount"] = zones.Select(zone => zone.Context).Distinct().Count(),
+			["gpuTimeZoneCount"] = gpuTimeZoneCount,
+			["cpuSubmitFallbackZoneCount"] = fallbackZoneCount,
+			["timeSource"] = timeSource,
+			["confidence"] = ResolveGpuConfidence(gpuTimeZoneCount, fallbackZoneCount, zones.Count),
+			["dominantGpuZone"] = dominantZone == null ? new Dictionary<string, object>() : GpuZoneToDictionary(dominantZone, frame),
+			["counterHighlights"] = BuildCounterHighlights(frameCounters)
+		};
+	}
+
+	private Dictionary<string, object> BuildCpuGpuCorrelation(TracyFrameSummary frame, List<TracyGpuZoneSummary> zones)
+	{
+		double cpuFrameMs = frame.Duration / 1_000_000.0;
+		double gpuFrameMs = zones.Sum(zone => zone.Duration) / 1_000_000.0;
+		string dominantSide = "unknown";
+		if (zones.Count > 0)
+		{
+			dominantSide = gpuFrameMs > cpuFrameMs * 1.10 ? "gpu" : (cpuFrameMs > gpuFrameMs * 1.10 ? "cpu" : "mixed");
+		}
+		return new Dictionary<string, object>
+		{
+			["cpuFrameMs"] = Round(cpuFrameMs),
+			["gpuFrameMs"] = Round(gpuFrameMs),
+			["cpuGpuRatio"] = gpuFrameMs <= 0.0 ? 0.0 : Round(cpuFrameMs / gpuFrameMs),
+			["dominantSide"] = dominantSide,
+			["notes"] = zones.Any(IsFallbackGpuZone) ? "GPU result includes cpu-submit-time fallback zones; do not treat it as a precise GPU critical path." : "GPU result uses resolved Tracy gpu-time zones when available."
+		};
+	}
+
+	private static ArrayList BuildCounterHighlights(ArrayList frameCounters)
+	{
+		return ToArrayList(frameCounters
+			.Cast<Dictionary<string, object>>()
+			.Where(counter => IsGpuCounterName(Convert.ToString(counter["name"])))
+			.OrderByDescending(counter => Math.Abs(Convert.ToDouble(counter["value"])))
+			.Take(20));
+	}
+
+	private static bool IsGpuCounterName(string name)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			return false;
+		}
+		string normalized = name.ToLowerInvariant();
+		return normalized.Contains("pica") ||
+			normalized.Contains("gpu") ||
+			normalized.Contains("pass") ||
+			normalized.Contains("draw") ||
+			normalized.Contains("blit") ||
+			normalized.Contains("display target");
+	}
+
+	private static long CalculateCoveredDuration(IEnumerable<TracyGpuZoneSummary> zones)
+	{
+		List<TracyGpuZoneSummary> ordered = zones
+			.Where(zone => zone.End > zone.Start)
+			.OrderBy(zone => zone.Start)
+			.ToList();
+		long covered = 0L;
+		long currentStart = 0L;
+		long currentEnd = 0L;
+		bool hasCurrent = false;
+		foreach (TracyGpuZoneSummary zone in ordered)
+		{
+			if (!hasCurrent)
+			{
+				currentStart = zone.Start;
+				currentEnd = zone.End;
+				hasCurrent = true;
+				continue;
+			}
+			if (zone.Start <= currentEnd)
+			{
+				currentEnd = Math.Max(currentEnd, zone.End);
+			}
+			else
+			{
+				covered += currentEnd - currentStart;
+				currentStart = zone.Start;
+				currentEnd = zone.End;
+			}
+		}
+		if (hasCurrent)
+		{
+			covered += currentEnd - currentStart;
+		}
+		return covered;
+	}
+
+	private static string ResolveGpuSummaryTimeSource(int gpuTimeZoneCount, int fallbackZoneCount)
+	{
+		if (gpuTimeZoneCount > 0 && fallbackZoneCount > 0)
+		{
+			return "mixed";
+		}
+		if (gpuTimeZoneCount > 0)
+		{
+			return "gpu-time";
+		}
+		if (fallbackZoneCount > 0)
+		{
+			return "cpu-submit-time";
+		}
+		return "none";
+	}
+
+	private static string ResolveGpuConfidence(int gpuTimeZoneCount, int fallbackZoneCount, int zoneCount)
+	{
+		if (zoneCount == 0)
+		{
+			return "none";
+		}
+		if (gpuTimeZoneCount == zoneCount)
+		{
+			return "high";
+		}
+		if (gpuTimeZoneCount > 0 && fallbackZoneCount > 0)
+		{
+			return "medium";
+		}
+		return "low";
+	}
+
+	private static bool IsFallbackGpuZone(TracyGpuZoneSummary zone)
+	{
+		return string.Equals(zone.TimeSource, "cpu-submit-time", StringComparison.OrdinalIgnoreCase);
+	}
+
+	private static bool ZoneOverlaps(long start, long end, long rangeStart, long rangeEnd)
+	{
+		return end >= rangeStart && start <= rangeEnd;
+	}
+
+	private ArrayList BuildGpuHotspots(IEnumerable<TracyGpuZoneSummary> zones, int top)
+	{
+		IEnumerable<Dictionary<string, object>> hotspots = zones
+			.GroupBy(zone => zone.Name)
+			.Select(group =>
+			{
+				List<double> durations = group.Select(zone => zone.Duration / 1_000_000.0).OrderBy(value => value).ToList();
+				return new Dictionary<string, object>
+				{
+					["name"] = group.Key,
+					["totalMs"] = Round(durations.Sum()),
+					["totalCount"] = group.Count(),
+					["avgMs"] = Round(durations.Count == 0 ? 0.0 : durations.Average()),
+					["maxMs"] = Round(durations.Count == 0 ? 0.0 : durations[durations.Count - 1]),
+					["p50Ms"] = Round(Percentile(durations, 0.50)),
+					["p90Ms"] = Round(Percentile(durations, 0.90)),
+					["p99Ms"] = Round(Percentile(durations, 0.99)),
+					["contextCount"] = group.Select(zone => zone.Context).Distinct().Count(),
+					["fallbackCount"] = group.Count(IsFallbackGpuZone),
+					["zoneKind"] = group.Select(zone => zone.ZoneKind).FirstOrDefault(kind => !string.IsNullOrWhiteSpace(kind)) ?? "unknown"
+				};
+			})
+			.OrderByDescending(hotspot => Convert.ToDouble(hotspot["totalMs"]))
+			.ThenBy(hotspot => Convert.ToString(hotspot["name"]))
+			.Take(Math.Max(1, top));
+		return ToArrayList(hotspots);
+	}
+
+	private static double Percentile(List<double> sortedValues, double percentile)
+	{
+		if (sortedValues.Count == 0)
+		{
+			return 0.0;
+		}
+		if (sortedValues.Count == 1)
+		{
+			return sortedValues[0];
+		}
+		double rank = percentile * (sortedValues.Count - 1);
+		int lower = (int)Math.Floor(rank);
+		int upper = (int)Math.Ceiling(rank);
+		if (lower == upper)
+		{
+			return sortedValues[lower];
+		}
+		double weight = rank - lower;
+		return sortedValues[lower] * (1.0 - weight) + sortedValues[upper] * weight;
+	}
+
+	private Dictionary<string, object> BuildGpuZoneSummary(List<TracyGpuZoneSummary> zones)
+	{
+		int gpuTimeZoneCount = zones.Count(zone => string.Equals(zone.TimeSource, "gpu-time", StringComparison.OrdinalIgnoreCase));
+		int fallbackZoneCount = zones.Count(IsFallbackGpuZone);
+		return new Dictionary<string, object>
+		{
+			["zoneCount"] = zones.Count,
+			["totalMs"] = Round(zones.Sum(zone => zone.Duration) / 1_000_000.0),
+			["coveredMs"] = Round(CalculateCoveredDuration(zones) / 1_000_000.0),
+			["maxZoneMs"] = Round((zones.Count == 0 ? 0L : zones.Max(zone => zone.Duration)) / 1_000_000.0),
+			["gpuTimeZoneCount"] = gpuTimeZoneCount,
+			["cpuSubmitFallbackZoneCount"] = fallbackZoneCount,
+			["timeSource"] = ResolveGpuSummaryTimeSource(gpuTimeZoneCount, fallbackZoneCount),
+			["confidence"] = ResolveGpuConfidence(gpuTimeZoneCount, fallbackZoneCount, zones.Count)
+		};
+	}
+
+	private List<TracyFrameSummary> ResolveFramesForRange(int startFrame, int endFrame)
+	{
+		List<TracyFrameSummary> frames = GetMetadataFrames().ToList();
+		if (frames.Count == 0)
+		{
+			return frames;
+		}
+		if (!HasExplicitFrameRange(startFrame, endFrame))
+		{
+			return frames;
+		}
+		int first = Math.Max(0, Math.Min(startFrame, endFrame));
+		int last = Math.Min(frames.Count - 1, Math.Max(startFrame, endFrame));
+		return frames.Where(frame => frame.FrameIndex >= first && frame.FrameIndex <= last).ToList();
+	}
+
 	private static Dictionary<string, object> BuildFrameDetailNode(TracyCpuZoneSummary zone, string threadName, TracyFrameSummary frame, long clippedStart, long clippedEnd, int depth)
 	{
 		Dictionary<string, object> node = BuildFrameDetailSpan(zone, threadName, frame, clippedStart, clippedEnd, depth);
@@ -1023,20 +1332,37 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	private Dictionary<string, object> GpuZoneToDictionary(TracyGpuZoneSummary zone)
 	{
+		return GpuZoneToDictionary(zone, null);
+	}
+
+	private Dictionary<string, object> GpuZoneToDictionary(TracyGpuZoneSummary zone, TracyFrameSummary frame)
+	{
 		TracyGpuContextSummary context = m_EventStream.GpuContexts.FirstOrDefault(value => value.Context == zone.Context);
-		return new Dictionary<string, object>
+		Dictionary<string, object> values = new Dictionary<string, object>
 		{
+			["id"] = zone.Id,
 			["context"] = zone.Context,
 			["contextName"] = context == null ? "GPU Context " + zone.Context : context.Name,
+			["contextNameStatus"] = context == null || string.IsNullOrWhiteSpace(context.Name) || context.Name.StartsWith("GPU Context ", StringComparison.Ordinal) ? "defaulted" : "resolved",
 			["queryId"] = zone.QueryId,
 			["threadId"] = zone.ThreadId,
 			["name"] = zone.Name,
 			["sourceLocation"] = zone.SourceLocation,
+			["source"] = SourceLocationToDictionary(ResolveSourceLocation(zone.SourceLocation), zone.Name),
 			["start"] = zone.Start,
 			["end"] = zone.End,
 			["durationMs"] = Round(zone.Duration / 1_000_000.0),
-			["timeSource"] = zone.TimeSource
+			["timeSource"] = zone.TimeSource,
+			["depth"] = zone.Depth,
+			["parentId"] = zone.ParentId,
+			["zoneKind"] = zone.ZoneKind
 		};
+		if (frame != null)
+		{
+			values["relativeStartMs"] = Round((zone.Start - frame.Start) / 1_000_000.0);
+			values["relativeEndMs"] = Round((zone.End - frame.Start) / 1_000_000.0);
+		}
+		return values;
 	}
 
 	private static Dictionary<string, object> GpuContextToDictionary(TracyGpuContextSummary context)
@@ -1051,6 +1377,34 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["flags"] = context.Flags,
 			["cpuTime"] = context.CpuTime,
 			["gpuTime"] = context.GpuTime
+		};
+	}
+
+	private TracySourceLocationSummary ResolveSourceLocation(short sourceLocation)
+	{
+		return m_EventStream.SourceLocations.FirstOrDefault(value => value.Id == sourceLocation);
+	}
+
+	private static Dictionary<string, object> SourceLocationToDictionary(TracySourceLocationSummary sourceLocation, string fallbackName)
+	{
+		if (sourceLocation == null)
+		{
+			return new Dictionary<string, object>
+			{
+				["name"] = fallbackName ?? string.Empty,
+				["function"] = string.Empty,
+				["file"] = string.Empty,
+				["line"] = 0U,
+				["dynamicName"] = string.Empty
+			};
+		}
+		return new Dictionary<string, object>
+		{
+			["name"] = string.IsNullOrWhiteSpace(sourceLocation.Name) ? fallbackName ?? string.Empty : sourceLocation.Name,
+			["function"] = sourceLocation.Function,
+			["file"] = sourceLocation.File,
+			["line"] = sourceLocation.Line,
+			["dynamicName"] = sourceLocation.DynamicName
 		};
 	}
 

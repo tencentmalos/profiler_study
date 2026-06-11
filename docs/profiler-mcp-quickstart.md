@@ -92,7 +92,7 @@ Android 示例：
 Android Tracy 示例：
 
 ```text
-请调用 profiler-study 的 capture_profile，url=android://localabstract:azahar-tracy，protocol=tracy，duration_seconds=10，keep_session=true，然后调用 list_gpu_zones 查看 GPU zone。
+请调用 profiler-study 的 capture_profile，url=android://localabstract:azahar-tracy，protocol=tracy，duration_seconds=10，keep_session=true，然后调用 analyze_gpu_frames 查看每帧 CPU/GPU 关联和 fallback zone。
 ```
 
 如果要继续追问某个慢帧，使用 `keep_session=true`：
@@ -217,6 +217,33 @@ Android Tracy 示例：
 ### `list_gpu_zones`
 
 查询 Tracy live capture 解码出的 GPU context、GPU zone 和按名称聚合的 GPU 热点。`time_source=gpu-time` 只返回已收到 Tracy `GpuTime` 回填的真实 GPU timeline；`time_source=cpu-submit-time` 返回尚未收到 GPU timestamp 的 CPU submit fallback zone；默认 `any`。
+
+### `analyze_gpu_frames`
+
+按 frame 聚合 Tracy GPU 数据，并把同帧 CPU frame duration、GPU total/max/pass/blit/draw count、GPU hotspot percentile、fallback zone 明细和同帧 counter highlights 放在一起。实机 GPU profiler 分析优先使用这个工具。
+
+参数：
+
+- `session_id`: session id
+- `top`: 返回最重 GPU frame 数，默认 `20`
+- `start_frame`: 起始 frame，可省略
+- `end_frame`: 结束 frame，可省略
+- `time_source`: `any`、`gpu-time`、`cpu-submit-time`，默认 `any`
+
+### `get_gpu_timeline`
+
+返回指定 frame range 或 time range 内按时间排序的 GPU zone 列表，用于复盘一帧里的 pass / blit / draw / marker 顺序。输出会保留 `timeSource`，其中 `cpu-submit-time` 表示尚未拿到真实 GPU timestamp 的 fallback。
+
+参数：
+
+- `session_id`: session id
+- `start_frame`: 起始 frame，可省略
+- `end_frame`: 结束 frame，可省略
+- `start_time_ns`: trace-relative 起始时间，可省略；提供时优先于 frame range
+- `end_time_ns`: trace-relative 结束时间，可省略
+- `max_zones`: 最大返回 zone 数，默认 `200`
+- `include_hierarchy`: 是否保留 `id` / `parentId` / `depth` 字段，默认 `true`
+- `time_source`: `any`、`gpu-time`、`cpu-submit-time`，默认 `any`
 
 参数：
 

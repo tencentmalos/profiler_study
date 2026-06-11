@@ -35,6 +35,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			RunCaptureTargetTests();
 			RunTracyStatusTests();
 			RunAnalysisServiceTests();
+			RunTracyCpuGpuAnalysisTests();
 
 			return 0;
 		}
@@ -2374,6 +2375,131 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertHasItems(counterSamples["samples"], "counter samples");
 		AssertStudySaveSessionFile(service, sessionId, session);
 		service.CloseSession(sessionId);
+	}
+
+	private static void RunTracyCpuGpuAnalysisTests()
+	{
+		TracyTraceQuerySession querySession = CreateSyntheticCpuGpuTraceSession();
+		Dictionary<string, object> frameDetail = querySession.AnalyzeFrameDetail(1, 100, 12, 0.0);
+		AssertEqual(true, frameDetail["supported"], "tracy cpu gpu frame detail supported");
+		IDictionary gpuSummary = frameDetail["gpuSummary"] as IDictionary;
+		AssertEqual(2, gpuSummary["zoneCount"], "tracy frame gpu zone count");
+		AssertEqual(1, gpuSummary["gpuTimeZoneCount"], "tracy frame gpu-time zone count");
+		AssertEqual(1, gpuSummary["cpuSubmitFallbackZoneCount"], "tracy frame fallback zone count");
+		AssertEqual("mixed", gpuSummary["timeSource"], "tracy frame gpu summary time source");
+		AssertEqual("medium", gpuSummary["confidence"], "tracy frame gpu confidence");
+		AssertEqual(1, gpuSummary["passCount"], "tracy frame pass count");
+		AssertEqual(1, gpuSummary["blitCount"], "tracy frame blit count");
+		AssertHasItems(frameDetail["gpuTimeline"], "tracy frame gpu timeline");
+		AssertHasItems(frameDetail["gpuHotspots"], "tracy frame gpu hotspots");
+		AssertHasItems(frameDetail["frameCounters"], "tracy frame counters");
+		IDictionary correlation = frameDetail["correlation"] as IDictionary;
+		AssertEqual("gpu", correlation["dominantSide"], "tracy frame dominant side");
+		IDictionary firstGpuZone = ((IList)frameDetail["gpuTimeline"])[0] as IDictionary;
+		AssertEqual("PICA Render Pass", firstGpuZone["name"], "tracy gpu timeline order");
+		AssertEqual("pica_gpu.cpp", ((IDictionary)firstGpuZone["source"])["file"], "tracy gpu source file");
+
+		Dictionary<string, object> gpuFrames = querySession.AnalyzeGpuFrames(10, 0, 2, "any");
+		AssertEqual(true, gpuFrames["eventsDecoded"], "tracy gpu frame events decoded");
+		AssertHasItems(gpuFrames["frames"], "tracy gpu frames");
+		AssertHasItems(gpuFrames["hotspots"], "tracy gpu frame hotspots");
+		AssertHasItems(gpuFrames["fallbackZones"], "tracy gpu fallback zones");
+		IDictionary firstHotspot = ((IList)gpuFrames["hotspots"])[0] as IDictionary;
+		AssertEqual(true, firstHotspot.Contains("p90Ms"), "tracy gpu hotspot percentile");
+		IDictionary firstFrame = ((IList)gpuFrames["frames"])[0] as IDictionary;
+		AssertEqual(true, firstFrame.Contains("counterHighlights"), "tracy gpu frame counter highlights");
+
+		Dictionary<string, object> timeline = querySession.GetGpuTimeline(0, 2, 0L, 0L, 20, true, "any");
+		AssertEqual(true, timeline["eventsDecoded"], "tracy gpu timeline decoded");
+		AssertHasItems(timeline["zones"], "tracy gpu timeline zones");
+		IDictionary firstTimelineZone = ((IList)timeline["zones"])[0] as IDictionary;
+		AssertEqual("PICA Render Pass", firstTimelineZone["name"], "tracy gpu timeline start order");
+
+		Dictionary<string, object> zones = querySession.ListGpuZones(10, 0, 2, 0L, 0L, "any");
+		IDictionary listHotspot = ((IList)zones["hotspots"])[0] as IDictionary;
+		AssertEqual(true, listHotspot.Contains("p50Ms"), "tracy list gpu hotspot p50");
+		IDictionary listZone = ((IList)zones["zones"])[0] as IDictionary;
+		AssertEqual(true, listZone.Contains("source"), "tracy list gpu zone source");
+	}
+
+	private static TracyTraceQuerySession CreateSyntheticCpuGpuTraceSession()
+	{
+		List<TracyFrameSummary> frames = new List<TracyFrameSummary>
+		{
+			new TracyFrameSummary(0, 0L, 16_000_000L),
+			new TracyFrameSummary(1, 16_000_000L, 33_000_000L),
+			new TracyFrameSummary(2, 33_000_000L, 50_000_000L)
+		};
+		TracyTraceMetadata metadata = new TracyTraceMetadata(
+			0L,
+			1_000_000_000L,
+			1.0,
+			50_000_000L,
+			0L,
+			1234UL,
+			0L,
+			0,
+			0U,
+			string.Empty,
+			false,
+			"SyntheticCpuGpu",
+			"SelfTest",
+			0L,
+			0L,
+			"SelfTestHost",
+			new List<TracyFrameSetSummary> { new TracyFrameSetSummary(ulong.MaxValue, false, frames) },
+			0,
+			1);
+		List<TracySourceLocationSummary> sources = new List<TracySourceLocationSummary>
+		{
+			new TracySourceLocationSummary(1, "Game::Update", "Game::Update", "game.cpp", 10, string.Empty),
+			new TracySourceLocationSummary(2, "PICA Render Pass", "GpuRenderPass", "pica_gpu.cpp", 42, string.Empty),
+			new TracySourceLocationSummary(3, "PICA Blit", "GpuBlit", "pica_gpu.cpp", 88, string.Empty)
+		};
+		List<TracyCpuZoneSummary> cpuZones = new List<TracyCpuZoneSummary>
+		{
+			new TracyCpuZoneSummary(100UL, 1, "Game::Update", 17_000_000L, 24_000_000L, 0, 7_000_000L)
+		};
+		List<TracyPlotSummary> plots = new List<TracyPlotSummary>
+		{
+			new TracyPlotSummary(
+				"PICA draw count",
+				0,
+				0,
+				20.0,
+				42.0,
+				62.0,
+				new List<TracyPlotSample>
+				{
+					new TracyPlotSample(20_000_000L, 20.0),
+					new TracyPlotSample(30_000_000L, 42.0)
+				})
+		};
+		List<TracyGpuContextSummary> gpuContexts = new List<TracyGpuContextSummary>
+		{
+			new TracyGpuContextSummary(2, "SelfTest Vulkan Queue", 345U, 1.0f, 0, 0, 16_000_000L, 16_000_000L)
+		};
+		List<TracyGpuZoneSummary> gpuZones = new List<TracyGpuZoneSummary>
+		{
+			new TracyGpuZoneSummary(2, 7, 345U, 2, "PICA Render Pass", 17_000_000L, 34_000_000L, "gpu-time"),
+			new TracyGpuZoneSummary(2, 9, 345U, 3, "PICA Blit", 30_000_000L, 32_000_000L, "cpu-submit-time")
+		};
+		TracyEventStream eventStream = new TracyEventStream(
+			new TracyFileHeader("0.10.0", "self-test"),
+			0,
+			0L,
+			0L,
+			0L,
+			metadata,
+			cpuZones,
+			plots,
+			new List<TracyThreadSummary> { new TracyThreadSummary(100UL, "MainThread") },
+			1,
+			new ArrayList(),
+			gpuContexts,
+			gpuZones,
+			sources);
+		return new TracyTraceQuerySession("synthetic.tracy", eventStream, new ArrayList());
 	}
 
 	private static void AssertStudySaveSessionFile(ProfilerAnalysisService service, string sessionId, Session sourceSession)

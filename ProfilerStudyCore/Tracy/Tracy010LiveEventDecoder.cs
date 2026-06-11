@@ -145,6 +145,14 @@ internal sealed class Tracy010LiveEventDecoder
 		public uint Line;
 	}
 
+	private sealed class SourceLocationPayloadRecord
+	{
+		public string Name;
+		public string Function;
+		public string File;
+		public uint Line;
+	}
+
 	private sealed class OpenZone
 	{
 		public ulong ThreadId;
@@ -788,6 +796,7 @@ internal sealed class Tracy010LiveEventDecoder
 	private readonly Dictionary<string, Queue<GpuZoneState>> m_GpuQueryZones = new Dictionary<string, Queue<GpuZoneState>>();
 	private readonly List<GpuZoneState> m_GpuZones = new List<GpuZoneState>();
 	private readonly Dictionary<ulong, string> m_SourceLocationPayloadNames = new Dictionary<ulong, string>();
+	private readonly Dictionary<ulong, SourceLocationPayloadRecord> m_SourceLocationPayloads = new Dictionary<ulong, SourceLocationPayloadRecord>();
 	private readonly Queue<ulong> m_PendingSourceLocations = new Queue<ulong>();
 	private readonly HashSet<ulong> m_RequestedStrings = new HashSet<ulong>();
 	private readonly HashSet<ulong> m_RequestedThreadNames = new HashSet<ulong>();
@@ -882,6 +891,7 @@ internal sealed class Tracy010LiveEventDecoder
 		List<TracyThreadSummary> threads = BuildThreads();
 		List<TracyGpuContextSummary> gpuContexts = BuildGpuContexts();
 		List<TracyGpuZoneSummary> gpuZones = BuildGpuZones();
+		List<TracySourceLocationSummary> sourceLocations = BuildSourceLocations();
 		int gpuTimeZoneCount = gpuZones.Count(zone => string.Equals(zone.TimeSource, "gpu-time", StringComparison.OrdinalIgnoreCase));
 		int cpuSubmitZoneCount = gpuZones.Count(zone => string.Equals(zone.TimeSource, "cpu-submit-time", StringComparison.OrdinalIgnoreCase));
 		TracyTraceMetadata metadata = new TracyTraceMetadata(
@@ -962,7 +972,8 @@ internal sealed class Tracy010LiveEventDecoder
 			threads.Count,
 			diagnostics,
 			gpuContexts,
-			gpuZones);
+			gpuZones,
+			sourceLocations);
 	}
 
 	private readonly List<LiveZone> m_ClosedZones = new List<LiveZone>();
@@ -1009,6 +1020,7 @@ internal sealed class Tracy010LiveEventDecoder
 
 	private List<TracyGpuZoneSummary> BuildGpuZones()
 	{
+		int id = 0;
 		foreach (GpuZoneState zone in m_GpuZones)
 		{
 			if (zone.CpuEnd < 0)
@@ -1020,6 +1032,7 @@ internal sealed class Tracy010LiveEventDecoder
 			.Where(zone => (zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart) || zone.CpuEnd >= zone.CpuStart)
 			.OrderBy(zone => zone.GpuStart >= 0 ? zone.GpuStart : zone.CpuStart)
 			.Select(zone => new TracyGpuZoneSummary(
+				id++,
 				zone.Context,
 				zone.BeginQueryId,
 				zone.ThreadId,
@@ -1027,8 +1040,60 @@ internal sealed class Tracy010LiveEventDecoder
 				ResolveSourceLocationName(zone.SourceLocation),
 				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? zone.GpuStart : zone.CpuStart,
 				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? zone.GpuEnd : zone.CpuEnd,
-				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? "gpu-time" : "cpu-submit-time"))
+				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? "gpu-time" : "cpu-submit-time",
+				0,
+				-1,
+				ClassifyGpuZoneKind(ResolveSourceLocationName(zone.SourceLocation))))
 			.ToList();
+	}
+
+	private List<TracySourceLocationSummary> BuildSourceLocations()
+	{
+		return m_SourceLocationIndexes
+			.OrderBy(pair => pair.Value)
+			.Select(pair => BuildSourceLocationSummary(pair.Value, pair.Key))
+			.ToList();
+	}
+
+	private TracySourceLocationSummary BuildSourceLocationSummary(short id, ulong pointer)
+	{
+		if (m_SourceLocationPayloads.TryGetValue(pointer, out SourceLocationPayloadRecord payload))
+		{
+			return new TracySourceLocationSummary(id, payload.Name, payload.Function, payload.File, payload.Line, string.Empty);
+		}
+		if (m_SourceLocations.TryGetValue(pointer, out SourceLocationRecord record))
+		{
+			return new TracySourceLocationSummary(
+				id,
+				ResolveString(record.Name),
+				ResolveString(record.Function),
+				ResolveString(record.File),
+				record.Line,
+				string.Empty);
+		}
+		return new TracySourceLocationSummary(id, ResolveSourceLocationName(pointer), string.Empty, string.Empty, 0U, string.Empty);
+	}
+
+	private static string ClassifyGpuZoneKind(string name)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			return "unknown";
+		}
+		string normalized = name.ToLowerInvariant();
+		if (normalized.Contains("blit"))
+		{
+			return "blit";
+		}
+		if (normalized.Contains("draw"))
+		{
+			return "draw";
+		}
+		if (normalized.Contains("pass"))
+		{
+			return "pass";
+		}
+		return "marker";
 	}
 
 	private void ProcessStringTransfer(byte[] buffer, ref int offset, QueueType type)
@@ -1395,6 +1460,13 @@ internal sealed class Tracy010LiveEventDecoder
 			pointer = 0x8000000000000000UL | (ulong)(uint)(m_SourceLocationPayloadNames.Count + 1);
 		}
 		m_SourceLocationPayloadNames[pointer] = label;
+		m_SourceLocationPayloads[pointer] = new SourceLocationPayloadRecord
+		{
+			Name = name,
+			Function = function,
+			File = source,
+			Line = line
+		};
 		m_PendingGpuSourceLocationPayload = pointer;
 	}
 

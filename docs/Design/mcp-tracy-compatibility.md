@@ -11,6 +11,14 @@ Tracy 实现必须是完整 C# 版本，不能依赖 C++/CLI、C++ native helper
 
 第一版锁定 Azahar 当前使用的 Tracy `0.10.0`。后续版本通过 version adapter 扩展，不在第一版做自动兼容。
 
+CPU+GPU 综合分析能力的后续迭代不继续塞进本文件主流程，独立记录在：
+
+```text
+docs/Design/mcp-cpu-gpu-analysis-roadmap.md
+```
+
+该路线图覆盖按 frame 聚合 GPU 时间、CPU/GPU 同帧关联、GPU timeline、fallback 明细、source location 展开、GPU percentile、counters join、GPU hierarchy、submit/command buffer/queue 关联和 hardware sample 解码等能力。本文件仍作为 Tracy 0.10.0 接入、文件/live capture、artifact 和基础 MCP contract 的设计来源。
+
 ## 非目标
 
 - 不在第一版支持任意 Tracy 版本；非 `0.10.0` 文件或 target 必须返回明确 unsupported diagnostics。
