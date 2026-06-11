@@ -10,6 +10,7 @@ public sealed class TracyEventStream
 		long compressedByteCount,
 		long decodedByteCount,
 		long payloadByteCount,
+		TracyTraceMetadata metadata,
 		ArrayList diagnostics)
 	{
 		Header = header;
@@ -17,6 +18,7 @@ public sealed class TracyEventStream
 		CompressedByteCount = compressedByteCount;
 		DecodedByteCount = decodedByteCount;
 		PayloadByteCount = payloadByteCount;
+		Metadata = metadata;
 		Diagnostics = diagnostics;
 	}
 
@@ -33,6 +35,10 @@ public sealed class TracyEventStream
 	public long DecodedByteCount { get; }
 
 	public long PayloadByteCount { get; }
+
+	public TracyTraceMetadata Metadata { get; }
+
+	public bool HasMetadata => Metadata != null;
 
 	public ArrayList Diagnostics { get; }
 }

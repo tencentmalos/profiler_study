@@ -117,6 +117,7 @@ internal static class ProfilerDiagnosticsSelfTest
 	{
 		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test.tracy");
 		string unsupportedPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported.tracy");
+		string metadataPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-metadata.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -131,6 +132,17 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(0L, eventStream.PayloadByteCount, "tracy payload byte count");
 			AssertLoadTraceFileTool(path);
 
+			WriteTracyDumpWithMetadata(metadataPath);
+			TracyEventStream metadataStream = Tracy010FileReader.Read(metadataPath);
+			AssertEqual(true, metadataStream.HasMetadata, "tracy metadata present");
+			AssertEqual("SelfTestCapture", metadataStream.Metadata.CaptureName, "tracy metadata capture name");
+			AssertEqual("SelfTestProgram", metadataStream.Metadata.CaptureProgram, "tracy metadata capture program");
+			AssertEqual("SelfTestHost", metadataStream.Metadata.HostInfo, "tracy metadata host info");
+			AssertEqual(4242UL, metadataStream.Metadata.ProcessId, "tracy metadata pid");
+			AssertEqual(16_666_667L, metadataStream.Metadata.LastTime, "tracy metadata last time");
+			AssertEqual(1, metadataStream.Metadata.FrameSetCount, "tracy metadata frame set count");
+			AssertEqual(2, metadataStream.Metadata.FrameCount, "tracy metadata frame count");
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 		}
@@ -143,6 +155,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(unsupportedPath))
 			{
 				File.Delete(unsupportedPath);
+			}
+			if (File.Exists(metadataPath))
+			{
+				File.Delete(metadataPath);
 			}
 		}
 	}
@@ -276,9 +292,54 @@ internal static class ProfilerDiagnosticsSelfTest
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)
 	{
 		byte[] innerHeader = new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', major, minor, patch };
-		byte[] compressed = new byte[1 + innerHeader.Length];
-		compressed[0] = (byte)(innerHeader.Length << 4);
-		Buffer.BlockCopy(innerHeader, 0, compressed, 1, innerHeader.Length);
+		WriteTracyDump(path, innerHeader);
+	}
+
+	private static void WriteTracyDumpWithMetadata(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
+		WriteInt64(inner, 0);                       // m_delay
+		WriteInt64(inner, 1_000_000_000);           // m_resolution
+		WriteDouble(inner, 1.0);                    // m_timerMul
+		WriteInt64(inner, 16_666_667);              // lastTime
+		WriteInt64(inner, 0);                       // frameOffset
+		WriteUInt64(inner, 4242);                   // pid
+		WriteInt64(inner, 0);                       // samplingPeriod
+		inner.WriteByte(2);                         // CpuArchX64
+		WriteUInt32(inner, 0x12345678);             // cpuId
+		WriteFixedAscii(inner, "SelfTestCpu", 12);  // cpuManufacturer
+		inner.WriteByte(0);                         // onDemand
+		WriteSizedString(inner, "SelfTestCapture");
+		WriteSizedString(inner, "SelfTestProgram");
+		WriteInt64(inner, 1_700_000_000);           // captureTime
+		WriteInt64(inner, 1_699_999_000);           // executableTime
+		WriteSizedString(inner, "SelfTestHost");
+		WriteUInt64(inner, 0);                      // cpuTopology count
+		WriteUInt64(inner, 0);                      // crashEvent.thread
+		WriteInt64(inner, 0);                       // crashEvent.time
+		WriteUInt64(inner, 0);                      // crashEvent.message
+		WriteUInt32(inner, 0);                      // crashEvent.callstack
+		WriteUInt64(inner, 1);                      // frame set count
+		WriteUInt64(inner, 0);                      // frame name
+		inner.WriteByte(0);                         // non-continuous frame set
+		WriteUInt64(inner, 2);                      // frame count
+		WriteInt64(inner, 0);                       // frame 0 start offset
+		WriteInt64(inner, 8_333_333);               // frame 0 end offset
+		WriteInt32(inner, -1);                      // frame 0 image
+		WriteInt64(inner, 1);                       // frame 1 start offset
+		WriteInt64(inner, 8_333_333);               // frame 1 end offset
+		WriteInt32(inner, -1);                      // frame 1 image
+		WriteUInt64(inner, 0);                      // stringData count
+		WriteUInt64(inner, 0);                      // strings count
+		WriteUInt64(inner, 0);                      // threadNames count
+		WriteUInt64(inner, 0);                      // externalNames count
+		WriteTracyDump(path, inner.ToArray());
+	}
+
+	private static void WriteTracyDump(string path, byte[] inner)
+	{
+		byte[] compressed = EncodeLz4LiteralBlock(inner);
 
 		using FileStream stream = File.Create(path);
 		byte[] outerHeader = Encoding.ASCII.GetBytes("tlZ4");
@@ -286,6 +347,73 @@ internal static class ProfilerDiagnosticsSelfTest
 		byte[] blockSize = BitConverter.GetBytes((uint)compressed.Length);
 		stream.Write(blockSize, 0, blockSize.Length);
 		stream.Write(compressed, 0, compressed.Length);
+	}
+
+	private static byte[] EncodeLz4LiteralBlock(byte[] bytes)
+	{
+		using MemoryStream stream = new MemoryStream();
+		if (bytes.Length < 15)
+		{
+			stream.WriteByte((byte)(bytes.Length << 4));
+		}
+		else
+		{
+			stream.WriteByte(0xF0);
+			int remaining = bytes.Length - 15;
+			while (remaining >= 255)
+			{
+				stream.WriteByte(255);
+				remaining -= 255;
+			}
+			stream.WriteByte((byte)remaining);
+		}
+		stream.Write(bytes, 0, bytes.Length);
+		return stream.ToArray();
+	}
+
+	private static void WriteSizedString(Stream stream, string value)
+	{
+		byte[] bytes = Encoding.ASCII.GetBytes(value);
+		WriteUInt64(stream, (ulong)bytes.Length);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteFixedAscii(Stream stream, string value, int size)
+	{
+		byte[] bytes = new byte[size];
+		byte[] text = Encoding.ASCII.GetBytes(value);
+		Buffer.BlockCopy(text, 0, bytes, 0, Math.Min(text.Length, bytes.Length));
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteInt32(Stream stream, int value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteUInt32(Stream stream, uint value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteInt64(Stream stream, long value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteUInt64(Stream stream, ulong value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteDouble(Stream stream, double value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
 	}
 
 	private static void AssertTracyStatusTool()

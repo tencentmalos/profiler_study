@@ -168,6 +168,7 @@ TracyVersionRegistry
 - 读取官方 `.tracy` 文件。
 - 校验 magic、file version、endianness、section layout 和压缩块。
 - 在 event decoder 完整落地前，先支持遍历 LZ4 block stream，产出 block 数、压缩字节数、解压字节数、payload 字节数和 header diagnostics，作为后续事件解码和大文件边界控制的基础。
+- 保存格式前段 metadata 需要优先解码：`delay/resolution/timerMul/lastTime/frameOffset/pid/samplingPeriod/cpuArch/cpuId/cpuManufacturer/onDemand/captureName/captureProgram/captureTime/executableTime/hostInfo`，以及 frame set 的 `name/continuous/frameCount/firstFrameStart/lastFrameEnd`。这些字段应进入 `TracyEventStream.Metadata` 和 MCP summary。
 - 解码 Tracy `0.10.0` 保存格式中的 CPU zones、thread names、frame marks、plots 和基础 metadata。
 - 对第一版不导出的事件累计 unsupported counts。
 - 输出 `TracyEventStream`，供 normalizer 使用。

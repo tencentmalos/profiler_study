@@ -27,7 +27,8 @@ public static class TracyTraceImporter
 				["compressedBlockCount"] = eventStream.CompressedBlockCount,
 				["compressedByteCount"] = eventStream.CompressedByteCount,
 				["decodedByteCount"] = eventStream.DecodedByteCount,
-				["payloadByteCount"] = eventStream.PayloadByteCount
+				["payloadByteCount"] = eventStream.PayloadByteCount,
+				["metadataDecoded"] = eventStream.HasMetadata
 			},
 			new Dictionary<string, object>
 			{
