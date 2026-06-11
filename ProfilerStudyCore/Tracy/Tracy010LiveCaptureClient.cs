@@ -18,6 +18,11 @@ public static class Tracy010LiveCaptureClient
 
 	public static TracyLiveCaptureResult Capture(string host, int port, int durationSeconds)
 	{
+		return Capture(host, port, durationSeconds, CancellationToken.None);
+	}
+
+	public static TracyLiveCaptureResult Capture(string host, int port, int durationSeconds, CancellationToken cancellationToken)
+	{
 		if (string.IsNullOrWhiteSpace(host))
 		{
 			throw new ArgumentException("Tracy host is required.", nameof(host));
@@ -26,16 +31,19 @@ public static class Tracy010LiveCaptureClient
 		{
 			throw new ArgumentOutOfRangeException(nameof(port), "Tracy port is outside the TCP port range.");
 		}
+		cancellationToken.ThrowIfCancellationRequested();
 
 		Stopwatch connectStopwatch = Stopwatch.StartNew();
 		using TcpClient client = new TcpClient();
 		try
 		{
 			IAsyncResult connect = client.BeginConnect(host, port, null, null);
-			if (!connect.AsyncWaitHandle.WaitOne(System.TimeSpan.FromSeconds(5)))
+			int waitIndex = WaitHandle.WaitAny(new[] { connect.AsyncWaitHandle, cancellationToken.WaitHandle }, System.TimeSpan.FromSeconds(5));
+			if (waitIndex == WaitHandle.WaitTimeout)
 			{
 				throw new TracyFileFormatException("TracyConnectFailed", "Timed out connecting to Tracy target.");
 			}
+			cancellationToken.ThrowIfCancellationRequested();
 			client.EndConnect(connect);
 		}
 		catch (TracyFileFormatException)
@@ -49,10 +57,12 @@ public static class Tracy010LiveCaptureClient
 		connectStopwatch.Stop();
 		client.ReceiveTimeout = 5000;
 		client.SendTimeout = 5000;
+		cancellationToken.ThrowIfCancellationRequested();
 
 		using NetworkStream stream = client.GetStream();
 		stream.Write(HandshakeShibboleth, 0, HandshakeShibboleth.Length);
 		WriteUInt32(stream, ProtocolVersion);
+		cancellationToken.ThrowIfCancellationRequested();
 		int status = stream.ReadByte();
 		if (status < 0)
 		{
@@ -63,7 +73,7 @@ public static class Tracy010LiveCaptureClient
 			throw CreateProtocolMismatch("Tracy target rejected protocol version " + ProtocolVersion + " with handshake status " + status + ".", status.ToString());
 		}
 
-		byte[] welcomeBytes = ReadExactly(stream, WelcomeMessageSize);
+		byte[] welcomeBytes = ReadExactly(stream, WelcomeMessageSize, cancellationToken);
 		TracyTraceMetadata metadata = ReadWelcomeMetadata(welcomeBytes);
 		ArrayList diagnostics = new ArrayList
 		{
@@ -88,8 +98,12 @@ public static class Tracy010LiveCaptureClient
 		int sleepMilliseconds = Math.Max(0, Math.Min(durationSeconds, 300)) * 1000;
 		if (sleepMilliseconds > 0)
 		{
-			Thread.Sleep(sleepMilliseconds);
+			if (cancellationToken.WaitHandle.WaitOne(sleepMilliseconds))
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+			}
 		}
+		cancellationToken.ThrowIfCancellationRequested();
 		TrySendTerminate(stream);
 
 		TracyEventStream eventStream = new TracyEventStream(
@@ -177,10 +191,16 @@ public static class Tracy010LiveCaptureClient
 
 	private static byte[] ReadExactly(Stream stream, int size)
 	{
+		return ReadExactly(stream, size, CancellationToken.None);
+	}
+
+	private static byte[] ReadExactly(Stream stream, int size, CancellationToken cancellationToken)
+	{
 		byte[] bytes = new byte[size];
 		int offset = 0;
 		while (offset < size)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			int read = stream.Read(bytes, offset, size - offset);
 			if (read == 0)
 			{

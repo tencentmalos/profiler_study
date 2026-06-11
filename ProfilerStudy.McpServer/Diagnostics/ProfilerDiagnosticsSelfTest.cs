@@ -1066,6 +1066,12 @@ internal static class ProfilerDiagnosticsSelfTest
 		string artifactRoot = ResetSelfTestArtifactRoot();
 		try
 		{
+			using CancellationTokenSource canceledCapture = new CancellationTokenSource();
+			canceledCapture.Cancel();
+			AssertThrows(
+				() => Tracy010LiveCaptureClient.Capture("127.0.0.1", 1, 1, canceledCapture.Token),
+				"tracy live capture cancellation");
+
 			using FakeTracyServer server = new FakeTracyServer();
 			server.Start();
 			ProfilerMcpTools tools = new ProfilerMcpTools();
