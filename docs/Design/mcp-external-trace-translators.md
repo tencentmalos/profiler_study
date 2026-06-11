@@ -227,6 +227,8 @@ Perfetto trace 可视化要承认两个事实：
 
 Tracy 支持分成文件打开和 live socket capture。
 
+Tracy 的细化设计见 `docs/Design/mcp-tracy-compatibility.md`。该专项设计将 Tracy bridge 放在独立 submodule `tools/profiler_tracy_bridge`，远端为 `git@github.com:tencentmalos/profiler_tracy_bridge.git`，并要求 Tracy 能力作为可选功能接入：默认构建和默认 `profiler_study` 协议路径不依赖 bridge。
+
 ### `.tracy` 文件打开
 
 推荐通过 Tracy bridge helper 读取 `.tracy`，输出 workspace 可消费的 normalized document：
