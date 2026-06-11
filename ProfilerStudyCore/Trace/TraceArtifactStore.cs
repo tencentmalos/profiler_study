@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using ProfilerStudy.Tracy;
 
 namespace ProfilerStudy.Trace;
 
@@ -43,7 +44,8 @@ public static class TraceArtifactStore
 		string artifactId = CreateArtifactId(document.SourceFormat, sourceKind);
 		string artifactDirectory = Path.Combine(root, artifactId);
 		Directory.CreateDirectory(artifactDirectory);
-		Directory.CreateDirectory(Path.Combine(artifactDirectory, "normalized"));
+		string normalizedDirectory = Path.Combine(artifactDirectory, "normalized");
+		Directory.CreateDirectory(normalizedDirectory);
 
 		string diagnosticsPath = Path.Combine(artifactDirectory, "import-diagnostics.json");
 		File.WriteAllText(diagnosticsPath, JsonSerializer.Serialize(diagnostics ?? new ArrayList(), JsonOptions));
@@ -63,7 +65,32 @@ public static class TraceArtifactStore
 			Capture = capture
 		};
 		File.WriteAllText(Path.Combine(artifactDirectory, "manifest.json"), JsonSerializer.Serialize(manifest, JsonOptions));
+		if (document.QuerySession is TracyTraceQuerySession tracyQuerySession)
+		{
+			TracyNormalizedArtifact.Write(normalizedDirectory, document, tracyQuerySession, diagnostics);
+		}
 		return manifest;
+	}
+
+	public static TraceDocument Load(string artifactId)
+	{
+		string artifactDirectory = GetArtifactDirectory(artifactId);
+		string manifestPath = Path.Combine(artifactDirectory, "manifest.json");
+		if (!File.Exists(manifestPath))
+		{
+			throw new FileNotFoundException("Trace artifact manifest does not exist.", manifestPath);
+		}
+
+		TraceArtifactManifest manifest = ReadManifest(manifestPath);
+		if (manifest == null)
+		{
+			throw new InvalidOperationException("Trace artifact manifest could not be read: " + artifactId + ".");
+		}
+		if (!string.Equals(manifest.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase))
+		{
+			throw new InvalidOperationException("Unsupported trace artifact format: " + manifest.SourceFormat + ".");
+		}
+		return TracyNormalizedArtifact.Load(artifactDirectory, manifest);
 	}
 
 	public static ArrayList List(string format, int limit)
@@ -111,6 +138,23 @@ public static class TraceArtifactStore
 		{
 			return null;
 		}
+	}
+
+	private static string GetArtifactDirectory(string artifactId)
+	{
+		if (string.IsNullOrWhiteSpace(artifactId))
+		{
+			throw new ArgumentException("artifact_id is required.", nameof(artifactId));
+		}
+		string root = RootPath;
+		string artifactDirectory = Path.GetFullPath(Path.Combine(root, artifactId));
+		string normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+		StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+		if (!artifactDirectory.Equals(normalizedRoot, comparison) && !artifactDirectory.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, comparison))
+		{
+			throw new InvalidOperationException("Trace artifact path escapes the artifact root.");
+		}
+		return artifactDirectory;
 	}
 
 	private static string CreateArtifactId(string sourceFormat, string sourceKind)

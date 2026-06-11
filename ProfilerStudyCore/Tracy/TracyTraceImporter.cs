@@ -33,8 +33,8 @@ public static class TracyTraceImporter
 			new Dictionary<string, object>
 			{
 				["severity"] = "warning",
-				["code"] = "TracyEventDecodingPending",
-				["message"] = "CPU zones, frame marks, plots, and metadata decoding are not enabled in this implementation slice."
+				["code"] = "TracyAdvancedEventDecodingPending",
+				["message"] = "CPU zones, frame set metadata, and plots are decoded when present; GPU zones, locks, allocations, callstacks, and messages remain pending."
 			}
 		};
 		TracyTraceQuerySession querySession = new TracyTraceQuerySession(fullPath, eventStream, diagnostics);

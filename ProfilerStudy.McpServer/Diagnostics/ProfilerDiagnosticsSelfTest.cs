@@ -335,135 +335,174 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void AssertTracyMetadataQueryTools(string path)
 	{
-		ProfilerMcpTools tools = new ProfilerMcpTools();
-		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
 		{
-			["path"] = path,
-			["format"] = "auto",
-			["keep_session"] = true
-		});
-		AssertEqual(false, keptResult["isError"], "metadata load_trace_file isError");
-		IDictionary kept = keptResult["structuredContent"] as IDictionary;
-		string sessionId = Convert.ToString(kept["sessionId"]);
-		IDictionary summary = kept["summary"] as IDictionary;
-		AssertEqual(true, summary["metadataDecoded"], "metadata summary decoded");
-		AssertEqual(2, summary["frameCount"], "metadata summary frame count");
-		AssertEqual(false, summary["framesUnavailable"], "metadata summary frames unavailable");
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "auto",
+				["keep_session"] = true
+			});
+			AssertEqual(false, keptResult["isError"], "metadata load_trace_file isError");
+			IDictionary kept = keptResult["structuredContent"] as IDictionary;
+			string sessionId = Convert.ToString(kept["sessionId"]);
+			IDictionary summary = kept["summary"] as IDictionary;
+			AssertEqual(true, summary["metadataDecoded"], "metadata summary decoded");
+			AssertEqual(2, summary["frameCount"], "metadata summary frame count");
+			AssertEqual(false, summary["framesUnavailable"], "metadata summary frames unavailable");
 
-		Dictionary<string, object> slowFramesResult = tools.CallTool("find_slow_frames", new Dictionary<string, object>
-		{
-			["session_id"] = sessionId,
-			["top"] = 5
-		});
-		AssertEqual(false, slowFramesResult["isError"], "metadata tracy find_slow_frames isError");
-		IDictionary slowFrames = slowFramesResult["structuredContent"] as IDictionary;
-		AssertEqual("tracy", slowFrames["sourceFormat"], "metadata slow frames source format");
-		AssertEqual(false, slowFrames["framesUnavailable"], "metadata slow frames unavailable");
-		AssertHasItems(slowFrames["slowFrames"], "metadata slow frames");
-		IDictionary firstFrame = ((IList)slowFrames["slowFrames"])[0] as IDictionary;
-		AssertEqual(1, firstFrame["frameIndex"], "metadata slow frame index");
-		AssertEqual(9.0, firstFrame["durationMs"], "metadata slow frame duration");
+			Dictionary<string, object> slowFramesResult = tools.CallTool("find_slow_frames", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["top"] = 5
+			});
+			AssertEqual(false, slowFramesResult["isError"], "metadata tracy find_slow_frames isError");
+			IDictionary slowFrames = slowFramesResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", slowFrames["sourceFormat"], "metadata slow frames source format");
+			AssertEqual(false, slowFrames["framesUnavailable"], "metadata slow frames unavailable");
+			AssertHasItems(slowFrames["slowFrames"], "metadata slow frames");
+			IDictionary firstFrame = ((IList)slowFrames["slowFrames"])[0] as IDictionary;
+			AssertEqual(1, firstFrame["frameIndex"], "metadata slow frame index");
+			AssertEqual(9.0, firstFrame["durationMs"], "metadata slow frame duration");
 
-		tools.CallTool("close_session", new Dictionary<string, object>
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+		}
+		finally
 		{
-			["session_id"] = sessionId
-		});
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
 	}
 
 	private static void AssertTracyZoneQueryTools(string path)
 	{
-		ProfilerMcpTools tools = new ProfilerMcpTools();
-		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
 		{
-			["path"] = path,
-			["format"] = "auto",
-			["keep_session"] = true
-		});
-		AssertEqual(false, keptResult["isError"], "zone load_trace_file isError");
-		IDictionary kept = keptResult["structuredContent"] as IDictionary;
-		string sessionId = Convert.ToString(kept["sessionId"]);
-		IDictionary summary = kept["summary"] as IDictionary;
-		AssertEqual(1, summary["threadCount"], "zone summary thread count");
-		AssertEqual(1, summary["zoneCount"], "zone summary zone count");
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "auto",
+				["keep_session"] = true
+			});
+			AssertEqual(false, keptResult["isError"], "zone load_trace_file isError");
+			IDictionary kept = keptResult["structuredContent"] as IDictionary;
+			string sessionId = Convert.ToString(kept["sessionId"]);
+			string artifactId = Convert.ToString(kept["artifactId"]);
+			if (string.IsNullOrWhiteSpace(artifactId))
+			{
+				throw new InvalidOperationException("zone load_trace_file must return artifactId.");
+			}
+			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "file-import");
+			AssertTraceArtifactNormalizedFiles(artifactRoot, artifactId, expectZone: true, expectPlot: false);
+			IDictionary summary = kept["summary"] as IDictionary;
+			AssertEqual(1, summary["threadCount"], "zone summary thread count");
+			AssertEqual(1, summary["zoneCount"], "zone summary zone count");
 
-		Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
-		{
-			["session_id"] = sessionId,
-			["top"] = 5
-		});
-		AssertEqual(false, hotspotsResult["isError"], "zone find_scope_hotspots isError");
-		IDictionary hotspots = hotspotsResult["structuredContent"] as IDictionary;
-		AssertEqual("tracy", hotspots["sourceFormat"], "zone hotspots source format");
-		AssertEqual(true, hotspots["eventsDecoded"], "zone hotspots events decoded");
-		AssertHasItems(hotspots["scopeHotspots"], "zone scope hotspots");
-		IDictionary firstHotspot = ((IList)hotspots["scopeHotspots"])[0] as IDictionary;
-		AssertEqual("SelfTestZone", firstHotspot["name"], "zone hotspot name");
-		AssertEqual(4.0, firstHotspot["totalMs"], "zone hotspot total ms");
-		AssertEqual(1, firstHotspot["totalCount"], "zone hotspot count");
+			Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["top"] = 5
+			});
+			AssertEqual(false, hotspotsResult["isError"], "zone find_scope_hotspots isError");
+			IDictionary hotspots = hotspotsResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", hotspots["sourceFormat"], "zone hotspots source format");
+			AssertEqual(true, hotspots["eventsDecoded"], "zone hotspots events decoded");
+			AssertHasItems(hotspots["scopeHotspots"], "zone scope hotspots");
+			IDictionary firstHotspot = ((IList)hotspots["scopeHotspots"])[0] as IDictionary;
+			AssertEqual("SelfTestZone", firstHotspot["name"], "zone hotspot name");
+			AssertEqual(4.0, firstHotspot["totalMs"], "zone hotspot total ms");
+			AssertEqual(1, firstHotspot["totalCount"], "zone hotspot count");
 
-		Dictionary<string, object> rangeResult = tools.CallTool("analyze_time_range", new Dictionary<string, object>
-		{
-			["session_id"] = sessionId,
-			["start_frame"] = 0,
-			["end_frame"] = 1,
-			["top"] = 5
-		});
-		AssertEqual(false, rangeResult["isError"], "zone analyze_time_range isError");
-		IDictionary range = rangeResult["structuredContent"] as IDictionary;
-		AssertEqual("tracy", range["sourceFormat"], "zone range source format");
-		AssertHasItems(range["scopeHotspots"], "zone range hotspots");
+			Dictionary<string, object> rangeResult = tools.CallTool("analyze_time_range", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["start_frame"] = 0,
+				["end_frame"] = 1,
+				["top"] = 5
+			});
+			AssertEqual(false, rangeResult["isError"], "zone analyze_time_range isError");
+			IDictionary range = rangeResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", range["sourceFormat"], "zone range source format");
+			AssertHasItems(range["scopeHotspots"], "zone range hotspots");
 
-		tools.CallTool("close_session", new Dictionary<string, object>
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+			AssertTraceArtifactReloadsZone(tools, artifactId);
+		}
+		finally
 		{
-			["session_id"] = sessionId
-		});
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
 	}
 
 	private static void AssertTracyPlotQueryTools(string path)
 	{
-		ProfilerMcpTools tools = new ProfilerMcpTools();
-		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
 		{
-			["path"] = path,
-			["format"] = "auto",
-			["keep_session"] = true
-		});
-		AssertEqual(false, keptResult["isError"], "plot load_trace_file isError");
-		IDictionary kept = keptResult["structuredContent"] as IDictionary;
-		string sessionId = Convert.ToString(kept["sessionId"]);
-		IDictionary summary = kept["summary"] as IDictionary;
-		AssertEqual(1, summary["plotCount"], "plot summary plot count");
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "auto",
+				["keep_session"] = true
+			});
+			AssertEqual(false, keptResult["isError"], "plot load_trace_file isError");
+			IDictionary kept = keptResult["structuredContent"] as IDictionary;
+			string sessionId = Convert.ToString(kept["sessionId"]);
+			string artifactId = Convert.ToString(kept["artifactId"]);
+			if (string.IsNullOrWhiteSpace(artifactId))
+			{
+				throw new InvalidOperationException("plot load_trace_file must return artifactId.");
+			}
+			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "file-import");
+			AssertTraceArtifactNormalizedFiles(artifactRoot, artifactId, expectZone: false, expectPlot: true);
+			IDictionary summary = kept["summary"] as IDictionary;
+			AssertEqual(1, summary["plotCount"], "plot summary plot count");
 
-		Dictionary<string, object> countersResult = tools.CallTool("list_counters", new Dictionary<string, object>
-		{
-			["session_id"] = sessionId,
-			["top"] = 5
-		});
-		AssertEqual(false, countersResult["isError"], "plot list_counters isError");
-		IDictionary counters = countersResult["structuredContent"] as IDictionary;
-		AssertEqual(true, counters["eventsDecoded"], "plot counters events decoded");
-		AssertHasItems(counters["counters"], "plot counters");
-		IDictionary firstCounter = ((IList)counters["counters"])[0] as IDictionary;
-		AssertEqual("FrameTime", firstCounter["name"], "plot counter name");
-		AssertEqual(2, firstCounter["sampleCount"], "plot counter sample count");
+			Dictionary<string, object> countersResult = tools.CallTool("list_counters", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["top"] = 5
+			});
+			AssertEqual(false, countersResult["isError"], "plot list_counters isError");
+			IDictionary counters = countersResult["structuredContent"] as IDictionary;
+			AssertEqual(true, counters["eventsDecoded"], "plot counters events decoded");
+			AssertHasItems(counters["counters"], "plot counters");
+			IDictionary firstCounter = ((IList)counters["counters"])[0] as IDictionary;
+			AssertEqual("FrameTime", firstCounter["name"], "plot counter name");
+			AssertEqual(2, firstCounter["sampleCount"], "plot counter sample count");
 
-		Dictionary<string, object> samplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
-		{
-			["session_id"] = sessionId,
-			["counter_name"] = "FrameTime",
-			["max_samples"] = 10
-		});
-		AssertEqual(false, samplesResult["isError"], "plot query_counter isError");
-		IDictionary samples = samplesResult["structuredContent"] as IDictionary;
-		AssertEqual("FrameTime", samples["counterName"], "plot sample counter name");
-		AssertHasItems(samples["samples"], "plot samples");
-		IDictionary secondSample = ((IList)samples["samples"])[1] as IDictionary;
-		AssertEqual(20.0, secondSample["value"], "plot second sample value");
+			Dictionary<string, object> samplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["counter_name"] = "FrameTime",
+				["max_samples"] = 10
+			});
+			AssertEqual(false, samplesResult["isError"], "plot query_counter isError");
+			IDictionary samples = samplesResult["structuredContent"] as IDictionary;
+			AssertEqual("FrameTime", samples["counterName"], "plot sample counter name");
+			AssertHasItems(samples["samples"], "plot samples");
+			IDictionary secondSample = ((IList)samples["samples"])[1] as IDictionary;
+			AssertEqual(20.0, secondSample["value"], "plot second sample value");
 
-		tools.CallTool("close_session", new Dictionary<string, object>
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+		}
+		finally
 		{
-			["session_id"] = sessionId
-		});
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
 	}
 
 	private static void AssertTracyLiveCaptureTool()
@@ -575,6 +614,69 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			throw new InvalidOperationException("trace artifact was not listed: " + artifactId);
 		}
+	}
+
+	private static void AssertTraceArtifactNormalizedFiles(string root, string artifactId, bool expectZone, bool expectPlot)
+	{
+		string normalizedRoot = Path.Combine(root, artifactId, "normalized");
+		string[] requiredFiles =
+		{
+			"manifest.json",
+			"threads.ndjson",
+			"frames.ndjson",
+			"cpu_zones.ndjson",
+			"plots.ndjson",
+			"diagnostics.json"
+		};
+		foreach (string fileName in requiredFiles)
+		{
+			string fullPath = Path.Combine(normalizedRoot, fileName);
+			if (!File.Exists(fullPath))
+			{
+				throw new InvalidOperationException("normalized artifact file is missing: " + fullPath);
+			}
+		}
+		if (expectZone && string.IsNullOrWhiteSpace(File.ReadAllText(Path.Combine(normalizedRoot, "cpu_zones.ndjson"))))
+		{
+			throw new InvalidOperationException("cpu_zones.ndjson must contain decoded Tracy zones.");
+		}
+		if (expectPlot && string.IsNullOrWhiteSpace(File.ReadAllText(Path.Combine(normalizedRoot, "plots.ndjson"))))
+		{
+			throw new InvalidOperationException("plots.ndjson must contain decoded Tracy plots.");
+		}
+	}
+
+	private static void AssertTraceArtifactReloadsZone(ProfilerMcpTools tools, string artifactId)
+	{
+		Dictionary<string, object> loadResult = tools.CallTool("load_trace_artifact", new Dictionary<string, object>
+		{
+			["artifact_id"] = artifactId,
+			["keep_session"] = true
+		});
+		AssertEqual(false, loadResult["isError"], "load_trace_artifact isError");
+		IDictionary loaded = loadResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", loaded["sourceFormat"], "artifact source format");
+		AssertEqual(artifactId, loaded["artifactId"], "artifact id");
+		IDictionary summary = loaded["summary"] as IDictionary;
+		AssertEqual(1, summary["zoneCount"], "artifact zone summary count");
+		string sessionId = Convert.ToString(loaded["sessionId"]);
+		if (string.IsNullOrWhiteSpace(sessionId))
+		{
+			throw new InvalidOperationException("load_trace_artifact keep_session=true must return sessionId.");
+		}
+		Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["top"] = 5
+		});
+		AssertEqual(false, hotspotsResult["isError"], "artifact find_scope_hotspots isError");
+		IDictionary hotspots = hotspotsResult["structuredContent"] as IDictionary;
+		AssertEqual(true, hotspots["eventsDecoded"], "artifact hotspots events decoded");
+		AssertHasItems(hotspots["scopeHotspots"], "artifact scope hotspots");
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
 	}
 
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)

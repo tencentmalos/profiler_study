@@ -28,6 +28,10 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public string DisplayName { get; }
 
+	public TracyEventStream EventStream => m_EventStream;
+
+	public ArrayList ImportDiagnostics => m_Diagnostics;
+
 	public Dictionary<string, object> GetSummary(int top)
 	{
 		return new Dictionary<string, object>

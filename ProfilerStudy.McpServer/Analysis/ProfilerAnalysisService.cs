@@ -278,6 +278,22 @@ internal sealed class ProfilerAnalysisService
 		};
 	}
 
+	public Dictionary<string, object> LoadTraceArtifact(string artifactId, int top, bool keepSession)
+	{
+		TraceDocument traceDocument = TraceArtifactStore.Load(artifactId);
+		Dictionary<string, object> result = traceDocument.QuerySession.GetSummary(top);
+		result["sourceFile"] = traceDocument.SourcePath;
+		result["sourceFormat"] = traceDocument.SourceFormat;
+		result["artifactId"] = artifactId;
+		result["top"] = top;
+		result["keepSession"] = keepSession;
+		if (keepSession)
+		{
+			result["sessionId"] = AddTraceDocument(traceDocument);
+		}
+		return result;
+	}
+
 	public Dictionary<string, object> LoadSessionFile(string path, int top)
 	{
 		CapturingLog log = new CapturingLog();

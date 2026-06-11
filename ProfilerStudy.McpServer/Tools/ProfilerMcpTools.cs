@@ -140,6 +140,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "load_trace_artifact",
+				["description"] = "Load a registered trace artifact from the artifact store. The initial implementation supports Tracy artifacts with normalized cache data.",
+				["inputSchema"] = TraceArtifactLoadSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "load_session_file",
 				["description"] = "Load a profiler file into memory and return a session_id for follow-up analysis tools.",
 				["inputSchema"] = new Dictionary<string, object>
@@ -269,6 +275,12 @@ internal sealed class ProfilerMcpTools
 					structured = m_AnalysisService.ListTraceArtifacts(
 						GetString(arguments, "format", "all"),
 						GetInt(arguments, "limit", 20, 1, 200));
+					break;
+				case "load_trace_artifact":
+					structured = m_AnalysisService.LoadTraceArtifact(
+						GetString(arguments, "artifact_id", string.Empty),
+						GetInt(arguments, "top", 10, 1, 50),
+						GetBool(arguments, "keep_session", false));
 					break;
 				case "load_session_file":
 					structured = m_AnalysisService.LoadSessionFile(
@@ -521,6 +533,26 @@ internal sealed class ProfilerMcpTools
 					["type"] = "boolean",
 					["default"] = false,
 					["description"] = "Keep the loaded trace in memory and return a session_id for follow-up queries."
+				}
+			}
+		};
+	}
+
+	private static Dictionary<string, object> TraceArtifactLoadSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "artifact_id" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["artifact_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 },
+				["keep_session"] = new Dictionary<string, object>
+				{
+					["type"] = "boolean",
+					["default"] = false,
+					["description"] = "Keep the loaded artifact in memory and return a session_id for follow-up queries."
 				}
 			}
 		};

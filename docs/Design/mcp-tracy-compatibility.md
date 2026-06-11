@@ -551,12 +551,14 @@ Artifact manifest：
 
 用户显式打开外部 `.tracy` 文件时，默认不复制原文件，只创建 normalized cache 和 manifest，manifest 记录原始绝对路径。MCP 只能列出 ProfilerStudy 登记过的 artifact，不扫描用户目录。
 
-当前实现第一阶段采用 manifest-only store：
+当前实现阶段采用 file-backed artifact store：
 
 - 默认根目录为 `~/.profilerstudy/traces/captures`，测试和 headless 环境可通过 `PROFILER_STUDY_TRACE_ARTIFACT_ROOT` 覆盖。
 - `load_trace_file(format=auto|tracy)` 和 `capture_profile(protocol=tracy)` 都登记 `manifest.json` 与 `import-diagnostics.json`，并在 tool 返回中带 `artifactId`。
+- 已解码的 Tracy metadata、frame set、CPU zones、plots 和 diagnostics 写入 `normalized/` 下的 `manifest.json`、`threads.ndjson`、`frames.ndjson`、`cpu_zones.ndjson`、`plots.ndjson`、`diagnostics.json`。
 - `list_trace_artifacts(format, limit)` 只枚举 artifact store 中的 manifest；`format=tracy` 对应 Tracy 导入和 live capture。
-- `source.tracy` writer、normalized ndjson 明细和 `load_trace_artifact(artifact_id)` 仍属于后续阶段，不在 manifest-only store 中声明已完成。
+- `load_trace_artifact(artifact_id, keep_session)` 从 artifact store 读取 normalized cache，重建 `TracyTraceQuerySession`，让 MCP 可以复用 import/live capture 产物。
+- `source.tracy` writer 和高级 Tracy 事件仍属于后续阶段，不在当前 artifact store 中声明已完成。
 
 ## 错误处理
 
