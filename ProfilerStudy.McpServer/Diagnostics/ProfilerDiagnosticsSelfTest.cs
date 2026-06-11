@@ -191,6 +191,7 @@ internal static class ProfilerDiagnosticsSelfTest
 
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
+			AssertUnsupportedTracyFileVersionTool(unsupportedPath);
 		}
 		finally
 		{
@@ -358,6 +359,33 @@ internal static class ProfilerDiagnosticsSelfTest
 			["artifact_id"] = artifactId
 		});
 		AssertEqual(true, diagnosticsResult["isError"], "escaped artifact diagnostics isError");
+	}
+
+	private static void AssertUnsupportedTracyFileVersionTool(string path)
+	{
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
+		{
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> result = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "tracy"
+			});
+			AssertEqual(true, result["isError"], "unsupported tracy load_trace_file isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			AssertEqual("TracyUnsupportedFileVersion", structured["errorCode"], "unsupported tracy error code");
+			AssertEqual("0.11.0", structured["detectedVersion"], "unsupported tracy detected version");
+			AssertEqual("0.10.0", structured["lockedVersion"], "unsupported tracy locked version");
+			AssertHasItems(structured["supportedVersions"], "unsupported tracy supported versions");
+			AssertDiagnosticCode(structured["diagnostics"], "TracyUnsupportedFileVersion", "unsupported tracy diagnostics");
+			IDictionary tracyStatus = structured["tracyStatus"] as IDictionary;
+			AssertEqual("0.10.0", tracyStatus["lockedVersion"], "unsupported tracy status locked version");
+		}
+		finally
+		{
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
 	}
 
 	private static void AssertTracyQueryToolContracts(ProfilerMcpTools tools, string sessionId)

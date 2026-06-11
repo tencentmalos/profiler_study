@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ProfilerStudy.Tracy;
 
 namespace ProfilerStudy.McpServer;
 
@@ -367,6 +368,10 @@ internal sealed class ProfilerMcpTools
 		}
 		catch (Exception ex)
 		{
+			if (ex is TracyFileFormatException tracyException)
+			{
+				return ToolResult(BuildTracyError(tracyException), isError: true);
+			}
 			return ToolResult(new Dictionary<string, object>
 			{
 				["error"] = ex.Message,
@@ -374,6 +379,46 @@ internal sealed class ProfilerMcpTools
 				["stackTrace"] = ex.StackTrace ?? string.Empty
 			}, isError: true);
 		}
+	}
+
+	private static Dictionary<string, object> BuildTracyError(TracyFileFormatException exception)
+	{
+		TracyStatus status = TracyVersionRegistry.GetStatus();
+		ArrayList supportedVersions = ToArrayList(exception.SupportedVersions.Count > 0
+			? exception.SupportedVersions
+			: status.SupportedVersions);
+		string lockedVersion = string.IsNullOrWhiteSpace(exception.LockedVersion)
+			? status.LockedVersion
+			: exception.LockedVersion;
+		Dictionary<string, object> diagnostic = new Dictionary<string, object>
+		{
+			["severity"] = "error",
+			["code"] = exception.ErrorCode,
+			["message"] = exception.Message,
+			["detectedVersion"] = exception.DetectedVersion,
+			["supportedVersions"] = supportedVersions,
+			["lockedVersion"] = lockedVersion
+		};
+		return new Dictionary<string, object>
+		{
+			["error"] = exception.Message,
+			["errorCode"] = exception.ErrorCode,
+			["message"] = exception.Message,
+			["exceptionType"] = exception.GetType().FullName,
+			["stackTrace"] = exception.StackTrace ?? string.Empty,
+			["detectedVersion"] = exception.DetectedVersion,
+			["supportedVersions"] = supportedVersions,
+			["lockedVersion"] = lockedVersion,
+			["tracyStatus"] = new Dictionary<string, object>
+			{
+				["lockedVersion"] = status.LockedVersion,
+				["supportedVersions"] = ToArrayList(status.SupportedVersions),
+				["sourceReferencePath"] = status.SourceReferencePath,
+				["sourceReferenceAvailable"] = status.SourceReferenceAvailable,
+				["reason"] = status.Reason
+			},
+			["diagnostics"] = new ArrayList { diagnostic }
+		};
 	}
 
 	private static Dictionary<string, object> ToolResult(Dictionary<string, object> structured, bool isError)
@@ -391,6 +436,16 @@ internal sealed class ProfilerMcpTools
 			["structuredContent"] = structured,
 			["isError"] = isError
 		};
+	}
+
+	private static ArrayList ToArrayList(IEnumerable<string> values)
+	{
+		ArrayList list = new ArrayList();
+		foreach (string value in values)
+		{
+			list.Add(value);
+		}
+		return list;
 	}
 
 	private static string GetString(Dictionary<string, object> values, string key, string defaultValue)

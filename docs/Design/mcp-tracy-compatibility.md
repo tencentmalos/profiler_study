@@ -587,10 +587,15 @@ MCP 返回 `isError=true` 时仍提供结构化内容，至少包含：
 ```text
 errorCode
 message
+detectedVersion?
+supportedVersions?
+lockedVersion?
 tracyStatus
 diagnosticsPath?
 logTail
 ```
+
+`TracyUnsupportedFileVersion` 和 `TracyProtocolMismatch` 必须在顶层 `structuredContent` 和 diagnostics 中同时给出 `detectedVersion`、`supportedVersions`、`lockedVersion`，避免 UI 和 MCP client 只能从文本 message 解析版本。
 
 UI 则显示简短错误，并在 diagnostics panel 展示详细日志。
 
