@@ -115,6 +115,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			TracyFileHeader header = Tracy010FileReader.ReadHeader(path);
 			AssertEqual("0.10.0", header.Version, "tracy file header version");
 			AssertEqual("lz4", header.Compression, "tracy file compression");
+			AssertLoadTraceFileTool(path);
 
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
@@ -130,6 +131,34 @@ internal static class ProfilerDiagnosticsSelfTest
 				File.Delete(unsupportedPath);
 			}
 		}
+	}
+
+	private static void AssertLoadTraceFileTool(string path)
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		bool found = false;
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "load_trace_file")
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			throw new InvalidOperationException("load_trace_file tool is missing.");
+		}
+
+		Dictionary<string, object> result = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		{
+			["path"] = path,
+			["format"] = "auto"
+		});
+		IDictionary structured = result["structuredContent"] as IDictionary;
+		AssertEqual("tracy", structured["sourceFormat"], "load trace source format");
+		AssertEqual("0.10.0", structured["tracyVersion"], "load trace tracy version");
 	}
 
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)

@@ -137,6 +137,45 @@ internal sealed class ProfilerAnalysisService
 		}
 	}
 
+	public Dictionary<string, object> LoadTraceFile(string path, string format, int top)
+	{
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			throw new ArgumentException("Trace file path is required.");
+		}
+		string fullPath = Path.GetFullPath(path);
+		string requestedFormat = string.IsNullOrWhiteSpace(format) ? "auto" : format.Trim().ToLowerInvariant();
+		if (requestedFormat == "auto")
+		{
+			string extension = Path.GetExtension(fullPath);
+			if (string.Equals(extension, ".tracy", StringComparison.OrdinalIgnoreCase))
+			{
+				requestedFormat = "tracy";
+			}
+		}
+		if (requestedFormat != "tracy")
+		{
+			throw new InvalidOperationException("Unsupported trace format: " + requestedFormat + ".");
+		}
+
+		TracyFileHeader header = Tracy010FileReader.ReadHeader(fullPath);
+		return new Dictionary<string, object>
+		{
+			["sourceFile"] = fullPath,
+			["sourceFormat"] = "tracy",
+			["tracyVersion"] = header.Version,
+			["compression"] = header.Compression,
+			["top"] = top,
+			["summary"] = new Dictionary<string, object>
+			{
+				["sourceFormat"] = "tracy",
+				["tracyVersion"] = header.Version,
+				["status"] = "header-loaded",
+				["note"] = "Initial C# Tracy reader has validated the file container and locked Tracy version; event decoding follows in the next implementation phase."
+			}
+		};
+	}
+
 	public Dictionary<string, object> LoadSessionFile(string path, int top)
 	{
 		CapturingLog log = new CapturingLog();

@@ -121,6 +121,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "load_trace_file",
+				["description"] = "Load a trace file through the unified trace path. The initial implementation supports Tracy .tracy files locked to Tracy 0.10.0.",
+				["inputSchema"] = TraceFileSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "load_session_file",
 				["description"] = "Load a profiler file into memory and return a session_id for follow-up analysis tools.",
 				["inputSchema"] = new Dictionary<string, object>
@@ -230,6 +236,12 @@ internal sealed class ProfilerMcpTools
 				case "analyze_session_file":
 					structured = m_AnalysisService.AnalyzeSessionFile(
 						GetString(arguments, "path", string.Empty),
+						GetInt(arguments, "top", 10, 1, 50));
+					break;
+				case "load_trace_file":
+					structured = m_AnalysisService.LoadTraceFile(
+						GetString(arguments, "path", string.Empty),
+						GetString(arguments, "format", "auto"),
 						GetInt(arguments, "top", 10, 1, 50));
 					break;
 				case "load_session_file":
@@ -455,6 +467,26 @@ internal sealed class ProfilerMcpTools
 				["frame_index"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
 				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 },
 				["neighbor_count"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0, ["maximum"] = 20, ["default"] = 3 }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> TraceFileSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "path" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["path"] = new Dictionary<string, object> { ["type"] = "string" },
+				["format"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["enum"] = new ArrayList { "auto", "tracy" },
+					["default"] = "auto"
+				},
+				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 }
 			}
 		};
 	}
