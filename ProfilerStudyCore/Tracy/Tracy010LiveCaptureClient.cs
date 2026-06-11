@@ -63,7 +63,7 @@ public static class Tracy010LiveCaptureClient
 		stream.Write(HandshakeShibboleth, 0, HandshakeShibboleth.Length);
 		WriteUInt32(stream, ProtocolVersion);
 		cancellationToken.ThrowIfCancellationRequested();
-		int status = stream.ReadByte();
+		int status = ReadByteOrEnd(stream, cancellationToken);
 		if (status < 0)
 		{
 			throw CreateProtocolMismatch("Tracy target closed the connection before handshake status.", "closed");
@@ -201,7 +201,7 @@ public static class Tracy010LiveCaptureClient
 		while (offset < size)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			int read = stream.Read(bytes, offset, size - offset);
+			int read = Read(stream, bytes, offset, size - offset, cancellationToken);
 			if (read == 0)
 			{
 				throw new TracyFileFormatException("TracyConnectFailed", "Unexpected end of Tracy live stream.");
@@ -209,6 +209,19 @@ public static class Tracy010LiveCaptureClient
 			offset += read;
 		}
 		return bytes;
+	}
+
+	private static int Read(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		return stream.ReadAsync(buffer, offset, count, cancellationToken).GetAwaiter().GetResult();
+	}
+
+	private static int ReadByteOrEnd(Stream stream, CancellationToken cancellationToken)
+	{
+		byte[] bytes = new byte[1];
+		int read = Read(stream, bytes, 0, 1, cancellationToken);
+		return read == 0 ? -1 : bytes[0];
 	}
 
 	private static void WriteUInt32(Stream stream, uint value)

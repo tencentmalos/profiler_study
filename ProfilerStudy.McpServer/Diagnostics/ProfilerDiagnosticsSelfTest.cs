@@ -1072,6 +1072,21 @@ internal static class ProfilerDiagnosticsSelfTest
 				() => Tracy010LiveCaptureClient.Capture("127.0.0.1", 1, 1, canceledCapture.Token),
 				"tracy live capture cancellation");
 
+			using FakeTracyServer stalledWelcomeServer = new FakeTracyServer(1, stallBeforeWelcome: true);
+			stalledWelcomeServer.Start();
+			using CancellationTokenSource stalledWelcomeCancellation = new CancellationTokenSource();
+			stalledWelcomeCancellation.CancelAfter(100);
+			long stalledWelcomeStart = Environment.TickCount64;
+			AssertThrows(
+				() => Tracy010LiveCaptureClient.Capture("127.0.0.1", stalledWelcomeServer.Port, 1, stalledWelcomeCancellation.Token),
+				"tracy live welcome read cancellation");
+			long stalledWelcomeElapsed = Environment.TickCount64 - stalledWelcomeStart;
+			if (stalledWelcomeElapsed > 2000)
+			{
+				throw new InvalidOperationException("tracy live welcome read cancellation took " + stalledWelcomeElapsed + " ms.");
+			}
+			stalledWelcomeServer.AssertHandshakeReceived();
+
 			using FakeTracyServer server = new FakeTracyServer();
 			server.Start();
 			ProfilerMcpTools tools = new ProfilerMcpTools();
@@ -1855,6 +1870,7 @@ internal static class ProfilerDiagnosticsSelfTest
 	{
 		private readonly TcpListener m_Listener = new TcpListener(IPAddress.Loopback, 0);
 		private readonly int m_HandshakeStatus;
+		private readonly bool m_StallBeforeWelcome;
 		private Thread m_Thread;
 		private volatile bool m_HandshakeReceived;
 		private Exception m_Exception;
@@ -1865,8 +1881,14 @@ internal static class ProfilerDiagnosticsSelfTest
 		}
 
 		public FakeTracyServer(int handshakeStatus)
+			: this(handshakeStatus, false)
+		{
+		}
+
+		public FakeTracyServer(int handshakeStatus, bool stallBeforeWelcome)
 		{
 			m_HandshakeStatus = handshakeStatus;
+			m_StallBeforeWelcome = stallBeforeWelcome;
 		}
 
 		public int Port { get; private set; }
@@ -1917,6 +1939,11 @@ internal static class ProfilerDiagnosticsSelfTest
 				stream.WriteByte((byte)m_HandshakeStatus);
 				if (m_HandshakeStatus != 1)
 				{
+					return;
+				}
+				if (m_StallBeforeWelcome)
+				{
+					Thread.Sleep(5000);
 					return;
 				}
 				WriteWelcomeMessage(stream);

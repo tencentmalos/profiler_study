@@ -29,7 +29,7 @@ dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release
 2. For existing `.tracy` files, call `load_trace_file` with `format=auto` or `format=tracy`; use `keep_session=true` for follow-up analysis or keep the returned `artifactId` for later `load_trace_artifact`.
 3. For live captures, call `capture_profile` with a target URL and `keep_session=true` when the user may ask follow-up questions. Use default `protocol=study` for ProfilerStudy targets. Use explicit `protocol=tracy` only for Tracy 0.10.0 TCP targets and `pc://{ip}:{port}` URLs.
 4. Start broad: `get_session_summary`, then `get_profiler_overhead`, then `find_slow_frames`, then `find_scope_hotspots`.
-5. Narrow by evidence: use `analyze_frame` for a suspicious frame, `analyze_frame_detail` when hierarchical single-frame flame graph data and same-frame counter samples are needed, and `analyze_time_range` for a slow-frame cluster or comparison window.
+5. Narrow by evidence: use `analyze_frame` for a suspicious frame, `analyze_frame_detail` when hierarchical single-frame flame graph data and same-frame counter samples are needed, and `analyze_time_range` for a slow-frame cluster or comparison window. Tracy sessions may use `start_time_ns` / `end_time_ns` when frame metadata is unavailable or timestamp precision is required.
 6. For custom stat / counter questions, call `list_counters` first, then `query_counter` using the exact returned `counter_name`.
 7. Use `get_import_diagnostics` with `session_id` or `artifact_id` when import compatibility, Tracy version support, or partial decoding status matters.
 8. Close retained sessions with `close_session` when analysis is complete or when many sessions are loaded.
