@@ -179,7 +179,7 @@ internal sealed class ProfilerMcpTools
 			new Dictionary<string, object>
 			{
 				["name"] = "save_session_file",
-				["description"] = "Save a retained session to disk. The output suffix is corrected from the session's actual protocol: study writes .profiler; file-backed Tracy copies the original .tracy source when available.",
+				["description"] = "Save a retained session to disk. The output suffix is corrected from the session's actual protocol: study writes .profiler; Tracy writes .tracy, copying original source bytes when available or materializing the decoded Tracy 0.10.0 session.",
 				["inputSchema"] = SaveSessionFileSchema()
 			},
 			new Dictionary<string, object>

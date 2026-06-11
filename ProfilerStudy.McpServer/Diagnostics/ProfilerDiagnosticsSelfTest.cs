@@ -199,8 +199,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			TracyEventStream gpuStream = Tracy010FileReader.Read(gpuPath);
 			AssertEqual(true, gpuStream.HasMetadata, "tracy gpu metadata present");
 			AssertEqual(0, gpuStream.CpuZones.Count, "tracy gpu cpu zone count");
-			AssertDiagnosticCode(gpuStream.Diagnostics, "TracyGpuZonesUnsupported", "tracy gpu unsupported diagnostics");
-			AssertLoadTraceFileDiagnostics(gpuPath, "TracyGpuZonesUnsupported");
+			AssertEqual(1, gpuStream.GpuContexts.Count, "tracy gpu context count");
+			AssertEqual(0, gpuStream.GpuZones.Count, "tracy gpu timeline zone count");
+			AssertDiagnosticCode(gpuStream.Diagnostics, "TracyGpuZonesDecoded", "tracy gpu decoded diagnostics");
+			AssertLoadTraceFileDiagnostics(gpuPath, "TracyGpuZonesDecoded");
 
 			WriteTracyDumpWithUnsupportedEvents(unsupportedEventsPath);
 			TracyEventStream unsupportedEventsStream = Tracy010FileReader.Read(unsupportedEventsPath);
@@ -1192,7 +1194,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertDiagnosticCode(diagnostics["diagnostics"], "TracyDynamicZoneNamesDecoded", "tracy dynamic zone name diagnostics");
 			AssertDiagnosticCode(diagnostics["diagnostics"], "TracyHardwareSamplesDecoded", "tracy hardware sample diagnostics");
 			AssertDiagnosticCode(diagnostics["diagnostics"], "TracyGpuTimeWithoutZone", "tracy unmatched gpu time diagnostics");
-			AssertTracyLiveSaveSessionFileRejected(tools, sessionId);
+			AssertTracyLiveSaveSessionFile(tools, sessionId);
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId
@@ -2717,7 +2719,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		}
 	}
 
-	private static void AssertTracyLiveSaveSessionFileRejected(ProfilerMcpTools tools, string sessionId)
+	private static void AssertTracyLiveSaveSessionFile(ProfilerMcpTools tools, string sessionId)
 	{
 		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-live-save.tracy");
 		try
@@ -2727,14 +2729,34 @@ internal static class ProfilerDiagnosticsSelfTest
 				["session_id"] = sessionId,
 				["path"] = path
 			});
-			AssertEqual(true, result["isError"], "tracy live save_session_file isError");
+			AssertEqual(false, result["isError"], "tracy live save_session_file isError");
 			IDictionary structured = result["structuredContent"] as IDictionary;
-			string error = Convert.ToString(structured["error"]);
-			if (string.IsNullOrWhiteSpace(error) || !error.Contains("no original .tracy source file"))
+			AssertEqual("tracy-writer", structured["saveMode"], "tracy live save mode");
+			AssertEqual(Path.GetFullPath(path), structured["path"], "tracy live save path");
+			AssertEqual(false, structured["extensionCorrected"], "tracy live save extension corrected");
+			AssertEqual(true, File.Exists(path), "tracy live save file exists");
+			AssertEqual("mcp-readable-tracy-0.10.0", structured["writerCompatibility"], "tracy live writer compatibility");
+			IDictionary writerCoverage = structured["writerCoverage"] as IDictionary;
+			AssertEqual(1, writerCoverage["frameCount"], "tracy live writer frame count");
+			AssertEqual(1, writerCoverage["gpuContextCount"], "tracy live writer gpu context count");
+			AssertEqual(1, writerCoverage["gpuZoneCount"], "tracy live writer gpu zone count");
+			AssertEqual(true, writerCoverage["gpuZonesPreserved"], "tracy live writer gpu zones preserved");
+			Tracy010FileReader.ReadHeader(path);
+
+			Dictionary<string, object> openResult = tools.CallTool("open_file", new Dictionary<string, object>
 			{
-				throw new InvalidOperationException("tracy live save_session_file must explain missing original .tracy source.");
-			}
-			AssertEqual(false, File.Exists(path), "tracy live save output exists");
+				["path"] = path,
+				["format"] = "auto",
+				["top"] = 5
+			});
+			AssertEqual(false, openResult["isError"], "tracy live saved file open_file isError");
+			IDictionary opened = openResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", opened["sourceFormat"], "tracy live saved file source format");
+			AssertEqual("tracy", opened["resolvedFormat"], "tracy live saved file resolved format");
+			IDictionary summary = opened["summary"] as IDictionary;
+			AssertEqual(1, summary["frameCount"], "tracy live saved file frame count");
+			AssertEqual(1, summary["gpuContextCount"], "tracy live saved file gpu context count");
+			AssertEqual(1, summary["gpuZoneCount"], "tracy live saved file gpu zone count");
 		}
 		finally
 		{

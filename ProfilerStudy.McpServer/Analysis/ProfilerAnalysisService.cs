@@ -1806,7 +1806,17 @@ internal sealed class ProfilerAnalysisService
 			return BuildTraceSaveResult(loaded, requestedPath, fullPath, extensionCorrected, overwrite, "source-copy", byteCount);
 		}
 
-		throw new InvalidOperationException("This Tracy session has no original .tracy source file to copy. Live normalized-only Tracy artifacts cannot be exported as viewer-compatible .tracy files yet.");
+		if (loaded.TraceDocument != null && loaded.TraceDocument.QuerySession is TracyTraceQuerySession querySession)
+		{
+			Tracy010FileWriteSummary writeSummary = Tracy010FileWriter.Write(fullPath, querySession);
+			Dictionary<string, object> result = BuildTraceSaveResult(loaded, requestedPath, fullPath, extensionCorrected, overwrite, "tracy-writer", writeSummary.ByteCount);
+			result["writerCompatibility"] = writeSummary.WriterCompatibility;
+			result["writerCoverage"] = writeSummary.WriterCoverage;
+			result["sourceByteExact"] = false;
+			return result;
+		}
+
+		throw new InvalidOperationException("This Tracy session has no original .tracy source file to copy and no Tracy query session to re-materialize.");
 	}
 
 	private static Dictionary<string, object> BuildTraceSaveResult(LoadedSession loaded, string requestedPath, string fullPath, bool extensionCorrected, bool overwrite, string saveMode, long byteCount)

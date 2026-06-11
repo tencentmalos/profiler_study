@@ -105,7 +105,7 @@ public static class Tracy010FileReader
 		TracyFileHeader header = new TracyFileHeader(version, "lz4");
 		long payloadByteCount = Math.Max(0, decodedByteCount - 8L);
 		cancellationToken.ThrowIfCancellationRequested();
-		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out ArrayList readerDiagnostics);
+		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out List<TracyGpuContextSummary> gpuContexts, out List<TracyGpuZoneSummary> gpuZones, out ArrayList readerDiagnostics);
 		ArrayList diagnostics = new ArrayList
 		{
 			new Dictionary<string, object>
@@ -120,14 +120,16 @@ public static class Tracy010FileReader
 				["metadataDecoded"] = metadata != null,
 				["threadCount"] = threadCount,
 				["cpuZoneCount"] = cpuZones.Count,
-				["plotCount"] = plots.Count
+				["plotCount"] = plots.Count,
+				["gpuContextCount"] = gpuContexts.Count,
+				["gpuZoneCount"] = gpuZones.Count
 			}
 		};
 		foreach (object diagnostic in readerDiagnostics)
 		{
 			diagnostics.Add(diagnostic);
 		}
-		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, plots, threads, threadCount, diagnostics);
+		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, plots, threads, threadCount, diagnostics, gpuContexts, gpuZones);
 	}
 
 	private static bool IsLz4CompressionHeader(byte[] header)
@@ -139,11 +141,13 @@ public static class Tracy010FileReader
 			&& (header[3] == 4 || header[3] == (byte)'4');
 	}
 
-	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out ArrayList readerDiagnostics)
+	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out List<TracyGpuContextSummary> gpuContexts, out List<TracyGpuZoneSummary> gpuZones, out ArrayList readerDiagnostics)
 	{
 		cpuZones = new List<TracyCpuZoneSummary>();
 		plots = new List<TracyPlotSummary>();
 		threads = new List<TracyThreadSummary>();
+		gpuContexts = new List<TracyGpuContextSummary>();
+		gpuZones = new List<TracyGpuZoneSummary>();
 		threadCount = 0;
 		readerDiagnostics = new ArrayList();
 		if (payloadByteCount <= 0)
@@ -289,17 +293,18 @@ public static class Tracy010FileReader
 		threadCount = Math.Max(threadCount, threads.Count);
 		if (reader.HasRemaining)
 		{
-			SkipGpuZones(reader, out ulong totalGpuZoneCount, out ulong gpuDataCount, out ulong gpuTimelineCount);
+			ReadGpuZones(reader, sourceLocationNames, stringData, out gpuContexts, out gpuZones, out ulong totalGpuZoneCount, out ulong gpuDataCount, out ulong gpuTimelineCount);
 			if (totalGpuZoneCount > 0 || gpuDataCount > 0)
 			{
 				readerDiagnostics.Add(new Dictionary<string, object>
 				{
-					["severity"] = "warning",
-					["code"] = "TracyGpuZonesUnsupported",
-					["message"] = "GPU zones are present but are not exported by the initial Tracy normalized schema.",
+					["severity"] = "info",
+					["code"] = "TracyGpuZonesDecoded",
+					["message"] = "GPU contexts and zones were decoded from the Tracy saved GPU timeline section.",
 					["gpuZoneCount"] = totalGpuZoneCount,
 					["gpuContextCount"] = gpuDataCount,
-					["gpuTimelineCount"] = gpuTimelineCount
+					["gpuTimelineCount"] = gpuTimelineCount,
+					["exportedGpuZoneCount"] = gpuZones.Count
 				});
 			}
 		}
@@ -362,22 +367,24 @@ public static class Tracy010FileReader
 
 	private sealed class SourceLocationNameTable
 	{
-		public SourceLocationNameTable(Dictionary<ulong, string> mappedNames, List<ulong> expandedLocations, List<string> payloadNames)
+		public SourceLocationNameTable(Dictionary<ulong, string> mappedNames, List<ulong> expandedLocations, List<string> payloadNames, List<ulong> localThreadIds)
 		{
 			MappedNames = mappedNames;
 			ExpandedLocations = expandedLocations;
 			PayloadNames = payloadNames;
+			LocalThreadIds = localThreadIds;
 		}
 
 		public Dictionary<ulong, string> MappedNames { get; }
 		public List<ulong> ExpandedLocations { get; }
 		public List<string> PayloadNames { get; }
+		public List<ulong> LocalThreadIds { get; }
 	}
 
 	private static SourceLocationNameTable ReadSourceLocationsAndSkipToLocks(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
 	{
-		SkipThreadCompress(reader);
-		SkipThreadCompress(reader);
+		List<ulong> localThreadIds = ReadThreadCompress(reader);
+		ReadThreadCompress(reader);
 		Dictionary<ulong, string> mappedNames = ReadSourceLocationMap(reader, pointerMap, stringData);
 		List<ulong> expandedLocations = ReadUInt64Array(reader);
 
@@ -394,17 +401,22 @@ public static class Tracy010FileReader
 
 		SkipSourceLocationZoneReservations(reader);
 		SkipSourceLocationZoneReservations(reader);
-		return new SourceLocationNameTable(mappedNames, expandedLocations, payloadNames);
+		return new SourceLocationNameTable(mappedNames, expandedLocations, payloadNames, localThreadIds);
 	}
 
-	private static void SkipThreadCompress(DecodedBlockReader reader)
+	private static List<ulong> ReadThreadCompress(DecodedBlockReader reader)
 	{
 		ulong count = reader.ReadUInt64();
 		if (count > 1_000_000)
 		{
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy thread compression table is too large.");
 		}
-		reader.Skip(checked((long)count * 8L));
+		List<ulong> threadIds = new List<ulong>();
+		for (ulong i = 0; i < count; i++)
+		{
+			threadIds.Add(reader.ReadUInt64());
+		}
+		return threadIds;
 	}
 
 	private static Dictionary<ulong, string> ReadSourceLocationMap(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, List<string> stringData)
@@ -561,8 +573,18 @@ public static class Tracy010FileReader
 		return zones;
 	}
 
-	private static void SkipGpuZones(DecodedBlockReader reader, out ulong totalGpuZoneCount, out ulong gpuDataCount, out ulong gpuTimelineCount)
+	private static void ReadGpuZones(
+		DecodedBlockReader reader,
+		SourceLocationNameTable sourceLocationNames,
+		List<string> stringData,
+		out List<TracyGpuContextSummary> contexts,
+		out List<TracyGpuZoneSummary> zones,
+		out ulong totalGpuZoneCount,
+		out ulong gpuDataCount,
+		out ulong gpuTimelineCount)
 	{
+		contexts = new List<TracyGpuContextSummary>();
+		zones = new List<TracyGpuZoneSummary>();
 		totalGpuZoneCount = reader.ReadUInt64();
 		if (totalGpuZoneCount > 10_000_000)
 		{
@@ -577,56 +599,103 @@ public static class Tracy010FileReader
 		gpuTimelineCount = 0;
 		for (ulong contextIndex = 0; contextIndex < gpuDataCount; contextIndex++)
 		{
-			reader.Skip(8);  // context thread
-			reader.Skip(1);  // hasCalibration
-			reader.Skip(8);  // context zone count
-			reader.Skip(4);  // period
-			reader.Skip(1);  // GpuContextType
-			reader.Skip(4);  // name StringIdx
-			reader.Skip(8);  // overflow
+			ulong contextThread = reader.ReadUInt64();
+			reader.ReadByte(); // hasCalibration
+			ulong contextZoneCount = reader.ReadUInt64();
+			float period = reader.ReadSingle();
+			byte contextType = reader.ReadByte();
+			uint nameIndex = reader.ReadUInt32();
+			reader.ReadUInt64(); // overflow
+			string contextName = nameIndex < stringData.Count ? stringData[(int)nameIndex] : string.Empty;
 			ulong threadDataCount = reader.ReadUInt64();
 			if (threadDataCount > 1_000_000)
 			{
 				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy GPU thread data section is too large.");
 			}
+			contexts.Add(new TracyGpuContextSummary(checked((byte)Math.Min(contextIndex, byte.MaxValue)), contextName, checked((uint)Math.Min(contextThread, uint.MaxValue)), period, contextType, 0, 0L, 0L));
 
 			for (ulong threadIndex = 0; threadIndex < threadDataCount; threadIndex++)
 			{
-				reader.Skip(8); // thread id
+				ulong threadId = reader.ReadUInt64();
 				ulong timelineSize = reader.ReadUInt64();
 				if (timelineSize > 10_000_000)
 				{
 					throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy GPU timeline section is too large.");
 				}
 				gpuTimelineCount += timelineSize;
-				SkipGpuTimeline(reader, timelineSize, 0);
+				ReadGpuTimeline(reader, checked((byte)Math.Min(contextIndex, byte.MaxValue)), threadId, timelineSize, sourceLocationNames, zones, 0, ref contextZoneCount);
 			}
 		}
 	}
 
-	private static void SkipGpuTimeline(DecodedBlockReader reader, ulong timelineSize, int depth)
+	private static void ReadGpuTimeline(
+		DecodedBlockReader reader,
+		byte context,
+		ulong fallbackThreadId,
+		ulong timelineSize,
+		SourceLocationNameTable sourceLocationNames,
+		List<TracyGpuZoneSummary> zones,
+		int depth,
+		ref ulong remainingContextZoneCount)
 	{
 		if (depth > 512)
 		{
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy GPU timeline nesting is too deep.");
 		}
 
+		long refCpuTime = 0L;
+		long refGpuTime = 0L;
 		for (ulong i = 0; i < timelineSize; i++)
 		{
-			reader.Skip(8); // CPU start time offset
-			reader.Skip(8); // GPU start time offset
-			reader.Skip(2); // source location
+			long cpuStart = ReadTimeOffset(reader, ref refCpuTime);
+			long gpuStart = ReadTimeOffset(reader, ref refGpuTime);
+			short sourceLocation = reader.ReadInt16();
 			reader.Skip(3); // callstack
-			reader.Skip(2); // thread id
+			short compressedThread = reader.ReadInt16();
+			ulong threadId = ResolveCompressedThread(sourceLocationNames, compressedThread, fallbackThreadId);
 			ulong childSize = reader.ReadUInt64();
 			if (childSize > 10_000_000)
 			{
 				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy GPU child timeline section is too large.");
 			}
-			SkipGpuTimeline(reader, childSize, depth + 1);
-			reader.Skip(8); // CPU end time offset
-			reader.Skip(8); // GPU end time offset
+			ReadGpuTimeline(reader, context, threadId, childSize, sourceLocationNames, zones, depth + 1, ref remainingContextZoneCount);
+			long cpuEnd = ReadTimeOffset(reader, ref refCpuTime);
+			long gpuEnd = ReadTimeOffset(reader, ref refGpuTime);
+			string name = ResolveSourceLocationName(sourceLocation, sourceLocationNames);
+			string timeSource = cpuStart == gpuStart && cpuEnd == gpuEnd ? "cpu-submit-time" : "gpu-time";
+			zones.Add(new TracyGpuZoneSummary(
+				zones.Count,
+				context,
+				0,
+				checked((uint)Math.Min(threadId, uint.MaxValue)),
+				sourceLocation,
+				name,
+				gpuStart,
+				gpuEnd,
+				timeSource,
+				depth,
+				-1,
+				string.Empty,
+				cpuStart,
+				cpuEnd));
+			if (remainingContextZoneCount > 0)
+			{
+				remainingContextZoneCount--;
+			}
 		}
+	}
+
+	private static ulong ResolveCompressedThread(SourceLocationNameTable sourceLocationNames, short compressedThread, ulong fallbackThreadId)
+	{
+		if (compressedThread >= 0)
+		{
+			int index = compressedThread;
+			if (index < sourceLocationNames.LocalThreadIds.Count)
+			{
+				return sourceLocationNames.LocalThreadIds[index];
+			}
+		}
+		return fallbackThreadId;
 	}
 
 	private static List<TracyPlotSummary> ReadPlots(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap)
@@ -997,6 +1066,12 @@ public static class Tracy010FileReader
 		{
 			byte[] bytes = ReadBytes(8);
 			return BitConverter.ToDouble(bytes, 0);
+		}
+
+		public float ReadSingle()
+		{
+			byte[] bytes = ReadBytes(4);
+			return BitConverter.ToSingle(bytes, 0);
 		}
 
 		public string ReadFixedAscii(int size)

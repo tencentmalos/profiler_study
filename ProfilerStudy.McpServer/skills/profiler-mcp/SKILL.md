@@ -50,7 +50,7 @@ dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release
 - Keep raw output bounded: use `top`, frame ranges, `max_nodes`, `max_depth`, `min_duration_ms`, and `max_samples` instead of requesting whole traces.
 - Preserve paths and session ids exactly as returned by tools.
 - Preserve artifact ids exactly as returned by `load_trace_file`, `capture_profile(protocol=tracy)`, and `list_trace_artifacts`.
-- Do not claim a live Tracy normalized-only session has been exported as a viewer-compatible `.tracy`; the server must have an original Tracy source file to copy.
+- For Tracy `save_session_file`, distinguish `saveMode=source-copy` / `source-artifact-copy` from `saveMode=tracy-writer`. The writer path still produces a `.tracy` file, but it is materialized from decoded Tracy 0.10.0 data and reports `writerCoverage` instead of byte-exact source preservation.
 - For live targets, prefer `capture_profile` URLs. Do not run arbitrary adb commands through this skill; Android capture only forwards the requested `localfilesystem:<path>`, `localabstract:<name>`, or `tcp:<port>` endpoint.
 
 ## Tool Reference

@@ -206,6 +206,37 @@ TracyEventStream
   Diagnostics
 ```
 
+### `Tracy010FileWriter`
+
+职责：
+
+- 当 MCP 的 Tracy live capture 只保留了 normalized session、没有原始 `source.tracy` 字节时，`save_session_file` 仍必须直接生成 `.tracy` 文件，不能降级为其它扩展名或 MCP 私有格式。
+- 第一版 writer 锁定 Tracy `0.10.0`，输出 MCP 当前已经解码并归一化的子集：metadata、frame set、thread names、CPU zones、GPU contexts、GPU timeline zones、plots/counters。若 live session 中存在 hardware samples、callstacks、locks、messages、allocations 或其它尚未落入 `.tracy` 保存格式 writer 的数据，保存结果必须通过结构化字段说明 `writerCoverage` 与未保存数量，避免误导用户认为完整 viewer capture 已经逐字节保真。
+- 文件布局中的固定记录必须使用与 C++ Tracy viewer 保存格式对齐的 C# protocol struct 表达，优先采用 `[StructLayout(LayoutKind.Sequential, Pack = 1)]`、`Marshal.SizeOf<T>()`、`MemoryMarshal` / `Span<byte>` 或等价 P/Invoke marshal 路径写出。禁止为 `.tracy` section 新增大段手写 offset/字段顺序代码；可变长字符串、数组和 LZ4 literal block 仍由统一 writer helper 负责。
+- writer 只在缺失原始 `.tracy` source bytes 时启用；若 artifact store 或 source path 中已有原始 `.tracy`，`save_session_file` 仍保持 source copy，保证官方 viewer 兼容性与字节保真。
+- 生成的 `.tracy` 必须能被 `open_file(format=auto)` 和 `Tracy010FileReader` 读回，作为 MCP 回归验证的最低合同。官方 Tracy viewer 的完整时间线兼容属于后续扩展目标，不能用另一个扩展名绕开 `.tracy` 保存需求。
+
+输入：
+
+```text
+Tracy010FileWriter.Write(path, TracyTraceQuerySession)
+```
+
+输出：
+
+```text
+Tracy010FileWriteSummary
+  ByteCount
+  FrameCount
+  CpuZoneCount
+  PlotCount
+  ThreadCount
+  GpuZoneCount
+  GpuContextCount
+  WriterCompatibility
+  WriterCoverage
+```
+
 ### `Tracy010LiveCaptureClient`
 
 职责：

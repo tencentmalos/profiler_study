@@ -9,7 +9,7 @@
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |
 | `open_file` | Open a supported file into the newest retained session. `format=auto` maps `.profiler` / `.profiler_recording` / `.profiler_dump` to `study` and `.tracy` to `tracy`. |
-| `save_session_file` | Save a retained session to disk. The output suffix is corrected from the session's actual protocol: `study` writes `.profiler`; file-backed `tracy` copies an original `.tracy` source when available. |
+| `save_session_file` | Save a retained session to disk. The output suffix is corrected from the session's actual protocol: `study` writes `.profiler`; `tracy` writes `.tracy`, copying original source bytes when available or materializing the decoded Tracy 0.10.0 session. |
 | `load_trace_file` | Load a trace file through the unified trace path. Current direct trace import supports `.tracy` / `format=tracy`, returns `artifactId`, and can return `sessionId` with `keep_session=true`. |
 | `load_trace_artifact` | Reopen a registered trace artifact from the artifact store by `artifact_id`; use `keep_session=true` for follow-up analysis. |
 | `list_trace_artifacts` | List registered artifacts from the ProfilerStudy artifact store. Use `format=tracy` for Tracy imports/live captures, `format=all` for every registered format, and optional `since=<ISO-8601 UTC>` to return only newer artifacts. |
@@ -94,13 +94,13 @@ For Tracy session s1, call analyze_time_range with start_time_ns=1563554109559 a
 Tracy artifact reuse:
 
 ```text
-Load trace file /captures/run.tracy with keep_session=false, then use the returned artifactId with load_trace_artifact and get_import_diagnostics. For live Tracy captures, artifact debug material is stored as capture.ndjson until source.tracy writer support is verified.
+Load trace file /captures/run.tracy with keep_session=false, then use the returned artifactId with load_trace_artifact and get_import_diagnostics. For live Tracy captures, artifact debug material is stored as capture.ndjson; use save_session_file when a materialized .tracy file is needed.
 ```
 
 Save retained session:
 
 ```text
-For session s1, call save_session_file with path=/captures/export.anything. The server will correct the suffix to .profiler for study or .tracy for Tracy. Live normalized-only Tracy artifacts cannot be exported as viewer-compatible .tracy files yet.
+For session s1, call save_session_file with path=/captures/export.anything. The server will correct the suffix to .profiler for study or .tracy for Tracy. Live normalized-only Tracy sessions are saved as .tracy through the Tracy 0.10.0 writer and report writerCoverage for any data that cannot be byte-exactly preserved.
 ```
 
 Unified file open:
