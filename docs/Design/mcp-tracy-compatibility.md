@@ -7,15 +7,18 @@
 - MCP 和 UI 可以按协议选择连接 profiler target，协议名称固定为 `study`、`tracy`、`perfetto`。默认仍使用 `study`，对应当前已有的 ProfilerStudy 原始实现；显式选择 `tracy` 时直连 Tracy 端口。
 - MCP 和 UI 可以打开、加载并分析 `.tracy` 文件，且 live capture 产物和文件导入产物都能通过 Trace Workspace / Artifact Store 被复用。
 
-Tracy 支持作为可选能力接入。未初始化 Tracy submodule、未构建 bridge、或运行环境缺少 bridge 可执行文件时，现有 ProfilerStudy 文件读取、TCP 捕获、Android adb forward 捕获和 MCP self-test 都不能受影响。
+Tracy 实现必须是完整 C# 版本，不能依赖 C++/CLI、C++ native helper、外部 bridge 进程或平台相关打包步骤。原因是 ProfilerStudy 需要在 macOS 构建和打包 Windows 产物，native bridge 会让跨平台 packaging 和发布链路变复杂。
+
+第一版锁定 Azahar 当前使用的 Tracy `0.10.0`。后续版本通过 version adapter 扩展，不在第一版做自动兼容。
 
 ## 非目标
 
-- 不在 C# 中重写 Tracy socket protocol 或 `.tracy` 文件格式解析。
+- 不在第一版支持任意 Tracy 版本；非 `0.10.0` 文件或 target 必须返回明确 unsupported diagnostics。
 - 不把 Tracy 原始事件完整映射成 ProfilerStudy legacy `Session`。
 - 不要求 WinForms 第一阶段直接打开 `.tracy`。
 - 不让 MCP 依赖 Avalonia UI 是否正在运行，也不读取 UI selection、viewport 或 active document。
 - 不在第一阶段实现 Tracy GPU、locks、allocations、callstacks、messages 的完整查询；这些事件先进入 diagnostics 或后续阶段。
+- 不在主产品构建中编译 Tracy viewer、capture 工具或任何 C++ 代码。
 
 ## 现有基础和约束
 
@@ -31,57 +34,74 @@ Azahar 参考路径：
 /Users/bytedance/workspace/azahar/foundation/basic/modules/implements/profiler/private/spatial/profiler/tracy
 ```
 
-该目录下的 SDK 是 target-side Tracy client 集成，当前版本来自 `tracy/common/TracyVersion.hpp`，为 `0.10.0`。它可以作为 target 端编译开关、协议版本和运行行为参考，但不包含 ProfilerStudy 侧所需的 server/capture/file reader 能力。因此 ProfilerStudy 侧需要独立 bridge，复用同版本 Tracy upstream 的 server/capture/savefile 逻辑。
+该目录下的 SDK 是 target-side Tracy client 集成，当前版本来自 `tracy/common/TracyVersion.hpp`，为 `0.10.0`。第一版 C# reader/capture 必须按该版本实现。
 
 ## 方案选择
 
-推荐采用 **独立 profiler_tracy_bridge submodule + 主仓库可选消费**。
+推荐采用 **ProfilerStudyCore 内置纯 C# Tracy 0.10.0 reader/capture + submodule 保存原始 Tracy/viewer 源码作参考**。
 
 ```text
-ProfilerStudy / MCP / Avalonia
-  -> TracyCaptureService / TracyTraceImporter
-  -> tools/profiler_tracy_bridge/profiler-tracy-bridge
-       capture
-       import
-       info
-  -> normalized trace files
-  -> TracyTraceQuerySession
+ProfilerStudy.McpServer / ProfilerStudy.Avalonia
+  -> TraceWorkspace
+  -> TracyTraceImporter / TracyCaptureService
+  -> ProfilerStudyCore.Tracy
+       Tracy010FileReader
+       Tracy010LiveCaptureClient
+       Tracy010EventDecoder
+       TracyNormalizer
+       TracyTraceQuerySession
+  -> TraceDocument / Artifact Store
 ```
 
-不推荐 C# 直写 Tracy client 或 `.tracy` parser。Tracy live protocol 包含 handshake、protocol version、LZ4 stream、server query 和保存格式细节，随 Tracy 版本变化有维护成本。Bridge 应复用 Tracy upstream C++ 侧已有 worker/capture/file 代码，把 ProfilerStudy 主仓库和 Tracy 内部实现隔离开。
+这个方案的关键点：
+
+- 产品运行时只加载 C# assemblies。
+- `.tracy` 文件读取和 Tracy socket capture 都在 `ProfilerStudyCore` 内完成。
+- MCP 和 UI 不知道 Tracy 协议细节，只消费 `ITraceQuerySession`。
+- 原始 Tracy/viewer 源码只用于协议对照、fixture 生成和人工验证，不参与默认 build。
+
+不再采用外部 `profiler-tracy-bridge` 可执行文件。原设计中的 bridge CLI、bridge binary resolve、bridge status、CMake build plumbing 全部废弃。
 
 ## Submodule 布局
 
-新增 submodule：
+保留 submodule：
 
 ```text
 tools/profiler_tracy_bridge
   remote: git@github.com:tencentmalos/profiler_tracy_bridge.git
 ```
 
+新的定位是 **Tracy source reference submodule**，不是产品 bridge。
+
 主仓库职责：
 
 - 在 `.gitmodules` 中登记 submodule。
-- 在设计文档、构建文档和 MCP diagnostics 中说明 Tracy 是 optional feature。
-- C# 侧只依赖 bridge CLI contract 和 normalized schema。
-- 不在主仓库复制 Tracy upstream C++ 源码。
+- 在设计文档、构建文档和 MCP diagnostics 中说明 submodule 是参考源码，不是运行时依赖。
+- C# 侧实现 Tracy `0.10.0` reader/capture。
+- 产品 build、MCP self-test、Avalonia publish 都不能要求初始化该 submodule。
 
-Bridge 仓库职责：
+Submodule 仓库职责：
 
-- 持有 `profiler-tracy-bridge` C++ CLI。
-- 持有或引用 Tracy upstream `0.10.0` 相关 server/capture/file reader 源码。
-- 维护跨平台 CMake 构建、版本输出和最小自测。
-- 产出稳定 CLI 和 normalized 文件格式。
+- 保存 Tracy upstream `0.10.0` 相关源码、viewer、capture/server/file reader 参考实现。
+- 提供用于对照 C# 行为的原始 `.tracy` fixture 或生成说明。
+- 后续 Tracy 版本升级时保存对应 upstream source 和 viewer 验证资料。
 
 Submodule 更新规则：
 
-- 修改 bridge 实现时先提交到 `profiler_tracy_bridge` 仓库。
-- 主仓库只更新 submodule revision 和消费侧代码。
-- 主仓库 PR 必须说明 bridge revision、Tracy upstream version、CLI contract 是否变化。
+- 更新 Tracy upstream 或 viewer 参考资料时先提交到 `profiler_tracy_bridge` 仓库。
+- 主仓库只更新 submodule revision 和文档说明。
+- 主仓库 PR 必须说明 Tracy upstream version、C# adapter 是否同步更新、fixture 是否重新验证。
 
-## 编译开关和可选能力
+## 构建和打包约束
 
-主仓库构建必须分为默认路径和 Tracy-enabled 路径。
+Tracy C# 实现是 ProfilerStudyCore 的内建能力，不再保留单独的 Tracy 编译开关。
+
+保留版本常量和参考源码路径配置，但它们不控制功能启停：
+
+```text
+TracyLockedVersion=0.10.0
+TracySourceReferencePath=tools/profiler_tracy_bridge
+```
 
 默认路径：
 
@@ -92,113 +112,145 @@ dotnet build ProfilerForStudy.sln -c Debug
 要求：
 
 - 不要求初始化 `tools/profiler_tracy_bridge`。
-- 不构建 C++ bridge。
+- 不构建任何 C++ 代码。
 - MCP 和 Avalonia 编译通过。
-- MCP 始终暴露通用 trace tools 和 `get_tracy_bridge_status`，但执行 `protocol=tracy` 或 `.tracy` import 时如果 bridge 不可用，必须返回 `BridgeUnavailable` diagnostics。
+- MCP 暴露 `protocol=tracy`、`.tracy` import 和 `get_tracy_status`。
+- `protocol=study` 不初始化 Tracy reader/capture，也不受 Tracy 版本、fixture 或 submodule 状态影响。
 
-Tracy-enabled 路径：
-
-```powershell
-git submodule update --init tools/profiler_tracy_bridge
-dotnet build ProfilerForStudy.sln -c Debug -p:EnableTracyBridge=true
-```
-
-建议 MSBuild 属性：
+Tracy 实现状态通过统一诊断返回：
 
 ```text
-EnableTracyBridge=false
-TracyBridgePath=
-TracyBridgeBuildConfiguration=Release
-```
-
-行为约定：
-
-- `EnableTracyBridge=false`：不尝试构建 submodule，不复制 bridge binary。运行时仅按 `TracyBridgePath`、环境变量或默认搜索路径探测现成 binary。
-- `EnableTracyBridge=true`：要求 submodule 存在，构建或验证 bridge binary，并复制到 MCP/Avalonia 输出目录。
-- `TracyBridgePath` 非空时优先使用该路径，方便本地调试独立 bridge 仓库。
-- 运行时环境变量 `PROFILER_STUDY_TRACY_BRIDGE` 可覆盖默认 bridge 路径。
-- 如果 `EnableTracyBridge=false` 但 `TracyBridgePath` 或 `PROFILER_STUDY_TRACY_BRIDGE` 指向可用 binary，运行时可以启用 Tracy；该模式只是不由主仓库构建 bridge。
-
-运行时状态通过统一诊断返回：
-
-```text
-TracyBridgeStatus
-  IsEnabledByBuild
-  IsAvailable
-  BridgePath
-  BridgeVersion
-  TracyVersion
+TracyStatus
+  LockedVersion
+  SupportedVersions
+  SourceReferencePath
+  SourceReferenceAvailable
   Reason
 ```
 
-即使未启用 Tracy，`protocol=study` 的所有现有路径也不能读取这些开关或受其影响。
+`SourceReferenceAvailable=false` 只表示参考源码 submodule 未初始化，不影响产品内置 C# Tracy 功能运行。
 
-## Bridge CLI Contract
+## Version Adapter 设计
 
-Bridge 提供三个稳定命令。
-
-### `info`
+第一版只注册 `0.10.0` adapter：
 
 ```text
-profiler-tracy-bridge info --json
+ITracyVersionAdapter
+  Version
+  CanReadFile(header)
+  CanConnect(welcome/protocolVersion)
+  CreateFileReader()
+  CreateLiveCaptureClient()
+  CreateEventDecoder()
+  CreateNormalizer()
+```
+
+```text
+TracyVersionRegistry
+  RegisteredAdapters: Tracy010VersionAdapter
+  ResolveFileAdapter(path/header)
+  ResolveLiveAdapter(protocolVersion)
+```
+
+行为要求：
+
+- `.tracy` 文件版本不是 `0.10.0` 时，返回 `TracyUnsupportedFileVersion`。
+- live target protocol version 不匹配时，返回 `TracyProtocolMismatch`。
+- 所有 diagnostics 都要包含 detected version、supported versions、locked version。
+- 后续支持新 Tracy 版本时，只增加 `Tracy0xxVersionAdapter` 和对应 fixture，不改 MCP tool contract。
+
+## C# Tracy 0.10.0 组件
+
+### `Tracy010FileReader`
+
+职责：
+
+- 读取官方 `.tracy` 文件。
+- 校验 magic、file version、endianness、section layout 和压缩块。
+- 解码 Tracy `0.10.0` 保存格式中的 CPU zones、thread names、frame marks、plots 和基础 metadata。
+- 对第一版不导出的事件累计 unsupported counts。
+- 输出 `TracyEventStream`，供 normalizer 使用。
+
+输入：
+
+```text
+Tracy010FileReader.Read(path, cancellationToken)
 ```
 
 输出：
 
-```json
-{
-  "bridgeVersion": "0.1.0",
-  "tracyVersion": "0.10.0",
-  "supportedCommands": ["capture", "import", "info"],
-  "normalizedSchemaVersion": 1
-}
-```
-
-用途：
-
-- MCP self-test 或 diagnostics 检查 bridge 是否存在。
-- UI 在 Tracy 连接面板显示可用性。
-- Artifact manifest 记录导入工具版本。
-
-### `capture`
-
 ```text
-profiler-tracy-bridge capture \
-  --host 127.0.0.1 \
-  --port 8086 \
-  --seconds 30 \
-  --output source.tracy \
-  --normalized normalized \
-  --diagnostics import-diagnostics.json
+TracyEventStream
+  Version
+  Metadata
+  Threads
+  Frames
+  CpuZones
+  Plots
+  Diagnostics
 ```
+
+### `Tracy010LiveCaptureClient`
 
 职责：
 
-- 连接 Tracy target。
-- 完成 Tracy protocol handshake、version check、stream receive 和 server query。
-- 保存原始 `.tracy`。
-- 同步生成 normalized 输出。
-- 退出码和 diagnostics 明确区分 connect failed、protocol mismatch、capture timeout、write failed、unsupported event。
+- 使用 `TcpClient` 直连 Tracy target 端口。
+- 完成 Tracy `0.10.0` handshake、protocol version 校验、server query 和 LZ4 stream 解码。
+- 按 fixed duration 采集事件。
+- 把 live stream 解码为同一个 `TracyEventStream`。
+- 采集完成后写入 artifact store。
 
-### `import`
+输入：
 
 ```text
-profiler-tracy-bridge import \
-  --input capture.tracy \
-  --normalized normalized \
-  --diagnostics import-diagnostics.json
+Tracy010LiveCaptureClient.Capture(host, port, durationSeconds, cancellationToken)
 ```
+
+输出：
+
+```text
+TracyCaptureResult
+  EventStream
+  RawCapturePath?
+  Diagnostics
+  CaptureTelemetry
+```
+
+第一版 artifact 的权威数据是 normalized cache。是否同时写出官方 `.tracy` 文件由 `Tracy010FileWriter` 的验证状态决定：
+
+- 如果 `Tracy010FileWriter` 已通过 viewer 兼容验证，live capture 写出 `source.tracy`。
+- 如果 writer 未完成验证，live capture 写出 `raw-stream.bin` 或 `capture.ndjson` 作为调试材料，并在 manifest 中标记 `sourceKind=tracy-live-normalized-only`。
+- MCP 查询不依赖 `source.tracy`，只依赖 normalized cache。
+
+### `Tracy010EventDecoder`
 
 职责：
 
-- 读取已有 `.tracy` 文件。
-- 生成 normalized 输出。
-- 不修改原始 `.tracy`。
-- 对不兼容版本返回明确 diagnostics。
+- 把 file reader 和 live capture client 读到的 Tracy event payload 解码成统一 C# 事件模型。
+- 对 string/source location/thread metadata 做 request/resolve。
+- 保留 event source id，方便 diagnostics 追踪。
+
+### `TracyNormalizer`
+
+职责：
+
+- 把 `TracyEventStream` 转成 Trace Workspace normalized 模型。
+- CPU zones 转为 thread slices。
+- frame marks 转为 frames。
+- plots 转为 counters。
+- unsupported event 进入 diagnostics。
+
+### `TracyTraceQuerySession`
+
+职责：
+
+- 实现 `ITraceQuerySession`。
+- 支持 summary、frames、threads、thread slices、zone hotspots、plots/counters、time range analysis。
+- frame marks 不存在时，frame-centric 工具返回明确 diagnostics，time-range 工具继续可用。
 
 ## Normalized 输出格式
 
-第一版使用目录 + NDJSON，避免单个巨大 JSON object 带来的内存峰值。
+第一版 normalized cache 使用目录 + NDJSON，避免单个巨大 JSON object 带来的内存峰值。
 
 ```text
 normalized/
@@ -217,8 +269,9 @@ normalized/
   "schemaVersion": 1,
   "sourceFormat": "tracy",
   "sourcePath": "source.tracy",
+  "implementation": "ProfilerStudyCore.Tracy",
+  "readerVersion": "0.1.0",
   "tracyVersion": "0.10.0",
-  "bridgeVersion": "0.1.0",
   "startTimeNs": 0,
   "endTimeNs": 1234567890,
   "timeBase": "trace-relative-ns",
@@ -303,9 +356,10 @@ Tracy importer：
 
 ```text
 TracyTraceImporter
-  -> Resolve TracyBridgeStatus
-  -> Run profiler-tracy-bridge import if source is .tracy
-  -> Read normalized manifest + ndjson streams
+  -> Resolve TracyVersionAdapter from .tracy header
+  -> Read .tracy with Tracy010FileReader
+  -> Normalize with TracyNormalizer
+  -> Write normalized cache
   -> Create TracyTraceQuerySession
   -> Return TraceDocument
 ```
@@ -314,17 +368,18 @@ Tracy live capture：
 
 ```text
 TracyCaptureService
-  -> Resolve TracyBridgeStatus
+  -> Resolve Tracy010VersionAdapter
   -> Allocate artifact directory
-  -> Run profiler-tracy-bridge capture
-  -> Register source.tracy + normalized + diagnostics
+  -> Capture with Tracy010LiveCaptureClient
+  -> Normalize with TracyNormalizer
+  -> Register normalized + diagnostics + optional source.tracy/raw stream
   -> Create TracyTraceQuerySession
 ```
 
 第一版 `TracyTraceQuerySession` 只需要支持：
 
 - summary
-- frames，如果 `.tracy` 中存在 frame marks
+- frames，如果 `.tracy` 或 live stream 中存在 frame marks
 - threads
 - CPU zones as slices
 - zone hotspots
@@ -361,7 +416,7 @@ default = study
 兼容要求：
 
 - 未传 `protocol` 时完全走现有 ProfilerStudy path。
-- `protocol=study` 时不探测 Tracy bridge。
+- `protocol=study` 时不初始化或探测 Tracy reader。
 - `protocol=tracy` 只支持 TCP host/port；Android Tracy target 需要用户先建立 adb forward，再传 `pc://127.0.0.1:<forwarded-port>`。后续可扩展 `android://tcp:<port>`。
 - `protocol=perfetto` 是后续 Perfetto live/import 接入的保留名称；当前 Tracy 阶段只定义命名，不实现 Perfetto live capture。
 
@@ -372,7 +427,7 @@ load_trace_file(path, format=auto, top=10)
 load_trace_artifact(artifact_id, top=10)
 list_trace_artifacts(format?, since?, limit?)
 get_import_diagnostics(session_id?|artifact_id?)
-get_tracy_bridge_status()
+get_tracy_status()
 ```
 
 保留兼容 alias：
@@ -418,7 +473,7 @@ Open dialog：
 Connection panel：
 
 ```text
-Protocol: ProfilerStudy | Tracy
+Protocol: Study | Tracy
 Host
 Port
 Duration seconds
@@ -426,9 +481,9 @@ Duration seconds
 
 行为：
 
-- `ProfilerStudy` 协议继续走当前 live `Session.ConnectToTcp`，保持持续连接和现有刷新模式。
-- `Tracy` 协议走 fixed-duration capture。Capture 完成后打开 artifact 中的 `TraceDocument`。
-- Bridge 不可用时，Tracy 选项显示不可用原因，但不影响 ProfilerStudy 连接。
+- `Study` 协议继续走当前 live `Session.ConnectToTcp`，保持持续连接和现有刷新模式。
+- `Tracy` 协议走 fixed-duration C# capture。Capture 完成后打开 artifact 中的 `TraceDocument`。
+- Tracy 选项始终可见；如果 target 或文件不是支持的 Tracy `0.10.0`，UI 显示版本不兼容 diagnostics，但不影响 Study 连接。
 
 Tracy document 第一版视图：
 
@@ -444,7 +499,8 @@ Live Tracy capture 必须进入 artifact store：
 
 ```text
 ~/.profilerstudy/traces/captures/2026-06-11-153000-tracy/
-  source.tracy
+  source.tracy?            # C# writer 验证后启用
+  raw-stream.bin?          # writer 未验证时的调试原始流
   normalized/
     manifest.json
     threads.ndjson
@@ -466,7 +522,8 @@ Artifact manifest：
   "sourcePath": "source.tracy",
   "normalizedPath": "normalized",
   "createdUtc": "2026-06-11T07:30:00Z",
-  "bridgeVersion": "0.1.0",
+  "implementation": "ProfilerStudyCore.Tracy",
+  "readerVersion": "0.1.0",
   "tracyVersion": "0.10.0",
   "capture": {
     "host": "127.0.0.1",
@@ -480,24 +537,17 @@ Artifact manifest：
 
 ## 错误处理
 
-Bridge process 必须有：
-
-- timeout
-- cancellation
-- stderr capture size cap
-- normalized output size diagnostics
-- exit code mapping
-
-错误类型建议：
+错误类型：
 
 ```text
-BridgeUnavailable
-BridgeVersionUnsupported
+TracyUnsupportedFileVersion
 TracyProtocolMismatch
 TracyConnectFailed
 TracyCaptureTimeout
 TracyImportFailed
-TracyUnsupportedFileVersion
+TracyFileFormatInvalid
+TracyLz4DecodeFailed
+TracyParserInvariantFailed
 TracyNormalizedSchemaUnsupported
 ```
 
@@ -506,7 +556,7 @@ MCP 返回 `isError=true` 时仍提供结构化内容，至少包含：
 ```text
 errorCode
 message
-bridgeStatus
+tracyStatus
 diagnosticsPath?
 logTail
 ```
@@ -516,7 +566,8 @@ UI 则显示简短错误，并在 diagnostics panel 展示详细日志。
 ## 安全和资源边界
 
 - MCP 不扫描用户目录，只访问用户显式 path 或 artifact store manifest。
-- Bridge command 参数必须通过 `ProcessStartInfo.ArgumentList` 传入，不拼接 shell command。
+- Tracy live capture 必须有 connect timeout、capture timeout、cancellation 和最大输出大小限制。
+- `.tracy` reader 必须校验文件大小、section size、compressed block size 和解压后大小。
 - Capture duration 有上限，MCP 默认沿用 1 到 300 秒。
 - Normalized reader 应流式读取 NDJSON，避免一次性加载超大 trace。
 - Artifact store 后续需要清理策略；第一阶段先只记录 size 和 created time，不自动删除。
@@ -525,51 +576,64 @@ UI 则显示简短错误，并在 diagnostics panel 展示详细日志。
 
 ### Phase 1：文档与 contract
 
-- 新增本设计文档。
-- 在 `mcp-external-trace-translators.md` 链接 Tracy 专项设计。
-- 明确 submodule 路径、CLI contract、normalized schema、编译开关。
+- 更新本设计文档，移除 bridge CLI 方案。
+- 在 `mcp-external-trace-translators.md` 链接纯 C# Tracy 专项设计。
+- 明确 submodule 只保存 Tracy/viewer 原始源码。
+- 明确 `study` 协议默认不变，且 `study` 对应当前 ProfilerStudy 原始实现。
 
 验收：
 
-- 文档说明默认构建不依赖 Tracy。
-- 文档说明 `study` 协议默认不变，且 `study` 对应当前 ProfilerStudy 原始实现。
+- 文档说明默认构建不依赖 native bridge。
+- 文档说明第一版锁定 Tracy `0.10.0`。
 
-### Phase 2：Submodule 和 build plumbing
+### Phase 2：Tracy status 和版本注册
 
-- 添加 `tools/profiler_tracy_bridge` submodule。
-- 增加 `EnableTracyBridge` / `TracyBridgePath` MSBuild 属性。
-- 增加 bridge binary resolve 逻辑和 `get_tracy_bridge_status`。
-- 默认 build 不要求 submodule。
-
-验收：
-
-- 不初始化 submodule 时，MCP/Avalonia 正常 build。
-- `EnableTracyBridge=true` 且 submodule 存在时能找到或构建 bridge。
-
-### Phase 3：Bridge import
-
-- 在 bridge 仓库实现 `info` 和 `import`。
-- 主仓库新增 `TracyTraceImporter` 和 normalized reader。
-- MCP 新增 `load_trace_file(.tracy)`。
+- 在 Core 增加 `TracyStatus`、`TracyVersionRegistry`、`Tracy010VersionAdapter`。
+- MCP 增加 `get_tracy_status`。
+- MCP self-test 覆盖默认 `study` 协议和 Tracy status contract。
 
 验收：
 
-- 真实 `.tracy` 文件可加载 summary、threads、zones、plots。
+- `dotnet run --project ProfilerStudy.McpServer/ProfilerStudy.McpServer.csproj -c Debug -p:TargetFrameworks=net8.0 -- --self-test` 通过。
+- `get_tracy_status` 返回 `LockedVersion=0.10.0`。
+
+### Phase 3：`.tracy` 文件读取
+
+- 实现 `Tracy010FileReader`、`Tracy010EventDecoder`、`TracyNormalizer`。
+- 增加 `.tracy` fixture 或最小合成 fixture。
+- MCP 新增 `load_trace_file(.tracy)`，返回 summary、threads、zones、plots。
+
+验收：
+
+- 真实或 fixture `.tracy` 文件可加载 summary、threads、zones、plots。
+- 非 `0.10.0` 文件返回 `TracyUnsupportedFileVersion`。
 - 无 frame mark 的 trace 返回明确 frame diagnostics。
 
-### Phase 4：Bridge capture
+### Phase 4：MCP query session
 
-- 在 bridge 仓库实现 `capture`。
-- 主仓库新增 `TracyCaptureService`。
-- MCP `capture_profile(protocol=tracy)` 返回 artifact id、summary、hotspots。
+- 实现 `TracyTraceQuerySession`。
+- 将 MCP loaded session 管理迁移到 `LoadedTrace`，保留 legacy `Session` adapter。
+- 让 `get_session_summary`、`find_scope_hotspots`、`list_counters`、`query_counter`、`analyze_time_range` 支持 Tracy。
 
 验收：
 
-- 可直连 Tracy target 端口完成 fixed-duration capture。
-- artifact 可被 `load_trace_artifact` 重载。
-- `protocol` 未传时现有 ProfilerStudy capture 不回归。
+- `load_trace_file(path="sample.tracy", keep_session=true)` 返回 `session_id`。
+- Tracy session 上可查询 summary、hotspots、counters、time range。
+- `get_profiler_overhead` 在 Tracy session 上返回 unsupported capability。
 
-### Phase 5：Avalonia 打开和连接
+### Phase 5：C# live capture
+
+- 实现 `Tracy010LiveCaptureClient`。
+- MCP `capture_profile(protocol=tracy)` 直连 Tracy target 端口。
+- Capture 完成后写 normalized artifact，并返回 artifact id、summary、hotspots。
+
+验收：
+
+- 可直连 Tracy `0.10.0` target 端口完成 fixed-duration capture。
+- artifact 可被 `load_trace_artifact` 重载。
+- `protocol` 未传时现有 Study capture 不回归。
+
+### Phase 6：Avalonia 打开和连接
 
 - Open dialog 支持 `.tracy`。
 - Connection panel 增加 protocol 选择。
@@ -580,10 +644,11 @@ UI 则显示简短错误，并在 diagnostics panel 展示详细日志。
 
 - `.tracy` 文件可从 UI 打开。
 - Tracy live capture 完成后 UI 展示同一个 artifact。
-- Bridge 不可用时 UI 提示清楚且不影响 ProfilerStudy 连接。
+- Tracy 版本不兼容时 UI 提示清楚且不影响 Study 连接。
 
-### Phase 6：高级 Tracy 事件
+### Phase 7：官方 `.tracy` writer 和高级 Tracy 事件
 
+- `Tracy010FileWriter` 写出 viewer 可打开的 `source.tracy`。
 - GPU zones。
 - locks。
 - allocations。
@@ -601,33 +666,26 @@ dotnet build ProfilerForStudy.sln -c Debug
 dotnet run --project ProfilerStudy.McpServer/ProfilerStudy.McpServer.csproj -c Debug -p:TargetFrameworks=net8.0 -- --self-test
 ```
 
-Tracy-enabled 构建：
-
-```powershell
-git submodule update --init tools/profiler_tracy_bridge
-dotnet build ProfilerForStudy.sln -c Debug -p:EnableTracyBridge=true
-profiler-tracy-bridge info --json
-```
-
 MCP 回归：
 
 - `capture_profile(url="pc://127.0.0.1:8428")` 仍默认 `study`。
-- `capture_profile(url="pc://127.0.0.1:8086", protocol="tracy")` 走 bridge。
-- `load_trace_file(path="sample.tracy")` 走 Tracy importer。
+- `capture_profile(url="pc://127.0.0.1:8086", protocol="tracy")` 走 C# Tracy live capture。
+- `load_trace_file(path="sample.tracy")` 走 C# Tracy importer。
 - `analyze_session_file(path="sample.profiler")` 仍走 legacy session。
 
 Artifact 回归：
 
-- Tracy live capture 创建 `source.tracy`、`normalized/`、`manifest.json`。
+- Tracy live capture 创建 `normalized/`、`manifest.json` 和 diagnostics。
+- writer 验证完成后 live capture 同时创建 viewer 可打开的 `source.tracy`。
 - `list_trace_artifacts(format="tracy")` 能看到新 artifact。
 - `load_trace_artifact(artifact_id)` 能重载同一数据。
 
 UI 回归：
 
-- ProfilerStudy TCP connection 仍可连接和断开。
-- Bridge 不可用时 Tracy UI 状态可读。
+- Study TCP connection 仍可连接和断开。
+- Tracy 版本不兼容时 UI 状态可读。
 - `.tracy` 文件打开后 summary/timeline/counters 不为空。
 
 ## 推荐结论
 
-Tracy 兼容应以 `tools/profiler_tracy_bridge` submodule 为唯一 C++ bridge 来源，主仓库只消费 bridge CLI 和 normalized schema。默认构建保持 Tracy optional，`study` 协议和现有文件读取不受影响。Tracy live capture 和 `.tracy` import 都先落到 Artifact Store，再通过 `TracyTraceQuerySession` 进入 MCP 和 Avalonia，从而保证同一份 capture 能被 UI 和 MCP 共同访问。
+Tracy 兼容应作为 `ProfilerStudyCore` 中的纯 C# reader/capture 能力实现，第一版锁定 Azahar 当前 Tracy `0.10.0`。`tools/profiler_tracy_bridge` submodule 保留为 Tracy/viewer 原始源码和协议对照资料，不参与产品构建、运行时加载或 macOS 打包 Windows 产物。Tracy live capture 和 `.tracy` import 都先落到 Artifact Store，再通过 `TracyTraceQuerySession` 进入 MCP 和 Avalonia，从而保证同一份 capture 能被 UI 和 MCP 共同访问。
