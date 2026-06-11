@@ -226,7 +226,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		TracyPlotSummary plot = m_EventStream.Plots.FirstOrDefault(value => string.Equals(value.Name, counterName, StringComparison.OrdinalIgnoreCase));
 		if (plot != null)
 		{
-			ArrayList samples = ToArrayList(plot.Samples
+			List<TracyPlotSample> filteredSamples = FilterPlotSamplesByFrameRange(plot, startFrame, endFrame).ToList();
+			ArrayList samples = ToArrayList(filteredSamples
 				.Take(Math.Max(1, maxSamples))
 				.Select(sample => new Dictionary<string, object>
 				{
@@ -241,8 +242,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["range"] = BuildFrameRange(startFrame, endFrame),
 				["accumulated"] = accumulated,
 				["sampleCount"] = samples.Count,
-				["availableSampleCount"] = plot.Samples.Count,
-				["truncated"] = plot.Samples.Count > samples.Count,
+				["availableSampleCount"] = filteredSamples.Count,
+				["truncated"] = filteredSamples.Count > samples.Count,
 				["samples"] = samples,
 				["eventsDecoded"] = true,
 				["diagnostics"] = Diagnostics("TracyPlotsDecoded", "Counter samples are read from decoded Tracy plot data."),
@@ -489,6 +490,40 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			if (zone.End >= rangeStart && zone.Start <= rangeEnd)
 			{
 				yield return zone;
+			}
+		}
+	}
+
+	private IEnumerable<TracyPlotSample> FilterPlotSamplesByFrameRange(TracyPlotSummary plot, int startFrame, int endFrame)
+	{
+		if (plot == null || plot.Samples.Count == 0)
+		{
+			yield break;
+		}
+
+		if (!HasMetadataFrames() || startFrame < 0 || endFrame < 0)
+		{
+			foreach (TracyPlotSample sample in plot.Samples)
+			{
+				yield return sample;
+			}
+			yield break;
+		}
+
+		List<TracyFrameSummary> frames = GetMetadataFrames().ToList();
+		if (frames.Count == 0)
+		{
+			yield break;
+		}
+		int first = Math.Max(0, Math.Min(startFrame, frames.Count - 1));
+		int last = Math.Max(first, Math.Min(endFrame, frames.Count - 1));
+		long rangeStart = frames[first].Start;
+		long rangeEnd = frames[last].End;
+		foreach (TracyPlotSample sample in plot.Samples)
+		{
+			if (sample.Time >= rangeStart && sample.Time <= rangeEnd)
+			{
+				yield return sample;
 			}
 		}
 	}

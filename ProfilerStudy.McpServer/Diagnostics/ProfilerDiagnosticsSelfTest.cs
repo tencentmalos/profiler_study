@@ -126,6 +126,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string metadataPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-metadata.tracy");
 		string zonePath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-zone.tracy");
 		string plotPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-plot.tracy");
+		string plotRangePath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-plot-range.tracy");
 		string gpuPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-gpu.tracy");
 		string unsupportedEventsPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported-events.tracy");
 		string oversizedLockPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-oversized-lock.tracy");
@@ -174,6 +175,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual("FrameTime", plotStream.Plots[0].Name, "tracy plot name");
 			AssertEqual(2, plotStream.Plots[0].Samples.Count, "tracy plot sample count");
 			AssertTracyPlotQueryTools(plotPath);
+
+			WriteTracyDumpWithPlotSeparatedFrames(plotRangePath);
+			AssertTracyPlotFrameRangeQueryTools(plotRangePath);
 
 			WriteTracyDumpWithGpuContext(gpuPath);
 			TracyEventStream gpuStream = Tracy010FileReader.Read(gpuPath);
@@ -229,6 +233,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(plotPath))
 			{
 				File.Delete(plotPath);
+			}
+			if (File.Exists(plotRangePath))
+			{
+				File.Delete(plotRangePath);
 			}
 			if (File.Exists(gpuPath))
 			{
@@ -854,6 +862,50 @@ internal static class ProfilerDiagnosticsSelfTest
 		}
 	}
 
+	private static void AssertTracyPlotFrameRangeQueryTools(string path)
+	{
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
+		{
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "auto",
+				["keep_session"] = true
+			});
+			AssertEqual(false, keptResult["isError"], "plot range load_trace_file isError");
+			IDictionary kept = keptResult["structuredContent"] as IDictionary;
+			string sessionId = Convert.ToString(kept["sessionId"]);
+
+			Dictionary<string, object> samplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["counter_name"] = "FrameTime",
+				["start_frame"] = 1,
+				["end_frame"] = 1,
+				["max_samples"] = 10
+			});
+			AssertEqual(false, samplesResult["isError"], "plot range query_counter isError");
+			IDictionary samples = samplesResult["structuredContent"] as IDictionary;
+			AssertEqual(1, samples["sampleCount"], "plot range sample count");
+			AssertEqual(1, samples["availableSampleCount"], "plot range available sample count");
+			IList sampleRows = samples["samples"] as IList;
+			AssertHasItems(sampleRows, "plot range samples");
+			IDictionary firstSample = sampleRows[0] as IDictionary;
+			AssertEqual(20.0, firstSample["value"], "plot range sample value");
+
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+		}
+		finally
+		{
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
+	}
+
 	private static void AssertTraceLoadedSessionListed(ProfilerMcpTools tools, string sessionId, string sourceFormat, int frameCount, int threadCount)
 	{
 		Dictionary<string, object> result = tools.CallTool("list_sessions", new Dictionary<string, object>());
@@ -1271,6 +1323,45 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteTracyDump(path, inner.ToArray());
 	}
 
+	private static void WriteTracyDumpWithPlotSeparatedFrames(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: false, includePlotString: true, includeThreadName: false, onDemand: false, continuousFrameSet: false, separatedFrameSet: true);
+		WriteUInt64(inner, 0);                      // localThreadCompress size
+		WriteUInt64(inner, 0);                      // externalThreadCompress size
+		WriteUInt64(inner, 0);                      // sourceLocation map count
+		WriteUInt64(inner, 0);                      // sourceLocationExpand count
+		WriteUInt64(inner, 0);                      // sourceLocationPayload count
+		WriteUInt64(inner, 0);                      // sourceLocationZones count
+		WriteUInt64(inner, 0);                      // gpuSourceLocationZones count
+		WriteUInt64(inner, 0);                      // lockMap count
+		WriteUInt64(inner, 0);                      // messages count
+		WriteUInt64(inner, 1);                      // zoneExtra count
+		inner.Write(new byte[12], 0, 12);           // ZoneExtra
+		WriteUInt64(inner, 0);                      // total CPU zone count
+		WriteUInt64(inner, 0);                      // zoneChildren count
+		WriteUInt64(inner, 0);                      // thread count
+		WriteUInt64(inner, 0);                      // total GPU zone count
+		WriteUInt64(inner, 0);                      // gpuChildren count
+		WriteUInt64(inner, 0);                      // gpuData count
+		WriteUInt64(inner, 1);                      // plot count
+		inner.WriteByte(0);                         // PlotType.User
+		inner.WriteByte(0);                         // PlotValueFormatting.Number
+		inner.WriteByte(0);                         // showSteps
+		inner.WriteByte(1);                         // fill
+		WriteUInt32(inner, 0);                      // color
+		WriteUInt64(inner, 0x2000);                 // name pointer
+		WriteDouble(inner, 10.0);                   // min
+		WriteDouble(inner, 20.0);                   // max
+		WriteDouble(inner, 30.0);                   // sum
+		WriteUInt64(inner, 2);                      // sample count
+		WriteInt64(inner, 500_000);                 // sample 0 absolute time 500000
+		WriteDouble(inner, 10.0);
+		WriteInt64(inner, 1_500_000);               // sample 1 absolute time 2000000
+		WriteDouble(inner, 20.0);
+		WriteTracyDump(path, inner.ToArray());
+	}
+
 	private static void WriteTracyDumpWithGpuContext(string path)
 	{
 		using MemoryStream inner = new MemoryStream();
@@ -1435,6 +1526,11 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString, bool includePlotString, bool includeThreadName, bool onDemand, bool continuousFrameSet)
 	{
+		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString, includeThreadName, onDemand, continuousFrameSet, separatedFrameSet: false);
+	}
+
+	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString, bool includePlotString, bool includeThreadName, bool onDemand, bool continuousFrameSet, bool separatedFrameSet)
+	{
 		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
 		WriteInt64(inner, 0);                       // m_delay
 		WriteInt64(inner, 1_000_000_000);           // m_resolution
@@ -1471,6 +1567,16 @@ internal static class ProfilerDiagnosticsSelfTest
 			WriteInt32(inner, -1);
 			WriteInt64(inner, 16_000_000);         // second user frame start
 			WriteInt32(inner, -1);
+		}
+		else if (separatedFrameSet)
+		{
+			WriteUInt64(inner, 2);                  // frame count
+			WriteInt64(inner, 0);                  // frame 0 start offset
+			WriteInt64(inner, 1_000_000);          // frame 0 end offset
+			WriteInt32(inner, -1);                 // frame 0 image
+			WriteInt64(inner, 1_000_000);          // frame 1 start offset
+			WriteInt64(inner, 3_000_000);          // frame 1 end offset
+			WriteInt32(inner, -1);                 // frame 1 image
 		}
 		else
 		{
