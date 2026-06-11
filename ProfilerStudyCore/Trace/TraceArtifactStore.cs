@@ -146,9 +146,12 @@ public static class TraceArtifactStore
 
 		string normalizedFormat = string.IsNullOrWhiteSpace(format) ? string.Empty : format.Trim().ToLowerInvariant();
 		IEnumerable<TraceArtifactManifest> manifests = Directory
-			.EnumerateFiles(root, "manifest.json", SearchOption.AllDirectories)
+			.EnumerateDirectories(root)
+			.Select(directory => Path.Combine(directory, "manifest.json"))
+			.Where(File.Exists)
 			.Select(ReadManifest)
 			.Where(manifest => manifest != null)
+			.Where(manifest => !string.IsNullOrWhiteSpace(manifest.ArtifactId))
 			.Where(manifest => normalizedFormat.Length == 0 || normalizedFormat == "all" || string.Equals(manifest.SourceFormat, normalizedFormat, StringComparison.OrdinalIgnoreCase))
 			.OrderByDescending(manifest => manifest.GetCreatedUtc())
 			.Take(Math.Max(1, limit));

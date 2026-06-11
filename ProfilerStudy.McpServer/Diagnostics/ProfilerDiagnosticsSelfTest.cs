@@ -887,6 +887,28 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			throw new InvalidOperationException("trace artifact was not listed: " + artifactId);
 		}
+		AssertTraceArtifactListAllContainsOnlyRegisteredArtifacts(tools);
+	}
+
+	private static void AssertTraceArtifactListAllContainsOnlyRegisteredArtifacts(ProfilerMcpTools tools)
+	{
+		Dictionary<string, object> listResult = tools.CallTool("list_trace_artifacts", new Dictionary<string, object>
+		{
+			["limit"] = 20
+		});
+		AssertEqual(false, listResult["isError"], "list_trace_artifacts all isError");
+		IDictionary structured = listResult["structuredContent"] as IDictionary;
+		AssertHasItems(structured["artifacts"], "all trace artifacts");
+		foreach (object item in (IList)structured["artifacts"])
+		{
+			IDictionary artifact = item as IDictionary;
+			if (artifact == null || string.IsNullOrWhiteSpace(Convert.ToString(artifact["artifactId"])))
+			{
+				throw new InvalidOperationException("list_trace_artifacts must not return normalized manifests or empty artifact ids.");
+			}
+			AssertEqual(false, string.IsNullOrWhiteSpace(Convert.ToString(artifact["sourceKind"])), "all trace artifact source kind");
+			AssertEqual(false, string.IsNullOrWhiteSpace(Convert.ToString(artifact["normalizedPath"])), "all trace artifact normalized path");
+		}
 	}
 
 	private static void AssertTraceArtifactNormalizedFiles(string root, string artifactId, bool expectZone, bool expectPlot)
