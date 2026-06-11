@@ -48,4 +48,6 @@ Before changing a subfeature, update the corresponding design document first, th
 
 Avalonia controls that use ScottPlot must reference the customized source projects from `third_party/ScottPlot/`, not the `ScottPlot.Avalonia` NuGet package. When timeline, frame graph, profiler stats, or TimelineScope behavior needs plotting changes, prefer targeted changes in the submodule plus the relevant control-family design document.
 
+For Tracy protocol work, keep the C# implementation structurally aligned with the Tracy C++ SDK/viewer instead of hand-maintaining large offset tables or ad hoc decode/encode logic. Live Tracy queue events and `.tracy` file sections should prefer `StructLayout(Pack = 1)`, `Marshal.SizeOf<T>()`, explicit protocol structs, or equivalent structured binary readers that mirror the C++ definitions. When a Tracy C++ struct, enum, section, or wire event changes, update the corresponding C# protocol struct and size/field mapping together, and verify against the Tracy viewer/capture flow before adding broader query behavior.
+
 After each code change that successfully builds, automatically create a focused git commit for the verified changes before reporting completion. Include the build evidence in the response. Do not include unrelated dirty or untracked files in that commit.

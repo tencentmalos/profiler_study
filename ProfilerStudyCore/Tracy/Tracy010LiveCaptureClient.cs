@@ -109,7 +109,7 @@ public static class Tracy010LiveCaptureClient
 		int compressedBlockCount = 0;
 		long compressedByteCount = 0;
 		long decodedByteCount = 0;
-		byte[] previousBlock = null;
+		byte[] rollingDictionary = null;
 		while (DateTime.UtcNow < endUtc)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -122,8 +122,8 @@ public static class Tracy010LiveCaptureClient
 				throw new TracyFileFormatException("TracyLiveDecodeFailed", "Invalid Tracy live LZ4 block size.");
 			}
 			byte[] compressedBlock = ReadExactly(stream, checked((int)blockSize), cancellationToken, DateTime.UtcNow.AddSeconds(2));
-			byte[] decodedBlock = TracyLz4BlockDecoder.Decode(compressedBlock, TargetFrameSize, previousBlock);
-			previousBlock = decodedBlock;
+			byte[] decodedBlock = TracyLz4BlockDecoder.Decode(compressedBlock, TargetFrameSize, rollingDictionary);
+			rollingDictionary = AppendRollingDictionary(rollingDictionary, decodedBlock);
 			compressedBlockCount++;
 			compressedByteCount += blockSize;
 			decodedByteCount += decodedBlock.Length;
@@ -134,6 +134,26 @@ public static class Tracy010LiveCaptureClient
 
 		TracyEventStream eventStream = decoder.CreateEventStream(compressedBlockCount, compressedByteCount, decodedByteCount, decodedByteCount, diagnostics);
 		return new TracyLiveCaptureResult(eventStream, diagnostics, connectStopwatch.Elapsed.TotalMilliseconds);
+	}
+
+	private static byte[] AppendRollingDictionary(byte[] rollingDictionary, byte[] decodedBlock)
+	{
+		const int maxDictionarySize = 64 * 1024;
+		if (decodedBlock == null || decodedBlock.Length == 0)
+		{
+			return rollingDictionary;
+		}
+		int previousLength = rollingDictionary == null ? 0 : rollingDictionary.Length;
+		int combinedLength = Math.Min(maxDictionarySize, previousLength + decodedBlock.Length);
+		byte[] combined = new byte[combinedLength];
+		int decodedBytesToCopy = Math.Min(decodedBlock.Length, combinedLength);
+		int previousBytesToCopy = combinedLength - decodedBytesToCopy;
+		if (previousBytesToCopy > 0)
+		{
+			Buffer.BlockCopy(rollingDictionary, previousLength - previousBytesToCopy, combined, 0, previousBytesToCopy);
+		}
+		Buffer.BlockCopy(decodedBlock, decodedBlock.Length - decodedBytesToCopy, combined, previousBytesToCopy, decodedBytesToCopy);
+		return combined;
 	}
 
 	private static TracyFileFormatException CreateProtocolMismatch(string message, string status)

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ProfilerStudy.Tracy;
@@ -182,10 +183,553 @@ internal sealed class Tracy010LiveEventDecoder
 
 	private const int TargetFrameSize = 256 * 1024;
 
-	private static readonly int[] QueueDataSize =
+	private static readonly int[] QueueDataSize = BuildQueueDataSize();
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueHeader
 	{
-		1, 1, 9, 12, 9, 12, 9, 9, 9, 1, 1, 1, 13, 13, 9, 17, 17, 9, 17, 17, 13, 17, 17, 17, 5, 25, 25, 21, 21, 25, 25, 21, 21, 22, 22, 14, 14, 16, 22, 22, 14, 14, 16, 25, 21, 25, 19, 13, 12, 2, 10, 13, 1, 1, 1, 17, 13, 1, 1, 5, 17, 1, 17, 5, 4, 9, 17, 17, 13, 33, 14, 13, 17, 17, 9, 12, 9, 12, 18, 25, 17, 13, 9, 13, 13, 13, 13, 13, 13, 16, 15, 1, 5, 1, 13, 1, 1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9
-	};
+		public byte Type;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueThreadContext
+	{
+		public uint Thread;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueZoneBeginLean
+	{
+		public long Time;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueZoneBegin
+	{
+		public long Time;
+		public ulong SourceLocation;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueZoneEnd
+	{
+		public long Time;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueLockWait
+	{
+		public uint Thread;
+		public uint Id;
+		public long Time;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueLockRelease
+	{
+		public uint Id;
+		public long Time;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueLockReleaseShared
+	{
+		public uint Id;
+		public long Time;
+		public uint Thread;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueLockName
+	{
+		public uint Id;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueMemAlloc
+	{
+		public long Time;
+		public uint Thread;
+		public ulong Pointer;
+		public byte Size0;
+		public byte Size1;
+		public byte Size2;
+		public byte Size3;
+		public byte Size4;
+		public byte Size5;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueMemFree
+	{
+		public long Time;
+		public uint Thread;
+		public ulong Pointer;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueGpuZoneBeginLean
+	{
+		public long CpuTime;
+		public uint Thread;
+		public ushort QueryId;
+		public byte Context;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueGpuZoneBegin
+	{
+		public long CpuTime;
+		public uint Thread;
+		public ushort QueryId;
+		public byte Context;
+		public ulong SourceLocation;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueGpuZoneEnd
+	{
+		public long CpuTime;
+		public uint Thread;
+		public ushort QueryId;
+		public byte Context;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueuePlotDataInt
+	{
+		public ulong Name;
+		public long Time;
+		public long Value;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueuePlotDataFloat
+	{
+		public ulong Name;
+		public long Time;
+		public float Value;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueuePlotDataDouble
+	{
+		public ulong Name;
+		public long Time;
+		public double Value;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueContextSwitch
+	{
+		public long Time;
+		public uint OldThread;
+		public uint NewThread;
+		public byte Cpu;
+		public byte Reason;
+		public byte State;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueThreadWakeup
+	{
+		public long Time;
+		public uint Thread;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueGpuTime
+	{
+		public long GpuTime;
+		public ushort QueryId;
+		public byte Context;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueGpuContextName
+	{
+		public byte Context;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueCallstackFrameSize
+	{
+		public ulong Pointer;
+		public byte Size;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueSymbolInformation
+	{
+		public uint Line;
+		public ulong SymbolAddress;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueFiberEnter
+	{
+		public long Time;
+		public ulong Fiber;
+		public uint Thread;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueFiberLeave
+	{
+		public long Time;
+		public uint Thread;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueGpuCalibration
+	{
+		public long GpuTime;
+		public long CpuTime;
+		public long CpuDelta;
+		public byte Context;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueCrashReport
+	{
+		public long Time;
+		public ulong Text;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueZoneValidation
+	{
+		public uint Id;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueZoneColor
+	{
+		public byte B;
+		public byte G;
+		public byte R;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueZoneValue
+	{
+		public ulong Value;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueFrameMark
+	{
+		public long Time;
+		public ulong Name;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueFrameImage
+	{
+		public uint Frame;
+		public ushort Width;
+		public ushort Height;
+		public byte Flip;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueFrameVsync
+	{
+		public long Time;
+		public uint Id;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueSourceLocation
+	{
+		public ulong Name;
+		public ulong Function;
+		public ulong File;
+		public uint Line;
+		public byte B;
+		public byte G;
+		public byte R;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueLockAnnounce
+	{
+		public uint Id;
+		public long Time;
+		public ulong Location;
+		public byte Type;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueLockTerminate
+	{
+		public uint Id;
+		public long Time;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueLockMark
+	{
+		public uint Thread;
+		public uint Id;
+		public ulong SourceLocation;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueMessage
+	{
+		public long Time;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueMessageColor
+	{
+		public long Time;
+		public byte B;
+		public byte G;
+		public byte R;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueMessageLiteral
+	{
+		public long Time;
+		public ulong Text;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueMessageColorLiteral
+	{
+		public long Time;
+		public byte B;
+		public byte G;
+		public byte R;
+		public ulong Text;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueGpuNewContext
+	{
+		public long CpuTime;
+		public long GpuTime;
+		public uint Thread;
+		public float Period;
+		public byte Context;
+		public byte Flags;
+		public byte Type;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueCallstackFrame
+	{
+		public uint Line;
+		public ulong SymbolAddress;
+		public uint SymbolLength;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueSysTime
+	{
+		public long Time;
+		public float SystemTime;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueSysPower
+	{
+		public long Time;
+		public ulong Delta;
+		public ulong Name;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueTidToPid
+	{
+		public ulong Tid;
+		public ulong Pid;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueHwSample
+	{
+		public ulong Ip;
+		public long Time;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueuePlotConfig
+	{
+		public ulong Name;
+		public byte Type;
+		public byte Step;
+		public byte Fill;
+		public uint Color;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueParamSetup
+	{
+		public uint Index;
+		public ulong Name;
+		public byte IsBool;
+		public int Value;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueSourceCodeNotAvailable
+	{
+		public uint Id;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueCpuTopology
+	{
+		public uint Package;
+		public uint Core;
+		public uint Thread;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueMemNamePayload
+	{
+		public ulong Name;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueStringTransfer
+	{
+		public ulong Pointer;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+	private struct QueueCallstackSample
+	{
+		public long Time;
+		public uint Thread;
+	}
+
+	private static int[] BuildQueueDataSize()
+	{
+		int header = Marshal.SizeOf<QueueHeader>();
+		int[] sizes = new int[(int)QueueType.NUM_TYPES];
+		sizes[(int)QueueType.ZoneText] = header;
+		sizes[(int)QueueType.ZoneName] = header;
+		sizes[(int)QueueType.Message] = SizeOf<QueueMessage>();
+		sizes[(int)QueueType.MessageColor] = SizeOf<QueueMessageColor>();
+		sizes[(int)QueueType.MessageCallstack] = SizeOf<QueueMessage>();
+		sizes[(int)QueueType.MessageColorCallstack] = SizeOf<QueueMessageColor>();
+		sizes[(int)QueueType.MessageAppInfo] = SizeOf<QueueMessage>();
+		sizes[(int)QueueType.ZoneBeginAllocSrcLoc] = SizeOf<QueueZoneBeginLean>();
+		sizes[(int)QueueType.ZoneBeginAllocSrcLocCallstack] = SizeOf<QueueZoneBeginLean>();
+		sizes[(int)QueueType.CallstackSerial] = header;
+		sizes[(int)QueueType.Callstack] = header;
+		sizes[(int)QueueType.CallstackAlloc] = header;
+		sizes[(int)QueueType.CallstackSample] = SizeOf<QueueCallstackSample>();
+		sizes[(int)QueueType.CallstackSampleContextSwitch] = SizeOf<QueueCallstackSample>();
+		sizes[(int)QueueType.FrameImage] = SizeOf<QueueFrameImage>();
+		sizes[(int)QueueType.ZoneBegin] = SizeOf<QueueZoneBegin>();
+		sizes[(int)QueueType.ZoneBeginCallstack] = SizeOf<QueueZoneBegin>();
+		sizes[(int)QueueType.ZoneEnd] = SizeOf<QueueZoneEnd>();
+		sizes[(int)QueueType.LockWait] = SizeOf<QueueLockWait>();
+		sizes[(int)QueueType.LockObtain] = SizeOf<QueueLockWait>();
+		sizes[(int)QueueType.LockRelease] = SizeOf<QueueLockRelease>();
+		sizes[(int)QueueType.LockSharedWait] = SizeOf<QueueLockWait>();
+		sizes[(int)QueueType.LockSharedObtain] = SizeOf<QueueLockWait>();
+		sizes[(int)QueueType.LockSharedRelease] = SizeOf<QueueLockReleaseShared>();
+		sizes[(int)QueueType.LockName] = SizeOf<QueueLockName>();
+		sizes[(int)QueueType.MemAlloc] = SizeOf<QueueMemAlloc>();
+		sizes[(int)QueueType.MemAllocNamed] = SizeOf<QueueMemAlloc>();
+		sizes[(int)QueueType.MemFree] = SizeOf<QueueMemFree>();
+		sizes[(int)QueueType.MemFreeNamed] = SizeOf<QueueMemFree>();
+		sizes[(int)QueueType.MemAllocCallstack] = SizeOf<QueueMemAlloc>();
+		sizes[(int)QueueType.MemAllocCallstackNamed] = SizeOf<QueueMemAlloc>();
+		sizes[(int)QueueType.MemFreeCallstack] = SizeOf<QueueMemFree>();
+		sizes[(int)QueueType.MemFreeCallstackNamed] = SizeOf<QueueMemFree>();
+		sizes[(int)QueueType.GpuZoneBegin] = SizeOf<QueueGpuZoneBegin>();
+		sizes[(int)QueueType.GpuZoneBeginCallstack] = SizeOf<QueueGpuZoneBegin>();
+		sizes[(int)QueueType.GpuZoneBeginAllocSrcLoc] = SizeOf<QueueGpuZoneBeginLean>();
+		sizes[(int)QueueType.GpuZoneBeginAllocSrcLocCallstack] = SizeOf<QueueGpuZoneBeginLean>();
+		sizes[(int)QueueType.GpuZoneEnd] = SizeOf<QueueGpuZoneEnd>();
+		sizes[(int)QueueType.GpuZoneBeginSerial] = SizeOf<QueueGpuZoneBegin>();
+		sizes[(int)QueueType.GpuZoneBeginCallstackSerial] = SizeOf<QueueGpuZoneBegin>();
+		sizes[(int)QueueType.GpuZoneBeginAllocSrcLocSerial] = SizeOf<QueueGpuZoneBeginLean>();
+		sizes[(int)QueueType.GpuZoneBeginAllocSrcLocCallstackSerial] = SizeOf<QueueGpuZoneBeginLean>();
+		sizes[(int)QueueType.GpuZoneEndSerial] = SizeOf<QueueGpuZoneEnd>();
+		sizes[(int)QueueType.PlotDataInt] = SizeOf<QueuePlotDataInt>();
+		sizes[(int)QueueType.PlotDataFloat] = SizeOf<QueuePlotDataFloat>();
+		sizes[(int)QueueType.PlotDataDouble] = SizeOf<QueuePlotDataDouble>();
+		sizes[(int)QueueType.ContextSwitch] = SizeOf<QueueContextSwitch>();
+		sizes[(int)QueueType.ThreadWakeup] = SizeOf<QueueThreadWakeup>();
+		sizes[(int)QueueType.GpuTime] = SizeOf<QueueGpuTime>();
+		sizes[(int)QueueType.GpuContextName] = SizeOf<QueueGpuContextName>();
+		sizes[(int)QueueType.CallstackFrameSize] = SizeOf<QueueCallstackFrameSize>();
+		sizes[(int)QueueType.SymbolInformation] = SizeOf<QueueSymbolInformation>();
+		sizes[(int)QueueType.ExternalNameMetadata] = header;
+		sizes[(int)QueueType.SymbolCodeMetadata] = header;
+		sizes[(int)QueueType.SourceCodeMetadata] = header;
+		sizes[(int)QueueType.FiberEnter] = SizeOf<QueueFiberEnter>();
+		sizes[(int)QueueType.FiberLeave] = SizeOf<QueueFiberLeave>();
+		sizes[(int)QueueType.Terminate] = header;
+		sizes[(int)QueueType.KeepAlive] = header;
+		sizes[(int)QueueType.ThreadContext] = SizeOf<QueueThreadContext>();
+		sizes[(int)QueueType.GpuCalibration] = SizeOf<QueueGpuCalibration>();
+		sizes[(int)QueueType.Crash] = header;
+		sizes[(int)QueueType.CrashReport] = SizeOf<QueueCrashReport>();
+		sizes[(int)QueueType.ZoneValidation] = SizeOf<QueueZoneValidation>();
+		sizes[(int)QueueType.ZoneColor] = SizeOf<QueueZoneColor>();
+		sizes[(int)QueueType.ZoneValue] = SizeOf<QueueZoneValue>();
+		sizes[(int)QueueType.FrameMarkMsg] = SizeOf<QueueFrameMark>();
+		sizes[(int)QueueType.FrameMarkMsgStart] = SizeOf<QueueFrameMark>();
+		sizes[(int)QueueType.FrameMarkMsgEnd] = SizeOf<QueueFrameMark>();
+		sizes[(int)QueueType.FrameVsync] = SizeOf<QueueFrameVsync>();
+		sizes[(int)QueueType.SourceLocation] = SizeOf<QueueSourceLocation>();
+		sizes[(int)QueueType.LockAnnounce] = SizeOf<QueueLockAnnounce>();
+		sizes[(int)QueueType.LockTerminate] = SizeOf<QueueLockTerminate>();
+		sizes[(int)QueueType.LockMark] = SizeOf<QueueLockMark>();
+		sizes[(int)QueueType.MessageLiteral] = SizeOf<QueueMessageLiteral>();
+		sizes[(int)QueueType.MessageLiteralColor] = SizeOf<QueueMessageColorLiteral>();
+		sizes[(int)QueueType.MessageLiteralCallstack] = SizeOf<QueueMessageLiteral>();
+		sizes[(int)QueueType.MessageLiteralColorCallstack] = SizeOf<QueueMessageColorLiteral>();
+		sizes[(int)QueueType.GpuNewContext] = SizeOf<QueueGpuNewContext>();
+		sizes[(int)QueueType.CallstackFrame] = SizeOf<QueueCallstackFrame>();
+		sizes[(int)QueueType.SysTimeReport] = SizeOf<QueueSysTime>();
+		sizes[(int)QueueType.SysPowerReport] = SizeOf<QueueSysPower>();
+		sizes[(int)QueueType.TidToPid] = SizeOf<QueueTidToPid>();
+		sizes[(int)QueueType.HwSampleCpuCycle] = SizeOf<QueueHwSample>();
+		sizes[(int)QueueType.HwSampleInstructionRetired] = SizeOf<QueueHwSample>();
+		sizes[(int)QueueType.HwSampleCacheReference] = SizeOf<QueueHwSample>();
+		sizes[(int)QueueType.HwSampleCacheMiss] = SizeOf<QueueHwSample>();
+		sizes[(int)QueueType.BranchRetired] = SizeOf<QueueHwSample>();
+		sizes[(int)QueueType.BranchMiss] = SizeOf<QueueHwSample>();
+		sizes[(int)QueueType.PlotConfig] = SizeOf<QueuePlotConfig>();
+		sizes[(int)QueueType.ParamSetup] = SizeOf<QueueParamSetup>();
+		sizes[(int)QueueType.AckServerQueryNoop] = header;
+		sizes[(int)QueueType.AckSourceCodeNotAvailable] = SizeOf<QueueSourceCodeNotAvailable>();
+		sizes[(int)QueueType.AckSymbolCodeNotAvailable] = header;
+		sizes[(int)QueueType.CpuTopology] = SizeOf<QueueCpuTopology>();
+		sizes[(int)QueueType.SingleStringData] = header;
+		sizes[(int)QueueType.SecondStringData] = header;
+		sizes[(int)QueueType.MemNamePayload] = SizeOf<QueueMemNamePayload>();
+		sizes[(int)QueueType.StringData] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.ThreadName] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.PlotName] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.SourceLocationPayload] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.CallstackPayload] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.CallstackAllocPayload] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.FrameName] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.FrameImageData] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.ExternalName] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.ExternalThreadName] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.SymbolCode] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.SourceCode] = SizeOf<QueueStringTransfer>();
+		sizes[(int)QueueType.FiberName] = SizeOf<QueueStringTransfer>();
+		return sizes;
+	}
+
+	private static int SizeOf<T>() where T : struct
+	{
+		return Marshal.SizeOf<QueueHeader>() + Marshal.SizeOf<T>();
+	}
 
 	private readonly TracyTraceMetadata m_InitialMetadata;
 	private readonly long m_BaseTime;
@@ -237,12 +781,17 @@ internal sealed class Tracy010LiveEventDecoder
 
 		int offset = 0;
 		int processed = 0;
+		QueueType? previousType = null;
+		Queue<string> recentEvents = new Queue<string>();
 		while (offset < decodedBlock.Length)
 		{
+			int eventOffset = offset;
 			byte typeValue = decodedBlock[offset];
 			if (typeValue >= (byte)QueueType.NUM_TYPES || typeValue >= QueueDataSize.Length)
 			{
-				throw new TracyFileFormatException("TracyLiveDecodeFailed", "Tracy live queue item type is outside the 0.10.0 protocol range.");
+				throw new TracyFileFormatException(
+					"TracyLiveDecodeFailed",
+					"Tracy live queue item type is outside the 0.10.0 protocol range at block offset " + offset + " with type byte " + typeValue + ", processed events " + processed + ", previous type " + (previousType.HasValue ? previousType.Value.ToString() : "none") + ", recent events [" + string.Join(", ", recentEvents.ToArray()) + "], decoded block size " + decodedBlock.Length + ".");
 			}
 
 			QueueType type = (QueueType)typeValue;
@@ -258,6 +807,12 @@ internal sealed class Tracy010LiveEventDecoder
 			{
 				ProcessFixedItem(decodedBlock, offset, type);
 				offset += QueueDataSize[typeValue];
+			}
+			previousType = type;
+			recentEvents.Enqueue(type + "@" + eventOffset + "+" + (offset - eventOffset));
+			while (recentEvents.Count > 8)
+			{
+				recentEvents.Dequeue();
 			}
 			processed++;
 		}
@@ -356,6 +911,11 @@ internal sealed class Tracy010LiveEventDecoder
 
 	private void ProcessStringTransfer(byte[] buffer, ref int offset, QueueType type)
 	{
+		if (type == QueueType.FrameImageData || type == QueueType.SymbolCode || type == QueueType.SourceCode)
+		{
+			ProcessLargeStringTransfer(buffer, ref offset, type);
+			return;
+		}
 		EnsureAvailable(buffer, offset, 11);
 		ulong pointer = ReadUInt64(buffer, offset + 1);
 		int size = ReadUInt16(buffer, offset + 9);
@@ -384,6 +944,16 @@ internal sealed class Tracy010LiveEventDecoder
 		}
 		m_StringPayloadCount++;
 		offset += 11 + size;
+	}
+
+	private void ProcessLargeStringTransfer(byte[] buffer, ref int offset, QueueType type)
+	{
+		EnsureAvailable(buffer, offset, 13);
+		int size = checked((int)ReadUInt32(buffer, offset + 9));
+		EnsureAvailable(buffer, offset, 13 + size);
+		IncrementUnsupported(type);
+		m_StringPayloadCount++;
+		offset += 13 + size;
 	}
 
 	private static void SkipInlineString(byte[] buffer, ref int offset)
