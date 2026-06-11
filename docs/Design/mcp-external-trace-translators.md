@@ -231,10 +231,13 @@ Tracy 的细化设计见 `docs/Design/mcp-tracy-compatibility.md`。该专项设
 
 ### `.tracy` 文件打开
 
-推荐通过 Tracy bridge helper 读取 `.tracy`，输出 workspace 可消费的 normalized document：
+推荐通过 ProfilerStudyCore 内置的纯 C# Tracy 0.10.0 reader 读取 `.tracy`，输出 workspace 可消费的 normalized document：
 
 ```text
-profiler-tracy-bridge import --input capture.tracy --output normalized.json
+TracyTraceImporter.Load(capture.tracy)
+  -> Tracy010FileReader
+  -> TracyTraceQuerySession
+  -> TraceArtifactStore register normalized cache + diagnostics
 ```
 
 第一版导入：
@@ -248,19 +251,20 @@ profiler-tracy-bridge import --input capture.tracy --output normalized.json
 
 ### Tracy live socket
 
-UI live capture 和 MCP headless capture 都应调用同一个 Tracy capture helper：
+UI live capture 和 MCP headless capture 都应调用同一个 Core C# capture path：
 
 ```text
-tracy://127.0.0.1:8086
-  -> profiler-tracy-bridge capture --host 127.0.0.1 --port 8086 --seconds 30 --output capture.tracy --normalized normalized.json
-  -> TraceArtifactStore register original + normalized
+pc://127.0.0.1:8086 + protocol=tracy
+  -> Tracy010LiveCaptureClient.Capture(host, port, seconds)
+  -> TracyTraceQuerySession
+  -> TraceArtifactStore register normalized cache + diagnostics
   -> UI open TraceDocument
   -> MCP load artifact_id or source path
 ```
 
-从用户角度看，ProfilerStudy 是直接连接 Tracy target 并打开 capture。实现上复用 Tracy 官方 worker/capture 逻辑，避免手写私有 wire protocol。
+从用户角度看，ProfilerStudy 是直接连接 Tracy target 并打开 capture。实现上锁定 Azahar 当前 Tracy `0.10.0`，由 C# reader/capture 实现 handshake、metadata 和已支持事件解析。
 
-Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`、LZ4 stream 和 server-query metadata round trip。手写 C# client 可行但维护风险高，不建议第一阶段做。
+Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`、LZ4 stream 和 server-query metadata round trip。`tools/profiler_tracy_bridge` 只保留 upstream source/viewer 参考，不作为产品 bridge、helper process 或 native build 依赖。
 
 ## Trace Artifact Store
 
@@ -330,9 +334,9 @@ Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`�
 
 ### Phase 4：Tracy 文件和 live socket
 
-- 增加 `profiler-tracy-bridge` 或文档化外部 Tracy capture helper。
+- 增加 ProfilerStudyCore 内置纯 C# Tracy 0.10.0 reader/capture。
 - UI 支持打开 `.tracy`。
-- UI 支持 `tracy://host:port` duration capture，capture 后打开 document。
+- UI 支持 `protocol=tracy` 的 host/port/duration capture，capture 后打开 document。
 - MCP 支持 headless capture，并能通过 artifact id 或 path 读取同一 Tracy capture。
 
 验收：
@@ -349,7 +353,7 @@ Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`�
 
 - 不允许模型传任意 SQL；Perfetto 查询由代码内固定 SQL 实现。
 - 不允许 MCP 扫描用户目录；只访问用户显式传入 path 或 artifact store manifest。
-- Tracy capture helper process 必须有 timeout、output size cap 和 cancellation。
+- Tracy C# live capture 必须有 timeout、output size cap 和 cancellation。
 - diagnostics 可以返回 dependency versions、import warnings，但不要返回无关环境变量或目录列表。
 
 ## 资料依据
@@ -369,6 +373,6 @@ Tracy upstream 当前 protocol 包含 `TracyPrf` handshake、`ProtocolVersion`�
 1. 先把 FramePro 也包进 `ITraceQuerySession`，建立 UI/MCP 共享 document 语义。
 2. 做 Artifact Store 和 MCP direct file/artifact access，让 UI 产物和 MCP 查询能引用同一批抓取文件。
 3. 接 Perfetto/systrace，因为 Trace Processor 能提供稳定解析能力，适合先验证统一文件/Artifact 工作流。
-4. 接 Tracy 时复用官方 C++ worker/capture 代码做 bridge，避免维护私有 wire protocol。
+4. 接 Tracy 时使用内置 C# 0.10.0 reader/capture，`tools/profiler_tracy_bridge` 仅保存官方源码和 viewer 参考。
 
 这样 ProfilerStudy 会成为可视化主界面，MCP 成为同一批 trace 文件和 artifact 上的分析入口，而不是另一个独立 trace 读取器。

@@ -4,10 +4,15 @@
 
 | Tool | Use |
 | --- | --- |
-| `capture_profile` | Capture ProfilerStudy data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Android URLs support default `localfilesystem` paths plus explicit `localfilesystem:<path>`, `localabstract:<name>`, and `tcp:<port>` endpoints. Use `keep_session=true` for follow-ups. |
+| `capture_profile` | Capture data from a profiler target. Default `protocol=study` captures ProfilerStudy data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Explicit `protocol=tracy` captures a Tracy 0.10.0 TCP target from `pc://{ip}:{port}` and registers a trace artifact. `protocol=perfetto` is reserved. Use `keep_session=true` for follow-ups. |
 | `capture_android_profile` | Compatibility wrapper for fixed Android debug/release sockets. Prefer `capture_profile` for new live captures. |
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |
+| `load_trace_file` | Load a trace file through the unified trace path. Current direct trace import supports `.tracy` / `format=tracy`, returns `artifactId`, and can return `sessionId` with `keep_session=true`. |
+| `load_trace_artifact` | Reopen a registered trace artifact from the artifact store by `artifact_id`; use `keep_session=true` for follow-up analysis. |
+| `list_trace_artifacts` | List registered artifacts from the ProfilerStudy artifact store, optionally filtered by `format=tracy`. |
+| `get_import_diagnostics` | Return import/live-capture diagnostics by `session_id` or by registered `artifact_id`. |
+| `get_tracy_status` | Return built-in C# Tracy support status, locked version, and source reference submodule availability. |
 | `list_sessions` | Show retained sessions. |
 | `close_session` | Release a retained session. |
 
@@ -49,6 +54,18 @@ Live PC capture:
 
 ```text
 Capture url=pc://127.0.0.1:8428 for 30 seconds with keep_session=true, then analyze slow frames and the worst frame.
+```
+
+Tracy live capture:
+
+```text
+Capture url=pc://127.0.0.1:8086 protocol=tracy for 10 seconds with keep_session=true, then call get_import_diagnostics and list_counters.
+```
+
+Tracy artifact reuse:
+
+```text
+Load trace file /captures/run.tracy with keep_session=false, then use the returned artifactId with load_trace_artifact and get_import_diagnostics.
 ```
 
 Live Android capture:

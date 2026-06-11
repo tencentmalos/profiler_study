@@ -165,6 +165,12 @@ Perfetto/Tracy/systrace 接入时建议新增：
 - `ProfilerStudyTraceQuerySession`：用现有 `Session` 适配统一 query。
 - `PerfettoTraceQuerySession` / `TracyTraceQuerySession`：外部格式 importer 的输出。
 
+当前 Tracy 接入已采用 file-backed `TraceArtifactStore`：
+
+- `load_trace_file` 和 `capture_profile(protocol=tracy)` 生成 `manifest.json`、`import-diagnostics.json` 和 `normalized/` cache。
+- `load_trace_artifact` 从 artifact id 重建 `TraceDocument` / `ITraceQuerySession`，不依赖 UI 进程内存。
+- `get_import_diagnostics` 支持 `session_id` 和 `artifact_id` 两种入口；artifact 查询只能读取 artifact store 内 manifest 指向的 diagnostics，不能扫描用户目录。
+
 这样 WinForms/Avalonia/MCP 可以逐步迁移到共享 query，而不是把所有格式塞进 `Session`。
 
 ## 修改原则

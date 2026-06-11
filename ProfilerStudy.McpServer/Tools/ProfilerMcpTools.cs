@@ -174,8 +174,8 @@ internal sealed class ProfilerMcpTools
 			new Dictionary<string, object>
 			{
 				["name"] = "get_import_diagnostics",
-				["description"] = "Return import or live-capture diagnostics for a loaded trace session.",
-				["inputSchema"] = SessionIdSchema()
+				["description"] = "Return import or live-capture diagnostics for a loaded trace session or registered trace artifact.",
+				["inputSchema"] = ImportDiagnosticsSchema()
 			},
 			new Dictionary<string, object>
 			{
@@ -294,7 +294,9 @@ internal sealed class ProfilerMcpTools
 					structured = m_AnalysisService.ListSessions();
 					break;
 				case "get_import_diagnostics":
-					structured = m_AnalysisService.GetImportDiagnostics(GetString(arguments, "session_id", string.Empty));
+					structured = m_AnalysisService.GetImportDiagnostics(
+						GetString(arguments, "session_id", string.Empty),
+						GetString(arguments, "artifact_id", string.Empty));
 					break;
 				case "get_session_summary":
 					structured = m_AnalysisService.GetSessionSummary(GetString(arguments, "session_id", string.Empty));
@@ -577,6 +579,27 @@ internal sealed class ProfilerMcpTools
 					["minimum"] = 1,
 					["maximum"] = 200,
 					["default"] = 20
+				}
+			}
+		};
+	}
+
+	private static Dictionary<string, object> ImportDiagnosticsSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["description"] = "Loaded trace session id returned by load_trace_file, load_trace_artifact, or capture_profile with keep_session=true."
+				},
+				["artifact_id"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["description"] = "Trace artifact id returned by load_trace_file, load_trace_artifact, capture_profile(protocol=tracy), or list_trace_artifacts."
 				}
 			}
 		};

@@ -93,6 +93,48 @@ public static class TraceArtifactStore
 		return TracyNormalizedArtifact.Load(artifactDirectory, manifest);
 	}
 
+	public static Dictionary<string, object> GetDiagnostics(string artifactId)
+	{
+		string artifactDirectory = GetArtifactDirectory(artifactId);
+		string manifestPath = Path.Combine(artifactDirectory, "manifest.json");
+		if (!File.Exists(manifestPath))
+		{
+			throw new FileNotFoundException("Trace artifact manifest does not exist.", manifestPath);
+		}
+
+		TraceArtifactManifest manifest = ReadManifest(manifestPath);
+		if (manifest == null)
+		{
+			throw new InvalidOperationException("Trace artifact manifest could not be read: " + artifactId + ".");
+		}
+
+		string diagnosticsPath = ResolveArtifactFilePath(
+			artifactDirectory,
+			string.IsNullOrWhiteSpace(manifest.DiagnosticsPath) ? "import-diagnostics.json" : manifest.DiagnosticsPath,
+			"Trace artifact diagnostics path escapes the artifact directory.");
+		return new Dictionary<string, object>
+		{
+			["artifactId"] = manifest.ArtifactId,
+			["source"] = manifest.SourcePath,
+			["sourceFormat"] = manifest.SourceFormat,
+			["sourceKind"] = manifest.SourceKind,
+			["diagnosticsPath"] = manifest.DiagnosticsPath,
+			["diagnostics"] = ReadDiagnostics(diagnosticsPath)
+		};
+	}
+
+	private static string ResolveArtifactFilePath(string artifactDirectory, string relativePath, string escapeMessage)
+	{
+		string fullArtifactDirectory = Path.GetFullPath(artifactDirectory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+		string fullPath = Path.GetFullPath(Path.Combine(fullArtifactDirectory, relativePath ?? string.Empty));
+		StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+		if (!fullPath.Equals(fullArtifactDirectory, comparison) && !fullPath.StartsWith(fullArtifactDirectory + Path.DirectorySeparatorChar, comparison))
+		{
+			throw new InvalidOperationException(escapeMessage);
+		}
+		return fullPath;
+	}
+
 	public static ArrayList List(string format, int limit)
 	{
 		string root = RootPath;
@@ -137,6 +179,65 @@ public static class TraceArtifactStore
 		catch
 		{
 			return null;
+		}
+	}
+
+	private static ArrayList ReadDiagnostics(string path)
+	{
+		if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+		{
+			return new ArrayList();
+		}
+		using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+		return ToArrayList(document.RootElement);
+	}
+
+	private static Dictionary<string, object> ToDictionary(JsonElement element)
+	{
+		Dictionary<string, object> values = new Dictionary<string, object>();
+		foreach (JsonProperty property in element.EnumerateObject())
+		{
+			values[property.Name] = ToObject(property.Value);
+		}
+		return values;
+	}
+
+	private static ArrayList ToArrayList(JsonElement element)
+	{
+		ArrayList values = new ArrayList();
+		if (element.ValueKind != JsonValueKind.Array)
+		{
+			return values;
+		}
+		foreach (JsonElement item in element.EnumerateArray())
+		{
+			values.Add(ToObject(item));
+		}
+		return values;
+	}
+
+	private static object ToObject(JsonElement element)
+	{
+		switch (element.ValueKind)
+		{
+			case JsonValueKind.Object:
+				return ToDictionary(element);
+			case JsonValueKind.Array:
+				return ToArrayList(element);
+			case JsonValueKind.String:
+				return element.GetString();
+			case JsonValueKind.Number:
+				if (element.TryGetInt64(out long longValue))
+				{
+					return longValue;
+				}
+				return element.GetDouble();
+			case JsonValueKind.True:
+				return true;
+			case JsonValueKind.False:
+				return false;
+			default:
+				return null;
 		}
 	}
 

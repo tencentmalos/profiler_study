@@ -436,7 +436,7 @@ get_import_diagnostics(session_id?|artifact_id?)
 get_tracy_status()
 ```
 
-`get_import_diagnostics` 第一阶段先支持 `session_id`，返回 import/live capture 时挂在 `TraceDocument.ImportDiagnostics` 上的结构化 diagnostics；artifact store 完成后再支持 `artifact_id`。
+`get_import_diagnostics` 支持 `session_id` 和 `artifact_id`。`session_id` 返回当前进程中 `TraceDocument.ImportDiagnostics` 挂载的结构化 diagnostics；`artifact_id` 从 artifact store 的 `manifest.json` 定位 `import-diagnostics.json`，不扫描用户目录。
 
 保留兼容 alias：
 
@@ -489,7 +489,7 @@ Open dialog：
 Connection panel：
 
 ```text
-Protocol: Study | Tracy
+Protocol: study | tracy
 Host
 Port
 Duration seconds
@@ -497,8 +497,8 @@ Duration seconds
 
 行为：
 
-- `Study` 协议继续走当前 live `Session.ConnectToTcp`，保持持续连接和现有刷新模式。
-- `Tracy` 协议走 fixed-duration C# capture。Capture 完成后打开 artifact 中的 `TraceDocument`。
+- `study` 协议继续走当前 live `Session.ConnectToTcp`，保持持续连接和现有刷新模式。
+- `tracy` 协议走 fixed-duration C# capture。Capture 完成后打开 artifact 中的 `TraceDocument`。
 - Tracy 选项始终可见；如果 target 或文件不是支持的 Tracy `0.10.0`，UI 显示版本不兼容 diagnostics，但不影响 Study 连接。
 
 Tracy document 第一版视图：
@@ -558,6 +558,7 @@ Artifact manifest：
 - 已解码的 Tracy metadata、frame set、CPU zones、plots 和 diagnostics 写入 `normalized/` 下的 `manifest.json`、`threads.ndjson`、`frames.ndjson`、`cpu_zones.ndjson`、`plots.ndjson`、`diagnostics.json`。
 - `list_trace_artifacts(format, limit)` 只枚举 artifact store 中的 manifest；`format=tracy` 对应 Tracy 导入和 live capture。
 - `load_trace_artifact(artifact_id, keep_session)` 从 artifact store 读取 normalized cache，重建 `TracyTraceQuerySession`，让 MCP 可以复用 import/live capture 产物。
+- `get_import_diagnostics(artifact_id)` 从 artifact store 读取 `import-diagnostics.json`，用于 UI 进程退出后仍可追溯导入或 live capture 诊断。
 - `source.tracy` writer 和高级 Tracy 事件仍属于后续阶段，不在当前 artifact store 中声明已完成。
 
 ## 错误处理

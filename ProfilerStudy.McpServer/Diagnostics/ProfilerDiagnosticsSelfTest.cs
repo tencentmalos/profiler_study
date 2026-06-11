@@ -233,6 +233,8 @@ internal static class ProfilerDiagnosticsSelfTest
 				throw new InvalidOperationException("load_trace_file must return artifactId.");
 			}
 			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "file-import");
+			AssertTraceArtifactDiagnostics(tools, artifactId);
+			AssertTraceArtifactDiagnosticsPathContained(tools, artifactRoot);
 
 			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
 			{
@@ -271,6 +273,59 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			CleanupSelfTestArtifactRoot(artifactRoot);
 		}
+	}
+
+	private static void AssertTraceArtifactDiagnostics(ProfilerMcpTools tools, string artifactId)
+	{
+		bool found = false;
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "get_import_diagnostics")
+			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IDictionary properties = inputSchema["properties"] as IDictionary;
+				if (!properties.Contains("session_id") || !properties.Contains("artifact_id"))
+				{
+					throw new InvalidOperationException("get_import_diagnostics must accept session_id and artifact_id.");
+				}
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			throw new InvalidOperationException("get_import_diagnostics tool is missing.");
+		}
+
+		Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+		{
+			["artifact_id"] = artifactId
+		});
+		AssertEqual(false, diagnosticsResult["isError"], "artifact get_import_diagnostics isError");
+		IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
+		AssertEqual(artifactId, diagnostics["artifactId"], "artifact diagnostics id");
+		AssertEqual("tracy", diagnostics["sourceFormat"], "artifact diagnostics source format");
+		AssertHasItems(diagnostics["diagnostics"], "artifact diagnostics");
+	}
+
+	private static void AssertTraceArtifactDiagnosticsPathContained(ProfilerMcpTools tools, string artifactRoot)
+	{
+		string artifactId = "escaped-diagnostics";
+		string artifactDirectory = Path.Combine(artifactRoot, artifactId);
+		Directory.CreateDirectory(artifactDirectory);
+		File.WriteAllText(
+			Path.Combine(artifactRoot, "escaped-diagnostics.json"),
+			"[{\"severity\":\"error\",\"code\":\"EscapedDiagnostics\",\"message\":\"This file is outside the artifact directory.\"}]");
+		File.WriteAllText(
+			Path.Combine(artifactDirectory, "manifest.json"),
+			"{\"ArtifactId\":\"" + artifactId + "\",\"SourceFormat\":\"tracy\",\"SourceKind\":\"file-import\",\"SourcePath\":\"capture.tracy\",\"NormalizedPath\":\"normalized\",\"DiagnosticsPath\":\"../escaped-diagnostics.json\",\"CreatedUtc\":\"2026-06-11T00:00:00.0000000Z\",\"Implementation\":\"self-test\",\"ReaderVersion\":\"0.0.0\",\"TracyVersion\":\"0.10.0\"}");
+
+		Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+		{
+			["artifact_id"] = artifactId
+		});
+		AssertEqual(true, diagnosticsResult["isError"], "escaped artifact diagnostics isError");
 	}
 
 	private static void AssertTracyQueryToolContracts(ProfilerMcpTools tools, string sessionId)

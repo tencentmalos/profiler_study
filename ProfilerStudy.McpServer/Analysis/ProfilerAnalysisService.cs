@@ -353,8 +353,13 @@ internal sealed class ProfilerAnalysisService
 		return new Dictionary<string, object> { ["sessions"] = sessions };
 	}
 
-	public Dictionary<string, object> GetImportDiagnostics(string sessionId)
+	public Dictionary<string, object> GetImportDiagnostics(string sessionId, string artifactId)
 	{
+		if (!string.IsNullOrWhiteSpace(artifactId))
+		{
+			return TraceArtifactStore.GetDiagnostics(artifactId);
+		}
+
 		LoadedSession loaded = GetLoadedSession(sessionId);
 		ArrayList diagnostics = new ArrayList();
 		if (loaded.TraceDocument != null)
