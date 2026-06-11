@@ -261,6 +261,7 @@ TracyCaptureResult
 - 支持 summary、frames、threads、thread slices、zone hotspots、plots/counters、time range analysis。
 - frame marks 不存在但保存格式中存在 frame set metadata 时，frame-centric 工具使用 `frameSource=tracy-frame-set-metadata` 返回基础 frame/range 结果。
 - `analyze_frame_detail` 使用 decoded Tracy CPU zone hierarchy 和 frame set metadata：`threadFlameGraphs` 按 thread 分组返回 frame 内的 zone roots/children，`topSpans` 按裁剪后耗时排序，span/node 必须包含 `threadId`、`threadName`、`depth`、`durationMs`、`selfMs`、frame 相对起止时间和 source location。`nodeStats.includedNodeCount`、`omittedNodeCount`、`omittedByDepthCount`、`omittedByDurationCount` 和 `truncated` 必须反映 `maxNodes` / `maxDepth` / `minDurationMs` 后的实际纳入情况。完整 Tracy callstack symbol/source-code 解码未完成时，diagnostics 只标记 callstack 受限，不能把已解码的 CPU zone hierarchy 降级为空。
+- `get_session_summary` / `capture_profile(protocol=tracy)` 的顶层输出应尽量对齐 FramePro / `study` 协议：除了 `summary`、`threads` 和 `diagnostics`，还应直接给出 `profilerOverhead`、`slowFrames`、`scopeHotspots`、`customStats` 和 `slowFramePattern`。Tracy 不支持 target-side profiler overhead 时返回 `supported=false` 的结构化对象；CPU zones、plots、frames 已解码时应复用同一查询模型填充 summary 顶层列表，不能只在独立 tool 中可见。
 - 有 frame metadata 的 `range` 必须标记 `framesUnavailable=false` 并给出裁剪后的 start/end frame；没有 frame metadata 时才返回 `framesUnavailable=true`，time-range 工具仍可基于全局 CPU zones 降级分析。
 
 ## Normalized 输出格式

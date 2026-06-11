@@ -55,10 +55,14 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public Dictionary<string, object> GetSummary(int top)
 	{
+		int resolvedTop = Math.Max(1, top);
 		ArrayList threads = ToArrayList(m_EventStream.Threads
 			.OrderBy(thread => thread.ThreadId)
-			.Take(Math.Max(1, top))
+			.Take(resolvedTop)
 			.Select(ThreadToDictionary));
+		Dictionary<string, object> slowFrameResult = FindSlowFrames(resolvedTop, 0.0);
+		Dictionary<string, object> hotspotResult = FindScopeHotspots(resolvedTop, -1, -1);
+		Dictionary<string, object> counterResult = ListCounters(resolvedTop, string.Empty);
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = "tracy",
@@ -92,9 +96,11 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["status"] = "header-loaded"
 			},
 			["threads"] = threads,
-			["slowFrames"] = new ArrayList(),
-			["scopeHotspots"] = new ArrayList(),
-			["customStats"] = new ArrayList(),
+			["profilerOverhead"] = GetProfilerOverhead(-1, -1, resolvedTop),
+			["slowFrames"] = GetArrayList(slowFrameResult, "slowFrames"),
+			["scopeHotspots"] = GetArrayList(hotspotResult, "scopeHotspots"),
+			["customStats"] = GetArrayList(counterResult, "counters"),
+			["slowFramePattern"] = slowFrameResult.TryGetValue("slowFramePattern", out object slowFramePattern) ? slowFramePattern : new Dictionary<string, object>(),
 			["diagnostics"] = m_Diagnostics,
 			["capabilities"] = new Dictionary<string, object>
 			{
@@ -106,7 +112,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["timeRange"] = HasMetadataFrames() || m_EventStream.CpuZones.Count > 0,
 				["profilerOverhead"] = false
 			},
-			["top"] = Math.Max(1, top)
+			["top"] = resolvedTop
 		};
 	}
 
@@ -902,6 +908,11 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			list.Add(value);
 		}
 		return list;
+	}
+
+	private static ArrayList GetArrayList(Dictionary<string, object> values, string key)
+	{
+		return values.TryGetValue(key, out object value) && value is ArrayList list ? list : new ArrayList();
 	}
 
 	private Dictionary<string, object> BuildFrameRange(int startFrame, int endFrame)
