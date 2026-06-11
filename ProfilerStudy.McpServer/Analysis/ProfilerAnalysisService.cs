@@ -35,7 +35,25 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> CaptureProfile(string url, int durationSeconds, int top, bool keepSession)
 	{
-		return CaptureProfile(ProfilerCaptureTarget.Parse(url), durationSeconds, top, keepSession);
+		return CaptureProfile(url, "study", durationSeconds, top, keepSession);
+	}
+
+	public Dictionary<string, object> CaptureProfile(string url, string protocol, int durationSeconds, int top, bool keepSession)
+	{
+		string normalizedProtocol = string.IsNullOrWhiteSpace(protocol) ? "study" : protocol.Trim().ToLowerInvariant();
+		if (normalizedProtocol == "study")
+		{
+			return CaptureProfile(ProfilerCaptureTarget.Parse(url), durationSeconds, top, keepSession);
+		}
+		if (normalizedProtocol == "tracy")
+		{
+			throw new InvalidOperationException("Tracy live capture is not implemented yet; .tracy file loading is available through load_trace_file.");
+		}
+		if (normalizedProtocol == "perfetto")
+		{
+			throw new InvalidOperationException("Perfetto live capture is reserved for a future implementation.");
+		}
+		throw new InvalidOperationException("Unsupported capture protocol: " + normalizedProtocol + ".");
 	}
 
 	public Dictionary<string, object> GetTracyStatus()

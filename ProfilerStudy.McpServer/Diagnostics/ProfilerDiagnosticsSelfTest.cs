@@ -89,6 +89,14 @@ internal static class ProfilerDiagnosticsSelfTest
 				{
 					throw new InvalidOperationException("capture_profile must require url.");
 				}
+				IDictionary properties = inputSchema["properties"] as IDictionary;
+				IDictionary protocol = properties["protocol"] as IDictionary;
+				AssertEqual("study", protocol["default"], "capture_profile protocol default");
+				IList protocolValues = protocol["enum"] as IList;
+				if (protocolValues == null || !protocolValues.Contains("study") || !protocolValues.Contains("tracy") || !protocolValues.Contains("perfetto"))
+				{
+					throw new InvalidOperationException("capture_profile protocol enum must include study, tracy, and perfetto.");
+				}
 				return;
 			}
 		}

@@ -27,6 +27,13 @@ internal sealed class ProfilerMcpTools
 							["type"] = "string",
 							["description"] = "Capture target URL, for example android:///data/local/tmp/framepro, android://localabstract:azahar-framepro, android://tcp:8428, or pc://127.0.0.1:8428."
 						},
+						["protocol"] = new Dictionary<string, object>
+						{
+							["type"] = "string",
+							["enum"] = new ArrayList { "study", "tracy", "perfetto" },
+							["default"] = "study",
+							["description"] = "Capture protocol. study is the existing ProfilerStudy transport; tracy and perfetto are explicit external trace protocols."
+						},
 						["duration_seconds"] = new Dictionary<string, object>
 						{
 							["type"] = "integer",
@@ -219,6 +226,7 @@ internal sealed class ProfilerMcpTools
 				case "capture_profile":
 					structured = m_AnalysisService.CaptureProfile(
 						GetString(arguments, "url", string.Empty),
+						GetString(arguments, "protocol", "study"),
 						GetInt(arguments, "duration_seconds", 60, 1, 300),
 						GetInt(arguments, "top", 10, 1, 50),
 						GetBool(arguments, "keep_session", false));
