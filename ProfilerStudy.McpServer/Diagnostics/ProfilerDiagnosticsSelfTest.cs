@@ -182,8 +182,12 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(true, unsupportedEventsStream.HasMetadata, "tracy unsupported events metadata present");
 			AssertDiagnosticCode(unsupportedEventsStream.Diagnostics, "TracyLocksUnsupported", "tracy locks unsupported diagnostics");
 			AssertDiagnosticCode(unsupportedEventsStream.Diagnostics, "TracyMessagesUnsupported", "tracy messages unsupported diagnostics");
+			AssertDiagnosticCode(unsupportedEventsStream.Diagnostics, "TracyAllocationsUnsupported", "tracy allocations unsupported diagnostics");
+			AssertDiagnosticCode(unsupportedEventsStream.Diagnostics, "TracyCallstacksUnsupported", "tracy callstacks unsupported diagnostics");
 			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyLocksUnsupported");
 			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyMessagesUnsupported");
+			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyAllocationsUnsupported");
+			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyCallstacksUnsupported");
 
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
@@ -1041,6 +1045,36 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteUInt64(inner, 0);                      // gpuChildren count
 		WriteUInt64(inner, 0);                      // gpuData count
 		WriteUInt64(inner, 0);                      // plot count
+		WriteUInt64(inner, 1);                      // memory arena count
+		WriteUInt64(inner, 1);                      // total allocation count
+		WriteUInt64(inner, 0);                      // memory arena name
+		WriteUInt64(inner, 1);                      // arena allocation count
+		WriteUInt64(inner, 0);                      // active allocation count
+		WriteUInt64(inner, 0);                      // free allocation count
+		WriteUInt64(inner, 0x1000);                 // allocation pointer
+		WriteUInt64(inner, 64);                     // allocation size
+		inner.Write(new byte[3], 0, 3);             // allocation callstack
+		inner.Write(new byte[3], 0, 3);             // free callstack
+		WriteInt64(inner, 1_000);                   // allocation time offset
+		WriteInt64(inner, -1);                      // free time offset
+		WriteInt16(inner, 123);                     // allocation thread
+		WriteInt16(inner, 0);                       // free thread
+		WriteInt64(inner, 64);                      // memory high
+		WriteInt64(inner, 0);                       // memory low
+		WriteInt64(inner, 64);                      // memory usage
+		WriteUInt64(inner, 0);                      // memory plot name
+		WriteUInt64(inner, 1);                      // callstack payload count
+		WriteInt16(inner, 1);                       // payload frame count
+		WriteUInt64(inner, 0x1234);                 // payload frame id
+		WriteUInt64(inner, 1);                      // callstack frame map count
+		WriteUInt64(inner, 0x1234);                 // frame id
+		inner.WriteByte(1);                         // frame data size
+		WriteUInt32(inner, 0);                      // frame image name
+		WriteUInt32(inner, 0);                      // frame name
+		WriteUInt32(inner, 0);                      // frame file
+		WriteUInt32(inner, 0);                      // frame line
+		WriteUInt64(inner, 0);                      // frame symbol address
+		WriteUInt64(inner, 0);                      // appInfo count
 		WriteTracyDump(path, inner.ToArray());
 	}
 

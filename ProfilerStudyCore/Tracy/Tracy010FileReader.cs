@@ -277,6 +277,36 @@ public static class Tracy010FileReader
 		{
 			plots = ReadPlots(reader, pointerMap);
 		}
+		if (reader.HasRemaining)
+		{
+			ulong memoryArenaCount = SkipAllocations(reader, out ulong allocationCount);
+			if (memoryArenaCount > 0 || allocationCount > 0)
+			{
+				readerDiagnostics.Add(new Dictionary<string, object>
+				{
+					["severity"] = "warning",
+					["code"] = "TracyAllocationsUnsupported",
+					["message"] = "Memory allocations are present but are not exported by the initial Tracy normalized schema.",
+					["memoryArenaCount"] = memoryArenaCount,
+					["allocationCount"] = allocationCount
+				});
+			}
+		}
+		if (reader.HasRemaining)
+		{
+			ulong callstackPayloadCount = SkipCallstacks(reader, out ulong callstackFrameCount);
+			if (callstackPayloadCount > 0 || callstackFrameCount > 0)
+			{
+				readerDiagnostics.Add(new Dictionary<string, object>
+				{
+					["severity"] = "warning",
+					["code"] = "TracyCallstacksUnsupported",
+					["message"] = "Callstacks are present but are not exported by the initial Tracy normalized schema.",
+					["callstackPayloadCount"] = callstackPayloadCount,
+					["callstackFrameCount"] = callstackFrameCount
+				});
+			}
+		}
 
 		return new TracyTraceMetadata(
 			delay,
@@ -576,6 +606,67 @@ public static class Tracy010FileReader
 			plots.Add(new TracyPlotSummary(name, type, format, min, max, sum, samples));
 		}
 		return plots;
+	}
+
+	private static ulong SkipAllocations(DecodedBlockReader reader, out ulong allocationCount)
+	{
+		ulong memoryArenaCount = reader.ReadUInt64();
+		allocationCount = reader.ReadUInt64();
+		if (memoryArenaCount > 1_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy memory section contains too many arenas.");
+		}
+		if (allocationCount > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy memory section contains too many allocations.");
+		}
+
+		ulong summedAllocations = 0;
+		for (ulong i = 0; i < memoryArenaCount; i++)
+		{
+			reader.Skip(8); // memory arena name
+			ulong arenaAllocationCount = reader.ReadUInt64();
+			if (arenaAllocationCount > 10_000_000)
+			{
+				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy memory arena contains too many allocations.");
+			}
+			summedAllocations = checked(summedAllocations + arenaAllocationCount);
+			reader.ReadUInt64(); // active allocation count
+			reader.ReadUInt64(); // free allocation count
+			reader.Skip(checked((long)arenaAllocationCount * (8L + 8L + 3L + 3L + 8L + 8L + 2L + 2L)));
+			reader.Skip(8 + 8 + 8 + 8); // high, low, usage, plot name
+		}
+
+		allocationCount = Math.Max(allocationCount, summedAllocations);
+		return memoryArenaCount;
+	}
+
+	private static ulong SkipCallstacks(DecodedBlockReader reader, out ulong callstackFrameCount)
+	{
+		ulong payloadCount = reader.ReadUInt64();
+		if (payloadCount > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy callstack payload section is too large.");
+		}
+		for (ulong i = 0; i < payloadCount; i++)
+		{
+			ushort frameCount = unchecked((ushort)reader.ReadInt16());
+			reader.Skip(checked((long)frameCount * 8L));
+		}
+
+		callstackFrameCount = reader.ReadUInt64();
+		if (callstackFrameCount > 10_000_000)
+		{
+			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy callstack frame section is too large.");
+		}
+		for (ulong i = 0; i < callstackFrameCount; i++)
+		{
+			reader.Skip(8); // CallstackFrameId
+			byte frameDataSize = reader.ReadByte();
+			reader.Skip(4); // imageName StringIdx
+			reader.Skip(checked((long)frameDataSize * (4L + 4L + 4L + 8L)));
+		}
+		return payloadCount;
 	}
 
 	private static long ReadCpuTimeline(DecodedBlockReader reader, ulong threadId, uint size, long refTime, List<string> sourceLocationNames, List<TracyCpuZoneSummary> zones)
