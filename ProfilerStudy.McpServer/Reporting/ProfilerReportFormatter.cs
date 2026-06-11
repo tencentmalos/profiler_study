@@ -187,6 +187,11 @@ internal static class ProfilerReportFormatter
 		{
 			return maxValue;
 		}
+		if (string.Equals(column, "frameEndTime", StringComparison.Ordinal) &&
+			row.TryGetValue("time", out object time))
+		{
+			return time;
+		}
 		return null;
 	}
 

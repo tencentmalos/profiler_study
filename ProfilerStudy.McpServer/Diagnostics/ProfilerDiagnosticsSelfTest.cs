@@ -844,6 +844,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertHasItems(samples["samples"], "plot samples");
 			IDictionary secondSample = ((IList)samples["samples"])[1] as IDictionary;
 			AssertEqual(20.0, secondSample["value"], "plot second sample value");
+			AssertMarkdownContains(samplesResult, "|  | 2000000 | 20 |  |", "plot sample markdown row");
 
 			Dictionary<string, object> missingSamplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
 			{
