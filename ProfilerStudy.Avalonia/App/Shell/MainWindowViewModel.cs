@@ -2256,7 +2256,7 @@ internal sealed class MainWindowViewModel : ObservableObject
 				capture.Diagnostics);
 			TraceArtifactManifest artifact = TraceArtifactStore.Register(
 				traceDocument,
-				"live-capture",
+				"tracy-live-normalized-only",
 				TracyVersionRegistry.LockedVersion,
 				capture.Diagnostics,
 				new Dictionary<string, object>

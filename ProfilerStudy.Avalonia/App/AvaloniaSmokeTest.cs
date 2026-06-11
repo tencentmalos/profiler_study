@@ -736,6 +736,7 @@ internal static class AvaloniaSmokeTest
 			Assert(viewModel.CurrentDocument.TraceDocument.SourceFormat == "tracy", "tracy connection source format");
 			Assert(viewModel.ConnectionPanelStatusText.Contains("Tracy", StringComparison.Ordinal), "tracy connection status");
 			Assert(viewModel.StatusBarSessionText.Contains("Tracy", StringComparison.Ordinal) || viewModel.SessionStatusText.Contains("Tracy", StringComparison.Ordinal), "tracy connection session status");
+			AssertTracyConnectionArtifact(artifactRoot);
 			server.AssertHandshakeReceived();
 		}
 		finally
@@ -746,6 +747,18 @@ internal static class AvaloniaSmokeTest
 				Directory.Delete(artifactRoot, true);
 			}
 		}
+	}
+
+	private static void AssertTracyConnectionArtifact(string artifactRoot)
+	{
+		ArrayList artifacts = TraceArtifactStore.List("tracy", string.Empty, 10);
+		Assert(artifacts.Count == 1, "tracy connection artifact count");
+		IDictionary artifact = artifacts[0] as IDictionary;
+		Assert(artifact != null, "tracy connection artifact row");
+		string artifactId = Convert.ToString(artifact["artifactId"]);
+		Assert(!string.IsNullOrWhiteSpace(artifactId), "tracy connection artifact id");
+		Assert(Convert.ToString(artifact["sourceKind"]) == "tracy-live-normalized-only", "tracy connection artifact source kind");
+		Assert(File.Exists(Path.Combine(artifactRoot, artifactId, "capture.ndjson")), "tracy connection capture debug material");
 	}
 
 	private static void SetProperty(object target, string name, object value)
