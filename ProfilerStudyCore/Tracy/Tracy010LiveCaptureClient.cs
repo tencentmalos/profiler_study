@@ -14,6 +14,10 @@ public static class Tracy010LiveCaptureClient
 	public const uint ProtocolVersion = 64;
 
 	private const int WelcomeMessageSize = 1178;
+	private const int OnDemandPayloadMessageSize = 16;
+	private const int TargetFrameSize = 256 * 1024;
+	private const int MaxLiveBlockSize = 1024 * 1024;
+	private const int ReadTimeoutMilliseconds = 500;
 	private static readonly byte[] HandshakeShibboleth = Encoding.ASCII.GetBytes("TracyPrf");
 
 	public static TracyLiveCaptureResult Capture(string host, int port, int durationSeconds)
@@ -55,7 +59,7 @@ public static class Tracy010LiveCaptureClient
 			throw new TracyFileFormatException("TracyConnectFailed", "Failed to connect to Tracy target " + host + ":" + port + ": " + ex.Message + ".");
 		}
 		connectStopwatch.Stop();
-		client.ReceiveTimeout = 5000;
+		client.ReceiveTimeout = ReadTimeoutMilliseconds;
 		client.SendTimeout = 5000;
 		cancellationToken.ThrowIfCancellationRequested();
 		TracyVersionRegistry.ResolveLiveAdapter(ProtocolVersion);
@@ -64,7 +68,7 @@ public static class Tracy010LiveCaptureClient
 		stream.Write(HandshakeShibboleth, 0, HandshakeShibboleth.Length);
 		WriteUInt32(stream, ProtocolVersion);
 		cancellationToken.ThrowIfCancellationRequested();
-		int status = ReadByteOrEnd(stream, cancellationToken);
+		int status = ReadByteOrEnd(stream, cancellationToken, DateTime.UtcNow.AddSeconds(5));
 		if (status < 0)
 		{
 			throw CreateProtocolMismatch("Tracy target closed the connection before handshake status.", "closed");
@@ -74,8 +78,17 @@ public static class Tracy010LiveCaptureClient
 			throw CreateProtocolMismatch("Tracy target rejected protocol version " + ProtocolVersion + " with handshake status " + status + ".", status.ToString());
 		}
 
-		byte[] welcomeBytes = ReadExactly(stream, WelcomeMessageSize, cancellationToken);
-		TracyTraceMetadata metadata = ReadWelcomeMetadata(welcomeBytes);
+		byte[] welcomeBytes = ReadExactly(stream, WelcomeMessageSize, cancellationToken, DateTime.UtcNow.AddSeconds(5));
+		LiveWelcomeData welcome = ReadWelcomeData(welcomeBytes);
+		TracyTraceMetadata metadata = welcome.Metadata;
+		if (metadata.OnDemand)
+		{
+			byte[] onDemandPayload = ReadExactly(stream, OnDemandPayloadMessageSize, cancellationToken, DateTime.UtcNow.AddSeconds(5));
+			ulong frameOffset = ReadUInt64(onDemandPayload, 0);
+			long currentTime = ToTime(ReadInt64(onDemandPayload, 8), welcome.InitBegin, metadata.TimerMultiplier);
+			metadata = CopyMetadata(metadata, currentTime, (long)frameOffset);
+			welcome = new LiveWelcomeData(metadata, welcome.InitBegin, welcome.InitEnd);
+		}
 		ArrayList diagnostics = new ArrayList
 		{
 			new Dictionary<string, object>
@@ -87,38 +100,39 @@ public static class Tracy010LiveCaptureClient
 				["captureProgram"] = metadata.CaptureProgram,
 				["hostInfo"] = metadata.HostInfo,
 				["processId"] = metadata.ProcessId
-			},
-			new Dictionary<string, object>
-			{
-				["severity"] = "warning",
-				["code"] = "TracyLiveEventDecodingPending",
-				["message"] = "Live LZ4 event stream decoding is not enabled in this implementation slice."
 			}
 		};
 
-		int sleepMilliseconds = Math.Max(0, Math.Min(durationSeconds, 300)) * 1000;
-		if (sleepMilliseconds > 0)
+		int boundedDurationSeconds = Math.Max(0, Math.Min(durationSeconds, 300));
+		DateTime endUtc = DateTime.UtcNow.AddSeconds(boundedDurationSeconds);
+		Tracy010LiveEventDecoder decoder = new Tracy010LiveEventDecoder(metadata, welcome.InitBegin, (queryType, pointer, extra) => SendServerQuery(stream, queryType, pointer, extra));
+		int compressedBlockCount = 0;
+		long compressedByteCount = 0;
+		long decodedByteCount = 0;
+		byte[] previousBlock = null;
+		while (DateTime.UtcNow < endUtc)
 		{
-			if (cancellationToken.WaitHandle.WaitOne(sleepMilliseconds))
+			cancellationToken.ThrowIfCancellationRequested();
+			if (!TryReadUInt32(stream, cancellationToken, out uint blockSize))
 			{
-				cancellationToken.ThrowIfCancellationRequested();
+				continue;
 			}
+			if (blockSize == 0 || blockSize > MaxLiveBlockSize)
+			{
+				throw new TracyFileFormatException("TracyLiveDecodeFailed", "Invalid Tracy live LZ4 block size.");
+			}
+			byte[] compressedBlock = ReadExactly(stream, checked((int)blockSize), cancellationToken, DateTime.UtcNow.AddSeconds(2));
+			byte[] decodedBlock = TracyLz4BlockDecoder.Decode(compressedBlock, TargetFrameSize, previousBlock);
+			previousBlock = decodedBlock;
+			compressedBlockCount++;
+			compressedByteCount += blockSize;
+			decodedByteCount += decodedBlock.Length;
+			decoder.ProcessBlock(decodedBlock);
 		}
 		cancellationToken.ThrowIfCancellationRequested();
 		TrySendTerminate(stream);
 
-		TracyEventStream eventStream = new TracyEventStream(
-			new TracyFileHeader(TracyVersionRegistry.LockedVersion, "live"),
-			0,
-			0,
-			0,
-			0,
-			metadata,
-			new List<TracyCpuZoneSummary>(),
-			new List<TracyPlotSummary>(),
-			new List<TracyThreadSummary>(),
-			0,
-			diagnostics);
+		TracyEventStream eventStream = decoder.CreateEventStream(compressedBlockCount, compressedByteCount, decodedByteCount, decodedByteCount, diagnostics);
 		return new TracyLiveCaptureResult(eventStream, diagnostics, connectStopwatch.Elapsed.TotalMilliseconds);
 	}
 
@@ -132,7 +146,23 @@ public static class Tracy010LiveCaptureClient
 			TracyVersionRegistry.LockedVersion);
 	}
 
-	private static TracyTraceMetadata ReadWelcomeMetadata(byte[] bytes)
+	private sealed class LiveWelcomeData
+	{
+		public LiveWelcomeData(TracyTraceMetadata metadata, long initBegin, long initEnd)
+		{
+			Metadata = metadata;
+			InitBegin = initBegin;
+			InitEnd = initEnd;
+		}
+
+		public TracyTraceMetadata Metadata { get; }
+
+		public long InitBegin { get; }
+
+		public long InitEnd { get; }
+	}
+
+	private static LiveWelcomeData ReadWelcomeData(byte[] bytes)
 	{
 		using MemoryStream stream = new MemoryStream(bytes);
 		double timerMultiplier = ReadDouble(stream);
@@ -151,8 +181,8 @@ public static class Tracy010LiveCaptureClient
 		string programName = ReadFixedAscii(stream, 64);
 		string hostInfo = ReadFixedAscii(stream, 1024);
 
-		long lastTime = (long)((initEnd - initBegin) * timerMultiplier);
-		return new TracyTraceMetadata(
+		long lastTime = ToTime(initEnd, initBegin, timerMultiplier);
+		TracyTraceMetadata metadata = new TracyTraceMetadata(
 			(long)(delay * timerMultiplier),
 			(long)(resolution * timerMultiplier),
 			timerMultiplier,
@@ -172,15 +202,38 @@ public static class Tracy010LiveCaptureClient
 			new List<TracyFrameSetSummary>(),
 			0,
 			0);
+		return new LiveWelcomeData(metadata, initBegin, initEnd);
+	}
+
+	private static TracyTraceMetadata CopyMetadata(TracyTraceMetadata metadata, long lastTime, long frameOffset)
+	{
+		return new TracyTraceMetadata(
+			metadata.Delay,
+			metadata.Resolution,
+			metadata.TimerMultiplier,
+			Math.Max(metadata.LastTime, lastTime),
+			frameOffset,
+			metadata.ProcessId,
+			metadata.SamplingPeriod,
+			metadata.CpuArchitecture,
+			metadata.CpuId,
+			metadata.CpuManufacturer,
+			metadata.OnDemand,
+			metadata.CaptureName,
+			metadata.CaptureProgram,
+			metadata.CaptureTime,
+			metadata.ExecutableTime,
+			metadata.HostInfo,
+			metadata.FrameSets,
+			metadata.StringCount,
+			metadata.ThreadNameCount);
 	}
 
 	private static void TrySendTerminate(Stream stream)
 	{
 		try
 		{
-			stream.WriteByte(0);
-			WriteUInt64(stream, 0);
-			WriteUInt32(stream, 0);
+			SendServerQuery(stream, 0, 0, 0);
 		}
 		catch (IOException)
 		{
@@ -190,6 +243,13 @@ public static class Tracy010LiveCaptureClient
 		}
 	}
 
+	private static void SendServerQuery(Stream stream, byte queryType, ulong pointer, uint extra)
+	{
+		stream.WriteByte(queryType);
+		WriteUInt64(stream, pointer);
+		WriteUInt32(stream, extra);
+	}
+
 	private static byte[] ReadExactly(Stream stream, int size)
 	{
 		return ReadExactly(stream, size, CancellationToken.None);
@@ -197,12 +257,25 @@ public static class Tracy010LiveCaptureClient
 
 	private static byte[] ReadExactly(Stream stream, int size, CancellationToken cancellationToken)
 	{
+		return ReadExactly(stream, size, cancellationToken, null);
+	}
+
+	private static byte[] ReadExactly(Stream stream, int size, CancellationToken cancellationToken, DateTime? deadlineUtc)
+	{
 		byte[] bytes = new byte[size];
 		int offset = 0;
 		while (offset < size)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
+			if (deadlineUtc.HasValue && DateTime.UtcNow > deadlineUtc.Value)
+			{
+				throw new TracyFileFormatException("TracyConnectFailed", "Timed out reading Tracy live stream.");
+			}
 			int read = Read(stream, bytes, offset, size - offset, cancellationToken);
+			if (read < 0)
+			{
+				continue;
+			}
 			if (read == 0)
 			{
 				throw new TracyFileFormatException("TracyConnectFailed", "Unexpected end of Tracy live stream.");
@@ -215,14 +288,72 @@ public static class Tracy010LiveCaptureClient
 	private static int Read(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 	{
 		cancellationToken.ThrowIfCancellationRequested();
-		return stream.ReadAsync(buffer, offset, count, cancellationToken).GetAwaiter().GetResult();
+		try
+		{
+			return stream.Read(buffer, offset, count);
+		}
+		catch (IOException ex) when (IsReadTimeout(ex))
+		{
+			return -1;
+		}
 	}
 
-	private static int ReadByteOrEnd(Stream stream, CancellationToken cancellationToken)
+	private static int ReadByteOrEnd(Stream stream, CancellationToken cancellationToken, DateTime deadlineUtc)
 	{
 		byte[] bytes = new byte[1];
 		int read = Read(stream, bytes, 0, 1, cancellationToken);
+		while (read < 0)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			if (DateTime.UtcNow > deadlineUtc)
+			{
+				throw new TracyFileFormatException("TracyConnectFailed", "Timed out waiting for Tracy handshake status.");
+			}
+			read = Read(stream, bytes, 0, 1, cancellationToken);
+		}
 		return read == 0 ? -1 : bytes[0];
+	}
+
+	private static bool TryReadUInt32(Stream stream, CancellationToken cancellationToken, out uint value)
+	{
+		byte[] bytes = new byte[4];
+		int offset = 0;
+		DateTime partialReadDeadlineUtc = DateTime.MinValue;
+		while (offset < bytes.Length)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			int read = Read(stream, bytes, offset, bytes.Length - offset, cancellationToken);
+			if (read < 0)
+			{
+				if (offset == 0)
+				{
+					value = 0;
+					return false;
+				}
+				if (DateTime.UtcNow > partialReadDeadlineUtc)
+				{
+					throw new TracyFileFormatException("TracyConnectFailed", "Timed out reading Tracy live block header.");
+				}
+				continue;
+			}
+			if (read == 0)
+			{
+				throw new TracyFileFormatException("TracyConnectFailed", "Unexpected end of Tracy live stream.");
+			}
+			offset += read;
+			if (offset > 0 && partialReadDeadlineUtc == DateTime.MinValue)
+			{
+				partialReadDeadlineUtc = DateTime.UtcNow.AddSeconds(2);
+			}
+		}
+		value = (uint)(bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24));
+		return true;
+	}
+
+	private static bool IsReadTimeout(IOException ex)
+	{
+		return ex.InnerException is SocketException socketException &&
+			socketException.SocketErrorCode == SocketError.TimedOut;
 	}
 
 	private static void WriteUInt32(Stream stream, uint value)
@@ -256,10 +387,15 @@ public static class Tracy010LiveCaptureClient
 	private static ulong ReadUInt64(Stream stream)
 	{
 		byte[] bytes = ReadExactly(stream, 8);
+		return ReadUInt64(bytes, 0);
+	}
+
+	private static ulong ReadUInt64(byte[] bytes, int offset)
+	{
 		ulong value = 0;
-		for (int i = 0; i < bytes.Length; i++)
+		for (int i = 0; i < 8; i++)
 		{
-			value |= (ulong)bytes[i] << (8 * i);
+			value |= (ulong)bytes[offset + i] << (8 * i);
 		}
 		return value;
 	}
@@ -267,6 +403,16 @@ public static class Tracy010LiveCaptureClient
 	private static long ReadInt64(Stream stream)
 	{
 		return unchecked((long)ReadUInt64(stream));
+	}
+
+	private static long ReadInt64(byte[] bytes, int offset)
+	{
+		return unchecked((long)ReadUInt64(bytes, offset));
+	}
+
+	private static long ToTime(long tsc, long baseTime, double timerMultiplier)
+	{
+		return (long)((tsc - baseTime) * timerMultiplier);
 	}
 
 	private static double ReadDouble(Stream stream)

@@ -205,9 +205,12 @@ TracyEventStream
 - 使用 `TcpClient` 直连 Tracy target 端口。
 - 完成 Tracy `0.10.0` handshake、protocol version 校验、server query 和 LZ4 stream 解码。
 - 按 fixed duration 采集事件。
-- 把 live stream 解码为同一个 `TracyEventStream`。
+- 把 live stream 解码为同一个 `TracyEventStream`，并复用 `.tracy` 文件导入侧的查询模型。
 - 采集完成后写入 artifact store。
-- 第一阶段可以先完成 handshake + `WelcomeMessage` 解析，生成 metadata-only `TracyEventStream` 并进入 MCP loaded session；如果 duration 内还没有事件流 decoder，返回 `eventsDecoded=false` diagnostics，但 `capture_profile(protocol=tracy)` 必须能连接 Tracy 端口并返回 Tracy session。
+- live capture 不能停留在 handshake + `WelcomeMessage` 的 metadata-only 状态。只要 target 在 duration 内发送了 CPU zone、frame mark 或 plot event，MCP summary 的 `eventsDecoded` 必须为 `true`，并且 `find_scope_hotspots`、`analyze_time_range`、`list_counters` / `query_counter` 至少能消费已经解码出的那部分数据。
+- 第一版 live decoder 覆盖 Tracy `0.10.0` 的 `ThreadContext`、`ZoneBegin` / `ZoneEnd`、`FrameMarkMsg*`、`PlotData*`、`PlotConfig`、`SourceLocation`、`StringData`、`ThreadName`、`PlotName` 和 `FrameName`。它必须发送必要的 `ServerQuery*` 请求补齐 source location、字符串、thread name、plot name 和 frame name。
+- GPU、locks、messages、allocations、callstacks、symbol/source-code transfer 和硬件采样第一版不导出查询模型，但 live decoder 必须跳过对应 queue item 并累计 unsupported counts；除非 wire stream 损坏，否则不能因为这些事件存在而让整个 live capture 失败。
+- live capture 必须有 bounded read timeout 和 cancellation 行为。duration 到达后发送 `ServerQueryTerminate`，即使 target 没有继续发送数据，MCP tool 也必须在有限时间内返回，不能阻塞 Codex 调用。
 
 输入：
 

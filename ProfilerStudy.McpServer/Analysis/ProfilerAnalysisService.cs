@@ -107,7 +107,7 @@ internal sealed class ProfilerAnalysisService
 		{
 			["connectMs"] = Round(capture.ConnectMilliseconds),
 			["totalToolMs"] = Round(stopwatch.Elapsed.TotalMilliseconds),
-			["eventsDecoded"] = false
+			["eventsDecoded"] = capture.EventStream.CpuZones.Count > 0 || capture.EventStream.Plots.Count > 0 || (capture.EventStream.Metadata != null && capture.EventStream.Metadata.FrameCount > 0)
 		};
 		if (keepSession)
 		{

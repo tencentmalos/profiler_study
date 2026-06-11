@@ -2038,7 +2038,15 @@ internal static class ProfilerDiagnosticsSelfTest
 					return;
 				}
 				WriteWelcomeMessage(stream);
-				Thread.Sleep(250);
+				WriteLiveFrameBlock(stream);
+				client.ReceiveTimeout = 2000;
+				try
+				{
+					ReadExactly(stream, 13);
+				}
+				catch (IOException)
+				{
+				}
 			}
 			catch (SocketException)
 			{
@@ -2085,6 +2093,26 @@ internal static class ProfilerDiagnosticsSelfTest
 			WriteUInt32(stream, 0x01020304);
 			WriteFixedAscii(stream, "FakeTracyProgram", 64);
 			WriteFixedAscii(stream, "FakeTracyHost", 1024);
+		}
+
+		private static void WriteLiveFrameBlock(Stream stream)
+		{
+			byte[] decoded = new byte[34];
+			WriteFrameMark(decoded, 0, 6_000_000);
+			WriteFrameMark(decoded, 17, 22_000_000);
+			byte[] compressed = new byte[36];
+			compressed[0] = 0xF0;
+			compressed[1] = 19;
+			Buffer.BlockCopy(decoded, 0, compressed, 2, decoded.Length);
+			WriteUInt32(stream, (uint)compressed.Length);
+			stream.Write(compressed, 0, compressed.Length);
+		}
+
+		private static void WriteFrameMark(byte[] buffer, int offset, long time)
+		{
+			buffer[offset] = 66;
+			byte[] timeBytes = BitConverter.GetBytes(time);
+			Buffer.BlockCopy(timeBytes, 0, buffer, offset + 1, timeBytes.Length);
 		}
 	}
 
