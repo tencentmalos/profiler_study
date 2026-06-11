@@ -31,6 +31,7 @@
 | `analyze_time_range` | `session_id`, either `start_frame` + `end_frame` or `start_time_ns` + `end_time_ns`, `top`, optional `threshold_ms` |
 | `list_counters` | `session_id`, optional `top`, `filter` |
 | `query_counter` | `session_id`, `counter_name`, optional `start_frame`, `end_frame`, `accumulated`, `max_samples` |
+| `list_gpu_zones` | `session_id`, optional `top`, `start_frame`, `end_frame`, `start_time_ns`, `end_time_ns`, `time_source` (`any`, `gpu-time`, `cpu-submit-time`) |
 
 ## Prompt Patterns
 
@@ -62,6 +63,12 @@ Tracy live capture:
 
 ```text
 Capture url=pc://127.0.0.1:8086 protocol=tracy for 10 seconds with keep_session=true, then call get_import_diagnostics and list_counters.
+```
+
+Tracy GPU profiler:
+
+```text
+For Tracy session s1, call list_gpu_zones with time_source=gpu-time and top=20, then summarize GPU contexts, resolved GPU hotspots, and any cpuSubmit fallback count from summary.
 ```
 
 Tracy time-window analysis:

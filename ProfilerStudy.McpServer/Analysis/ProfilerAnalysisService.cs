@@ -600,6 +600,47 @@ internal sealed class ProfilerAnalysisService
 		};
 	}
 
+	public Dictionary<string, object> ListGpuZones(string sessionId, int top, int startFrame, int endFrame, long startTimeNs, long endTimeNs, string timeSource)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.ListGpuZones(top, startFrame, endFrame, startTimeNs, endTimeNs, timeSource));
+		}
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = sessionId,
+			["source"] = loaded.Source,
+			["sourceFormat"] = loaded.SourceFormat,
+			["supported"] = false,
+			["capability"] = "listGpuZones",
+			["eventsDecoded"] = false,
+			["timeSource"] = string.IsNullOrWhiteSpace(timeSource) ? "any" : timeSource,
+			["summary"] = new Dictionary<string, object>
+			{
+				["contextCount"] = 0,
+				["zoneCount"] = 0,
+				["rangeZoneCount"] = 0,
+				["totalZoneCount"] = 0,
+				["gpuTimeZoneCount"] = 0,
+				["cpuSubmitZoneCount"] = 0
+			},
+			["contexts"] = new ArrayList(),
+			["zones"] = new ArrayList(),
+			["hotspots"] = new ArrayList(),
+			["diagnostics"] = new ArrayList
+			{
+				new Dictionary<string, object>
+				{
+					["severity"] = "warning",
+					["code"] = "ProfilerStudyGpuUnsupported",
+					["message"] = "GPU zone queries are currently implemented for Tracy trace sessions."
+				}
+			},
+			["top"] = Math.Max(1, top)
+		};
+	}
+
 	public Dictionary<string, object> AnalyzeFrame(string sessionId, int frameIndex, int top, int neighborCount)
 	{
 		LoadedSession loaded = GetLoadedSession(sessionId);

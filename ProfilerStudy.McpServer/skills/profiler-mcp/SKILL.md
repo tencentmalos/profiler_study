@@ -31,15 +31,17 @@ dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release
 4. For live captures, call `capture_profile` with a target URL and `keep_session=true` when the user may ask follow-up questions. Use default `protocol=study` for ProfilerStudy targets. Use explicit `protocol=tracy` only for Tracy 0.10.0 TCP targets and `pc://{ip}:{port}` URLs.
 5. Start broad: `get_session_summary`, then `get_profiler_overhead`, then `find_slow_frames`, then `find_scope_hotspots`.
 6. Narrow by evidence: use `analyze_frame` for a suspicious frame, `analyze_frame_detail` when hierarchical single-frame flame graph data and same-frame counter samples are needed, and `analyze_time_range` for a slow-frame cluster or comparison window. Tracy sessions may use `start_time_ns` / `end_time_ns` when frame metadata is unavailable or timestamp precision is required.
-7. For custom stat / counter questions, call `list_counters` first, then `query_counter` using the exact returned `counter_name`.
-8. Use `get_import_diagnostics` with `session_id` or `artifact_id` when import compatibility, Tracy version support, or partial decoding status matters.
-9. Save retained sessions with `save_session_file` only when the user asks for a file artifact. The server corrects the output suffix from the session's actual protocol; do not infer protocol from the requested save path.
-10. Close retained sessions with `close_session` when analysis is complete or when many sessions are loaded.
+7. For Tracy GPU questions, call `list_gpu_zones`. Use `time_source=gpu-time` when the user asks about resolved GPU timeline/hotspots, and `time_source=cpu-submit-time` only when submit-side fallback zones are acceptable.
+8. For custom stat / counter questions, call `list_counters` first, then `query_counter` using the exact returned `counter_name`.
+9. Use `get_import_diagnostics` with `session_id` or `artifact_id` when import compatibility, Tracy version support, or partial decoding status matters.
+10. Save retained sessions with `save_session_file` only when the user asks for a file artifact. The server corrects the output suffix from the session's actual protocol; do not infer protocol from the requested save path.
+11. Close retained sessions with `close_session` when analysis is complete or when many sessions are loaded.
 
 ## Interpretation Rules
 
 - Treat counters as ProfilerStudy custom stats. Use their `valueType`, `unit`, `totalCount`, `maxValuePerFrame`, and per-frame samples to explain behavior.
 - Treat Tracy counters as Tracy plots. Tracy sessions use `sourceFormat=tracy`; not every ProfilerStudy-only analysis field is available.
+- Treat Tracy GPU zones separately from counters. `list_gpu_zones.summary` reports both `gpuTimeZoneCount` and `cpuSubmitZoneCount`; prefer GPU-time zones for GPU profiler analysis.
 - Treat `get_profiler_overhead` as the authoritative target-side ProfilerStudy overhead entry point; on Tracy sessions it returns an unsupported capability result. Do not infer profiler overhead from arbitrary scope or counter names.
 - For Tracy sessions, `analyze_frame` and `analyze_frame_detail` may return partial frame metadata results or `supported=false` diagnostics when frame metadata or hierarchy data is unavailable.
 - Treat `analyze_frame_detail.frameCounters` as the current frame's custom stat samples; use it before issuing separate counter queries for a single suspicious frame.

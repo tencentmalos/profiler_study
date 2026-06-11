@@ -207,6 +207,20 @@ Android 示例：
 - `accumulated`: 是否返回 accumulated 值，默认 `false`
 - `max_samples`: 最大返回样本数，默认 `200`
 
+### `list_gpu_zones`
+
+查询 Tracy live capture 解码出的 GPU context、GPU zone 和按名称聚合的 GPU 热点。`time_source=gpu-time` 只返回已收到 Tracy `GpuTime` 回填的真实 GPU timeline；`time_source=cpu-submit-time` 返回尚未收到 GPU timestamp 的 CPU submit fallback zone；默认 `any`。
+
+参数：
+
+- `session_id`: session id
+- `top`: 返回条数，默认 `20`
+- `start_frame`: 起始 frame，可省略
+- `end_frame`: 结束 frame，可省略
+- `start_time_ns`: trace-relative 起始时间；存在时优先于 frame range
+- `end_time_ns`: trace-relative 结束时间；存在时优先于 frame range
+- `time_source`: `any`、`gpu-time` 或 `cpu-submit-time`，默认 `any`
+
 ### `analyze_frame`
 
 分析单帧，返回该帧局部 scope hotspots、邻近帧上下文和未归因时间诊断。

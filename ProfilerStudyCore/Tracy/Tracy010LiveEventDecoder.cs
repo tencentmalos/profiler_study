@@ -166,6 +166,41 @@ internal sealed class Tracy010LiveEventDecoder
 		public long SelfDuration;
 	}
 
+	private sealed class GpuContextState
+	{
+		public byte Context;
+		public string Name;
+		public uint ThreadId;
+		public float Period;
+		public byte Type;
+		public byte Flags;
+		public long CpuTime;
+		public long GpuTime;
+		public long TimeDiff;
+		public bool HasPeriod;
+		public bool HasCalibration;
+		public long CalibratedGpuTime;
+		public long CalibratedCpuTime;
+		public double CalibrationMod = 1.0;
+		public long LastGpuTime;
+		public ulong Overflow;
+		public ulong OverflowMul;
+	}
+
+	private sealed class GpuZoneState
+	{
+		public byte Context;
+		public ushort BeginQueryId;
+		public ushort EndQueryId;
+		public uint ThreadId;
+		public ulong SourceLocation;
+		public short SourceLocationIndex;
+		public long CpuStart;
+		public long CpuEnd = -1;
+		public long GpuStart = -1;
+		public long GpuEnd = -1;
+	}
+
 	private sealed class PlotBuilder
 	{
 		public ulong NamePointer;
@@ -748,6 +783,11 @@ internal sealed class Tracy010LiveEventDecoder
 	private readonly Dictionary<ulong, List<TracyFrameSummary>> m_DiscreteFrames = new Dictionary<ulong, List<TracyFrameSummary>>();
 	private readonly Dictionary<ulong, TracyFrameSummary> m_OpenFrames = new Dictionary<ulong, TracyFrameSummary>();
 	private readonly Dictionary<ulong, PlotBuilder> m_Plots = new Dictionary<ulong, PlotBuilder>();
+	private readonly Dictionary<byte, GpuContextState> m_GpuContexts = new Dictionary<byte, GpuContextState>();
+	private readonly Dictionary<string, Stack<GpuZoneState>> m_OpenGpuZoneStacks = new Dictionary<string, Stack<GpuZoneState>>();
+	private readonly Dictionary<string, Queue<GpuZoneState>> m_GpuQueryZones = new Dictionary<string, Queue<GpuZoneState>>();
+	private readonly List<GpuZoneState> m_GpuZones = new List<GpuZoneState>();
+	private readonly Dictionary<ulong, string> m_SourceLocationPayloadNames = new Dictionary<ulong, string>();
 	private readonly Queue<ulong> m_PendingSourceLocations = new Queue<ulong>();
 	private readonly HashSet<ulong> m_RequestedStrings = new HashSet<ulong>();
 	private readonly HashSet<ulong> m_RequestedThreadNames = new HashSet<ulong>();
@@ -757,10 +797,16 @@ internal sealed class Tracy010LiveEventDecoder
 	private readonly Dictionary<string, int> m_UnsupportedCounts = new Dictionary<string, int>(StringComparer.Ordinal);
 	private ulong m_CurrentThread;
 	private long m_RefTimeThread;
+	private long m_RefTimeSerial;
+	private long m_RefTimeGpu;
 	private long m_LastTime;
 	private int m_EventCount;
 	private int m_StringPayloadCount;
 	private int m_ServerAckCount;
+	private int m_PendingGpuContextName = -1;
+	private ulong m_PendingGpuSourceLocationPayload;
+	private int m_GpuTimeEventCount;
+	private int m_GpuTimeMatchedCount;
 
 	public Tracy010LiveEventDecoder(TracyTraceMetadata initialMetadata, long baseTime, Action<byte, ulong, uint> sendQuery)
 	{
@@ -805,7 +851,7 @@ internal sealed class Tracy010LiveEventDecoder
 			}
 			else if (type == QueueType.SingleStringData || type == QueueType.SecondStringData)
 			{
-				SkipInlineString(decodedBlock, ref offset);
+				ProcessInlineString(decodedBlock, ref offset);
 			}
 			else
 			{
@@ -834,6 +880,10 @@ internal sealed class Tracy010LiveEventDecoder
 		List<TracyFrameSetSummary> frameSets = BuildFrameSets();
 		List<TracyPlotSummary> plots = BuildPlots();
 		List<TracyThreadSummary> threads = BuildThreads();
+		List<TracyGpuContextSummary> gpuContexts = BuildGpuContexts();
+		List<TracyGpuZoneSummary> gpuZones = BuildGpuZones();
+		int gpuTimeZoneCount = gpuZones.Count(zone => string.Equals(zone.TimeSource, "gpu-time", StringComparison.OrdinalIgnoreCase));
+		int cpuSubmitZoneCount = gpuZones.Count(zone => string.Equals(zone.TimeSource, "cpu-submit-time", StringComparison.OrdinalIgnoreCase));
 		TracyTraceMetadata metadata = new TracyTraceMetadata(
 			m_InitialMetadata.Delay,
 			m_InitialMetadata.Resolution,
@@ -865,9 +915,29 @@ internal sealed class Tracy010LiveEventDecoder
 			["serverAckCount"] = m_ServerAckCount,
 			["threadCount"] = threads.Count,
 			["cpuZoneCount"] = zones.Count,
+			["gpuContextCount"] = gpuContexts.Count,
+			["gpuZoneCount"] = gpuZones.Count,
+			["gpuTimeZoneCount"] = gpuTimeZoneCount,
+			["cpuSubmitGpuZoneCount"] = cpuSubmitZoneCount,
+			["gpuTimeEventCount"] = m_GpuTimeEventCount,
+			["gpuTimeMatchedCount"] = m_GpuTimeMatchedCount,
 			["frameCount"] = frameSets.Sum(frameSet => frameSet.FrameCount),
 			["plotCount"] = plots.Count
 		});
+		if (cpuSubmitZoneCount > 0)
+		{
+			diagnostics.Add(new Dictionary<string, object>
+			{
+				["severity"] = "warning",
+				["code"] = "TracyGpuTimestampFallback",
+				["message"] = "Some Tracy GPU zones did not receive GpuTime samples during this capture and are exposed with CPU submit timestamps.",
+				["gpuZoneCount"] = gpuZones.Count,
+				["gpuTimeZoneCount"] = gpuTimeZoneCount,
+				["cpuSubmitGpuZoneCount"] = cpuSubmitZoneCount,
+				["gpuTimeEventCount"] = m_GpuTimeEventCount,
+				["gpuTimeMatchedCount"] = m_GpuTimeMatchedCount
+			});
+		}
 		if (m_UnsupportedCounts.Count > 0)
 		{
 			diagnostics.Add(new Dictionary<string, object>
@@ -890,7 +960,9 @@ internal sealed class Tracy010LiveEventDecoder
 			plots,
 			threads,
 			threads.Count,
-			diagnostics);
+			diagnostics,
+			gpuContexts,
+			gpuZones);
 	}
 
 	private readonly List<LiveZone> m_ClosedZones = new List<LiveZone>();
@@ -917,6 +989,46 @@ internal sealed class Tracy010LiveEventDecoder
 			}
 			yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocationIndex, ResolveSourceLocationName(zone.SourceLocation), zone.Start, end, zone.Depth, selfDuration);
 		}
+	}
+
+	private List<TracyGpuContextSummary> BuildGpuContexts()
+	{
+		return m_GpuContexts.Values
+			.OrderBy(context => context.Context)
+			.Select(context => new TracyGpuContextSummary(
+				context.Context,
+				string.IsNullOrWhiteSpace(context.Name) ? "GPU Context " + context.Context : context.Name,
+				context.ThreadId,
+				context.Period,
+				context.Type,
+				context.Flags,
+				context.CpuTime,
+				context.GpuTime))
+			.ToList();
+	}
+
+	private List<TracyGpuZoneSummary> BuildGpuZones()
+	{
+		foreach (GpuZoneState zone in m_GpuZones)
+		{
+			if (zone.CpuEnd < 0)
+			{
+				zone.CpuEnd = m_LastTime > zone.CpuStart ? m_LastTime : zone.CpuStart;
+			}
+		}
+		return m_GpuZones
+			.Where(zone => (zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart) || zone.CpuEnd >= zone.CpuStart)
+			.OrderBy(zone => zone.GpuStart >= 0 ? zone.GpuStart : zone.CpuStart)
+			.Select(zone => new TracyGpuZoneSummary(
+				zone.Context,
+				zone.BeginQueryId,
+				zone.ThreadId,
+				zone.SourceLocationIndex,
+				ResolveSourceLocationName(zone.SourceLocation),
+				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? zone.GpuStart : zone.CpuStart,
+				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? zone.GpuEnd : zone.CpuEnd,
+				zone.GpuStart >= 0 && zone.GpuEnd >= zone.GpuStart ? "gpu-time" : "cpu-submit-time"))
+			.ToList();
 	}
 
 	private void ProcessStringTransfer(byte[] buffer, ref int offset, QueueType type)
@@ -946,7 +1058,7 @@ internal sealed class Tracy010LiveEventDecoder
 				m_Strings[pointer] = value;
 				break;
 			case QueueType.SourceLocationPayload:
-				IncrementUnsupported(type);
+				ProcessSourceLocationPayload(pointer, buffer, offset + 11, size);
 				break;
 			default:
 				IncrementUnsupported(type);
@@ -966,11 +1078,18 @@ internal sealed class Tracy010LiveEventDecoder
 		offset += 13 + size;
 	}
 
-	private static void SkipInlineString(byte[] buffer, ref int offset)
+	private void ProcessInlineString(byte[] buffer, ref int offset)
 	{
 		EnsureAvailable(buffer, offset, 3);
 		int size = ReadUInt16(buffer, offset + 1);
 		EnsureAvailable(buffer, offset, 3 + size);
+		if (m_PendingGpuContextName >= 0)
+		{
+			byte contextId = (byte)m_PendingGpuContextName;
+			GpuContextState context = EnsureGpuContext(contextId);
+			context.Name = Encoding.UTF8.GetString(buffer, offset + 3, size);
+			m_PendingGpuContextName = -1;
+		}
 		offset += 3 + size;
 	}
 
@@ -1014,6 +1133,41 @@ internal sealed class Tracy010LiveEventDecoder
 			case QueueType.PlotConfig:
 				ProcessPlotConfig(buffer, offset);
 				break;
+			case QueueType.GpuNewContext:
+				ProcessGpuNewContext(buffer, offset);
+				break;
+			case QueueType.GpuContextName:
+				m_PendingGpuContextName = buffer[offset + 1];
+				EnsureGpuContext(buffer[offset + 1]);
+				break;
+			case QueueType.GpuZoneBeginSerial:
+			case QueueType.GpuZoneBeginCallstackSerial:
+				ProcessGpuZoneBegin(ReadInt64(buffer, offset + 1), ReadUInt32(buffer, offset + 9), ReadUInt16(buffer, offset + 13), buffer[offset + 15], ReadUInt64(buffer, offset + 16), serial: true);
+				break;
+			case QueueType.GpuZoneBeginAllocSrcLocSerial:
+			case QueueType.GpuZoneBeginAllocSrcLocCallstackSerial:
+				ProcessGpuZoneBegin(ReadInt64(buffer, offset + 1), ReadUInt32(buffer, offset + 9), ReadUInt16(buffer, offset + 13), buffer[offset + 15], ConsumeGpuSourceLocationPayload(), serial: true);
+				break;
+			case QueueType.GpuZoneEndSerial:
+				ProcessGpuZoneEnd(ReadInt64(buffer, offset + 1), ReadUInt32(buffer, offset + 9), ReadUInt16(buffer, offset + 13), buffer[offset + 15], serial: true);
+				break;
+			case QueueType.GpuZoneBegin:
+			case QueueType.GpuZoneBeginCallstack:
+				ProcessGpuZoneBegin(ReadInt64(buffer, offset + 1), ReadUInt32(buffer, offset + 9), ReadUInt16(buffer, offset + 13), buffer[offset + 15], ReadUInt64(buffer, offset + 16), serial: false);
+				break;
+			case QueueType.GpuZoneBeginAllocSrcLoc:
+			case QueueType.GpuZoneBeginAllocSrcLocCallstack:
+				ProcessGpuZoneBegin(ReadInt64(buffer, offset + 1), ReadUInt32(buffer, offset + 9), ReadUInt16(buffer, offset + 13), buffer[offset + 15], ConsumeGpuSourceLocationPayload(), serial: false);
+				break;
+			case QueueType.GpuZoneEnd:
+				ProcessGpuZoneEnd(ReadInt64(buffer, offset + 1), ReadUInt32(buffer, offset + 9), ReadUInt16(buffer, offset + 13), buffer[offset + 15], serial: false);
+				break;
+			case QueueType.GpuTime:
+				ProcessGpuTime(ReadInt64(buffer, offset + 1), ReadUInt16(buffer, offset + 9), buffer[offset + 11]);
+				break;
+			case QueueType.GpuCalibration:
+				ProcessGpuCalibration(ReadInt64(buffer, offset + 1), ReadInt64(buffer, offset + 9), ReadInt64(buffer, offset + 17), buffer[offset + 25]);
+				break;
 			case QueueType.AckServerQueryNoop:
 			case QueueType.AckSourceCodeNotAvailable:
 			case QueueType.AckSymbolCodeNotAvailable:
@@ -1026,6 +1180,130 @@ internal sealed class Tracy010LiveEventDecoder
 				IncrementUnsupported(type);
 				break;
 		}
+	}
+
+	private void ProcessGpuNewContext(byte[] buffer, int offset)
+	{
+		byte contextId = buffer[offset + 25];
+		GpuContextState context = EnsureGpuContext(contextId);
+		context.CpuTime = ToTime(ReadInt64(buffer, offset + 1));
+		context.GpuTime = ReadInt64(buffer, offset + 9);
+		context.ThreadId = ReadUInt32(buffer, offset + 17);
+		context.Period = BitConverter.ToSingle(buffer, offset + 21);
+		context.Flags = buffer[offset + 26];
+		context.Type = buffer[offset + 27];
+		long calibratedGpuTime = context.Period == 1.0f ? context.GpuTime : (long)(context.Period * context.GpuTime);
+		context.TimeDiff = context.CpuTime - calibratedGpuTime;
+		context.HasPeriod = context.Period != 1.0f;
+		context.HasCalibration = (context.Flags & 1) != 0;
+		context.CalibratedGpuTime = calibratedGpuTime;
+		context.CalibratedCpuTime = context.CpuTime;
+		context.CalibrationMod = 1.0;
+		context.LastGpuTime = 0L;
+		context.Overflow = 0UL;
+		context.OverflowMul = 0UL;
+		UpdateLastTime(context.CpuTime);
+	}
+
+	private void ProcessGpuZoneBegin(long cpuTimeDelta, uint thread, ushort queryId, byte context, ulong sourceLocation, bool serial)
+	{
+		if (sourceLocation != 0 && !m_SourceLocationPayloadNames.ContainsKey(sourceLocation))
+		{
+			EnsureSourceLocation(sourceLocation);
+		}
+		GpuContextState contextState = EnsureGpuContext(context);
+		long start = ToTime(serial ? RefTimeSerial(cpuTimeDelta) : RefTime(cpuTimeDelta));
+		GpuZoneState zone = new GpuZoneState
+		{
+			Context = context,
+			BeginQueryId = queryId,
+			ThreadId = thread,
+			SourceLocation = sourceLocation,
+			SourceLocationIndex = sourceLocation == 0 ? (short)-1 : GetSourceLocationIndex(sourceLocation),
+			CpuStart = start
+		};
+		m_GpuZones.Add(zone);
+		GetGpuStack(contextState, context, thread).Push(zone);
+		EnqueueGpuQueryZone(context, queryId, zone);
+		UpdateLastTime(start);
+	}
+
+	private void ProcessGpuZoneEnd(long cpuTimeDelta, uint thread, ushort queryId, byte context, bool serial)
+	{
+		long end = ToTime(serial ? RefTimeSerial(cpuTimeDelta) : RefTime(cpuTimeDelta));
+		UpdateLastTime(end);
+		GpuContextState contextState = EnsureGpuContext(context);
+		Stack<GpuZoneState> stack = GetGpuStack(contextState, context, thread);
+		if (stack.Count == 0 && thread != 0)
+		{
+			stack = GetGpuStack(contextState, context, 0);
+		}
+		if (stack.Count == 0)
+		{
+			IncrementUnsupported("GpuZoneEndWithoutBegin");
+			return;
+		}
+		GpuZoneState zone = stack.Pop();
+		zone.EndQueryId = queryId;
+		zone.CpuEnd = end;
+		EnqueueGpuQueryZone(context, queryId, zone);
+	}
+
+	private void ProcessGpuTime(long gpuTimeDelta, ushort queryId, byte context)
+	{
+		m_GpuTimeEventCount++;
+		GpuContextState contextState = EnsureGpuContext(context);
+		long gpuTick = RefTimeGpu(gpuTimeDelta);
+		if (gpuTick < contextState.LastGpuTime - (1L << 31))
+		{
+			if (contextState.Overflow == 0UL)
+			{
+				contextState.Overflow = NextPowerOfTwo(contextState.LastGpuTime);
+			}
+			contextState.OverflowMul++;
+		}
+		contextState.LastGpuTime = gpuTick;
+		if (contextState.Overflow != 0UL)
+		{
+			gpuTick = checked((long)((ulong)gpuTick + contextState.Overflow * contextState.OverflowMul));
+		}
+
+		long resolvedGpuTime = ResolveGpuTime(contextState, gpuTick);
+		string key = GpuZoneKey(context, queryId);
+		if (!m_GpuQueryZones.TryGetValue(key, out Queue<GpuZoneState> queue) || queue.Count == 0)
+		{
+			IncrementUnsupported("GpuTimeWithoutZone");
+			return;
+		}
+		GpuZoneState zone = queue.Dequeue();
+		if (queue.Count == 0)
+		{
+			m_GpuQueryZones.Remove(key);
+		}
+		if (zone.GpuStart < 0)
+		{
+			zone.GpuStart = resolvedGpuTime;
+		}
+		else
+		{
+			zone.GpuEnd = resolvedGpuTime;
+		}
+		m_GpuTimeMatchedCount++;
+		UpdateLastTime(resolvedGpuTime);
+	}
+
+	private void ProcessGpuCalibration(long gpuTime, long cpuTime, long cpuDelta, byte context)
+	{
+		GpuContextState contextState = EnsureGpuContext(context);
+		long calibratedGpuTime = contextState.HasPeriod ? (long)(contextState.Period * gpuTime) : gpuTime;
+		long gpuDelta = calibratedGpuTime - contextState.CalibratedGpuTime;
+		if (gpuDelta != 0)
+		{
+			contextState.CalibrationMod = (double)cpuDelta / gpuDelta;
+		}
+		contextState.CalibratedGpuTime = calibratedGpuTime;
+		contextState.CalibratedCpuTime = ToTime(cpuTime);
+		contextState.HasCalibration = true;
 	}
 
 	private void ProcessZoneBegin(long timeDelta, ulong sourceLocation)
@@ -1093,6 +1371,50 @@ internal sealed class Tracy010LiveEventDecoder
 		EnsureString(record.Name);
 		EnsureString(record.Function);
 		EnsureString(record.File);
+	}
+
+	private void ProcessSourceLocationPayload(ulong pointer, byte[] buffer, int offset, int size)
+	{
+		if (size < 8)
+		{
+			IncrementUnsupported("SourceLocationPayloadTruncated");
+			return;
+		}
+
+		uint line = ReadUInt32(buffer, offset + 4);
+		int cursor = offset + 8;
+		int end = offset + size;
+		string function = ReadNullTerminatedUtf8(buffer, ref cursor, end);
+		string source = ReadNullTerminatedUtf8(buffer, ref cursor, end);
+		string name = cursor <= end ? Encoding.UTF8.GetString(buffer, cursor, end - cursor) : string.Empty;
+		string label = !string.IsNullOrWhiteSpace(name)
+			? name
+			: (!string.IsNullOrWhiteSpace(function) ? function : (line == 0 ? source : source + ":" + line));
+		if (pointer == 0UL)
+		{
+			pointer = 0x8000000000000000UL | (ulong)(uint)(m_SourceLocationPayloadNames.Count + 1);
+		}
+		m_SourceLocationPayloadNames[pointer] = label;
+		m_PendingGpuSourceLocationPayload = pointer;
+	}
+
+	private static string ReadNullTerminatedUtf8(byte[] buffer, ref int cursor, int end)
+	{
+		if (cursor >= end)
+		{
+			return string.Empty;
+		}
+		int start = cursor;
+		while (cursor < end && buffer[cursor] != 0)
+		{
+			cursor++;
+		}
+		string value = Encoding.UTF8.GetString(buffer, start, cursor - start);
+		if (cursor < end && buffer[cursor] == 0)
+		{
+			cursor++;
+		}
+		return value;
 	}
 
 	private void ProcessPlot(ulong name, long timeDelta, double value)
@@ -1264,6 +1586,63 @@ internal sealed class Tracy010LiveEventDecoder
 		return plot;
 	}
 
+	private GpuContextState EnsureGpuContext(byte context)
+	{
+		if (!m_GpuContexts.TryGetValue(context, out GpuContextState state))
+		{
+			state = new GpuContextState
+			{
+				Context = context
+			};
+			m_GpuContexts[context] = state;
+		}
+		return state;
+	}
+
+	private void EnqueueGpuQueryZone(byte context, ushort queryId, GpuZoneState zone)
+	{
+		string key = GpuZoneKey(context, queryId);
+		if (!m_GpuQueryZones.TryGetValue(key, out Queue<GpuZoneState> queue))
+		{
+			queue = new Queue<GpuZoneState>();
+			m_GpuQueryZones[key] = queue;
+		}
+		queue.Enqueue(zone);
+	}
+
+	private Stack<GpuZoneState> GetGpuStack(GpuContextState contextState, byte context, uint thread)
+	{
+		uint stackThread = contextState.ThreadId == 0 ? thread : 0U;
+		string key = GpuStackKey(context, stackThread);
+		if (!m_OpenGpuZoneStacks.TryGetValue(key, out Stack<GpuZoneState> stack))
+		{
+			stack = new Stack<GpuZoneState>();
+			m_OpenGpuZoneStacks[key] = stack;
+		}
+		return stack;
+	}
+
+	private ulong ConsumeGpuSourceLocationPayload()
+	{
+		ulong pointer = m_PendingGpuSourceLocationPayload;
+		m_PendingGpuSourceLocationPayload = 0UL;
+		if (pointer == 0UL)
+		{
+			IncrementUnsupported("GpuSourceLocationPayloadMissing");
+		}
+		return pointer;
+	}
+
+	private static string GpuZoneKey(byte context, ushort queryId)
+	{
+		return context + ":" + queryId;
+	}
+
+	private static string GpuStackKey(byte context, uint thread)
+	{
+		return context + ":" + thread;
+	}
+
 	private short GetSourceLocationIndex(ulong pointer)
 	{
 		if (!m_SourceLocationIndexes.TryGetValue(pointer, out short index))
@@ -1276,6 +1655,10 @@ internal sealed class Tracy010LiveEventDecoder
 
 	private string ResolveSourceLocationName(ulong pointer)
 	{
+		if (m_SourceLocationPayloadNames.TryGetValue(pointer, out string payloadName) && !string.IsNullOrWhiteSpace(payloadName))
+		{
+			return payloadName;
+		}
 		if (m_SourceLocations.TryGetValue(pointer, out SourceLocationRecord record))
 		{
 			string name = ResolveString(record.Name);
@@ -1310,6 +1693,51 @@ internal sealed class Tracy010LiveEventDecoder
 	{
 		m_RefTimeThread += delta;
 		return m_RefTimeThread;
+	}
+
+	private long RefTimeSerial(long delta)
+	{
+		m_RefTimeSerial += delta;
+		return m_RefTimeSerial;
+	}
+
+	private long RefTimeGpu(long delta)
+	{
+		m_RefTimeGpu += delta;
+		return m_RefTimeGpu;
+	}
+
+	private long ResolveGpuTime(GpuContextState context, long gpuTick)
+	{
+		if (!context.HasPeriod)
+		{
+			if (!context.HasCalibration)
+			{
+				return gpuTick + context.TimeDiff;
+			}
+			return (long)((gpuTick - context.CalibratedGpuTime) * context.CalibrationMod + context.CalibratedCpuTime);
+		}
+		double periodTime = context.Period * gpuTick;
+		if (!context.HasCalibration)
+		{
+			return (long)periodTime + context.TimeDiff;
+		}
+		return (long)((periodTime - context.CalibratedGpuTime) * context.CalibrationMod + context.CalibratedCpuTime);
+	}
+
+	private static ulong NextPowerOfTwo(long value)
+	{
+		if (value <= 0)
+		{
+			return 1UL;
+		}
+		ulong result = 1UL;
+		ulong target = (ulong)value;
+		while (result <= target && result < (1UL << 63))
+		{
+			result <<= 1;
+		}
+		return result;
 	}
 
 	private long ToTime(long tsc)

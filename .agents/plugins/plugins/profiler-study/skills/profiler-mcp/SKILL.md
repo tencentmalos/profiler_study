@@ -25,21 +25,31 @@ dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release
 
 ## Workflow
 
-1. For an existing capture file, call `load_session_file` when follow-up questions are likely; call `analyze_session_file` only for one-shot summaries.
-2. For live captures, call `capture_profile` with a target URL and `keep_session=true` when the user may ask follow-up questions. Use `android://{forward_name}` for adb forward to a device `localfilesystem`, `localabstract`, or `tcp` endpoint and `pc://{ip}:{port}` for direct TCP.
-3. Start broad: `get_session_summary`, then `get_profiler_overhead`, then `find_slow_frames`, then `find_scope_hotspots`.
-4. Narrow by evidence: use `analyze_frame` for a suspicious frame, `analyze_frame_detail` when hierarchical single-frame flame graph data and same-frame counter samples are needed, and `analyze_time_range` for a slow-frame cluster or comparison window.
-5. For custom stat / counter questions, call `list_counters` first, then `query_counter` using the exact returned `counter_name`.
-6. Close retained sessions with `close_session` when analysis is complete or when many sessions are loaded.
+1. For an existing file when the format can be inferred, call `open_file` so the server opens it as the newest retained session and returns `sessionId`.
+2. For existing ProfilerStudy capture files where a one-shot summary is enough, call `analyze_session_file`; use `load_session_file` only when explicitly targeting the legacy study loader.
+3. For existing `.tracy` files where artifact-only reuse is desired, call `load_trace_file` with `keep_session=false`; otherwise prefer `open_file`.
+4. For live captures, call `capture_profile` with a target URL and `keep_session=true` when the user may ask follow-up questions. Use default `protocol=study` for ProfilerStudy targets. Use explicit `protocol=tracy` only for Tracy 0.10.0 TCP targets and `pc://{ip}:{port}` URLs.
+5. Start broad: `get_session_summary`, then `get_profiler_overhead`, then `find_slow_frames`, then `find_scope_hotspots`.
+6. Narrow by evidence: use `analyze_frame` for a suspicious frame, `analyze_frame_detail` when hierarchical single-frame flame graph data and same-frame counter samples are needed, and `analyze_time_range` for a slow-frame cluster or comparison window. Tracy sessions may use `start_time_ns` / `end_time_ns` when frame metadata is unavailable or timestamp precision is required.
+7. For Tracy GPU questions, call `list_gpu_zones`. Use `time_source=gpu-time` when the user asks about resolved GPU timeline/hotspots, and `time_source=cpu-submit-time` only when submit-side fallback zones are acceptable.
+8. For custom stat / counter questions, call `list_counters` first, then `query_counter` using the exact returned `counter_name`.
+9. Use `get_import_diagnostics` with `session_id` or `artifact_id` when import compatibility, Tracy version support, or partial decoding status matters.
+10. Save retained sessions with `save_session_file` only when the user asks for a file artifact. The server corrects the output suffix from the session's actual protocol; do not infer protocol from the requested save path.
+11. Close retained sessions with `close_session` when analysis is complete or when many sessions are loaded.
 
 ## Interpretation Rules
 
 - Treat counters as ProfilerStudy custom stats. Use their `valueType`, `unit`, `totalCount`, `maxValuePerFrame`, and per-frame samples to explain behavior.
-- Treat `get_profiler_overhead` as the authoritative target-side profiler overhead entry point; do not infer profiler overhead from arbitrary scope or counter names.
+- Treat Tracy counters as Tracy plots. Tracy sessions use `sourceFormat=tracy`; not every ProfilerStudy-only analysis field is available.
+- Treat Tracy GPU zones separately from counters. `list_gpu_zones.summary` reports both `gpuTimeZoneCount` and `cpuSubmitZoneCount`; prefer GPU-time zones for GPU profiler analysis.
+- Treat `get_profiler_overhead` as the authoritative target-side ProfilerStudy overhead entry point; on Tracy sessions it returns an unsupported capability result. Do not infer profiler overhead from arbitrary scope or counter names.
+- For Tracy sessions, `analyze_frame` and `analyze_frame_detail` may return partial frame metadata results or `supported=false` diagnostics when frame metadata or hierarchy data is unavailable.
 - Treat `analyze_frame_detail.frameCounters` as the current frame's custom stat samples; use it before issuing separate counter queries for a single suspicious frame.
 - Do not infer missing scope time from nested totals. The server's diagnostics use conservative broad-unattributed estimates.
 - Keep raw output bounded: use `top`, frame ranges, `max_nodes`, `max_depth`, `min_duration_ms`, and `max_samples` instead of requesting whole traces.
 - Preserve paths and session ids exactly as returned by tools.
+- Preserve artifact ids exactly as returned by `load_trace_file`, `capture_profile(protocol=tracy)`, and `list_trace_artifacts`.
+- Do not claim a live Tracy normalized-only session has been exported as a viewer-compatible `.tracy`; the server must have an original Tracy source file to copy.
 - For live targets, prefer `capture_profile` URLs. Do not run arbitrary adb commands through this skill; Android capture only forwards the requested `localfilesystem:<path>`, `localabstract:<name>`, or `tcp:<port>` endpoint.
 
 ## Tool Reference

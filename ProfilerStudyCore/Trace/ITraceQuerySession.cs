@@ -29,4 +29,6 @@ public interface ITraceQuerySession
 	Dictionary<string, object> AnalyzeTimeRange(int startFrame, int endFrame, int top, double thresholdMs);
 
 	Dictionary<string, object> AnalyzeTimeRange(long startTimeNs, long endTimeNs, int top, double thresholdMs);
+
+	Dictionary<string, object> ListGpuZones(int top, int startFrame, int endFrame, long startTimeNs, long endTimeNs, string timeSource);
 }

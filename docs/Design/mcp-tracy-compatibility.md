@@ -17,7 +17,7 @@ Tracy 实现必须是完整 C# 版本，不能依赖 C++/CLI、C++ native helper
 - 不把 Tracy 原始事件完整映射成 ProfilerStudy legacy `Session`。
 - 不要求 WinForms 第一阶段直接打开 `.tracy`。
 - 不让 MCP 依赖 Avalonia UI 是否正在运行，也不读取 UI selection、viewport 或 active document。
-- 不在第一阶段实现 Tracy GPU、locks、allocations、callstacks、messages 的完整查询；这些事件先进入 diagnostics 或后续阶段。
+- 不在第一阶段实现 Tracy locks、allocations、callstacks、messages 的完整查询；这些事件先进入 diagnostics 或后续阶段。Tracy GPU 第一阶段提供 MCP 可查询的 context/zone 摘要，但 GPU 时间校准仍按后续阶段完善。
 - 不在主产品构建中编译 Tracy viewer、capture 工具或任何 C++ 代码。
 
 ## 现有基础和约束
@@ -210,7 +210,8 @@ TracyEventStream
 - live capture 不能停留在 handshake + `WelcomeMessage` 的 metadata-only 状态。只要 target 在 duration 内发送了 CPU zone、frame mark 或 plot event，MCP summary 的 `eventsDecoded` 必须为 `true`，并且 `find_scope_hotspots`、`analyze_time_range`、`list_counters` / `query_counter` 至少能消费已经解码出的那部分数据。
 - live CPU zone 必须在 `ZoneBegin` / `ZoneEnd` 栈上记录 `depth` 与 `selfDuration`：begin 时记录当前栈深度，end 时把完整 duration 累加到父节点 child duration，并把 `duration - childDuration` 作为当前 zone 自耗时。duration 到达但仍未闭合的 open zones 在 close 阶段用最后观测时间补齐，仍按同一规则维护父子自耗时。
 - 第一版 live decoder 覆盖 Tracy `0.10.0` 的 `ThreadContext`、`ZoneBegin` / `ZoneEnd`、`FrameMarkMsg*`、`PlotData*`、`PlotConfig`、`SourceLocation`、`StringData`、`ThreadName`、`PlotName` 和 `FrameName`。它必须发送必要的 `ServerQuery*` 请求补齐 source location、字符串、thread name、plot name 和 frame name。
-- GPU、locks、messages、allocations、callstacks、symbol/source-code transfer 和硬件采样第一版不导出查询模型，但 live decoder 必须跳过对应 queue item 并累计 unsupported counts；除非 wire stream 损坏，否则不能因为这些事件存在而让整个 live capture 失败。
+- locks、messages、allocations、callstacks、symbol/source-code transfer 和硬件采样第一版不导出查询模型，但 live decoder 必须跳过对应 queue item 并累计 unsupported counts；除非 wire stream 损坏，否则不能因为这些事件存在而让整个 live capture 失败。
+- GPU live event 第一阶段解码 `GpuNewContext`、`GpuContextName`、`GpuZoneBegin*`、`GpuZoneEnd*`、`GpuTime` 和 `GpuCalibration`，输出 context、zone、聚合热点和 diagnostics。已收到 `GpuTime` 回填的 zone 使用 `timeSource=gpu-time`；capture 窗口内尚未收到 GPU timestamp 的 zone 仍以 `timeSource=cpu-submit-time` 暴露，并在 summary/diagnostics 中报告 fallback 数量。
 - live capture 必须有 bounded read timeout 和 cancellation 行为。duration 到达后发送 `ServerQueryTerminate`，即使 target 没有继续发送数据，MCP tool 也必须在有限时间内返回，不能阻塞 Codex 调用。
 
 输入：
@@ -485,6 +486,7 @@ Phase 4 的第一步允许先落内存级 `TraceDocument/ITraceQuerySession`，�
 - `analyze_time_range`：Tracy 下优先支持 `start_time_ns` / `end_time_ns` 直接裁剪 CPU zones；如果用户只传 frame range，则要求 frames 存在并通过 frame metadata 推导时间范围。
 - `find_slow_frames` / `analyze_frame` / `analyze_frame_detail`：frames 存在时基于 Tracy frame set metadata 提供轻量结果；不存在时返回 `supported=false`、`framesUnavailable=true` 和结构化 diagnostics。
 - `get_profiler_overhead`：仅 ProfilerStudy session 支持；Tracy 下返回 unsupported capability。
+- `list_gpu_zones`：Tracy 下返回 GPU context、zone 摘要、按名称聚合的热点和 time source；支持 `time_source=any/gpu-time/cpu-submit-time`。study 下返回 unsupported capability。
 
 ## Avalonia 接入
 

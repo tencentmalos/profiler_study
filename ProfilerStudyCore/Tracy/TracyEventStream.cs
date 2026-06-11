@@ -16,7 +16,9 @@ public sealed class TracyEventStream
 		IReadOnlyList<TracyPlotSummary> plots,
 		IReadOnlyList<TracyThreadSummary> threads,
 		int threadCount,
-		ArrayList diagnostics)
+		ArrayList diagnostics,
+		IReadOnlyList<TracyGpuContextSummary> gpuContexts = null,
+		IReadOnlyList<TracyGpuZoneSummary> gpuZones = null)
 	{
 		Header = header;
 		CompressedBlockCount = compressedBlockCount;
@@ -29,6 +31,8 @@ public sealed class TracyEventStream
 		Threads = threads;
 		ThreadCount = threadCount;
 		Diagnostics = diagnostics;
+		GpuContexts = gpuContexts ?? new List<TracyGpuContextSummary>();
+		GpuZones = gpuZones ?? new List<TracyGpuZoneSummary>();
 	}
 
 	public TracyFileHeader Header { get; }
@@ -58,4 +62,8 @@ public sealed class TracyEventStream
 	public int ThreadCount { get; }
 
 	public ArrayList Diagnostics { get; }
+
+	public IReadOnlyList<TracyGpuContextSummary> GpuContexts { get; }
+
+	public IReadOnlyList<TracyGpuZoneSummary> GpuZones { get; }
 }

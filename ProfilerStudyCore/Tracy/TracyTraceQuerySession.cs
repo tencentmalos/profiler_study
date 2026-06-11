@@ -77,6 +77,10 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["threadCount"] = m_EventStream.ThreadCount,
 				["frameCount"] = GetMetadataFrameCount(),
 				["zoneCount"] = m_EventStream.CpuZones.Count,
+				["gpuContextCount"] = m_EventStream.GpuContexts.Count,
+				["gpuZoneCount"] = m_EventStream.GpuZones.Count,
+				["gpuTimeZoneCount"] = m_EventStream.GpuZones.Count(zone => string.Equals(zone.TimeSource, "gpu-time", StringComparison.OrdinalIgnoreCase)),
+				["cpuSubmitGpuZoneCount"] = m_EventStream.GpuZones.Count(zone => string.Equals(zone.TimeSource, "cpu-submit-time", StringComparison.OrdinalIgnoreCase)),
 				["plotCount"] = m_EventStream.Plots.Count,
 				["compressedBlockCount"] = m_EventStream.CompressedBlockCount,
 				["compressedByteCount"] = m_EventStream.CompressedByteCount,
@@ -108,6 +112,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["threads"] = m_EventStream.Threads.Count > 0,
 				["frames"] = HasMetadataFrames(),
 				["scopeHotspots"] = m_EventStream.CpuZones.Count > 0,
+				["gpu"] = m_EventStream.GpuZones.Count > 0 || m_EventStream.GpuContexts.Count > 0,
 				["counters"] = m_EventStream.Plots.Count > 0,
 				["timeRange"] = HasMetadataFrames() || m_EventStream.CpuZones.Count > 0,
 				["profilerOverhead"] = false
@@ -293,6 +298,67 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		};
 	}
 
+	public Dictionary<string, object> ListGpuZones(int top, int startFrame, int endFrame, long startTimeNs, long endTimeNs, string timeSource)
+	{
+		int resolvedTop = Math.Max(1, top);
+		string resolvedTimeSource = NormalizeGpuTimeSource(timeSource);
+		List<TracyGpuZoneSummary> rangeZones = FilterGpuZones(startFrame, endFrame, startTimeNs, endTimeNs).ToList();
+		List<TracyGpuZoneSummary> zones = rangeZones
+			.Where(zone => resolvedTimeSource == "any" || string.Equals(zone.TimeSource, resolvedTimeSource, StringComparison.OrdinalIgnoreCase))
+			.ToList();
+		int gpuTimeZoneCount = rangeZones.Count(zone => string.Equals(zone.TimeSource, "gpu-time", StringComparison.OrdinalIgnoreCase));
+		int cpuSubmitZoneCount = rangeZones.Count(zone => string.Equals(zone.TimeSource, "cpu-submit-time", StringComparison.OrdinalIgnoreCase));
+		string summaryTimeSource = gpuTimeZoneCount > 0 && cpuSubmitZoneCount > 0
+			? "mixed"
+			: (gpuTimeZoneCount > 0 ? "gpu-time" : (cpuSubmitZoneCount > 0 ? "cpu-submit-time" : resolvedTimeSource));
+		ArrayList contexts = ToArrayList(m_EventStream.GpuContexts
+			.OrderBy(context => context.Context)
+			.Select(GpuContextToDictionary));
+		ArrayList zoneItems = ToArrayList(zones
+			.OrderByDescending(zone => zone.Duration)
+			.ThenBy(zone => zone.Start)
+			.Take(resolvedTop)
+			.Select(GpuZoneToDictionary));
+		ArrayList hotspots = ToArrayList(zones
+			.GroupBy(zone => zone.Name)
+			.Select(group => new Dictionary<string, object>
+			{
+				["name"] = group.Key,
+				["totalMs"] = Round(group.Sum(zone => zone.Duration) / 1_000_000.0),
+				["totalCount"] = group.Count(),
+				["maxMs"] = Round(group.Max(zone => zone.Duration) / 1_000_000.0),
+				["contextCount"] = group.Select(zone => zone.Context).Distinct().Count()
+			})
+			.OrderByDescending(hotspot => Convert.ToDouble(hotspot["totalMs"]))
+			.ThenBy(hotspot => Convert.ToString(hotspot["name"]))
+			.Take(resolvedTop));
+		return new Dictionary<string, object>
+		{
+			["sourceFormat"] = SourceFormat,
+			["eventsDecoded"] = m_EventStream.GpuZones.Count > 0 || m_EventStream.GpuContexts.Count > 0,
+			["timeSource"] = resolvedTimeSource,
+			["summary"] = new Dictionary<string, object>
+			{
+				["contextCount"] = m_EventStream.GpuContexts.Count,
+				["zoneCount"] = zones.Count,
+				["rangeZoneCount"] = rangeZones.Count,
+				["totalZoneCount"] = m_EventStream.GpuZones.Count,
+				["gpuTimeZoneCount"] = gpuTimeZoneCount,
+				["cpuSubmitZoneCount"] = cpuSubmitZoneCount,
+				["timeSource"] = summaryTimeSource,
+				["returnedTimeSource"] = resolvedTimeSource
+			},
+			["range"] = BuildGpuRange(startFrame, endFrame, startTimeNs, endTimeNs),
+			["contexts"] = contexts,
+			["zones"] = zoneItems,
+			["hotspots"] = hotspots,
+			["diagnostics"] = Diagnostics(
+				m_EventStream.GpuZones.Count > 0 ? "TracyGpuZonesDecoded" : "TracyGpuZonesPending",
+				m_EventStream.GpuZones.Count > 0 ? "GPU zones are decoded from Tracy live queue events. time_source=gpu-time returns zones with resolved Tracy GpuTime samples; cpu-submit-time returns submit fallback zones." : "GPU zone decoding requires Tracy live GPU queue events."),
+			["top"] = resolvedTop
+		};
+	}
+
 	public Dictionary<string, object> AnalyzeFrame(int frameIndex, int top, int neighborCount)
 	{
 		if (!TryGetMetadataFrame(frameIndex, out TracyFrameSummary frame))
@@ -402,11 +468,13 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 					["frameCount"] = GetMetadataFrameCount(),
 					["threadCount"] = m_EventStream.ThreadCount,
 					["zoneCount"] = zones.Count,
+					["gpuZoneCount"] = FilterGpuZones(startFrame, endFrame, 0L, 0L).Count(),
 					["plotCount"] = m_EventStream.Plots.Count
 				},
 				["profilerOverhead"] = GetProfilerOverhead(startFrame, endFrame, top),
 				["slowFrames"] = FindSlowFrames(top, thresholdMs)["slowFrames"],
 				["scopeHotspots"] = hotspots,
+				["gpu"] = ListGpuZones(top, startFrame, endFrame, 0L, 0L, "any"),
 				["slowFramePattern"] = new Dictionary<string, object>
 				{
 					["hasPeriodicSlowFrames"] = false,
@@ -474,11 +542,13 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["frameCount"] = GetMetadataFrameCount(),
 				["threadCount"] = m_EventStream.ThreadCount,
 				["zoneCount"] = zones.Count,
+				["gpuZoneCount"] = FilterGpuZones(-1, -1, resolvedStart, resolvedEnd).Count(),
 				["plotCount"] = m_EventStream.Plots.Count
 			},
 			["profilerOverhead"] = GetProfilerOverhead(-1, -1, top),
 			["slowFrames"] = new ArrayList(),
 			["scopeHotspots"] = hotspots,
+			["gpu"] = ListGpuZones(top, -1, -1, resolvedStart, resolvedEnd, "any"),
 			["slowFramePattern"] = new Dictionary<string, object>
 			{
 				["hasPeriodicSlowFrames"] = false,
@@ -515,7 +585,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	private bool HasDecodedEventData()
 	{
-		return m_EventStream.CpuZones.Count > 0 || m_EventStream.Plots.Count > 0;
+		return m_EventStream.CpuZones.Count > 0 || m_EventStream.Plots.Count > 0 || m_EventStream.GpuZones.Count > 0;
 	}
 
 	private bool TryGetMetadataFrame(int frameIndex, out TracyFrameSummary frame)
@@ -607,6 +677,67 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				yield return sample;
 			}
 		}
+	}
+
+	private IEnumerable<TracyGpuZoneSummary> FilterGpuZones(int startFrame, int endFrame, long startTimeNs, long endTimeNs)
+	{
+		if (startTimeNs > 0L || endTimeNs > 0L)
+		{
+			long resolvedStart = Math.Min(startTimeNs, endTimeNs);
+			long resolvedEnd = Math.Max(startTimeNs, endTimeNs);
+			foreach (TracyGpuZoneSummary zone in m_EventStream.GpuZones)
+			{
+				long clippedStart = Math.Max(zone.Start, resolvedStart);
+				long clippedEnd = Math.Min(zone.End, resolvedEnd);
+				if (clippedEnd > clippedStart)
+				{
+					yield return new TracyGpuZoneSummary(zone.Context, zone.QueryId, zone.ThreadId, zone.SourceLocation, zone.Name, clippedStart, clippedEnd, zone.TimeSource);
+				}
+			}
+			yield break;
+		}
+
+		if (!HasExplicitFrameRange(startFrame, endFrame) ||
+			!TryResolveMetadataFrameRange(startFrame, endFrame, out List<TracyFrameSummary> frames, out int first, out int last))
+		{
+			foreach (TracyGpuZoneSummary zone in m_EventStream.GpuZones)
+			{
+				yield return zone;
+			}
+			yield break;
+		}
+
+		long rangeStart = frames[first].Start;
+		long rangeEnd = frames[last].End;
+		foreach (TracyGpuZoneSummary zone in m_EventStream.GpuZones)
+		{
+			if (zone.End >= rangeStart && zone.Start <= rangeEnd)
+			{
+				yield return zone;
+			}
+		}
+	}
+
+	private static string NormalizeGpuTimeSource(string timeSource)
+	{
+		if (string.IsNullOrWhiteSpace(timeSource))
+		{
+			return "any";
+		}
+		string normalized = timeSource.Trim().ToLowerInvariant();
+		if (normalized == "gpu" || normalized == "gpu_time" || normalized == "gputime")
+		{
+			return "gpu-time";
+		}
+		if (normalized == "cpu" || normalized == "submit" || normalized == "cpu_submit" || normalized == "cpu-submit")
+		{
+			return "cpu-submit-time";
+		}
+		if (normalized == "gpu-time" || normalized == "cpu-submit-time")
+		{
+			return normalized;
+		}
+		return "any";
 	}
 
 	private ArrayList BuildFrameDetailThreadFlameGraphs(
@@ -888,6 +1019,55 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["maxValue"] = Round(plot.Max),
 			["totalValueDouble"] = Round(plot.Sum)
 		};
+	}
+
+	private Dictionary<string, object> GpuZoneToDictionary(TracyGpuZoneSummary zone)
+	{
+		TracyGpuContextSummary context = m_EventStream.GpuContexts.FirstOrDefault(value => value.Context == zone.Context);
+		return new Dictionary<string, object>
+		{
+			["context"] = zone.Context,
+			["contextName"] = context == null ? "GPU Context " + zone.Context : context.Name,
+			["queryId"] = zone.QueryId,
+			["threadId"] = zone.ThreadId,
+			["name"] = zone.Name,
+			["sourceLocation"] = zone.SourceLocation,
+			["start"] = zone.Start,
+			["end"] = zone.End,
+			["durationMs"] = Round(zone.Duration / 1_000_000.0),
+			["timeSource"] = zone.TimeSource
+		};
+	}
+
+	private static Dictionary<string, object> GpuContextToDictionary(TracyGpuContextSummary context)
+	{
+		return new Dictionary<string, object>
+		{
+			["context"] = context.Context,
+			["name"] = context.Name,
+			["threadId"] = context.ThreadId,
+			["period"] = context.Period,
+			["type"] = context.Type,
+			["flags"] = context.Flags,
+			["cpuTime"] = context.CpuTime,
+			["gpuTime"] = context.GpuTime
+		};
+	}
+
+	private Dictionary<string, object> BuildGpuRange(int startFrame, int endFrame, long startTimeNs, long endTimeNs)
+	{
+		if (startTimeNs > 0L || endTimeNs > 0L)
+		{
+			return new Dictionary<string, object>
+			{
+				["startTimeNs"] = Math.Min(startTimeNs, endTimeNs),
+				["endTimeNs"] = Math.Max(startTimeNs, endTimeNs),
+				["timeSource"] = "trace-relative-ns"
+			};
+		}
+		Dictionary<string, object> range = BuildFrameRange(startFrame, endFrame);
+		range["timeSource"] = "frame-range";
+		return range;
 	}
 
 	private static Dictionary<string, object> ThreadToDictionary(TracyThreadSummary thread)

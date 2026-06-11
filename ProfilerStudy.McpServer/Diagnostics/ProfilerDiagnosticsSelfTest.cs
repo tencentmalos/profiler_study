@@ -1145,6 +1145,10 @@ internal static class ProfilerDiagnosticsSelfTest
 				["top"] = 5,
 				["keep_session"] = true
 			});
+			if (object.Equals(true, result["isError"]))
+			{
+				throw new InvalidOperationException("tracy live capture returned error: " + JsonSerializer.Serialize(result["structuredContent"]));
+			}
 			AssertEqual(false, result["isError"], "tracy live capture isError");
 			IDictionary structured = result["structuredContent"] as IDictionary;
 			AssertEqual("tracy", structured["sourceFormat"], "tracy live source format");
@@ -1173,6 +1177,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(false, summaryResult["isError"], "tracy live summary isError");
 			IDictionary loadedSummary = summaryResult["structuredContent"] as IDictionary;
 			AssertEqual("tracy", loadedSummary["sourceFormat"], "tracy live loaded source format");
+			IDictionary capabilities = loadedSummary["capabilities"] as IDictionary;
+			AssertEqual(true, capabilities["gpu"], "tracy live gpu capability");
+			AssertTracyGpuQueryTool(tools, sessionId);
 			Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId
@@ -1223,6 +1230,55 @@ internal static class ProfilerDiagnosticsSelfTest
 			CleanupSelfTestArtifactRoot(artifactRoot);
 		}
 	}
+
+	private static void AssertTracyGpuQueryTool(ProfilerMcpTools tools, string sessionId)
+	{
+		bool found = false;
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "list_gpu_zones")
+			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IList required = inputSchema["required"] as IList;
+				if (required == null || !required.Contains("session_id"))
+				{
+					throw new InvalidOperationException("list_gpu_zones must require session_id.");
+				}
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			throw new InvalidOperationException("list_gpu_zones tool is missing.");
+		}
+
+		Dictionary<string, object> result = tools.CallTool("list_gpu_zones", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["top"] = 10,
+			["time_source"] = "gpu-time"
+		});
+		AssertEqual(false, result["isError"], "list_gpu_zones isError");
+		IDictionary structured = result["structuredContent"] as IDictionary;
+		AssertEqual("tracy", structured["sourceFormat"], "gpu source format");
+		AssertEqual(true, structured["eventsDecoded"], "gpu events decoded");
+		IDictionary summary = structured["summary"] as IDictionary;
+		AssertEqual(1, summary["contextCount"], "gpu context count");
+		AssertEqual(1, summary["zoneCount"], "gpu zone count");
+		AssertEqual(1, summary["gpuTimeZoneCount"], "gpu time zone count");
+		AssertEqual(0, summary["cpuSubmitZoneCount"], "gpu cpu submit zone count");
+		AssertHasItems(structured["contexts"], "gpu contexts");
+		AssertHasItems(structured["zones"], "gpu zones");
+		AssertHasItems(structured["hotspots"], "gpu hotspots");
+		IDictionary zone = ((IList)structured["zones"])[0] as IDictionary;
+		AssertEqual(2, Convert.ToInt32(zone["context"]), "gpu zone context");
+		AssertEqual(7, Convert.ToInt32(zone["queryId"]), "gpu zone query id");
+		AssertEqual("SelfTestGpuContext", zone["contextName"], "gpu context name");
+			AssertEqual("gpu-time", zone["timeSource"], "gpu zone time source");
+			AssertEqual(8.0, zone["durationMs"], "gpu zone duration");
+		}
 
 	private static int ReserveClosedTcpPort()
 	{
@@ -1930,6 +1986,12 @@ internal static class ProfilerDiagnosticsSelfTest
 		stream.Write(bytes, 0, bytes.Length);
 	}
 
+	private static void WriteUInt16(Stream stream, ushort value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
 	private static void WriteUInt32(Stream stream, uint value)
 	{
 		byte[] bytes = BitConverter.GetBytes(value);
@@ -2100,22 +2162,102 @@ internal static class ProfilerDiagnosticsSelfTest
 
 		private static void WriteLiveFrameBlock(Stream stream)
 		{
-			byte[] decoded = new byte[34];
-			WriteFrameMark(decoded, 0, 6_000_000);
-			WriteFrameMark(decoded, 17, 22_000_000);
-			byte[] compressed = new byte[36];
+			using MemoryStream decodedStream = new MemoryStream();
+			WriteFrameMark(decodedStream, 6_000_000);
+			WriteFrameMark(decodedStream, 22_000_000);
+			WriteGpuNewContext(decodedStream, 2, 345, 6_500_000, 6_500_000, 1.0f);
+			WriteGpuContextName(decodedStream, 2, "SelfTestGpuContext");
+			WriteSourceLocationPayload(decodedStream, "SelfTestGpuZone", "SelfTestGpuFunction", "selftest_gpu.cpp", 42);
+			WriteGpuZoneBeginAllocSrcLocSerial(decodedStream, 2, 7, 345, 7_000_000);
+			WriteGpuZoneEndSerial(decodedStream, 2, 8, 345, 8_000_000);
+			WriteGpuTime(decodedStream, 2, 7, 7_000_000);
+			WriteGpuTime(decodedStream, 2, 8, 8_000_000);
+			byte[] decoded = decodedStream.ToArray();
+			byte[] compressed = new byte[decoded.Length + 2];
 			compressed[0] = 0xF0;
-			compressed[1] = 19;
+			compressed[1] = (byte)(decoded.Length - 15);
 			Buffer.BlockCopy(decoded, 0, compressed, 2, decoded.Length);
 			WriteUInt32(stream, (uint)compressed.Length);
 			stream.Write(compressed, 0, compressed.Length);
 		}
 
-		private static void WriteFrameMark(byte[] buffer, int offset, long time)
+		private static void WriteFrameMark(Stream stream, long time)
 		{
-			buffer[offset] = 66;
-			byte[] timeBytes = BitConverter.GetBytes(time);
-			Buffer.BlockCopy(timeBytes, 0, buffer, offset + 1, timeBytes.Length);
+			stream.WriteByte(66);
+			WriteInt64(stream, time);
+			WriteUInt64(stream, 0);
+		}
+
+		private static void WriteGpuNewContext(Stream stream, byte context, uint thread, long cpuTime, long gpuTime, float period)
+		{
+			stream.WriteByte(78);
+			WriteInt64(stream, cpuTime);
+			WriteInt64(stream, gpuTime);
+			WriteUInt32(stream, thread);
+			WriteSingle(stream, period);
+			stream.WriteByte(context);
+			stream.WriteByte(0);
+			stream.WriteByte(0);
+		}
+
+		private static void WriteGpuContextName(Stream stream, byte context, string name)
+		{
+			stream.WriteByte(49);
+			stream.WriteByte(context);
+			stream.WriteByte(95);
+			byte[] bytes = Encoding.UTF8.GetBytes(name);
+			WriteUInt16(stream, (ushort)bytes.Length);
+			stream.Write(bytes, 0, bytes.Length);
+		}
+
+		private static void WriteGpuZoneBeginAllocSrcLocSerial(Stream stream, byte context, ushort queryId, uint thread, long cpuTime)
+		{
+			stream.WriteByte(40);
+			WriteInt64(stream, cpuTime);
+			WriteUInt32(stream, thread);
+			WriteUInt16(stream, queryId);
+			stream.WriteByte(context);
+		}
+
+		private static void WriteGpuZoneEndSerial(Stream stream, byte context, ushort queryId, uint thread, long cpuTime)
+		{
+			stream.WriteByte(42);
+			WriteInt64(stream, cpuTime);
+			WriteUInt32(stream, thread);
+			WriteUInt16(stream, queryId);
+			stream.WriteByte(context);
+		}
+
+		private static void WriteGpuTime(Stream stream, byte context, ushort queryId, long gpuTime)
+		{
+			stream.WriteByte(48);
+			WriteInt64(stream, gpuTime);
+			WriteUInt16(stream, queryId);
+			stream.WriteByte(context);
+		}
+
+		private static void WriteSourceLocationPayload(Stream stream, string name, string function, string source, uint line)
+		{
+			using MemoryStream payload = new MemoryStream();
+			WriteUInt32(payload, 0);
+			WriteUInt32(payload, line);
+			WriteNullTerminatedAscii(payload, function);
+			WriteNullTerminatedAscii(payload, source);
+			byte[] nameBytes = Encoding.UTF8.GetBytes(name);
+			payload.Write(nameBytes, 0, nameBytes.Length);
+			byte[] payloadBytes = payload.ToArray();
+
+			stream.WriteByte(101);
+			WriteUInt64(stream, 0x55550001UL);
+			WriteUInt16(stream, (ushort)payloadBytes.Length);
+			stream.Write(payloadBytes, 0, payloadBytes.Length);
+		}
+
+		private static void WriteNullTerminatedAscii(Stream stream, string value)
+		{
+			byte[] bytes = Encoding.UTF8.GetBytes(value);
+			stream.Write(bytes, 0, bytes.Length);
+			stream.WriteByte(0);
 		}
 	}
 

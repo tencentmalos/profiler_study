@@ -228,6 +228,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "list_gpu_zones",
+				["description"] = "Return Tracy GPU contexts, GPU zones, and GPU zone hotspots for a loaded session.",
+				["inputSchema"] = GpuZoneQuerySchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "analyze_frame",
 				["description"] = "Analyze one frame's local scope hotspots and nearby-frame context.",
 				["inputSchema"] = FrameAnalysisSchema()
@@ -361,6 +367,16 @@ internal sealed class ProfilerMcpTools
 						GetInt(arguments, "end_frame", -1, -1, int.MaxValue),
 						GetBool(arguments, "accumulated", false),
 						GetInt(arguments, "max_samples", 200, 1, 5000));
+					break;
+				case "list_gpu_zones":
+					structured = m_AnalysisService.ListGpuZones(
+						GetString(arguments, "session_id", string.Empty),
+						GetInt(arguments, "top", 20, 1, 200),
+						GetInt(arguments, "start_frame", -1, -1, int.MaxValue),
+						GetInt(arguments, "end_frame", -1, -1, int.MaxValue),
+						GetLong(arguments, "start_time_ns", 0L),
+						GetLong(arguments, "end_time_ns", 0L),
+						GetString(arguments, "time_source", "any"));
 					break;
 				case "analyze_frame":
 					structured = m_AnalysisService.AnalyzeFrame(
@@ -847,6 +863,41 @@ internal sealed class ProfilerMcpTools
 				["end_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
 				["accumulated"] = new Dictionary<string, object> { ["type"] = "boolean", ["default"] = false },
 				["max_samples"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 5000, ["default"] = 200 }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> GpuZoneQuerySchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 200, ["default"] = 20 },
+				["start_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["end_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 },
+				["start_time_ns"] = new Dictionary<string, object>
+				{
+					["type"] = "integer",
+					["minimum"] = 0,
+					["description"] = "Trace-relative start time in nanoseconds. Takes precedence over frame range when supplied."
+				},
+				["end_time_ns"] = new Dictionary<string, object>
+				{
+					["type"] = "integer",
+					["minimum"] = 0,
+					["description"] = "Trace-relative end time in nanoseconds. Takes precedence over frame range when supplied."
+				},
+				["time_source"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["enum"] = new ArrayList { "any", "gpu-time", "cpu-submit-time" },
+					["default"] = "any",
+					["description"] = "Filter GPU zones by resolved Tracy GpuTime samples or CPU submit fallback timestamps."
+				}
 			}
 		};
 	}
