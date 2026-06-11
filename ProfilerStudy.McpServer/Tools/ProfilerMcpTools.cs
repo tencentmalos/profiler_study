@@ -229,8 +229,8 @@ internal sealed class ProfilerMcpTools
 			new Dictionary<string, object>
 			{
 				["name"] = "analyze_time_range",
-				["description"] = "Analyze a frame range with local summary, slow frames, hotspots, and pattern diagnostics.",
-				["inputSchema"] = QuerySchema(includeThreshold: true, includeFrameRange: true)
+				["description"] = "Analyze a frame range or trace time range with local summary, slow frames, hotspots, and pattern diagnostics.",
+				["inputSchema"] = QuerySchema(includeThreshold: true, includeFrameRange: true, includeTimeRange: true)
 			}
 		};
 	}
@@ -353,12 +353,24 @@ internal sealed class ProfilerMcpTools
 						GetDouble(arguments, "min_duration_ms", 0.01));
 					break;
 				case "analyze_time_range":
-					structured = m_AnalysisService.AnalyzeTimeRange(
-						GetString(arguments, "session_id", string.Empty),
-						GetInt(arguments, "start_frame", 0, 0, int.MaxValue),
-						GetInt(arguments, "end_frame", 0, 0, int.MaxValue),
-						GetInt(arguments, "top", 10, 1, 50),
-						GetDouble(arguments, "threshold_ms", 0.0));
+					if (HasArgument(arguments, "start_time_ns") || HasArgument(arguments, "end_time_ns"))
+					{
+						structured = m_AnalysisService.AnalyzeTimeRange(
+							GetString(arguments, "session_id", string.Empty),
+							GetLong(arguments, "start_time_ns", 0L),
+							GetLong(arguments, "end_time_ns", 0L),
+							GetInt(arguments, "top", 10, 1, 50),
+							GetDouble(arguments, "threshold_ms", 0.0));
+					}
+					else
+					{
+						structured = m_AnalysisService.AnalyzeTimeRange(
+							GetString(arguments, "session_id", string.Empty),
+							GetInt(arguments, "start_frame", 0, 0, int.MaxValue),
+							GetInt(arguments, "end_frame", 0, 0, int.MaxValue),
+							GetInt(arguments, "top", 10, 1, 50),
+							GetDouble(arguments, "threshold_ms", 0.0));
+					}
 					break;
 				default:
 					throw new InvalidOperationException("Unknown tool: " + name);
@@ -484,6 +496,15 @@ internal sealed class ProfilerMcpTools
 		return defaultValue;
 	}
 
+	private static long GetLong(Dictionary<string, object> values, string key, long defaultValue)
+	{
+		if (values != null && values.TryGetValue(key, out object raw) && raw != null)
+		{
+			return Convert.ToInt64(raw);
+		}
+		return defaultValue;
+	}
+
 	private static bool GetBool(Dictionary<string, object> values, string key, bool defaultValue)
 	{
 		if (values != null && values.TryGetValue(key, out object raw) && raw != null)
@@ -491,6 +512,11 @@ internal sealed class ProfilerMcpTools
 			return Convert.ToBoolean(raw);
 		}
 		return defaultValue;
+	}
+
+	private static bool HasArgument(Dictionary<string, object> values, string key)
+	{
+		return values != null && values.ContainsKey(key);
 	}
 
 	private static Dictionary<string, object> SessionIdSchema()
@@ -506,7 +532,7 @@ internal sealed class ProfilerMcpTools
 		};
 	}
 
-	private static Dictionary<string, object> QuerySchema(bool includeThreshold, bool includeFrameRange)
+	private static Dictionary<string, object> QuerySchema(bool includeThreshold, bool includeFrameRange, bool includeTimeRange = false)
 	{
 		Dictionary<string, object> properties = new Dictionary<string, object>
 		{
@@ -521,6 +547,21 @@ internal sealed class ProfilerMcpTools
 		{
 			properties["start_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 };
 			properties["end_frame"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 0 };
+		}
+		if (includeTimeRange)
+		{
+			properties["start_time_ns"] = new Dictionary<string, object>
+			{
+				["type"] = "integer",
+				["minimum"] = 0,
+				["description"] = "Trace-relative start time in nanoseconds. Trace-backed sessions use this in preference to frame range when supplied."
+			};
+			properties["end_time_ns"] = new Dictionary<string, object>
+			{
+				["type"] = "integer",
+				["minimum"] = 0,
+				["description"] = "Trace-relative end time in nanoseconds. Trace-backed sessions use this in preference to frame range when supplied."
+			};
 		}
 		return new Dictionary<string, object>
 		{

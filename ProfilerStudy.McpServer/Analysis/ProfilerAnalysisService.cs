@@ -706,6 +706,16 @@ internal sealed class ProfilerAnalysisService
 		};
 	}
 
+	public Dictionary<string, object> AnalyzeTimeRange(string sessionId, long startTimeNs, long endTimeNs, int top, double thresholdMs)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			return AddLoadedTraceMetadata(loaded, loaded.TraceQuerySession.AnalyzeTimeRange(startTimeNs, endTimeNs, top, thresholdMs));
+		}
+		throw new InvalidOperationException("Time-based analyze_time_range is only supported for trace-backed sessions.");
+	}
+
 	private static string ResolveAndroidEndpoint(string target)
 	{
 		switch ((target ?? string.Empty).Trim().ToLowerInvariant())

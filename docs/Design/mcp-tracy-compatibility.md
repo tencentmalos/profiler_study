@@ -477,7 +477,7 @@ Phase 4 的第一步允许先落内存级 `TraceDocument/ITraceQuerySession`，�
 - `get_session_summary`：支持 Tracy，返回 `sourceFormat=tracy`；当前 ProfilerStudy 原始实现返回 `sourceFormat=study`。
 - `find_scope_hotspots`：Tracy 下聚合 CPU zones。
 - `list_counters` / `query_counter`：Tracy 下读取 plots。
-- `analyze_time_range`：Tracy 下优先支持 time range；如果用户只传 frame range，则要求 frames 存在。
+- `analyze_time_range`：Tracy 下优先支持 `start_time_ns` / `end_time_ns` 直接裁剪 CPU zones；如果用户只传 frame range，则要求 frames 存在并通过 frame metadata 推导时间范围。
 - `find_slow_frames` / `analyze_frame` / `analyze_frame_detail`：frames 存在时基于 Tracy frame set metadata 提供轻量结果；不存在时返回 `supported=false`、`framesUnavailable=true` 和结构化 diagnostics。
 - `get_profiler_overhead`：仅 ProfilerStudy session 支持；Tracy 下返回 unsupported capability。
 

@@ -753,6 +753,34 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(false, ((IDictionary)range["range"])["framesUnavailable"], "zone nested range frames unavailable");
 			AssertHasItems(range["scopeHotspots"], "zone range hotspots");
 
+			Dictionary<string, object> timeRangeResult = tools.CallTool("analyze_time_range", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["start_time_ns"] = 1_000_000L,
+				["end_time_ns"] = 6_000_000L,
+				["top"] = 5
+			});
+			AssertEqual(false, timeRangeResult["isError"], "zone analyze_time_range by time isError");
+			IDictionary timeRange = timeRangeResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", timeRange["sourceFormat"], "zone time range source format");
+			AssertEqual(1_000_000L, timeRange["startTimeNs"], "zone time range start ns");
+			AssertEqual(6_000_000L, timeRange["endTimeNs"], "zone time range end ns");
+			AssertEqual(false, timeRange["framesUnavailable"], "zone time range frames unavailable");
+			AssertHasItems(timeRange["scopeHotspots"], "zone time range hotspots");
+
+			Dictionary<string, object> clippedTimeRangeResult = tools.CallTool("analyze_time_range", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["start_time_ns"] = 2_000_000L,
+				["end_time_ns"] = 3_000_000L,
+				["top"] = 5
+			});
+			AssertEqual(false, clippedTimeRangeResult["isError"], "zone clipped time range isError");
+			IDictionary clippedTimeRange = clippedTimeRangeResult["structuredContent"] as IDictionary;
+			AssertHasItems(clippedTimeRange["scopeHotspots"], "zone clipped time range hotspots");
+			IDictionary clippedHotspot = ((IList)clippedTimeRange["scopeHotspots"])[0] as IDictionary;
+			AssertEqual(1.0, clippedHotspot["totalMs"], "zone clipped time range total ms");
+
 			Dictionary<string, object> frameDetailResult = tools.CallTool("analyze_frame_detail", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId,

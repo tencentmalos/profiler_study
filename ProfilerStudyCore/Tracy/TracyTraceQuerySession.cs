@@ -412,6 +412,51 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		};
 	}
 
+	public Dictionary<string, object> AnalyzeTimeRange(long startTimeNs, long endTimeNs, int top, double thresholdMs)
+	{
+		long resolvedStart = Math.Min(startTimeNs, endTimeNs);
+		long resolvedEnd = Math.Max(startTimeNs, endTimeNs);
+		List<TracyCpuZoneSummary> zones = FilterZonesByTimeRange(resolvedStart, resolvedEnd).ToList();
+		ArrayList hotspots = BuildScopeHotspots(zones, top);
+		return new Dictionary<string, object>
+		{
+			["sourceFormat"] = SourceFormat,
+			["startTimeNs"] = resolvedStart,
+			["endTimeNs"] = resolvedEnd,
+			["range"] = new Dictionary<string, object>
+			{
+				["startTimeNs"] = resolvedStart,
+				["endTimeNs"] = resolvedEnd,
+				["framesUnavailable"] = !HasMetadataFrames(),
+				["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none"
+			},
+			["framesUnavailable"] = !HasMetadataFrames(),
+			["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none",
+			["eventsDecoded"] = zones.Count > 0,
+			["summary"] = new Dictionary<string, object>
+			{
+				["sourceFormat"] = SourceFormat,
+				["frameCount"] = GetMetadataFrameCount(),
+				["threadCount"] = m_EventStream.ThreadCount,
+				["zoneCount"] = zones.Count,
+				["plotCount"] = m_EventStream.Plots.Count
+			},
+			["profilerOverhead"] = GetProfilerOverhead(-1, -1, top),
+			["slowFrames"] = new ArrayList(),
+			["scopeHotspots"] = hotspots,
+			["slowFramePattern"] = new Dictionary<string, object>
+			{
+				["hasPeriodicSlowFrames"] = false,
+				["reason"] = "Time-range analysis was requested in trace time; slow frame cadence requires frame metadata."
+			},
+			["diagnostics"] = Diagnostics(
+				zones.Count > 0 ? "TracyCpuZonesDecoded" : "TracyZonesPending",
+				zones.Count > 0 ? "Time range analysis is based on decoded Tracy CPU zones." : "CPU zone decoding is required before time range analysis can return hotspot data."),
+			["thresholdMs"] = Round(Math.Max(0.0, thresholdMs)),
+			["top"] = Math.Max(1, top)
+		};
+	}
+
 	private ArrayList Diagnostics(string code, string message)
 	{
 		ArrayList diagnostics = new ArrayList();
@@ -484,6 +529,19 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			if (zone.End >= rangeStart && zone.Start <= rangeEnd)
 			{
 				yield return zone;
+			}
+		}
+	}
+
+	private IEnumerable<TracyCpuZoneSummary> FilterZonesByTimeRange(long startTimeNs, long endTimeNs)
+	{
+		foreach (TracyCpuZoneSummary zone in m_EventStream.CpuZones)
+		{
+			long clippedStart = Math.Max(zone.Start, startTimeNs);
+			long clippedEnd = Math.Min(zone.End, endTimeNs);
+			if (clippedEnd > clippedStart)
+			{
+				yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocation, zone.Name, clippedStart, clippedEnd);
 			}
 		}
 	}

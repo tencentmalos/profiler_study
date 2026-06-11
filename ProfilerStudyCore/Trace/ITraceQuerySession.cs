@@ -27,4 +27,6 @@ public interface ITraceQuerySession
 	Dictionary<string, object> AnalyzeFrameDetail(int frameIndex, int maxNodes, int maxDepth, double minDurationMs);
 
 	Dictionary<string, object> AnalyzeTimeRange(int startFrame, int endFrame, int top, double thresholdMs);
+
+	Dictionary<string, object> AnalyzeTimeRange(long startTimeNs, long endTimeNs, int top, double thresholdMs);
 }
