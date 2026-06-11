@@ -151,6 +151,8 @@ internal sealed class Tracy010LiveEventDecoder
 		public ulong SourceLocation;
 		public short SourceLocationIndex;
 		public long Start;
+		public int Depth;
+		public long ChildDuration;
 	}
 
 	private sealed class LiveZone
@@ -160,6 +162,8 @@ internal sealed class Tracy010LiveEventDecoder
 		public short SourceLocationIndex;
 		public long Start;
 		public long End;
+		public int Depth;
+		public long SelfDuration;
 	}
 
 	private sealed class PlotBuilder
@@ -895,7 +899,7 @@ internal sealed class Tracy010LiveEventDecoder
 	{
 		foreach (LiveZone zone in m_ClosedZones)
 		{
-			yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocationIndex, ResolveSourceLocationName(zone.SourceLocation), zone.Start, zone.End);
+			yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocationIndex, ResolveSourceLocationName(zone.SourceLocation), zone.Start, zone.End, zone.Depth, zone.SelfDuration);
 		}
 	}
 
@@ -905,7 +909,13 @@ internal sealed class Tracy010LiveEventDecoder
 		{
 			OpenZone zone = thread.Stack.Pop();
 			long end = m_LastTime > zone.Start ? m_LastTime : zone.Start;
-			yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocationIndex, ResolveSourceLocationName(zone.SourceLocation), zone.Start, end);
+			long duration = Math.Max(0L, end - zone.Start);
+			long selfDuration = Math.Max(0L, duration - zone.ChildDuration);
+			if (thread.Stack.Count > 0)
+			{
+				thread.Stack.Peek().ChildDuration += duration;
+			}
+			yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocationIndex, ResolveSourceLocationName(zone.SourceLocation), zone.Start, end, zone.Depth, selfDuration);
 		}
 	}
 
@@ -1028,7 +1038,9 @@ internal sealed class Tracy010LiveEventDecoder
 			ThreadId = thread.ThreadId,
 			SourceLocation = sourceLocation,
 			SourceLocationIndex = GetSourceLocationIndex(sourceLocation),
-			Start = start
+			Start = start,
+			Depth = thread.Stack.Count,
+			ChildDuration = 0L
 		});
 		UpdateLastTime(start);
 	}
@@ -1044,13 +1056,21 @@ internal sealed class Tracy010LiveEventDecoder
 			return;
 		}
 		OpenZone openZone = thread.Stack.Pop();
+		long duration = Math.Max(0L, end - openZone.Start);
+		long selfDuration = Math.Max(0L, duration - openZone.ChildDuration);
+		if (thread.Stack.Count > 0)
+		{
+			thread.Stack.Peek().ChildDuration += duration;
+		}
 		m_ClosedZones.Add(new LiveZone
 		{
 			ThreadId = openZone.ThreadId,
 			SourceLocation = openZone.SourceLocation,
 			SourceLocationIndex = openZone.SourceLocationIndex,
 			Start = openZone.Start,
-			End = end
+			End = end,
+			Depth = openZone.Depth,
+			SelfDuration = selfDuration
 		});
 	}
 

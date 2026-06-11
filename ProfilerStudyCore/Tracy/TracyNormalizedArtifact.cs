@@ -178,7 +178,8 @@ public static class TracyNormalizedArtifact
 			["startNs"] = zone.Start,
 			["endNs"] = zone.End,
 			["durationNs"] = zone.Duration,
-			["depth"] = 0
+			["selfDurationNs"] = zone.SelfDuration,
+			["depth"] = zone.Depth
 		};
 	}
 
@@ -265,7 +266,9 @@ public static class TracyNormalizedArtifact
 				(short)GetInt(record, "sourceLocation", -1),
 				GetString(record, "name", string.Empty),
 				GetLong(record, "startNs", 0L),
-				GetLong(record, "endNs", 0L)));
+				GetLong(record, "endNs", 0L),
+				GetInt(record, "depth", 0),
+				GetLong(record, "selfDurationNs", -1L)));
 		}
 		return zones;
 	}

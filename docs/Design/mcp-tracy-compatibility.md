@@ -170,7 +170,7 @@ TracyVersionRegistry
 - 在 event decoder 完整落地前，先支持遍历 LZ4 block stream，产出 block 数、压缩字节数、解压字节数、payload 字节数和 header diagnostics，作为后续事件解码和大文件边界控制的基础。
 - 保存格式前段 metadata 需要优先解码：`delay/resolution/timerMul/lastTime/frameOffset/pid/samplingPeriod/cpuArch/cpuId/cpuManufacturer/onDemand/captureName/captureProgram/captureTime/executableTime/hostInfo`，以及 frame set 的 `name/continuous/frameCount/firstFrameStart/lastFrameEnd`。这些字段应进入 `TracyEventStream.Metadata` 和 MCP summary。
 - 当 `.tracy` 保存格式中已经包含 frame set metadata 时，`TracyTraceQuerySession` 可以先用 frame set 作为 `frameSource=tracy-frame-set-metadata`，让 `get_session_summary` 和 `find_slow_frames` 返回基础 frame 信息；后续完整 event decoder 再把 frame marks 和 frame images 细化到同一模型。
-- CPU zone 第一阶段按保存格式中的 `sourceLocationPayload` 和 thread timeline 解码，生成 `TracyCpuZoneSummary(threadId, sourceLocation, name, start, end)`；`find_scope_hotspots` 按 zone name 聚合，`analyze_time_range` 先用 frame metadata 推导 frame range 的时间范围。
+- CPU zone 第一阶段按保存格式中的 `sourceLocationPayload` 和 thread timeline 解码，生成 `TracyCpuZoneSummary(threadId, sourceLocation, name, start, end, depth, selfDuration)`；`depth` 来自 Tracy timeline 的递归嵌套层级，`selfDuration` 为 zone duration 扣除直接子树 duration 后的自耗时。`find_scope_hotspots` 按 zone name 聚合，`analyze_time_range` 先用 frame metadata 推导 frame range 的时间范围。
 - Plot 第一阶段按 Tracy `0.10.0` 保存格式中的 plot section 解码，生成 `TracyPlotSummary(name, type, format, min, max, sum, samples)`；`list_counters` 和 `query_counter` 使用该数据返回 Tracy counters。
 - Summary 中的 `eventsDecoded` 表示已经解码出可查询的 Tracy event-derived 数据；CPU zones 或 plots 任一存在时必须为 `true`，只有 header/metadata/frame set 而没有 zones/plots 时保持 `false`。
 - 解码 Tracy `0.10.0` 保存格式中的 CPU zones、thread names、frame marks、plots 和基础 metadata。thread names 应合并保存格式的 `threadNames` map 与 CPU zone thread ids；MCP summary 的 `threads` 和 normalized `threads.ndjson` 必须保留 thread id/name，artifact reload 后不能丢失。
@@ -208,6 +208,7 @@ TracyEventStream
 - 把 live stream 解码为同一个 `TracyEventStream`，并复用 `.tracy` 文件导入侧的查询模型。
 - 采集完成后写入 artifact store。
 - live capture 不能停留在 handshake + `WelcomeMessage` 的 metadata-only 状态。只要 target 在 duration 内发送了 CPU zone、frame mark 或 plot event，MCP summary 的 `eventsDecoded` 必须为 `true`，并且 `find_scope_hotspots`、`analyze_time_range`、`list_counters` / `query_counter` 至少能消费已经解码出的那部分数据。
+- live CPU zone 必须在 `ZoneBegin` / `ZoneEnd` 栈上记录 `depth` 与 `selfDuration`：begin 时记录当前栈深度，end 时把完整 duration 累加到父节点 child duration，并把 `duration - childDuration` 作为当前 zone 自耗时。duration 到达但仍未闭合的 open zones 在 close 阶段用最后观测时间补齐，仍按同一规则维护父子自耗时。
 - 第一版 live decoder 覆盖 Tracy `0.10.0` 的 `ThreadContext`、`ZoneBegin` / `ZoneEnd`、`FrameMarkMsg*`、`PlotData*`、`PlotConfig`、`SourceLocation`、`StringData`、`ThreadName`、`PlotName` 和 `FrameName`。它必须发送必要的 `ServerQuery*` 请求补齐 source location、字符串、thread name、plot name 和 frame name。
 - GPU、locks、messages、allocations、callstacks、symbol/source-code transfer 和硬件采样第一版不导出查询模型，但 live decoder 必须跳过对应 queue item 并累计 unsupported counts；除非 wire stream 损坏，否则不能因为这些事件存在而让整个 live capture 失败。
 - live capture 必须有 bounded read timeout 和 cancellation 行为。duration 到达后发送 `ServerQueryTerminate`，即使 target 没有继续发送数据，MCP tool 也必须在有限时间内返回，不能阻塞 Codex 调用。
@@ -259,7 +260,7 @@ TracyCaptureResult
 - 实现 `ITraceQuerySession`。
 - 支持 summary、frames、threads、thread slices、zone hotspots、plots/counters、time range analysis。
 - frame marks 不存在但保存格式中存在 frame set metadata 时，frame-centric 工具使用 `frameSource=tracy-frame-set-metadata` 返回基础 frame/range 结果。
-- `analyze_frame_detail` 在第一阶段使用 flat CPU zones 作为 frame detail 输入：`topSpans` 按裁剪后耗时排序，`nodeStats.includedNodeCount`、`omittedNodeCount`、`omittedByDurationCount` 和 `truncated` 必须反映 `maxNodes` / `minDurationMs` 后的实际纳入情况。完整 callstack hierarchy 未解码时 `threadFlameGraphs` 可以为空，但不能把已返回的 CPU zones 统计为 0。
+- `analyze_frame_detail` 使用 decoded Tracy CPU zone hierarchy 和 frame set metadata：`threadFlameGraphs` 按 thread 分组返回 frame 内的 zone roots/children，`topSpans` 按裁剪后耗时排序，span/node 必须包含 `threadId`、`threadName`、`depth`、`durationMs`、`selfMs`、frame 相对起止时间和 source location。`nodeStats.includedNodeCount`、`omittedNodeCount`、`omittedByDepthCount`、`omittedByDurationCount` 和 `truncated` 必须反映 `maxNodes` / `maxDepth` / `minDurationMs` 后的实际纳入情况。完整 Tracy callstack symbol/source-code 解码未完成时，diagnostics 只标记 callstack 受限，不能把已解码的 CPU zone hierarchy 降级为空。
 - 有 frame metadata 的 `range` 必须标记 `framesUnavailable=false` 并给出裁剪后的 start/end frame；没有 frame metadata 时才返回 `framesUnavailable=true`，time-range 工具仍可基于全局 CPU zones 降级分析。
 
 ## Normalized 输出格式
@@ -311,7 +312,7 @@ normalized/
 `cpu_zones.ndjson` 每行：
 
 ```json
-{"sliceId":"z123","threadId":123,"name":"Renderer::Draw","startNs":1100000,"endNs":1500000,"depth":2,"sourceLocation":"Renderer.cpp:88"}
+{"threadId":123,"sourceLocation":12,"name":"Renderer::Draw","startNs":1100000,"endNs":1500000,"durationNs":400000,"selfDurationNs":120000,"depth":2}
 ```
 
 `plots.ndjson` 每行：

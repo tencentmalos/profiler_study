@@ -549,7 +549,7 @@ public static class Tracy010FileReader
 			uint timelineSize = reader.ReadUInt32();
 			if (timelineSize > 0)
 			{
-				ReadCpuTimeline(reader, threadId, timelineSize, 0L, sourceLocationNames, zones);
+				ReadCpuTimeline(reader, threadId, timelineSize, 0L, sourceLocationNames, zones, 0, out _);
 			}
 			ulong messageCount = reader.ReadUInt64();
 			reader.Skip(checked((long)messageCount * 8L));
@@ -729,21 +729,26 @@ public static class Tracy010FileReader
 		return payloadCount;
 	}
 
-	private static long ReadCpuTimeline(DecodedBlockReader reader, ulong threadId, uint size, long refTime, SourceLocationNameTable sourceLocationNames, List<TracyCpuZoneSummary> zones)
+	private static long ReadCpuTimeline(DecodedBlockReader reader, ulong threadId, uint size, long refTime, SourceLocationNameTable sourceLocationNames, List<TracyCpuZoneSummary> zones, int depth, out long totalDuration)
 	{
+		totalDuration = 0L;
 		for (uint i = 0; i < size; i++)
 		{
 			short sourceLocation = reader.ReadInt16();
 			long start = ReadTimeOffset(reader, ref refTime);
 			reader.Skip(4); // extra
 			uint childSize = reader.ReadUInt32();
+			long childDuration = 0L;
 			if (childSize > 0)
 			{
-				refTime = ReadCpuTimeline(reader, threadId, childSize, refTime, sourceLocationNames, zones);
+				refTime = ReadCpuTimeline(reader, threadId, childSize, refTime, sourceLocationNames, zones, depth + 1, out childDuration);
 			}
 			long end = ReadTimeOffset(reader, ref refTime);
+			long duration = Math.Max(0L, end - start);
+			long selfDuration = Math.Max(0L, duration - childDuration);
+			totalDuration += duration;
 			string name = ResolveSourceLocationName(sourceLocation, sourceLocationNames);
-			zones.Add(new TracyCpuZoneSummary(threadId, sourceLocation, name, start, end));
+			zones.Add(new TracyCpuZoneSummary(threadId, sourceLocation, name, start, end, depth, selfDuration));
 		}
 		return refTime;
 	}

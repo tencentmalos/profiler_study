@@ -13,6 +13,22 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 	private readonly TracyEventStream m_EventStream;
 	private readonly ArrayList m_Diagnostics;
 
+	private sealed class FrameDetailStackItem
+	{
+		public FrameDetailStackItem(int depth, long end, Dictionary<string, object> node)
+		{
+			Depth = depth;
+			End = end;
+			Node = node;
+		}
+
+		public int Depth { get; }
+
+		public long End { get; }
+
+		public Dictionary<string, object> Node { get; }
+	}
+
 	public TracyTraceQuerySession(string sourcePath, TracyEventStream eventStream, ArrayList diagnostics)
 	{
 		SourcePath = sourcePath;
@@ -312,12 +328,25 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				HasMetadataFrames() ? "Requested Tracy frame index is outside the decoded frame metadata range." : "Tracy frame metadata is required before frame detail analysis can return data.");
 		}
 
-		List<Dictionary<string, object>> allSpans = BuildFrameDetailSpans(frameIndex, frame, minDurationMs, out int omittedByDurationCount);
 		int resolvedMaxNodes = Math.Max(1, maxNodes);
-		List<Dictionary<string, object>> includedSpans = allSpans
+		int resolvedMaxDepth = Math.Max(1, maxDepth);
+		ArrayList threadFlameGraphs = BuildFrameDetailThreadFlameGraphs(
+			frame,
+			resolvedMaxNodes,
+			resolvedMaxDepth,
+			minDurationMs,
+			out List<Dictionary<string, object>> flatSpans,
+			out int includedNodeCount,
+			out int omittedNodeCount,
+			out int omittedByDepthCount,
+			out int omittedByDurationCount,
+			out bool truncated);
+		List<Dictionary<string, object>> topSpans = flatSpans
+			.OrderByDescending(span => Convert.ToDouble(span["durationMs"]))
+			.ThenBy(span => Convert.ToString(span["name"]))
+			.ThenBy(span => Convert.ToUInt64(span["threadId"]))
 			.Take(resolvedMaxNodes)
 			.ToList();
-		int omittedNodeCount = Math.Max(0, allSpans.Count - includedSpans.Count) + omittedByDurationCount;
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -330,21 +359,21 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["options"] = new Dictionary<string, object>
 			{
 				["maxNodes"] = resolvedMaxNodes,
-				["maxDepth"] = Math.Max(1, maxDepth),
+				["maxDepth"] = resolvedMaxDepth,
 				["minDurationMs"] = Round(Math.Max(0.0, minDurationMs))
 			},
-			["threadFlameGraphs"] = new ArrayList(),
-			["topSpans"] = ToArrayList(includedSpans),
-			["frameCounters"] = new ArrayList(),
+			["threadFlameGraphs"] = threadFlameGraphs,
+			["topSpans"] = ToArrayList(topSpans),
+			["frameCounters"] = BuildFrameCounters(frame, frameIndex, 200),
 			["nodeStats"] = new Dictionary<string, object>
 			{
-				["includedNodeCount"] = includedSpans.Count,
+				["includedNodeCount"] = includedNodeCount,
 				["omittedNodeCount"] = omittedNodeCount,
-				["omittedByDepthCount"] = 0,
+				["omittedByDepthCount"] = omittedByDepthCount,
 				["omittedByDurationCount"] = omittedByDurationCount,
-				["truncated"] = allSpans.Count > includedSpans.Count
+				["truncated"] = truncated
 			},
-			["diagnostics"] = Diagnostics("TracyFrameDetailPartial", "Frame detail uses decoded Tracy frame set metadata and flat CPU zones; full Tracy callstack hierarchy decoding is pending.")
+			["diagnostics"] = Diagnostics("TracyFrameDetailHierarchyDecoded", "Frame detail uses decoded Tracy CPU zone hierarchy and frame set metadata; callstack symbols are limited to decoded zone names.")
 		};
 	}
 
@@ -541,7 +570,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			long clippedEnd = Math.Min(zone.End, endTimeNs);
 			if (clippedEnd > clippedStart)
 			{
-				yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocation, zone.Name, clippedStart, clippedEnd);
+				yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocation, zone.Name, clippedStart, clippedEnd, zone.Depth, Math.Min(zone.SelfDuration, clippedEnd - clippedStart));
 			}
 		}
 	}
@@ -574,45 +603,187 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		}
 	}
 
-	private List<Dictionary<string, object>> BuildFrameDetailSpans(int frameIndex, TracyFrameSummary frame, double minDurationMs, out int omittedByDurationCount)
+	private ArrayList BuildFrameDetailThreadFlameGraphs(
+		TracyFrameSummary frame,
+		int maxNodes,
+		int maxDepth,
+		double minDurationMs,
+		out List<Dictionary<string, object>> flatSpans,
+		out int includedNodeCount,
+		out int omittedNodeCount,
+		out int omittedByDepthCount,
+		out int omittedByDurationCount,
+		out bool truncated)
 	{
 		long minDurationNs = (long)Math.Ceiling(Math.Max(0.0, minDurationMs) * 1_000_000.0);
+		Dictionary<ulong, string> threadNames = m_EventStream.Threads
+			.GroupBy(thread => thread.ThreadId)
+			.ToDictionary(group => group.Key, group => group.Select(thread => thread.Name).FirstOrDefault(name => !string.IsNullOrWhiteSpace(name)) ?? string.Empty);
+		ArrayList threadGraphs = new ArrayList();
+		flatSpans = new List<Dictionary<string, object>>();
+		includedNodeCount = 0;
+		omittedNodeCount = 0;
+		omittedByDepthCount = 0;
 		omittedByDurationCount = 0;
-		List<Dictionary<string, object>> spans = new List<Dictionary<string, object>>();
-		foreach (TracyCpuZoneSummary zone in FilterZonesByFrameRange(frameIndex, frameIndex))
+		truncated = false;
+
+		IEnumerable<IGrouping<ulong, TracyCpuZoneSummary>> zonesByThread = m_EventStream.CpuZones
+			.Where(zone => zone.End > frame.Start && zone.Start < frame.End)
+			.GroupBy(zone => zone.ThreadId)
+			.OrderBy(group => group.Key);
+		foreach (IGrouping<ulong, TracyCpuZoneSummary> threadGroup in zonesByThread)
 		{
-			long clippedStart = Math.Max(zone.Start, frame.Start);
-			long clippedEnd = Math.Min(zone.End, frame.End);
-			if (clippedEnd <= clippedStart)
+			string threadName = GetThreadName(threadNames, threadGroup.Key);
+			ArrayList roots = new ArrayList();
+			List<FrameDetailStackItem> stack = new List<FrameDetailStackItem>();
+			foreach (TracyCpuZoneSummary zone in threadGroup
+				.OrderBy(zone => zone.Start)
+				.ThenByDescending(zone => zone.End)
+				.ThenBy(zone => zone.Depth))
+			{
+				long clippedStart = Math.Max(zone.Start, frame.Start);
+				long clippedEnd = Math.Min(zone.End, frame.End);
+				if (clippedEnd <= clippedStart)
+				{
+					continue;
+				}
+
+				long duration = clippedEnd - clippedStart;
+				if (duration < minDurationNs)
+				{
+					omittedNodeCount++;
+					omittedByDurationCount++;
+					continue;
+				}
+
+				while (stack.Count > 0)
+				{
+					FrameDetailStackItem top = stack[stack.Count - 1];
+					if (top.Depth < zone.Depth && top.End > clippedStart)
+					{
+						break;
+					}
+					stack.RemoveAt(stack.Count - 1);
+				}
+
+				int displayDepth = stack.Count;
+				if (displayDepth >= maxDepth)
+				{
+					omittedNodeCount++;
+					omittedByDepthCount++;
+					continue;
+				}
+
+				if (includedNodeCount >= maxNodes)
+				{
+					omittedNodeCount++;
+					truncated = true;
+					continue;
+				}
+
+				Dictionary<string, object> node = BuildFrameDetailNode(zone, threadName, frame, clippedStart, clippedEnd, displayDepth);
+				if (stack.Count == 0)
+				{
+					roots.Add(node);
+				}
+				else
+				{
+					((ArrayList)stack[stack.Count - 1].Node["children"]).Add(node);
+				}
+				stack.Add(new FrameDetailStackItem(zone.Depth, clippedEnd, node));
+				flatSpans.Add(BuildFrameDetailSpan(zone, threadName, frame, clippedStart, clippedEnd, displayDepth));
+				includedNodeCount++;
+			}
+
+			if (roots.Count > 0)
+			{
+				threadGraphs.Add(new Dictionary<string, object>
+				{
+					["threadId"] = threadGroup.Key,
+					["threadName"] = threadName,
+					["roots"] = roots
+				});
+			}
+		}
+
+		return threadGraphs;
+	}
+
+	private ArrayList BuildFrameCounters(TracyFrameSummary frame, int frameIndex, int maxCounters)
+	{
+		List<Dictionary<string, object>> counters = new List<Dictionary<string, object>>();
+		foreach (TracyPlotSummary plot in m_EventStream.Plots)
+		{
+			List<TracyPlotSample> samples = plot.Samples
+				.Where(sample => sample.Time >= frame.Start && sample.Time <= frame.End)
+				.ToList();
+			if (samples.Count == 0)
 			{
 				continue;
 			}
 
-			long duration = clippedEnd - clippedStart;
-			if (duration < minDurationNs)
+			double lastValue = samples[samples.Count - 1].Value;
+			counters.Add(new Dictionary<string, object>
 			{
-				omittedByDurationCount++;
-				continue;
-			}
-
-			spans.Add(new Dictionary<string, object>
-			{
-				["threadId"] = zone.ThreadId,
-				["name"] = zone.Name,
-				["sourceLocation"] = zone.SourceLocation,
-				["start"] = clippedStart,
-				["end"] = clippedEnd,
-				["startOffsetMs"] = Round((clippedStart - frame.Start) / 1_000_000.0),
-				["durationMs"] = Round(duration / 1_000_000.0),
-				["depth"] = 0
+				["name"] = plot.Name,
+				["valueType"] = "Double",
+				["format"] = plot.Format,
+				["type"] = plot.Type,
+				["frameIndex"] = frameIndex,
+				["frameStartTime"] = frame.Start,
+				["frameEndTime"] = frame.End,
+				["value"] = Round(lastValue),
+				["count"] = samples.Count,
+				["minValue"] = Round(samples.Min(sample => sample.Value)),
+				["maxValue"] = Round(samples.Max(sample => sample.Value)),
+				["sumValue"] = Round(samples.Sum(sample => sample.Value))
 			});
 		}
 
-		return spans
-			.OrderByDescending(span => Convert.ToDouble(span["durationMs"]))
-			.ThenBy(span => Convert.ToString(span["name"]))
-			.ThenBy(span => Convert.ToUInt64(span["threadId"]))
-			.ToList();
+		return ToArrayList(counters
+			.OrderByDescending(counter => Convert.ToInt32(counter["count"]))
+			.ThenByDescending(counter => Math.Abs(Convert.ToDouble(counter["value"])))
+			.ThenBy(counter => Convert.ToString(counter["name"]))
+			.Take(Math.Max(1, maxCounters)));
+	}
+
+	private static Dictionary<string, object> BuildFrameDetailNode(TracyCpuZoneSummary zone, string threadName, TracyFrameSummary frame, long clippedStart, long clippedEnd, int depth)
+	{
+		Dictionary<string, object> node = BuildFrameDetailSpan(zone, threadName, frame, clippedStart, clippedEnd, depth);
+		node["children"] = new ArrayList();
+		return node;
+	}
+
+	private static Dictionary<string, object> BuildFrameDetailSpan(TracyCpuZoneSummary zone, string threadName, TracyFrameSummary frame, long clippedStart, long clippedEnd, int depth)
+	{
+		long duration = clippedEnd - clippedStart;
+		long selfDuration = Math.Min(zone.SelfDuration, duration);
+		return new Dictionary<string, object>
+		{
+			["threadId"] = zone.ThreadId,
+			["threadName"] = threadName,
+			["name"] = zone.Name,
+			["sourceLocation"] = zone.SourceLocation,
+			["start"] = clippedStart,
+			["end"] = clippedEnd,
+			["startTime"] = zone.Start,
+			["endTime"] = zone.End,
+			["clippedStartTime"] = clippedStart,
+			["clippedEndTime"] = clippedEnd,
+			["startOffsetMs"] = Round((clippedStart - frame.Start) / 1_000_000.0),
+			["relativeStartMs"] = Round((clippedStart - frame.Start) / 1_000_000.0),
+			["relativeEndMs"] = Round((clippedEnd - frame.Start) / 1_000_000.0),
+			["durationMs"] = Round(duration / 1_000_000.0),
+			["selfMs"] = Round(selfDuration / 1_000_000.0),
+			["depth"] = depth
+		};
+	}
+
+	private static string GetThreadName(Dictionary<ulong, string> threadNames, ulong threadId)
+	{
+		return threadNames.TryGetValue(threadId, out string name) && !string.IsNullOrWhiteSpace(name)
+			? name
+			: threadId.ToString();
 	}
 
 	private IEnumerable<TracyFrameSummary> GetMetadataFrames()
