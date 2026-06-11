@@ -544,6 +544,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary loadedThread = ((IList)kept["threads"])[0] as IDictionary;
 			AssertEqual(123UL, loadedThread["threadId"], "zone loaded thread id");
 			AssertEqual("RenderThread", loadedThread["name"], "zone loaded thread name");
+			AssertTraceLoadedSessionListed(tools, sessionId, "tracy", 2, 1);
 
 			Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
 			{
@@ -670,6 +671,26 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			CleanupSelfTestArtifactRoot(artifactRoot);
 		}
+	}
+
+	private static void AssertTraceLoadedSessionListed(ProfilerMcpTools tools, string sessionId, string sourceFormat, int frameCount, int threadCount)
+	{
+		Dictionary<string, object> result = tools.CallTool("list_sessions", new Dictionary<string, object>());
+		AssertEqual(false, result["isError"], "list_sessions isError");
+		IDictionary structured = result["structuredContent"] as IDictionary;
+		AssertHasItems(structured["sessions"], "loaded sessions");
+		foreach (object item in (IList)structured["sessions"])
+		{
+			IDictionary session = item as IDictionary;
+			if (session != null && Convert.ToString(session["sessionId"]) == sessionId)
+			{
+				AssertEqual(sourceFormat, session["sourceFormat"], "loaded trace session source format");
+				AssertEqual(frameCount, session["frameCount"], "loaded trace session frame count");
+				AssertEqual(threadCount, session["threadCount"], "loaded trace session thread count");
+				return;
+			}
+		}
+		throw new InvalidOperationException("loaded trace session was not listed: " + sessionId);
 	}
 
 	private static void AssertLoadTraceFileDiagnostics(string path, string expectedCode)

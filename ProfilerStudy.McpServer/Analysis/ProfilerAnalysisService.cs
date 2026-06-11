@@ -338,6 +338,7 @@ internal sealed class ProfilerAnalysisService
 		{
 			foreach (LoadedSession loaded in m_Sessions.Values.OrderBy(s => s.Id))
 			{
+				Dictionary<string, int> counts = GetLoadedSessionCounts(loaded);
 				sessions.Add(new Dictionary<string, object>
 				{
 					["sessionId"] = loaded.Id,
@@ -345,8 +346,8 @@ internal sealed class ProfilerAnalysisService
 					["sourceFormat"] = loaded.SourceFormat,
 					["createdUtc"] = loaded.CreatedUtc.ToString("o"),
 					["lastAccessUtc"] = loaded.LastAccessUtc.ToString("o"),
-					["frameCount"] = loaded.Session == null ? 0 : loaded.Session.FrameCount,
-					["threadCount"] = loaded.Session == null ? 0 : loaded.Session.ThreadCount
+					["frameCount"] = counts["frameCount"],
+					["threadCount"] = counts["threadCount"]
 				});
 			}
 		}
@@ -1410,6 +1411,46 @@ internal sealed class ProfilerAnalysisService
 		return normalizedPath.Equals(normalizedRoot, comparison) ||
 			normalizedPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, comparison) ||
 			normalizedPath.StartsWith(normalizedRoot + Path.AltDirectorySeparatorChar, comparison);
+	}
+
+	private static Dictionary<string, int> GetLoadedSessionCounts(LoadedSession loaded)
+	{
+		if (loaded.Session != null)
+		{
+			return new Dictionary<string, int>
+			{
+				["frameCount"] = loaded.Session.FrameCount,
+				["threadCount"] = loaded.Session.ThreadCount
+			};
+		}
+
+		if (loaded.TraceQuerySession != null)
+		{
+			Dictionary<string, object> summaryResult = loaded.TraceQuerySession.GetSummary(1);
+			if (summaryResult.TryGetValue("summary", out object summaryObject) && summaryObject is IDictionary summary)
+			{
+				return new Dictionary<string, int>
+				{
+					["frameCount"] = GetInt(summary, "frameCount"),
+					["threadCount"] = GetInt(summary, "threadCount")
+				};
+			}
+		}
+
+		return new Dictionary<string, int>
+		{
+			["frameCount"] = 0,
+			["threadCount"] = 0
+		};
+	}
+
+	private static int GetInt(IDictionary values, string key)
+	{
+		if (values == null || !values.Contains(key) || values[key] == null)
+		{
+			return 0;
+		}
+		return Convert.ToInt32(values[key]);
 	}
 
 	private static Session LoadSessionFromFile(string path, CapturingLog log)
