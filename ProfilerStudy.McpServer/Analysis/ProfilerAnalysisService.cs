@@ -267,14 +267,15 @@ internal sealed class ProfilerAnalysisService
 		return result;
 	}
 
-	public Dictionary<string, object> ListTraceArtifacts(string format, int limit)
+	public Dictionary<string, object> ListTraceArtifacts(string format, string since, int limit)
 	{
 		string normalizedFormat = string.IsNullOrWhiteSpace(format) ? "all" : format.Trim().ToLowerInvariant();
 		return new Dictionary<string, object>
 		{
 			["root"] = TraceArtifactStore.RootPath,
 			["format"] = normalizedFormat,
-			["artifacts"] = TraceArtifactStore.List(normalizedFormat, limit)
+			["since"] = since ?? string.Empty,
+			["artifacts"] = TraceArtifactStore.List(normalizedFormat, since, limit)
 		};
 	}
 

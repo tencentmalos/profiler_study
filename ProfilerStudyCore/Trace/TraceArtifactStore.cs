@@ -158,7 +158,7 @@ public static class TraceArtifactStore
 		return fullPath;
 	}
 
-	public static ArrayList List(string format, int limit)
+	public static ArrayList List(string format, string since, int limit)
 	{
 		string root = RootPath;
 		ArrayList artifacts = new ArrayList();
@@ -168,6 +168,7 @@ public static class TraceArtifactStore
 		}
 
 		string normalizedFormat = string.IsNullOrWhiteSpace(format) ? string.Empty : format.Trim().ToLowerInvariant();
+		DateTime sinceUtc = ResolveSinceUtc(since);
 		IEnumerable<TraceArtifactManifest> manifests = Directory
 			.EnumerateDirectories(root)
 			.Select(directory => Path.Combine(directory, "manifest.json"))
@@ -176,6 +177,7 @@ public static class TraceArtifactStore
 			.Where(manifest => manifest != null)
 			.Where(manifest => !string.IsNullOrWhiteSpace(manifest.ArtifactId))
 			.Where(manifest => normalizedFormat.Length == 0 || normalizedFormat == "all" || string.Equals(manifest.SourceFormat, normalizedFormat, StringComparison.OrdinalIgnoreCase))
+			.Where(manifest => sinceUtc == DateTime.MinValue || manifest.GetCreatedUtc() >= sinceUtc)
 			.OrderByDescending(manifest => manifest.GetCreatedUtc())
 			.Take(Math.Max(1, limit));
 
@@ -194,6 +196,19 @@ public static class TraceArtifactStore
 			});
 		}
 		return artifacts;
+	}
+
+	private static DateTime ResolveSinceUtc(string since)
+	{
+		if (string.IsNullOrWhiteSpace(since))
+		{
+			return DateTime.MinValue;
+		}
+		if (!DateTime.TryParse(since, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime value))
+		{
+			throw new ArgumentException("since must be an ISO-8601 timestamp.");
+		}
+		return value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Utc) : value.ToUniversalTime();
 	}
 
 	private static TraceArtifactManifest ReadManifest(string path)

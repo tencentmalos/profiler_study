@@ -1208,6 +1208,15 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			throw new InvalidOperationException("trace artifact was not listed: " + artifactId);
 		}
+		Dictionary<string, object> futureListResult = tools.CallTool("list_trace_artifacts", new Dictionary<string, object>
+		{
+			["format"] = "tracy",
+			["since"] = DateTime.UtcNow.AddMinutes(5).ToString("o"),
+			["limit"] = 20
+		});
+		AssertEqual(false, futureListResult["isError"], "list_trace_artifacts future since isError");
+		IDictionary futureList = futureListResult["structuredContent"] as IDictionary;
+		AssertEqual(0, ((IList)futureList["artifacts"]).Count, "future since trace artifact count");
 		AssertTraceArtifactManifest(root, artifactId, sourceKind);
 		AssertTraceArtifactListAllContainsOnlyRegisteredArtifacts(tools);
 	}

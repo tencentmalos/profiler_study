@@ -275,6 +275,7 @@ internal sealed class ProfilerMcpTools
 				case "list_trace_artifacts":
 					structured = m_AnalysisService.ListTraceArtifacts(
 						GetString(arguments, "format", "all"),
+						GetString(arguments, "since", string.Empty),
 						GetInt(arguments, "limit", 20, 1, 200));
 					break;
 				case "load_trace_artifact":
@@ -668,6 +669,11 @@ internal sealed class ProfilerMcpTools
 					["type"] = "string",
 					["enum"] = new ArrayList { "all", "study", "tracy", "perfetto", "systrace" },
 					["default"] = "all"
+				},
+				["since"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["description"] = "Optional ISO-8601 UTC timestamp; only artifacts created at or after this time are returned."
 				},
 				["limit"] = new Dictionary<string, object>
 				{
