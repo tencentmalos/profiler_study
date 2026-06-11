@@ -486,6 +486,14 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(false, summaryResult["isError"], "tracy live summary isError");
 		IDictionary loadedSummary = summaryResult["structuredContent"] as IDictionary;
 		AssertEqual("tracy", loadedSummary["sourceFormat"], "tracy live loaded source format");
+		Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		AssertEqual(false, diagnosticsResult["isError"], "tracy live diagnostics isError");
+		IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", diagnostics["sourceFormat"], "tracy diagnostics source format");
+		AssertHasItems(diagnostics["diagnostics"], "tracy diagnostics");
 		tools.CallTool("close_session", new Dictionary<string, object>
 		{
 			["session_id"] = sessionId

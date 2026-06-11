@@ -161,6 +161,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "get_import_diagnostics",
+				["description"] = "Return import or live-capture diagnostics for a loaded trace session.",
+				["inputSchema"] = SessionIdSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "get_session_summary",
 				["description"] = "Return summary diagnostics for a loaded profiler session.",
 				["inputSchema"] = SessionIdSchema()
@@ -263,6 +269,9 @@ internal sealed class ProfilerMcpTools
 					break;
 				case "list_sessions":
 					structured = m_AnalysisService.ListSessions();
+					break;
+				case "get_import_diagnostics":
+					structured = m_AnalysisService.GetImportDiagnostics(GetString(arguments, "session_id", string.Empty));
 					break;
 				case "get_session_summary":
 					structured = m_AnalysisService.GetSessionSummary(GetString(arguments, "session_id", string.Empty));

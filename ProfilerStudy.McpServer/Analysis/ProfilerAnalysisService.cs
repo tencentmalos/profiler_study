@@ -307,6 +307,36 @@ internal sealed class ProfilerAnalysisService
 		return new Dictionary<string, object> { ["sessions"] = sessions };
 	}
 
+	public Dictionary<string, object> GetImportDiagnostics(string sessionId)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		ArrayList diagnostics = new ArrayList();
+		if (loaded.TraceDocument != null)
+		{
+			foreach (object diagnostic in loaded.TraceDocument.ImportDiagnostics)
+			{
+				diagnostics.Add(diagnostic);
+			}
+		}
+		else if (loaded.Log != null)
+		{
+			diagnostics.Add(new Dictionary<string, object>
+			{
+				["severity"] = "info",
+				["code"] = "ProfilerStudyLegacyLogTail",
+				["message"] = "Legacy ProfilerStudy sessions expose capture/load diagnostics through logTail.",
+				["logTail"] = loaded.Log.GetTail(40)
+			});
+		}
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["source"] = loaded.Source,
+			["sourceFormat"] = loaded.SourceFormat,
+			["diagnostics"] = diagnostics
+		};
+	}
+
 	public Dictionary<string, object> GetSessionSummary(string sessionId)
 	{
 		LoadedSession loaded = GetLoadedSession(sessionId);

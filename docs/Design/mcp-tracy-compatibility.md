@@ -436,6 +436,8 @@ get_import_diagnostics(session_id?|artifact_id?)
 get_tracy_status()
 ```
 
+`get_import_diagnostics` 第一阶段先支持 `session_id`，返回 import/live capture 时挂在 `TraceDocument.ImportDiagnostics` 上的结构化 diagnostics；artifact store 完成后再支持 `artifact_id`。
+
 保留兼容 alias：
 
 - `analyze_session_file`
