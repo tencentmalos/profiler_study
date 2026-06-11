@@ -36,6 +36,7 @@ public static class TracyNormalizedArtifact
 		List<TracyFrameSummary> frames = ReadFrames(Path.Combine(normalizedDirectory, "frames.ndjson"));
 		List<TracyCpuZoneSummary> zones = ReadZones(Path.Combine(normalizedDirectory, "cpu_zones.ndjson"));
 		List<TracyPlotSummary> plots = ReadPlots(Path.Combine(normalizedDirectory, "plots.ndjson"));
+		List<TracyThreadSummary> threads = ReadThreads(Path.Combine(normalizedDirectory, "threads.ndjson"), zones);
 		TracyTraceMetadata metadata = BuildMetadata(manifest, frames);
 		TracyFileHeader header = new TracyFileHeader(GetString(manifest, "tracyVersion", artifactManifest.TracyVersion), GetString(manifest, "compression", "lz4"));
 		TracyEventStream eventStream = new TracyEventStream(
@@ -47,7 +48,8 @@ public static class TracyNormalizedArtifact
 			metadata,
 			zones,
 			plots,
-			GetInt(manifest, "threadCount", zones.Select(zone => zone.ThreadId).Distinct().Count()),
+			threads,
+			GetInt(manifest, "threadCount", threads.Count),
 			diagnostics);
 		TracyTraceQuerySession querySession = new TracyTraceQuerySession(artifactManifest.SourcePath ?? artifactManifest.ArtifactId, eventStream, diagnostics);
 		return new TraceDocument(
@@ -108,12 +110,12 @@ public static class TracyNormalizedArtifact
 
 	private static IEnumerable<Dictionary<string, object>> BuildThreads(TracyEventStream eventStream)
 	{
-		foreach (ulong threadId in eventStream.CpuZones.Select(zone => zone.ThreadId).Distinct().OrderBy(value => value))
+		foreach (TracyThreadSummary thread in eventStream.Threads.OrderBy(value => value.ThreadId))
 		{
 			yield return new Dictionary<string, object>
 			{
-				["threadId"] = threadId,
-				["name"] = string.Empty,
+				["threadId"] = thread.ThreadId,
+				["name"] = thread.Name,
 				["processId"] = 0
 			};
 		}
@@ -268,6 +270,29 @@ public static class TracyNormalizedArtifact
 				GetLong(record, "endNs", 0L)));
 		}
 		return zones;
+	}
+
+	private static List<TracyThreadSummary> ReadThreads(string path, IReadOnlyList<TracyCpuZoneSummary> zones)
+	{
+		Dictionary<ulong, string> names = new Dictionary<ulong, string>();
+		foreach (Dictionary<string, object> record in ReadLineDictionaries(path))
+		{
+			ulong threadId = GetULong(record, "threadId", 0UL);
+			names[threadId] = GetString(record, "name", string.Empty);
+		}
+
+		foreach (TracyCpuZoneSummary zone in zones)
+		{
+			if (!names.ContainsKey(zone.ThreadId))
+			{
+				names[zone.ThreadId] = string.Empty;
+			}
+		}
+
+		return names
+			.OrderBy(pair => pair.Key)
+			.Select(pair => new TracyThreadSummary(pair.Key, pair.Value))
+			.ToList();
 	}
 
 	private static List<TracyPlotSummary> ReadPlots(string path)

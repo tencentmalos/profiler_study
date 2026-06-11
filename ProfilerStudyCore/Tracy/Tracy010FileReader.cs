@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ProfilerStudy.Tracy;
@@ -83,7 +84,7 @@ public static class Tracy010FileReader
 		}
 		TracyFileHeader header = new TracyFileHeader(version, "lz4");
 		long payloadByteCount = Math.Max(0, decodedByteCount - 8L);
-		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out int threadCount, out ArrayList readerDiagnostics);
+		TracyTraceMetadata metadata = TryReadMetadata(decodedBlocks, payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out ArrayList readerDiagnostics);
 		ArrayList diagnostics = new ArrayList
 		{
 			new Dictionary<string, object>
@@ -105,13 +106,14 @@ public static class Tracy010FileReader
 		{
 			diagnostics.Add(diagnostic);
 		}
-		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, plots, threadCount, diagnostics);
+		return new TracyEventStream(header, decodedBlocks.Count, compressedByteCount, decodedByteCount, payloadByteCount, metadata, cpuZones, plots, threads, threadCount, diagnostics);
 	}
 
-	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out int threadCount, out ArrayList readerDiagnostics)
+	private static TracyTraceMetadata TryReadMetadata(List<byte[]> decodedBlocks, long payloadByteCount, out List<TracyCpuZoneSummary> cpuZones, out List<TracyPlotSummary> plots, out List<TracyThreadSummary> threads, out int threadCount, out ArrayList readerDiagnostics)
 	{
 		cpuZones = new List<TracyCpuZoneSummary>();
 		plots = new List<TracyPlotSummary>();
+		threads = new List<TracyThreadSummary>();
 		threadCount = 0;
 		readerDiagnostics = new ArrayList();
 		if (payloadByteCount <= 0)
@@ -197,9 +199,11 @@ public static class Tracy010FileReader
 			stringData.Add(value);
 		}
 
-		SkipPointerMap(reader, pointerMap, out int stringCount);
-		SkipPointerMap(reader, pointerMap, out int threadNameCount);
+		ReadPointerMap(reader, pointerMap, out int stringCount);
+		Dictionary<ulong, string> threadNameMap = ReadPointerMap(reader, pointerMap, out int threadNameCount);
 		SkipExternalNameMap(reader);
+		threads = BuildThreads(threadNameMap, cpuZones);
+		threadCount = Math.Max(threadCount, threads.Count);
 
 		if (!reader.HasRemaining)
 		{
@@ -230,6 +234,8 @@ public static class Tracy010FileReader
 		SkipMessages(reader);
 		SkipZoneExtra(reader);
 		cpuZones = ReadCpuZones(reader, sourceLocationNames, out threadCount);
+		threads = BuildThreads(threadNameMap, cpuZones);
+		threadCount = Math.Max(threadCount, threads.Count);
 		if (reader.HasRemaining)
 		{
 			SkipGpuZones(reader, out ulong totalGpuZoneCount, out ulong gpuDataCount, out ulong gpuTimelineCount);
@@ -596,7 +602,7 @@ public static class Tracy010FileReader
 		}
 	}
 
-	private static void SkipPointerMap(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, out int resolvedCount)
+	private static Dictionary<ulong, string> ReadPointerMap(DecodedBlockReader reader, Dictionary<ulong, string> pointerMap, out int resolvedCount)
 	{
 		resolvedCount = 0;
 		ulong count = reader.ReadUInt64();
@@ -604,15 +610,41 @@ public static class Tracy010FileReader
 		{
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy metadata contains too many pointer map entries.");
 		}
+		Dictionary<ulong, string> values = new Dictionary<ulong, string>();
 		for (ulong i = 0; i < count; i++)
 		{
-			reader.Skip(8); // id
+			ulong id = reader.ReadUInt64();
 			ulong pointer = reader.ReadUInt64();
-			if (pointerMap.ContainsKey(pointer))
+			if (pointerMap.TryGetValue(pointer, out string value))
 			{
+				values[id] = value;
+				pointerMap[id] = value;
 				resolvedCount++;
 			}
 		}
+		return values;
+	}
+
+	private static List<TracyThreadSummary> BuildThreads(Dictionary<ulong, string> threadNameMap, IEnumerable<TracyCpuZoneSummary> zones)
+	{
+		Dictionary<ulong, string> names = new Dictionary<ulong, string>();
+		foreach (KeyValuePair<ulong, string> pair in threadNameMap)
+		{
+			names[pair.Key] = pair.Value;
+		}
+
+		foreach (TracyCpuZoneSummary zone in zones)
+		{
+			if (!names.ContainsKey(zone.ThreadId))
+			{
+				names[zone.ThreadId] = string.Empty;
+			}
+		}
+
+		return names
+			.OrderBy(pair => pair.Key)
+			.Select(pair => new TracyThreadSummary(pair.Key, pair.Value))
+			.ToList();
 	}
 
 	private static void SkipExternalNameMap(DecodedBlockReader reader)

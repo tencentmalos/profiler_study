@@ -90,6 +90,7 @@ public static class Tracy010LiveCaptureClient
 			metadata,
 			new List<TracyCpuZoneSummary>(),
 			new List<TracyPlotSummary>(),
+			new List<TracyThreadSummary>(),
 			0,
 			diagnostics);
 		return new TracyLiveCaptureResult(eventStream, diagnostics, connectStopwatch.Elapsed.TotalMilliseconds);

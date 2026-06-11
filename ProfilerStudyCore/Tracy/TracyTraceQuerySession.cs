@@ -34,6 +34,10 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public Dictionary<string, object> GetSummary(int top)
 	{
+		ArrayList threads = ToArrayList(m_EventStream.Threads
+			.OrderBy(thread => thread.ThreadId)
+			.Take(Math.Max(1, top))
+			.Select(ThreadToDictionary));
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = "tracy",
@@ -66,7 +70,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none",
 				["status"] = "header-loaded"
 			},
-			["threads"] = new ArrayList(),
+			["threads"] = threads,
 			["slowFrames"] = new ArrayList(),
 			["scopeHotspots"] = new ArrayList(),
 			["customStats"] = new ArrayList(),
@@ -74,11 +78,11 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["capabilities"] = new Dictionary<string, object>
 			{
 				["summary"] = true,
-				["threads"] = false,
-				["frames"] = false,
-				["scopeHotspots"] = false,
-				["counters"] = false,
-				["timeRange"] = false,
+				["threads"] = m_EventStream.Threads.Count > 0,
+				["frames"] = HasMetadataFrames(),
+				["scopeHotspots"] = m_EventStream.CpuZones.Count > 0,
+				["counters"] = m_EventStream.Plots.Count > 0,
+				["timeRange"] = HasMetadataFrames() || m_EventStream.CpuZones.Count > 0,
 				["profilerOverhead"] = false
 			},
 			["top"] = Math.Max(1, top)
@@ -602,6 +606,16 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["minValue"] = Round(plot.Min),
 			["maxValue"] = Round(plot.Max),
 			["totalValueDouble"] = Round(plot.Sum)
+		};
+	}
+
+	private static Dictionary<string, object> ThreadToDictionary(TracyThreadSummary thread)
+	{
+		return new Dictionary<string, object>
+		{
+			["threadId"] = thread.ThreadId,
+			["name"] = thread.Name,
+			["processId"] = 0
 		};
 	}
 

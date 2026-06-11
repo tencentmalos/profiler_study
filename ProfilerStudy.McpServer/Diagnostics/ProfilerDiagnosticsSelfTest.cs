@@ -154,6 +154,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			WriteTracyDumpWithCpuZone(zonePath);
 			TracyEventStream zoneStream = Tracy010FileReader.Read(zonePath);
 			AssertEqual(1, zoneStream.ThreadCount, "tracy zone thread count");
+			AssertEqual(1, zoneStream.Threads.Count, "tracy zone thread summary count");
+			AssertEqual(123UL, zoneStream.Threads[0].ThreadId, "tracy zone thread id");
+			AssertEqual("RenderThread", zoneStream.Threads[0].Name, "tracy zone thread name");
 			AssertEqual(1, zoneStream.CpuZones.Count, "tracy cpu zone count");
 			AssertEqual("SelfTestZone", zoneStream.CpuZones[0].Name, "tracy cpu zone name");
 			AssertEqual(4_000_000L, zoneStream.CpuZones[0].Duration, "tracy cpu zone duration");
@@ -492,6 +495,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary summary = kept["summary"] as IDictionary;
 			AssertEqual(1, summary["threadCount"], "zone summary thread count");
 			AssertEqual(1, summary["zoneCount"], "zone summary zone count");
+			AssertHasItems(kept["threads"], "zone load trace threads");
+			IDictionary loadedThread = ((IList)kept["threads"])[0] as IDictionary;
+			AssertEqual(123UL, loadedThread["threadId"], "zone loaded thread id");
+			AssertEqual("RenderThread", loadedThread["name"], "zone loaded thread name");
 
 			Dictionary<string, object> hotspotsResult = tools.CallTool("find_scope_hotspots", new Dictionary<string, object>
 			{
@@ -804,6 +811,10 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(artifactId, loaded["artifactId"], "artifact id");
 		IDictionary summary = loaded["summary"] as IDictionary;
 		AssertEqual(1, summary["zoneCount"], "artifact zone summary count");
+		AssertHasItems(loaded["threads"], "artifact threads");
+		IDictionary thread = ((IList)loaded["threads"])[0] as IDictionary;
+		AssertEqual(123UL, thread["threadId"], "artifact thread id");
+		AssertEqual("RenderThread", thread["name"], "artifact thread name");
 		string sessionId = Convert.ToString(loaded["sessionId"]);
 		if (string.IsNullOrWhiteSpace(sessionId))
 		{
@@ -840,7 +851,7 @@ internal static class ProfilerDiagnosticsSelfTest
 	private static void WriteTracyDumpWithCpuZone(string path)
 	{
 		using MemoryStream inner = new MemoryStream();
-		WriteTracyMetadataPrefix(inner, includeZoneString: true);
+		WriteTracyMetadataPrefix(inner, includeZoneString: true, includePlotString: false, includeThreadName: true);
 		WriteUInt64(inner, 1);                      // localThreadCompress size
 		WriteUInt64(inner, 123);                    // thread id
 		WriteUInt64(inner, 0);                      // externalThreadCompress size
@@ -948,10 +959,15 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString)
 	{
-		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString: false);
+		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString: false, includeThreadName: false);
 	}
 
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString, bool includePlotString)
+	{
+		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString, includeThreadName: false);
+	}
+
+	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString, bool includePlotString, bool includeThreadName)
 	{
 		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
 		WriteInt64(inner, 0);                       // m_delay
@@ -985,7 +1001,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteInt64(inner, 1);                       // frame 1 start offset
 		WriteInt64(inner, 9_000_000);               // frame 1 end offset
 		WriteInt32(inner, -1);                      // frame 1 image
-		ulong stringCount = (includeZoneString ? 1UL : 0UL) + (includePlotString ? 1UL : 0UL);
+		ulong stringCount = (includeZoneString ? 1UL : 0UL) + (includePlotString ? 1UL : 0UL) + (includeThreadName ? 1UL : 0UL);
 		WriteUInt64(inner, stringCount);            // stringData count
 		if (includeZoneString)
 		{
@@ -997,8 +1013,18 @@ internal static class ProfilerDiagnosticsSelfTest
 			WriteUInt64(inner, 0x2000);
 			WriteSizedString(inner, "FrameTime");
 		}
+		if (includeThreadName)
+		{
+			WriteUInt64(inner, 0x3000);
+			WriteSizedString(inner, "RenderThread");
+		}
 		WriteUInt64(inner, 0);                      // strings count
-		WriteUInt64(inner, 0);                      // threadNames count
+		WriteUInt64(inner, includeThreadName ? 1UL : 0UL); // threadNames count
+		if (includeThreadName)
+		{
+			WriteUInt64(inner, 123);                 // thread id
+			WriteUInt64(inner, 0x3000);              // name pointer
+		}
 		WriteUInt64(inner, 0);                      // externalNames count
 	}
 

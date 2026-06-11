@@ -591,6 +591,7 @@ internal static class AvaloniaSmokeTest
 					new TracyPlotSample(24_000_000, 17.0)
 				})
 			},
+			new[] { new TracyThreadSummary(7, "Thread 7") },
 			1,
 			new ArrayList());
 		TracyTraceQuerySession querySession = new TracyTraceQuerySession("memory://tracy-ui-analyzer", eventStream, new ArrayList());
