@@ -1189,6 +1189,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
 			AssertEqual("tracy", diagnostics["sourceFormat"], "tracy diagnostics source format");
 			AssertHasItems(diagnostics["diagnostics"], "tracy diagnostics");
+			AssertDiagnosticCode(diagnostics["diagnostics"], "TracyDynamicZoneNamesDecoded", "tracy dynamic zone name diagnostics");
+			AssertDiagnosticCode(diagnostics["diagnostics"], "TracyHardwareSamplesDecoded", "tracy hardware sample diagnostics");
+			AssertDiagnosticCode(diagnostics["diagnostics"], "TracyGpuTimeWithoutZone", "tracy unmatched gpu time diagnostics");
 			AssertTracyLiveSaveSessionFileRejected(tools, sessionId);
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
@@ -2214,6 +2217,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			using MemoryStream decodedStream = new MemoryStream();
 			WriteFrameMark(decodedStream, 6_000_000);
 			WriteFrameMark(decodedStream, 22_000_000);
+			WriteZoneName(decodedStream);
+			WriteHwSample(decodedStream, 83, 0xABCDEF01UL, 7_500_000);
+			WriteHwSample(decodedStream, 86, 0xABCDEF02UL, 7_600_000);
 			WriteGpuNewContext(decodedStream, 2, 345, 6_500_000, 6_500_000, 1.0f);
 			WriteGpuContextName(decodedStream, 2, "SelfTestGpuContext");
 			WriteSourceLocationPayload(decodedStream, "SelfTestGpuZone", "SelfTestGpuFunction", "selftest_gpu.cpp", 42);
@@ -2221,6 +2227,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			WriteGpuZoneEndSerial(decodedStream, 2, 8, 345, 8_000_000);
 			WriteGpuTime(decodedStream, 2, 7, 7_000_000);
 			WriteGpuTime(decodedStream, 2, 8, 8_000_000);
+			WriteGpuTime(decodedStream, 2, 99, 9_000_000);
 			byte[] decoded = decodedStream.ToArray();
 			byte[] compressed = new byte[decoded.Length + 2];
 			compressed[0] = 0xF0;
@@ -2235,6 +2242,18 @@ internal static class ProfilerDiagnosticsSelfTest
 			stream.WriteByte(66);
 			WriteInt64(stream, time);
 			WriteUInt64(stream, 0);
+		}
+
+		private static void WriteZoneName(Stream stream)
+		{
+			stream.WriteByte(1);
+		}
+
+		private static void WriteHwSample(Stream stream, byte type, ulong ip, long time)
+		{
+			stream.WriteByte(type);
+			WriteUInt64(stream, ip);
+			WriteInt64(stream, time);
 		}
 
 		private static void WriteGpuNewContext(Stream stream, byte context, uint thread, long cpuTime, long gpuTime, float period)

@@ -216,6 +216,15 @@ internal sealed class Tracy010LiveEventDecoder
 		public readonly List<TracyPlotSample> Samples = new List<TracyPlotSample>();
 	}
 
+	private sealed class HardwareSampleStats
+	{
+		public string Name;
+		public int Count;
+		public long FirstTime = -1L;
+		public long LastTime = -1L;
+		public readonly List<Dictionary<string, object>> Samples = new List<Dictionary<string, object>>();
+	}
+
 	private sealed class ThreadState
 	{
 		public ThreadState(ulong threadId)
@@ -797,6 +806,8 @@ internal sealed class Tracy010LiveEventDecoder
 	private readonly List<GpuZoneState> m_GpuZones = new List<GpuZoneState>();
 	private readonly Dictionary<ulong, string> m_SourceLocationPayloadNames = new Dictionary<ulong, string>();
 	private readonly Dictionary<ulong, SourceLocationPayloadRecord> m_SourceLocationPayloads = new Dictionary<ulong, SourceLocationPayloadRecord>();
+	private readonly Dictionary<string, HardwareSampleStats> m_HardwareSamples = new Dictionary<string, HardwareSampleStats>(StringComparer.Ordinal);
+	private readonly List<Dictionary<string, object>> m_GpuTimeWithoutZoneSamples = new List<Dictionary<string, object>>();
 	private readonly Queue<ulong> m_PendingSourceLocations = new Queue<ulong>();
 	private readonly HashSet<ulong> m_RequestedStrings = new HashSet<ulong>();
 	private readonly HashSet<ulong> m_RequestedThreadNames = new HashSet<ulong>();
@@ -816,6 +827,8 @@ internal sealed class Tracy010LiveEventDecoder
 	private ulong m_PendingGpuSourceLocationPayload;
 	private int m_GpuTimeEventCount;
 	private int m_GpuTimeMatchedCount;
+	private int m_DynamicZoneNameCount;
+	private int m_GpuTimeWithoutZoneCount;
 
 	public Tracy010LiveEventDecoder(TracyTraceMetadata initialMetadata, long baseTime, Action<byte, ulong, uint> sendQuery)
 	{
@@ -931,6 +944,10 @@ internal sealed class Tracy010LiveEventDecoder
 			["cpuSubmitGpuZoneCount"] = cpuSubmitZoneCount,
 			["gpuTimeEventCount"] = m_GpuTimeEventCount,
 			["gpuTimeMatchedCount"] = m_GpuTimeMatchedCount,
+			["gpuTimeWithoutZoneCount"] = m_GpuTimeWithoutZoneCount,
+			["dynamicZoneNameCount"] = m_DynamicZoneNameCount,
+			["hardwareSampleCount"] = m_HardwareSamples.Values.Sum(value => value.Count),
+			["hardwareSampleTypeCount"] = m_HardwareSamples.Count,
 			["frameCount"] = frameSets.Sum(frameSet => frameSet.FrameCount),
 			["plotCount"] = plots.Count
 		});
@@ -946,6 +963,37 @@ internal sealed class Tracy010LiveEventDecoder
 				["cpuSubmitGpuZoneCount"] = cpuSubmitZoneCount,
 				["gpuTimeEventCount"] = m_GpuTimeEventCount,
 				["gpuTimeMatchedCount"] = m_GpuTimeMatchedCount
+			});
+		}
+		if (m_DynamicZoneNameCount > 0)
+		{
+			diagnostics.Add(new Dictionary<string, object>
+			{
+				["severity"] = "info",
+				["code"] = "TracyDynamicZoneNamesDecoded",
+				["message"] = "Tracy ZoneName events were observed. The current decoder records their count; binding dynamic names to zone instances is reserved for the hierarchy pass.",
+				["dynamicZoneNameCount"] = m_DynamicZoneNameCount
+			});
+		}
+		if (m_HardwareSamples.Count > 0)
+		{
+			diagnostics.Add(new Dictionary<string, object>
+			{
+				["severity"] = "info",
+				["code"] = "TracyHardwareSamplesDecoded",
+				["message"] = "Tracy hardware sample queue events were decoded into bounded summaries. IP symbolization and CPU zone attribution are not implemented yet.",
+				["sampleTypes"] = BuildHardwareSampleDiagnostics()
+			});
+		}
+		if (m_GpuTimeWithoutZoneCount > 0)
+		{
+			diagnostics.Add(new Dictionary<string, object>
+			{
+				["severity"] = "warning",
+				["code"] = "TracyGpuTimeWithoutZone",
+				["message"] = "Some Tracy GpuTime events did not match an open GPU query zone. This usually means the capture window missed the matching begin/end event or the runtime emitted an orphan query timestamp.",
+				["count"] = m_GpuTimeWithoutZoneCount,
+				["samples"] = new ArrayList(m_GpuTimeWithoutZoneSamples)
 			});
 		}
 		if (m_UnsupportedCounts.Count > 0)
@@ -984,6 +1032,23 @@ internal sealed class Tracy010LiveEventDecoder
 		{
 			yield return new TracyCpuZoneSummary(zone.ThreadId, zone.SourceLocationIndex, ResolveSourceLocationName(zone.SourceLocation), zone.Start, zone.End, zone.Depth, zone.SelfDuration);
 		}
+	}
+
+	private ArrayList BuildHardwareSampleDiagnostics()
+	{
+		ArrayList sampleTypes = new ArrayList();
+		foreach (HardwareSampleStats stats in m_HardwareSamples.Values.OrderBy(value => value.Name))
+		{
+			sampleTypes.Add(new Dictionary<string, object>
+			{
+				["name"] = stats.Name,
+				["count"] = stats.Count,
+				["firstTime"] = stats.FirstTime,
+				["lastTime"] = stats.LastTime,
+				["samples"] = new ArrayList(stats.Samples)
+			});
+		}
+		return sampleTypes;
 	}
 
 	private IEnumerable<TracyCpuZoneSummary> CloseOpenZones(ThreadState thread)
@@ -1162,6 +1227,9 @@ internal sealed class Tracy010LiveEventDecoder
 	{
 		switch (type)
 		{
+			case QueueType.ZoneName:
+				ProcessZoneName();
+				break;
 			case QueueType.ThreadContext:
 				m_RefTimeThread = 0;
 				m_CurrentThread = ReadUInt32(buffer, offset + 1);
@@ -1232,6 +1300,14 @@ internal sealed class Tracy010LiveEventDecoder
 				break;
 			case QueueType.GpuCalibration:
 				ProcessGpuCalibration(ReadInt64(buffer, offset + 1), ReadInt64(buffer, offset + 9), ReadInt64(buffer, offset + 17), buffer[offset + 25]);
+				break;
+			case QueueType.HwSampleCpuCycle:
+			case QueueType.HwSampleInstructionRetired:
+			case QueueType.HwSampleCacheReference:
+			case QueueType.HwSampleCacheMiss:
+			case QueueType.BranchRetired:
+			case QueueType.BranchMiss:
+				ProcessHardwareSample(type, ReadUInt64(buffer, offset + 1), ReadInt64(buffer, offset + 9));
 				break;
 			case QueueType.AckServerQueryNoop:
 			case QueueType.AckSourceCodeNotAvailable:
@@ -1337,7 +1413,17 @@ internal sealed class Tracy010LiveEventDecoder
 		string key = GpuZoneKey(context, queryId);
 		if (!m_GpuQueryZones.TryGetValue(key, out Queue<GpuZoneState> queue) || queue.Count == 0)
 		{
-			IncrementUnsupported("GpuTimeWithoutZone");
+			m_GpuTimeWithoutZoneCount++;
+			if (m_GpuTimeWithoutZoneSamples.Count < 16)
+			{
+				m_GpuTimeWithoutZoneSamples.Add(new Dictionary<string, object>
+				{
+					["context"] = context,
+					["queryId"] = queryId,
+					["gpuTick"] = gpuTick,
+					["resolvedGpuTime"] = resolvedGpuTime
+				});
+			}
 			return;
 		}
 		GpuZoneState zone = queue.Dequeue();
@@ -1369,6 +1455,40 @@ internal sealed class Tracy010LiveEventDecoder
 		contextState.CalibratedGpuTime = calibratedGpuTime;
 		contextState.CalibratedCpuTime = ToTime(cpuTime);
 		contextState.HasCalibration = true;
+	}
+
+	private void ProcessZoneName()
+	{
+		m_DynamicZoneNameCount++;
+	}
+
+	private void ProcessHardwareSample(QueueType type, ulong ip, long timeDelta)
+	{
+		string name = type.ToString();
+		if (!m_HardwareSamples.TryGetValue(name, out HardwareSampleStats stats))
+		{
+			stats = new HardwareSampleStats
+			{
+				Name = name
+			};
+			m_HardwareSamples[name] = stats;
+		}
+		long time = ToTime(RefTime(timeDelta));
+		stats.Count++;
+		if (stats.FirstTime < 0)
+		{
+			stats.FirstTime = time;
+		}
+		stats.LastTime = time;
+		if (stats.Samples.Count < 8)
+		{
+			stats.Samples.Add(new Dictionary<string, object>
+			{
+				["ip"] = "0x" + ip.ToString("x"),
+				["time"] = time
+			});
+		}
+		UpdateLastTime(time);
 	}
 
 	private void ProcessZoneBegin(long timeDelta, ulong sourceLocation)

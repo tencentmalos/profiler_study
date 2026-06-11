@@ -299,6 +299,12 @@ P2 要求：
 - `list_gpu_zones` 的 hotspot 已包含 avg/P50/P90/P99/fallback count，zone 输出包含 source 展开、contextNameStatus、zoneKind、depth、parentId。
 - live Tracy source location payload 已进入 `source_locations.ndjson`，artifact reload 后 source 展开不丢失。
 
+补充优化状态：
+
+- `ZoneName` live event 第一阶段不再进入 unsupported；先按 Tracy queue 主流程识别为动态 zone name 事件并累计 `dynamicZoneNameCount` / 样例。完整回填到最近 open zone 的行为放入 P1，避免在缺少 viewer 主流程对照时错误绑定。
+- `HwSampleCpuCycle`、`HwSampleInstructionRetired`、`HwSampleCacheReference`、`HwSampleCacheMiss`、`BranchRetired`、`BranchMiss` 第一阶段按 fixed struct 解码为 hardware sample summary，输出 count、first/last time 和少量 IP 样例；暂不做 IP 符号化和 CPU zone 归因。
+- `GpuTimeWithoutZone` 从单纯 unsupported count 升级为结构化 diagnostics，包含 context、queryId、resolvedGpuTime 样例，便于判断 runtime 是否发送了孤立 query timestamp 或 capture 窗口截断。
+
 任务：
 
 - 扩展 `analyze_frame_detail`，加入 `gpuSummary`、`gpuTimeline`、`gpuHotspots`、`correlation`。
