@@ -451,6 +451,13 @@ LoadedTrace
   ImportDiagnostics
 ```
 
+Phase 4 的第一步允许先落内存级 `TraceDocument/ITraceQuerySession`，不强制立即写 normalized NDJSON cache。这个切片的目标是打通 MCP 可访问性：
+
+- `load_trace_file(..., keep_session=true)` 返回 `session_id`。
+- 该 `session_id` 进入同一套 `list_sessions`、`close_session`、`get_session_summary` 管理。
+- Tracy 0.10.0 header 已验证但事件解码尚不完整时，`TracyTraceQuerySession` 必须返回 `sourceFormat=tracy`、`framesUnavailable=true`、`eventsDecoded=false` 和明确 diagnostics，不能假装是空的 ProfilerStudy session。
+- legacy `Session` 仍由 adapter 路径处理，默认 `study` 行为不变。
+
 现有 MCP 分析工具兼容策略：
 
 - `get_session_summary`：支持 Tracy，返回 `sourceFormat=tracy`；当前 ProfilerStudy 原始实现返回 `sourceFormat=study`。

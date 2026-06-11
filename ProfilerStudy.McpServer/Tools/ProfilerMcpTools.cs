@@ -250,7 +250,8 @@ internal sealed class ProfilerMcpTools
 					structured = m_AnalysisService.LoadTraceFile(
 						GetString(arguments, "path", string.Empty),
 						GetString(arguments, "format", "auto"),
-						GetInt(arguments, "top", 10, 1, 50));
+						GetInt(arguments, "top", 10, 1, 50),
+						GetBool(arguments, "keep_session", false));
 					break;
 				case "load_session_file":
 					structured = m_AnalysisService.LoadSessionFile(
@@ -494,7 +495,13 @@ internal sealed class ProfilerMcpTools
 					["enum"] = new ArrayList { "auto", "tracy" },
 					["default"] = "auto"
 				},
-				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 }
+				["top"] = new Dictionary<string, object> { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50, ["default"] = 10 },
+				["keep_session"] = new Dictionary<string, object>
+				{
+					["type"] = "boolean",
+					["default"] = false,
+					["description"] = "Keep the loaded trace in memory and return a session_id for follow-up queries."
+				}
 			}
 		};
 	}

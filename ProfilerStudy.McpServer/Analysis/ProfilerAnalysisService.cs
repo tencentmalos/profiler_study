@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using ProfilerStudy;
 using ProfilerStudy.Tracy;
+using ProfilerStudy.Trace;
 using SCLCoreCLR;
 
 namespace ProfilerStudy.McpServer;
@@ -17,10 +18,13 @@ internal sealed class ProfilerAnalysisService
 	{
 		public string Id;
 		public string Source;
+		public string SourceFormat;
 		public DateTime CreatedUtc;
 		public DateTime LastAccessUtc;
 		public Session Session;
 		public CapturingLog Log;
+		public TraceDocument TraceDocument;
+		public ITraceQuerySession TraceQuerySession;
 	}
 
 	private readonly Dictionary<string, LoadedSession> m_Sessions = new Dictionary<string, LoadedSession>();
@@ -157,6 +161,11 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> LoadTraceFile(string path, string format, int top)
 	{
+		return LoadTraceFile(path, format, top, false);
+	}
+
+	public Dictionary<string, object> LoadTraceFile(string path, string format, int top, bool keepSession)
+	{
 		if (string.IsNullOrWhiteSpace(path))
 		{
 			throw new ArgumentException("Trace file path is required.");
@@ -176,22 +185,23 @@ internal sealed class ProfilerAnalysisService
 			throw new InvalidOperationException("Unsupported trace format: " + requestedFormat + ".");
 		}
 
-		TracyFileHeader header = Tracy010FileReader.ReadHeader(fullPath);
-		return new Dictionary<string, object>
+		ValidatePathAllowed(fullPath);
+		if (!File.Exists(fullPath))
 		{
-			["sourceFile"] = fullPath,
-			["sourceFormat"] = "tracy",
-			["tracyVersion"] = header.Version,
-			["compression"] = header.Compression,
-			["top"] = top,
-			["summary"] = new Dictionary<string, object>
-			{
-				["sourceFormat"] = "tracy",
-				["tracyVersion"] = header.Version,
-				["status"] = "header-loaded",
-				["note"] = "Initial C# Tracy reader has validated the file container and locked Tracy version; event decoding follows in the next implementation phase."
-			}
-		};
+			throw new FileNotFoundException("Trace file does not exist.", fullPath);
+		}
+
+		TraceDocument traceDocument = TracyTraceImporter.Load(fullPath);
+		Dictionary<string, object> result = traceDocument.QuerySession.GetSummary(top);
+		result["sourceFile"] = traceDocument.SourcePath;
+		result["sourceFormat"] = traceDocument.SourceFormat;
+		result["top"] = top;
+		result["keepSession"] = keepSession;
+		if (keepSession)
+		{
+			result["sessionId"] = AddTraceDocument(traceDocument);
+		}
+		return result;
 	}
 
 	public Dictionary<string, object> LoadSessionFile(string path, int top)
@@ -220,7 +230,10 @@ internal sealed class ProfilerAnalysisService
 		{
 			throw new ArgumentException("Unknown session_id: " + sessionId);
 		}
-		loaded.Session.Close();
+		if (loaded.Session != null)
+		{
+			loaded.Session.Close();
+		}
 		return new Dictionary<string, object>
 		{
 			["sessionId"] = sessionId,
@@ -239,10 +252,11 @@ internal sealed class ProfilerAnalysisService
 				{
 					["sessionId"] = loaded.Id,
 					["source"] = loaded.Source,
+					["sourceFormat"] = loaded.SourceFormat,
 					["createdUtc"] = loaded.CreatedUtc.ToString("o"),
 					["lastAccessUtc"] = loaded.LastAccessUtc.ToString("o"),
-					["frameCount"] = loaded.Session.FrameCount,
-					["threadCount"] = loaded.Session.ThreadCount
+					["frameCount"] = loaded.Session == null ? 0 : loaded.Session.FrameCount,
+					["threadCount"] = loaded.Session == null ? 0 : loaded.Session.ThreadCount
 				});
 			}
 		}
@@ -252,16 +266,25 @@ internal sealed class ProfilerAnalysisService
 	public Dictionary<string, object> GetSessionSummary(string sessionId)
 	{
 		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.TraceQuerySession != null)
+		{
+			Dictionary<string, object> traceResult = loaded.TraceQuerySession.GetSummary(10);
+			traceResult["sessionId"] = loaded.Id;
+			traceResult["source"] = loaded.Source;
+			traceResult["sourceFormat"] = loaded.SourceFormat;
+			return traceResult;
+		}
 		Dictionary<string, object> result = AnalyzeSession(loaded.Session, 10);
 		result["sessionId"] = loaded.Id;
 		result["source"] = loaded.Source;
+		result["sourceFormat"] = loaded.SourceFormat;
 		result["logTail"] = loaded.Log.GetTail(40);
 		return result;
 	}
 
 	public Dictionary<string, object> FindSlowFrames(string sessionId, int top, double thresholdMs)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "find_slow_frames");
 		double tickToMs = TickToMs(loaded.Session);
 		double resolvedThreshold = ResolveThresholdMs(loaded.Session, thresholdMs, tickToMs);
 		List<ProfilerDiagnostics.FrameSample> samples = GetFrameSamples(loaded.Session, tickToMs).ToList();
@@ -277,7 +300,7 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> FindScopeHotspots(string sessionId, int top, int startFrame, int endFrame)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "find_scope_hotspots");
 		Session session = loaded.Session;
 		NormalizeFrameRange(session, ref startFrame, ref endFrame);
 		double tickToMs = TickToMs(session);
@@ -291,7 +314,7 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> GetProfilerOverhead(string sessionId, int startFrame, int endFrame, int top)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "get_profiler_overhead");
 		Session session = loaded.Session;
 		NormalizeFrameRange(session, ref startFrame, ref endFrame);
 		double tickToMs = TickToMs(session);
@@ -305,7 +328,7 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> ListCounters(string sessionId, int top, string filter)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "list_counters");
 		Session session = loaded.Session;
 		IEnumerable<Dictionary<string, object>> counters = GetCounterSummaries(session)
 			.Where(counter => CounterMatchesFilter(counter, filter))
@@ -321,7 +344,7 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> QueryCounterSamples(string sessionId, string counterName, int startFrame, int endFrame, bool accumulated, int maxSamples)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "query_counter");
 		Session session = loaded.Session;
 		if (string.IsNullOrWhiteSpace(counterName))
 		{
@@ -369,7 +392,7 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> AnalyzeFrame(string sessionId, int frameIndex, int top, int neighborCount)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "analyze_frame");
 		Session session = loaded.Session;
 		if (frameIndex >= session.FrameCount)
 		{
@@ -402,7 +425,7 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> AnalyzeFrameDetail(string sessionId, int frameIndex, int maxNodes, int maxDepth, double minDurationMs)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "analyze_frame_detail");
 		Session session = loaded.Session;
 		if (frameIndex >= session.FrameCount)
 		{
@@ -503,7 +526,7 @@ internal sealed class ProfilerAnalysisService
 
 	public Dictionary<string, object> AnalyzeTimeRange(string sessionId, int startFrame, int endFrame, int top, double thresholdMs)
 	{
-		LoadedSession loaded = GetLoadedSession(sessionId);
+		LoadedSession loaded = GetLoadedProfilerStudySession(sessionId, "analyze_time_range");
 		Session session = loaded.Session;
 		NormalizeFrameRange(session, ref startFrame, ref endFrame);
 		Dictionary<string, object> range = BuildRangeDictionary(session, startFrame, endFrame);
@@ -1264,8 +1287,28 @@ internal sealed class ProfilerAnalysisService
 			{
 				Id = id,
 				Source = source,
+				SourceFormat = "study",
 				Session = session,
 				Log = log,
+				CreatedUtc = DateTime.UtcNow,
+				LastAccessUtc = DateTime.UtcNow
+			};
+			return id;
+		}
+	}
+
+	private string AddTraceDocument(TraceDocument traceDocument)
+	{
+		lock (m_SessionsLock)
+		{
+			string id = "s" + (++m_NextSessionId).ToString();
+			m_Sessions[id] = new LoadedSession
+			{
+				Id = id,
+				Source = traceDocument.SourcePath,
+				SourceFormat = traceDocument.SourceFormat,
+				TraceDocument = traceDocument,
+				TraceQuerySession = traceDocument.QuerySession,
 				CreatedUtc = DateTime.UtcNow,
 				LastAccessUtc = DateTime.UtcNow
 			};
@@ -1284,6 +1327,16 @@ internal sealed class ProfilerAnalysisService
 			}
 		}
 		throw new ArgumentException("Unknown session_id: " + sessionId);
+	}
+
+	private LoadedSession GetLoadedProfilerStudySession(string sessionId, string capability)
+	{
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		if (loaded.Session == null)
+		{
+			throw new InvalidOperationException(capability + " is not supported for sourceFormat=" + loaded.SourceFormat + " yet.");
+		}
+		return loaded;
 	}
 
 	private static ArrayList ToArrayList(IEnumerable<Dictionary<string, object>> values)

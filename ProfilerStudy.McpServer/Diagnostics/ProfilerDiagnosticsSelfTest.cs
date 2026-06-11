@@ -115,8 +115,8 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void AssertTracyFileHeaderReader()
 	{
-		string path = Path.Combine(Path.GetTempPath(), "profiler-study-self-test.tracy");
-		string unsupportedPath = Path.Combine(Path.GetTempPath(), "profiler-study-self-test-unsupported.tracy");
+		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test.tracy");
+		string unsupportedPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -150,6 +150,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary tool = toolObject as IDictionary;
 			if (tool != null && Convert.ToString(tool["name"]) == "load_trace_file")
 			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IDictionary properties = inputSchema["properties"] as IDictionary;
+				IDictionary keepSession = properties["keep_session"] as IDictionary;
+				AssertEqual(false, keepSession["default"], "load_trace_file keep_session default");
 				found = true;
 				break;
 			}
@@ -164,9 +168,42 @@ internal static class ProfilerDiagnosticsSelfTest
 			["path"] = path,
 			["format"] = "auto"
 		});
+		AssertEqual(false, result["isError"], "load_trace_file isError");
 		IDictionary structured = result["structuredContent"] as IDictionary;
 		AssertEqual("tracy", structured["sourceFormat"], "load trace source format");
 		AssertEqual("0.10.0", structured["tracyVersion"], "load trace tracy version");
+
+		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		{
+			["path"] = path,
+			["format"] = "auto",
+			["keep_session"] = true
+		});
+		AssertEqual(false, keptResult["isError"], "load_trace_file keep_session isError");
+		IDictionary kept = keptResult["structuredContent"] as IDictionary;
+		string sessionId = Convert.ToString(kept["sessionId"]);
+		if (string.IsNullOrWhiteSpace(sessionId))
+		{
+			throw new InvalidOperationException("load_trace_file keep_session=true must return sessionId.");
+		}
+		AssertEqual("tracy", kept["sourceFormat"], "kept load trace source format");
+
+		Dictionary<string, object> summaryResult = tools.CallTool("get_session_summary", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		AssertEqual(false, summaryResult["isError"], "tracy get_session_summary isError");
+		IDictionary summary = summaryResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", summary["sourceFormat"], "tracy summary source format");
+		AssertEqual(sessionId, summary["sessionId"], "tracy summary session id");
+		IDictionary summaryBlock = summary["summary"] as IDictionary;
+		AssertEqual("tracy", summaryBlock["sourceFormat"], "tracy summary block source format");
+		AssertEqual(true, summaryBlock["framesUnavailable"], "tracy summary frames unavailable");
+		AssertEqual(false, summaryBlock["eventsDecoded"], "tracy summary events decoded");
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
 	}
 
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)
