@@ -2,8 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using ProfilerStudy;
 using ProfilerStudy.Tracy;
 
@@ -110,6 +113,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(false, string.IsNullOrWhiteSpace(status.SourceReferencePath), "tracy source reference path");
 		AssertHasItems(status.SupportedVersions, "tracy supported versions");
 		AssertTracyFileHeaderReader();
+		AssertTracyLiveCaptureTool();
 		AssertTracyStatusTool();
 	}
 
@@ -448,6 +452,47 @@ internal static class ProfilerDiagnosticsSelfTest
 		});
 	}
 
+	private static void AssertTracyLiveCaptureTool()
+	{
+		using FakeTracyServer server = new FakeTracyServer();
+		server.Start();
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		Dictionary<string, object> result = tools.CallTool("capture_profile", new Dictionary<string, object>
+		{
+			["url"] = "pc://127.0.0.1:" + server.Port,
+			["protocol"] = "tracy",
+			["duration_seconds"] = 1,
+			["top"] = 5,
+			["keep_session"] = true
+		});
+		AssertEqual(false, result["isError"], "tracy live capture isError");
+		IDictionary structured = result["structuredContent"] as IDictionary;
+		AssertEqual("tracy", structured["sourceFormat"], "tracy live source format");
+		AssertEqual("tracy", ((IDictionary)structured["capture"])["protocol"], "tracy live capture protocol");
+		string sessionId = Convert.ToString(structured["sessionId"]);
+		if (string.IsNullOrWhiteSpace(sessionId))
+		{
+			throw new InvalidOperationException("tracy live capture keep_session=true must return sessionId.");
+		}
+		IDictionary summary = structured["summary"] as IDictionary;
+		AssertEqual("FakeTracyProgram", summary["captureProgram"], "tracy live capture program");
+		AssertEqual("FakeTracyHost", summary["hostInfo"], "tracy live host info");
+		AssertEqual(31415UL, summary["processId"], "tracy live pid");
+
+		Dictionary<string, object> summaryResult = tools.CallTool("get_session_summary", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		AssertEqual(false, summaryResult["isError"], "tracy live summary isError");
+		IDictionary loadedSummary = summaryResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", loadedSummary["sourceFormat"], "tracy live loaded source format");
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+		server.AssertHandshakeReceived();
+	}
+
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)
 	{
 		byte[] innerHeader = new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', major, minor, patch };
@@ -698,6 +743,110 @@ internal static class ProfilerDiagnosticsSelfTest
 	{
 		byte[] bytes = BitConverter.GetBytes(value);
 		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private sealed class FakeTracyServer : IDisposable
+	{
+		private readonly TcpListener m_Listener = new TcpListener(IPAddress.Loopback, 0);
+		private Thread m_Thread;
+		private volatile bool m_HandshakeReceived;
+		private Exception m_Exception;
+
+		public int Port { get; private set; }
+
+		public void Start()
+		{
+			m_Listener.Start();
+			Port = ((IPEndPoint)m_Listener.LocalEndpoint).Port;
+			m_Thread = new Thread(Run) { IsBackground = true };
+			m_Thread.Start();
+		}
+
+		public void AssertHandshakeReceived()
+		{
+			if (m_Exception != null)
+			{
+				throw new InvalidOperationException("fake tracy server failed: " + m_Exception.Message, m_Exception);
+			}
+			if (!m_HandshakeReceived)
+			{
+				throw new InvalidOperationException("fake tracy server did not receive a handshake.");
+			}
+		}
+
+		public void Dispose()
+		{
+			m_Listener.Stop();
+			if (m_Thread != null)
+			{
+				m_Thread.Join(2000);
+			}
+		}
+
+		private void Run()
+		{
+			try
+			{
+				using TcpClient client = m_Listener.AcceptTcpClient();
+				using NetworkStream stream = client.GetStream();
+				byte[] handshake = ReadExactly(stream, 12);
+				string shibboleth = Encoding.ASCII.GetString(handshake, 0, 8);
+				uint protocol = (uint)(handshake[8] | (handshake[9] << 8) | (handshake[10] << 16) | (handshake[11] << 24));
+				if (shibboleth != "TracyPrf" || protocol != 64)
+				{
+					throw new InvalidOperationException("unexpected Tracy handshake.");
+				}
+				m_HandshakeReceived = true;
+				stream.WriteByte(1); // HandshakeWelcome
+				WriteWelcomeMessage(stream);
+				Thread.Sleep(250);
+			}
+			catch (SocketException)
+			{
+			}
+			catch (ObjectDisposedException)
+			{
+			}
+			catch (Exception ex)
+			{
+				m_Exception = ex;
+			}
+		}
+
+		private static byte[] ReadExactly(Stream stream, int size)
+		{
+			byte[] bytes = new byte[size];
+			int offset = 0;
+			while (offset < size)
+			{
+				int read = stream.Read(bytes, offset, size - offset);
+				if (read == 0)
+				{
+					throw new EndOfStreamException("fake tracy server reached end of stream.");
+				}
+				offset += read;
+			}
+			return bytes;
+		}
+
+		private static void WriteWelcomeMessage(Stream stream)
+		{
+			WriteDouble(stream, 1.0);
+			WriteInt64(stream, 0);
+			WriteInt64(stream, 5_000_000);
+			WriteUInt64(stream, 0);
+			WriteUInt64(stream, 1_000_000_000);
+			WriteUInt64(stream, 1_700_000_000);
+			WriteUInt64(stream, 1_699_999_000);
+			WriteUInt64(stream, 31415);
+			WriteInt64(stream, 0);
+			stream.WriteByte(0);
+			stream.WriteByte(2);
+			WriteFixedAscii(stream, "FakeCPU", 12);
+			WriteUInt32(stream, 0x01020304);
+			WriteFixedAscii(stream, "FakeTracyProgram", 64);
+			WriteFixedAscii(stream, "FakeTracyHost", 1024);
+		}
 	}
 
 	private static void AssertTracyStatusTool()

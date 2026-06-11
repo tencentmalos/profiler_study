@@ -204,6 +204,7 @@ TracyEventStream
 - 按 fixed duration 采集事件。
 - 把 live stream 解码为同一个 `TracyEventStream`。
 - 采集完成后写入 artifact store。
+- 第一阶段可以先完成 handshake + `WelcomeMessage` 解析，生成 metadata-only `TracyEventStream` 并进入 MCP loaded session；如果 duration 内还没有事件流 decoder，返回 `eventsDecoded=false` diagnostics，但 `capture_profile(protocol=tracy)` 必须能连接 Tracy 端口并返回 Tracy session。
 
 输入：
 

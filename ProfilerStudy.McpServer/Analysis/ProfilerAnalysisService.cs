@@ -51,13 +51,57 @@ internal sealed class ProfilerAnalysisService
 		}
 		if (normalizedProtocol == "tracy")
 		{
-			throw new InvalidOperationException("Tracy live capture is not implemented yet; .tracy file loading is available through load_trace_file.");
+			ProfilerCaptureTarget target = ProfilerCaptureTarget.Parse(url);
+			if (target.Kind != ProfilerCaptureTargetKind.Tcp)
+			{
+				throw new InvalidOperationException("Tracy live capture currently requires a pc://host:port TCP target. Use adb forward first for Android Tracy targets.");
+			}
+			return CaptureTracyProfile(target, durationSeconds, top, keepSession);
 		}
 		if (normalizedProtocol == "perfetto")
 		{
 			throw new InvalidOperationException("Perfetto live capture is reserved for a future implementation.");
 		}
 		throw new InvalidOperationException("Unsupported capture protocol: " + normalizedProtocol + ".");
+	}
+
+	private Dictionary<string, object> CaptureTracyProfile(ProfilerCaptureTarget target, int durationSeconds, int top, bool keepSession)
+	{
+		Stopwatch stopwatch = Stopwatch.StartNew();
+		TracyLiveCaptureResult capture = Tracy010LiveCaptureClient.Capture(target.ConnectHost, target.ConnectPort, durationSeconds);
+		TracyTraceQuerySession querySession = new TracyTraceQuerySession(target.Url, capture.EventStream, capture.Diagnostics);
+		TraceDocument traceDocument = new TraceDocument(
+			Guid.NewGuid().ToString("N"),
+			target.Url,
+			"tracy",
+			target.Endpoint,
+			DateTime.UtcNow,
+			querySession,
+			capture.Diagnostics);
+		Dictionary<string, object> analysis = querySession.GetSummary(top);
+		analysis["sourceFormat"] = "tracy";
+		analysis["capture"] = new Dictionary<string, object>
+		{
+			["protocol"] = "tracy",
+			["url"] = target.Url,
+			["kind"] = target.Kind.ToString(),
+			["endpoint"] = target.Endpoint,
+			["connectHost"] = target.ConnectHost,
+			["connectPort"] = target.ConnectPort,
+			["durationSeconds"] = durationSeconds,
+			["keepSession"] = keepSession
+		};
+		analysis["captureTelemetry"] = new Dictionary<string, object>
+		{
+			["connectMs"] = Round(capture.ConnectMilliseconds),
+			["totalToolMs"] = Round(stopwatch.Elapsed.TotalMilliseconds),
+			["eventsDecoded"] = false
+		};
+		if (keepSession)
+		{
+			analysis["sessionId"] = AddTraceDocument(traceDocument);
+		}
+		return analysis;
 	}
 
 	public Dictionary<string, object> GetTracyStatus()
