@@ -127,6 +127,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string gpuPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-gpu.tracy");
 		string unsupportedEventsPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported-events.tracy");
 		string oversizedLockPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-oversized-lock.tracy");
+		string dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-lz4-dictionary.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -193,6 +194,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			WriteTracyDumpWithOversizedLockThreadList(oversizedLockPath);
 			AssertInvalidTracyFileTool(oversizedLockPath);
 
+			WriteTracyDumpWithDictionaryBackReference(dictionaryPath);
+			TracyFileHeader dictionaryHeader = Tracy010FileReader.ReadHeader(dictionaryPath);
+			AssertEqual("0.10.0", dictionaryHeader.Version, "dictionary tracy header version");
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 			AssertUnsupportedTracyFileVersionTool(unsupportedPath);
@@ -230,6 +235,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(oversizedLockPath))
 			{
 				File.Delete(oversizedLockPath);
+			}
+			if (File.Exists(dictionaryPath))
+			{
+				File.Delete(dictionaryPath);
 			}
 		}
 	}
@@ -1269,6 +1278,25 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteTracyDump(path, inner.ToArray());
 	}
 
+	private static void WriteTracyDumpWithDictionaryBackReference(string path)
+	{
+		byte[] firstBlock = new byte[64 * 1024];
+		firstBlock[0] = (byte)'t';
+		firstBlock[1] = (byte)'r';
+		firstBlock[2] = (byte)'a';
+		firstBlock[3] = (byte)'c';
+		firstBlock[4] = (byte)'y';
+		firstBlock[5] = 0;
+		firstBlock[6] = 10;
+		firstBlock[7] = 0;
+
+		using FileStream stream = File.Create(path);
+		byte[] outerHeader = new byte[] { (byte)'t', (byte)'l', (byte)'Z', 4 };
+		stream.Write(outerHeader, 0, outerHeader.Length);
+		WriteCompressedBlock(stream, EncodeLz4LiteralBlock(firstBlock));
+		WriteCompressedBlock(stream, new byte[] { 0x00, 0x01, 0x00 });
+	}
+
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString)
 	{
 		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString: false, includeThreadName: false);
@@ -1368,6 +1396,13 @@ internal static class ProfilerDiagnosticsSelfTest
 		using FileStream stream = File.Create(path);
 		byte[] outerHeader = new byte[] { (byte)'t', (byte)'l', (byte)'Z', 4 };
 		stream.Write(outerHeader, 0, outerHeader.Length);
+		byte[] blockSize = BitConverter.GetBytes((uint)compressed.Length);
+		stream.Write(blockSize, 0, blockSize.Length);
+		stream.Write(compressed, 0, compressed.Length);
+	}
+
+	private static void WriteCompressedBlock(Stream stream, byte[] compressed)
+	{
 		byte[] blockSize = BitConverter.GetBytes((uint)compressed.Length);
 		stream.Write(blockSize, 0, blockSize.Length);
 		stream.Write(compressed, 0, compressed.Length);

@@ -6,6 +6,11 @@ internal static class TracyLz4BlockDecoder
 {
 	public static byte[] Decode(byte[] input, int maxOutputSize)
 	{
+		return Decode(input, maxOutputSize, null);
+	}
+
+	public static byte[] Decode(byte[] input, int maxOutputSize, byte[] dictionary)
+	{
 		if (input == null)
 		{
 			throw new ArgumentNullException(nameof(input));
@@ -43,7 +48,8 @@ internal static class TracyLz4BlockDecoder
 			}
 			int matchOffset = input[inputOffset] | (input[inputOffset + 1] << 8);
 			inputOffset += 2;
-			if (matchOffset <= 0 || matchOffset > outputOffset)
+			int dictionaryLength = dictionary == null ? 0 : dictionary.Length;
+			if (matchOffset <= 0 || matchOffset > outputOffset + dictionaryLength)
 			{
 				throw new TracyFileFormatException("TracyLz4DecodeFailed", "Invalid Tracy LZ4 match distance.");
 			}
@@ -60,7 +66,15 @@ internal static class TracyLz4BlockDecoder
 			int matchSource = outputOffset - matchOffset;
 			for (int i = 0; i < matchLength; i++)
 			{
-				output[outputOffset++] = output[matchSource + i];
+				int sourceIndex = matchSource + i;
+				if (sourceIndex < 0)
+				{
+					output[outputOffset++] = dictionary[dictionaryLength + sourceIndex];
+				}
+				else
+				{
+					output[outputOffset++] = output[sourceIndex];
+				}
 			}
 		}
 

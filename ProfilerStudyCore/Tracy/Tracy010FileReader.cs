@@ -40,6 +40,7 @@ public static class Tracy010FileReader
 		List<byte[]> decodedBlocks = new List<byte[]>();
 		long compressedByteCount = 0L;
 		long decodedByteCount = 0L;
+		byte[] previousBlock = null;
 		while (TryReadUInt32(stream, out uint blockSize))
 		{
 			if (blockSize == 0 || blockSize > MaxBlockSize)
@@ -51,8 +52,9 @@ public static class Tracy010FileReader
 				throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy file contains too many compressed blocks.");
 			}
 			byte[] compressedBlock = ReadExactly(stream, checked((int)blockSize));
-			byte[] decodedBlock = TracyLz4BlockDecoder.Decode(compressedBlock, MaxDecodedBlockSize);
+			byte[] decodedBlock = TracyLz4BlockDecoder.Decode(compressedBlock, MaxDecodedBlockSize, previousBlock);
 			decodedBlocks.Add(decodedBlock);
+			previousBlock = decodedBlock;
 			compressedByteCount += blockSize;
 			decodedByteCount += decodedBlock.Length;
 		}
