@@ -65,11 +65,34 @@ public static class TraceArtifactStore
 			Capture = capture
 		};
 		File.WriteAllText(Path.Combine(artifactDirectory, "manifest.json"), JsonSerializer.Serialize(manifest, JsonOptions));
+		WriteLiveCaptureDebugMaterial(artifactDirectory, manifest, diagnostics);
 		if (document.QuerySession is TracyTraceQuerySession tracyQuerySession)
 		{
 			TracyNormalizedArtifact.Write(normalizedDirectory, document, tracyQuerySession, diagnostics);
 		}
 		return manifest;
+	}
+
+	private static void WriteLiveCaptureDebugMaterial(string artifactDirectory, TraceArtifactManifest manifest, ArrayList diagnostics)
+	{
+		if (!string.Equals(manifest.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase) ||
+			!string.Equals(manifest.SourceKind, "tracy-live-normalized-only", StringComparison.OrdinalIgnoreCase))
+		{
+			return;
+		}
+
+		Dictionary<string, object> record = new Dictionary<string, object>
+		{
+			["artifactId"] = manifest.ArtifactId,
+			["sourceFormat"] = manifest.SourceFormat,
+			["sourceKind"] = manifest.SourceKind,
+			["sourcePath"] = manifest.SourcePath,
+			["tracyVersion"] = manifest.TracyVersion,
+			["createdUtc"] = manifest.CreatedUtc,
+			["capture"] = manifest.Capture ?? new Dictionary<string, object>(),
+			["diagnostics"] = diagnostics ?? new ArrayList()
+		};
+		File.WriteAllText(Path.Combine(artifactDirectory, "capture.ndjson"), JsonSerializer.Serialize(record) + Environment.NewLine);
 	}
 
 	public static TraceDocument Load(string artifactId)

@@ -1087,6 +1087,7 @@ internal static class ProfilerDiagnosticsSelfTest
 				throw new InvalidOperationException("tracy live capture must return artifactId.");
 			}
 			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "tracy-live-normalized-only");
+			AssertTraceArtifactLiveCaptureDebugMaterial(artifactRoot, artifactId);
 			string sessionId = Convert.ToString(structured["sessionId"]);
 			if (string.IsNullOrWhiteSpace(sessionId))
 			{
@@ -1209,6 +1210,24 @@ internal static class ProfilerDiagnosticsSelfTest
 		}
 		AssertTraceArtifactManifest(root, artifactId, sourceKind);
 		AssertTraceArtifactListAllContainsOnlyRegisteredArtifacts(tools);
+	}
+
+	private static void AssertTraceArtifactLiveCaptureDebugMaterial(string root, string artifactId)
+	{
+		string path = Path.Combine(root, artifactId, "capture.ndjson");
+		if (!File.Exists(path))
+		{
+			throw new InvalidOperationException("tracy live capture artifact must include capture.ndjson.");
+		}
+		string line = File.ReadLines(path).FirstOrDefault();
+		if (string.IsNullOrWhiteSpace(line))
+		{
+			throw new InvalidOperationException("tracy live capture.ndjson must contain capture metadata.");
+		}
+		using JsonDocument document = JsonDocument.Parse(line);
+		AssertEqual("tracy-live-normalized-only", document.RootElement.GetProperty("sourceKind").GetString(), "tracy live capture debug source kind");
+		AssertEqual("tracy", document.RootElement.GetProperty("sourceFormat").GetString(), "tracy live capture debug source format");
+		AssertEqual("0.10.0", document.RootElement.GetProperty("tracyVersion").GetString(), "tracy live capture debug tracy version");
 	}
 
 	private static void AssertTraceArtifactManifest(string root, string artifactId, string sourceKind)
