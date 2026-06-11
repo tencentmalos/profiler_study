@@ -104,6 +104,10 @@ Connection/ReceiveStream
 
 `Session.Write(...)` 保存 session 和 view save data。Core 不直接读取 WinForms/Avalonia 控件状态；UI 层负责收集 `SessionViewSaveData` 并传入 Core。
 
+MCP 需要把 server 内存中保留的 session 落盘时，Core 应提供显式目标路径的 `.profiler` 写入入口。该入口只负责 ProfilerStudy legacy `Session` 的原生保存格式；调用方若没有 UI 状态，应传入空的 `SessionViewSaveData`，避免 Core 反向依赖 WinForms/Avalonia。
+
+外部 trace session 不应通过 `Session.Write(...)` 伪装成 `.profiler`。Tracy session 保存为 `.tracy` 时必须保留原始 Tracy dump 语义：如果 session/artifact 来源是已有 `.tracy` 文件，则通过校验后的源文件复制完成；如果 live Tracy artifact 当前只有 normalized cache 而没有原始 dump，则应返回明确 unsupported 结果，不能用归一化 JSON 或部分解码结果重新编码一个可能无法被 Tracy viewer 打开的伪 `.tracy`。
+
 ### 选区复制
 
 `Session.CopyTo(...)` 将时间范围复制成新 session。它复制帧、scope、counter、线程元数据、context switch、进程名，并重新计算 session stats。该行为支撑 UI 的 "Create Session from Selection"，必须保持确定性。

@@ -123,6 +123,16 @@ Android 示例：
 - `path`: 文件路径
 - `top`: 初始摘要返回条数，默认 `10`
 
+### `save_session_file`
+
+把 MCP server 内存中保留的 session 保存到文件。`study` session 保存为 `.profiler`；`tracy` session 仅在来源仍有原始 `.tracy` 文件时复制保存为 `.tracy`。当前 live Tracy capture artifact 如果只有 normalized cache，会返回不支持保存为 `.tracy` 的明确错误。
+
+参数：
+
+- `session_id`: session id
+- `path`: 输出路径。无后缀时按 session 格式补 `.profiler` 或 `.tracy`
+- `overwrite`: 是否覆盖已有文件，默认 `false`
+
 ### `list_sessions`
 
 列出当前 MCP server 内存中保留的 session。

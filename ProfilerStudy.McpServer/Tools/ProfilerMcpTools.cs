@@ -162,6 +162,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "save_session_file",
+				["description"] = "Save a retained session to disk. study sessions write .profiler files; file-backed Tracy sessions copy the original .tracy source when available.",
+				["inputSchema"] = SaveSessionFileSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "close_session",
 				["description"] = "Close a session previously returned by load_session_file or capture_android_profile keep_session=true.",
 				["inputSchema"] = SessionIdSchema()
@@ -288,6 +294,12 @@ internal sealed class ProfilerMcpTools
 					structured = m_AnalysisService.LoadSessionFile(
 						GetString(arguments, "path", string.Empty),
 						GetInt(arguments, "top", 10, 1, 50));
+					break;
+				case "save_session_file":
+					structured = m_AnalysisService.SaveSessionFile(
+						GetString(arguments, "session_id", string.Empty),
+						GetString(arguments, "path", string.Empty),
+						GetBool(arguments, "overwrite", false));
 					break;
 				case "close_session":
 					structured = m_AnalysisService.CloseSession(GetString(arguments, "session_id", string.Empty));
@@ -529,6 +541,29 @@ internal sealed class ProfilerMcpTools
 			["properties"] = new Dictionary<string, object>
 			{
 				["session_id"] = new Dictionary<string, object> { ["type"] = "string" }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> SaveSessionFileSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "session_id", "path" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["session_id"] = new Dictionary<string, object> { ["type"] = "string" },
+				["path"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["description"] = "Output path. Extension-less paths are completed to .profiler for study sessions and .tracy for Tracy sessions."
+				},
+				["overwrite"] = new Dictionary<string, object>
+				{
+					["type"] = "boolean",
+					["default"] = false
+				}
 			}
 		};
 	}

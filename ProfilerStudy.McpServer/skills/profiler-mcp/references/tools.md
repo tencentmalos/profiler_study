@@ -8,6 +8,7 @@
 | `capture_android_profile` | Compatibility wrapper for fixed Android debug/release sockets. Prefer `capture_profile` for new live captures. |
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |
+| `save_session_file` | Save a retained session to disk. `study` sessions write `.profiler`; `tracy` sessions copy an original `.tracy` source when available. |
 | `load_trace_file` | Load a trace file through the unified trace path. Current direct trace import supports `.tracy` / `format=tracy`, returns `artifactId`, and can return `sessionId` with `keep_session=true`. |
 | `load_trace_artifact` | Reopen a registered trace artifact from the artifact store by `artifact_id`; use `keep_session=true` for follow-up analysis. |
 | `list_trace_artifacts` | List registered artifacts from the ProfilerStudy artifact store. Use `format=tracy` for Tracy imports/live captures, `format=all` for every registered format, and optional `since=<ISO-8601 UTC>` to return only newer artifacts. |
@@ -72,6 +73,12 @@ Tracy artifact reuse:
 
 ```text
 Load trace file /captures/run.tracy with keep_session=false, then use the returned artifactId with load_trace_artifact and get_import_diagnostics. For live Tracy captures, artifact debug material is stored as capture.ndjson until source.tracy writer support is verified.
+```
+
+Save retained session:
+
+```text
+For session s1, call save_session_file with path=/captures/export.profiler. For Tracy file-backed sessions use a .tracy output path; live normalized-only Tracy artifacts cannot be exported as viewer-compatible .tracy files yet.
 ```
 
 Recent Tracy artifacts:

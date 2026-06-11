@@ -3922,6 +3922,11 @@ public class Session : IDisposable
 		return Write(m_SessionFilename, session_gui_data, context, ref error);
 	}
 
+	public bool WriteToFile(string filename, IProfilerStudySerialisable session_gui_data, ThreadJobContext context, ref string error)
+	{
+		return Write(filename, session_gui_data, context, ref error);
+	}
+
 	private bool Write(string filename, IProfilerStudySerialisable session_gui_data, ThreadJobContext context, ref string error)
 	{
 		int tickCount = Environment.TickCount;

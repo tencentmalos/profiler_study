@@ -355,6 +355,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(true, summaryBlock["framesUnavailable"], "tracy summary frames unavailable");
 			AssertEqual(false, summaryBlock["eventsDecoded"], "tracy summary events decoded");
 			AssertTracyQueryToolContracts(tools, sessionId);
+			AssertTracySaveSessionFileTool(tools, path, sessionId);
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId
@@ -1179,6 +1180,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
 			AssertEqual("tracy", diagnostics["sourceFormat"], "tracy diagnostics source format");
 			AssertHasItems(diagnostics["diagnostics"], "tracy diagnostics");
+			AssertTracyLiveSaveSessionFileRejected(tools, sessionId);
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId
@@ -2179,7 +2181,132 @@ internal static class ProfilerDiagnosticsSelfTest
 		Dictionary<string, object> counterSamples = service.QueryCounterSamples(sessionId, counterName, 18, 24, false, 10);
 		AssertEqual(counterName, counterSamples["counterName"], "counter name");
 		AssertHasItems(counterSamples["samples"], "counter samples");
+		AssertStudySaveSessionFile(service, sessionId, session);
 		service.CloseSession(sessionId);
+	}
+
+	private static void AssertStudySaveSessionFile(ProfilerAnalysisService service, string sessionId, Session sourceSession)
+	{
+		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-save.profiler");
+		try
+		{
+			Dictionary<string, object> saved = service.SaveSessionFile(sessionId, path, overwrite: false);
+			AssertEqual(sessionId, saved["sessionId"], "study save session id");
+			AssertEqual("study", saved["sourceFormat"], "study save source format");
+			AssertEqual(Path.GetFullPath(path), saved["path"], "study save path");
+			AssertEqual(true, saved["saved"], "study save saved");
+			if (!File.Exists(path))
+			{
+				throw new InvalidOperationException("study save file was not created.");
+			}
+
+			Session loaded = new Session(new CoreSettings(), new CapturingLog());
+			try
+			{
+				string error = string.Empty;
+				if (!loaded.Read(path, ref error))
+				{
+					throw new InvalidOperationException("saved study session could not be read: " + error);
+				}
+				AssertEqual(sourceSession.FrameCount, loaded.FrameCount, "saved study frame count");
+				AssertEqual(sourceSession.ThreadCount, loaded.ThreadCount, "saved study thread count");
+			}
+			finally
+			{
+				loaded.Close();
+			}
+		}
+		finally
+		{
+			if (File.Exists(path))
+			{
+				File.Delete(path);
+			}
+		}
+	}
+
+	private static void AssertTracySaveSessionFileTool(ProfilerMcpTools tools, string sourcePath, string sessionId)
+	{
+		bool found = false;
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "save_session_file")
+			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IList required = inputSchema["required"] as IList;
+				if (required == null || !required.Contains("session_id") || !required.Contains("path"))
+				{
+					throw new InvalidOperationException("save_session_file must require session_id and path.");
+				}
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			throw new InvalidOperationException("save_session_file tool is missing.");
+		}
+
+		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-save.tracy");
+		try
+		{
+			Dictionary<string, object> result = tools.CallTool("save_session_file", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["path"] = path
+			});
+			AssertEqual(false, result["isError"], "tracy save_session_file isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			AssertEqual(sessionId, structured["sessionId"], "tracy save session id");
+			AssertEqual("tracy", structured["sourceFormat"], "tracy save source format");
+			AssertEqual("source-artifact-copy", structured["saveMode"], "tracy save mode");
+			AssertEqual(Path.GetFullPath(path), structured["path"], "tracy save path");
+			if (!File.Exists(path))
+			{
+				throw new InvalidOperationException("tracy save file was not created.");
+			}
+			if (!File.ReadAllBytes(sourcePath).SequenceEqual(File.ReadAllBytes(path)))
+			{
+				throw new InvalidOperationException("tracy save must preserve the original file bytes.");
+			}
+			Tracy010FileReader.ReadHeader(path);
+		}
+		finally
+		{
+			if (File.Exists(path))
+			{
+				File.Delete(path);
+			}
+		}
+	}
+
+	private static void AssertTracyLiveSaveSessionFileRejected(ProfilerMcpTools tools, string sessionId)
+	{
+		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-live-save.tracy");
+		try
+		{
+			Dictionary<string, object> result = tools.CallTool("save_session_file", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["path"] = path
+			});
+			AssertEqual(true, result["isError"], "tracy live save_session_file isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			string error = Convert.ToString(structured["error"]);
+			if (string.IsNullOrWhiteSpace(error) || !error.Contains("no original .tracy source file"))
+			{
+				throw new InvalidOperationException("tracy live save_session_file must explain missing original .tracy source.");
+			}
+			AssertEqual(false, File.Exists(path), "tracy live save output exists");
+		}
+		finally
+		{
+			if (File.Exists(path))
+			{
+				File.Delete(path);
+			}
+		}
 	}
 
 	private static void AssertProfilerOverheadContract(ProfilerAnalysisService service, string sessionId)

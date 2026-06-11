@@ -70,6 +70,12 @@ public static class TraceArtifactStore
 			TracyVersion = tracyVersion,
 			Capture = capture
 		};
+		if (ShouldPreserveSourceFile(document, sourceKind))
+		{
+			string sourceArtifactPath = "source" + Path.GetExtension(document.SourcePath);
+			File.Copy(document.SourcePath, Path.Combine(artifactDirectory, sourceArtifactPath), overwrite: true);
+			manifest.SourceArtifactPath = sourceArtifactPath;
+		}
 		if (document.QuerySession is TracyTraceQuerySession tracyQuerySession)
 		{
 			TracyNormalizedArtifact.Write(normalizedDirectory, document, tracyQuerySession, diagnostics);
@@ -80,6 +86,45 @@ public static class TraceArtifactStore
 		File.WriteAllText(Path.Combine(artifactDirectory, "manifest.json"), JsonSerializer.Serialize(manifest, JsonOptions));
 		document.AttachArtifactId(artifactId);
 		return manifest;
+	}
+
+	public static bool TryCopySourceArtifact(string artifactId, string destinationPath, bool overwrite, out long byteCount)
+	{
+		byteCount = 0;
+		string artifactDirectory = GetArtifactDirectory(artifactId);
+		string manifestPath = Path.Combine(artifactDirectory, "manifest.json");
+		if (!File.Exists(manifestPath))
+		{
+			return false;
+		}
+
+		TraceArtifactManifest manifest = ReadManifest(manifestPath);
+		if (manifest == null || string.IsNullOrWhiteSpace(manifest.SourceArtifactPath))
+		{
+			return false;
+		}
+
+		string sourcePath = ResolveArtifactFilePath(
+			artifactDirectory,
+			manifest.SourceArtifactPath,
+			"Trace artifact source path escapes the artifact directory.");
+		if (!File.Exists(sourcePath))
+		{
+			return false;
+		}
+		File.Copy(sourcePath, destinationPath, overwrite);
+		byteCount = new FileInfo(destinationPath).Length;
+		return true;
+	}
+
+	private static bool ShouldPreserveSourceFile(TraceDocument document, string sourceKind)
+	{
+		return document != null
+			&& string.Equals(document.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase)
+			&& string.Equals(sourceKind, "file-import", StringComparison.OrdinalIgnoreCase)
+			&& !string.IsNullOrWhiteSpace(document.SourcePath)
+			&& string.Equals(Path.GetExtension(document.SourcePath), ".tracy", StringComparison.OrdinalIgnoreCase)
+			&& File.Exists(document.SourcePath);
 	}
 
 	private static void WriteLiveCaptureDebugMaterial(string artifactDirectory, TraceArtifactManifest manifest, ArrayList diagnostics)
@@ -198,6 +243,7 @@ public static class TraceArtifactStore
 				["sourceFormat"] = manifest.SourceFormat,
 				["sourceKind"] = manifest.SourceKind,
 				["sourcePath"] = manifest.SourcePath,
+				["sourceArtifactPath"] = manifest.SourceArtifactPath ?? string.Empty,
 				["normalizedPath"] = manifest.NormalizedPath,
 				["diagnosticsPath"] = manifest.DiagnosticsPath,
 				["sourceByteCount"] = manifest.SourceByteCount,

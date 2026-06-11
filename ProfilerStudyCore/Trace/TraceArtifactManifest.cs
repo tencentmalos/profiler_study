@@ -13,6 +13,8 @@ public sealed class TraceArtifactManifest
 
 	public string SourcePath { get; set; }
 
+	public string SourceArtifactPath { get; set; }
+
 	public string NormalizedPath { get; set; }
 
 	public string DiagnosticsPath { get; set; }

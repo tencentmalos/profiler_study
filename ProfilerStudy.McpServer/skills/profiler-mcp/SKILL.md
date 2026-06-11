@@ -32,7 +32,8 @@ dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release
 5. Narrow by evidence: use `analyze_frame` for a suspicious frame, `analyze_frame_detail` when hierarchical single-frame flame graph data and same-frame counter samples are needed, and `analyze_time_range` for a slow-frame cluster or comparison window. Tracy sessions may use `start_time_ns` / `end_time_ns` when frame metadata is unavailable or timestamp precision is required.
 6. For custom stat / counter questions, call `list_counters` first, then `query_counter` using the exact returned `counter_name`.
 7. Use `get_import_diagnostics` with `session_id` or `artifact_id` when import compatibility, Tracy version support, or partial decoding status matters.
-8. Close retained sessions with `close_session` when analysis is complete or when many sessions are loaded.
+8. Save retained sessions with `save_session_file` only when the user asks for a file artifact. Use `.profiler` for `study`; use `.tracy` only for file-backed Tracy sessions with an original Tracy source file.
+9. Close retained sessions with `close_session` when analysis is complete or when many sessions are loaded.
 
 ## Interpretation Rules
 
@@ -45,6 +46,7 @@ dotnet publish ProfilerStudy.McpServer\ProfilerStudy.McpServer.csproj -c Release
 - Keep raw output bounded: use `top`, frame ranges, `max_nodes`, `max_depth`, `min_duration_ms`, and `max_samples` instead of requesting whole traces.
 - Preserve paths and session ids exactly as returned by tools.
 - Preserve artifact ids exactly as returned by `load_trace_file`, `capture_profile(protocol=tracy)`, and `list_trace_artifacts`.
+- Do not claim a live Tracy normalized-only session has been exported as a viewer-compatible `.tracy`; the server must have an original Tracy source file to copy.
 - For live targets, prefer `capture_profile` URLs. Do not run arbitrary adb commands through this skill; Android capture only forwards the requested `localfilesystem:<path>`, `localabstract:<name>`, or `tcp:<port>` endpoint.
 
 ## Tool Reference

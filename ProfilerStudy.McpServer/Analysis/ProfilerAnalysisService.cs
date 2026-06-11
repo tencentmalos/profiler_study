@@ -307,6 +307,41 @@ internal sealed class ProfilerAnalysisService
 		return analysis;
 	}
 
+	public Dictionary<string, object> SaveSessionFile(string sessionId, string path, bool overwrite)
+	{
+		if (string.IsNullOrWhiteSpace(sessionId))
+		{
+			throw new ArgumentException("session_id is required.");
+		}
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			throw new ArgumentException("path is required.");
+		}
+
+		LoadedSession loaded = GetLoadedSession(sessionId);
+		string fullPath = ResolveSavePath(loaded, path);
+		ValidatePathAllowed(fullPath);
+		if (File.Exists(fullPath) && !overwrite)
+		{
+			throw new IOException("Output file already exists. Set overwrite=true to replace it: " + fullPath);
+		}
+		string directory = Path.GetDirectoryName(fullPath);
+		if (!string.IsNullOrWhiteSpace(directory))
+		{
+			Directory.CreateDirectory(directory);
+		}
+
+		if (loaded.Session != null)
+		{
+			return SaveProfilerStudySession(loaded, fullPath, overwrite);
+		}
+		if (string.Equals(loaded.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase))
+		{
+			return SaveTracySession(loaded, fullPath, overwrite);
+		}
+		throw new InvalidOperationException("save_session_file is not supported for sourceFormat=" + loaded.SourceFormat + ".");
+	}
+
 	public Dictionary<string, object> CloseSession(string sessionId)
 	{
 		LoadedSession loaded = null;
@@ -1523,6 +1558,105 @@ internal sealed class ProfilerAnalysisService
 			};
 			return id;
 		}
+	}
+
+	private static string ResolveSavePath(LoadedSession loaded, string path)
+	{
+		string fullPath = Path.GetFullPath(path);
+		string extension = Path.GetExtension(fullPath);
+		if (loaded.Session != null)
+		{
+			if (string.IsNullOrWhiteSpace(extension))
+			{
+				return fullPath + ".profiler";
+			}
+			if (!string.Equals(extension, ".profiler", StringComparison.OrdinalIgnoreCase))
+			{
+				throw new InvalidOperationException("study sessions can only be saved as .profiler files.");
+			}
+			return fullPath;
+		}
+		if (string.Equals(loaded.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase))
+		{
+			if (string.IsNullOrWhiteSpace(extension))
+			{
+				return fullPath + ".tracy";
+			}
+			if (!string.Equals(extension, ".tracy", StringComparison.OrdinalIgnoreCase))
+			{
+				throw new InvalidOperationException("Tracy sessions can only be saved as .tracy files.");
+			}
+			return fullPath;
+		}
+		return fullPath;
+	}
+
+	private static Dictionary<string, object> SaveProfilerStudySession(LoadedSession loaded, string fullPath, bool overwrite)
+	{
+		string error = string.Empty;
+		ThreadJobContext context = new ThreadJobContext();
+		if (!loaded.Session.WriteToFile(fullPath, new SessionViewSaveData(), context, ref error))
+		{
+			throw new InvalidOperationException("Failed to save profiler session: " + error);
+		}
+		loaded.Source = fullPath;
+		loaded.LastAccessUtc = DateTime.UtcNow;
+		FileInfo fileInfo = new FileInfo(fullPath);
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["sourceFormat"] = loaded.SourceFormat,
+			["path"] = fullPath,
+			["saved"] = true,
+			["overwrite"] = overwrite,
+			["saveMode"] = "profiler-write",
+			["byteCount"] = fileInfo.Length,
+			["frameCount"] = loaded.Session.FrameCount,
+			["threadCount"] = loaded.Session.ThreadCount
+		};
+	}
+
+	private static Dictionary<string, object> SaveTracySession(LoadedSession loaded, string fullPath, bool overwrite)
+	{
+		long byteCount;
+		string artifactId = loaded.TraceDocument == null ? string.Empty : loaded.TraceDocument.ArtifactId;
+		if (!string.IsNullOrWhiteSpace(artifactId) && TraceArtifactStore.TryCopySourceArtifact(artifactId, fullPath, overwrite, out byteCount))
+		{
+			return BuildTraceSaveResult(loaded, fullPath, overwrite, "source-artifact-copy", byteCount);
+		}
+
+		string sourcePath = loaded.TraceDocument == null ? loaded.Source : loaded.TraceDocument.SourcePath;
+		if (!string.IsNullOrWhiteSpace(sourcePath) &&
+			string.Equals(Path.GetExtension(sourcePath), ".tracy", StringComparison.OrdinalIgnoreCase) &&
+			File.Exists(sourcePath))
+		{
+			string fullSourcePath = Path.GetFullPath(sourcePath);
+			ValidatePathAllowed(fullSourcePath);
+			File.Copy(fullSourcePath, fullPath, overwrite);
+			byteCount = new FileInfo(fullPath).Length;
+			return BuildTraceSaveResult(loaded, fullPath, overwrite, "source-copy", byteCount);
+		}
+
+		throw new InvalidOperationException("This Tracy session has no original .tracy source file to copy. Live normalized-only Tracy artifacts cannot be exported as viewer-compatible .tracy files yet.");
+	}
+
+	private static Dictionary<string, object> BuildTraceSaveResult(LoadedSession loaded, string fullPath, bool overwrite, string saveMode, long byteCount)
+	{
+		loaded.Source = fullPath;
+		loaded.LastAccessUtc = DateTime.UtcNow;
+		Dictionary<string, int> counts = GetLoadedSessionCounts(loaded);
+		return new Dictionary<string, object>
+		{
+			["sessionId"] = loaded.Id,
+			["sourceFormat"] = loaded.SourceFormat,
+			["path"] = fullPath,
+			["saved"] = true,
+			["overwrite"] = overwrite,
+			["saveMode"] = saveMode,
+			["byteCount"] = byteCount,
+			["frameCount"] = counts["frameCount"],
+			["threadCount"] = counts["threadCount"]
+		};
 	}
 
 	private LoadedSession GetLoadedSession(string sessionId)
