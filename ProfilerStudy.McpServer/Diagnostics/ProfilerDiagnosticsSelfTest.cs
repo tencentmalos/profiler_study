@@ -835,6 +835,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(false, samplesResult["isError"], "plot query_counter isError");
 			IDictionary samples = samplesResult["structuredContent"] as IDictionary;
 			AssertEqual("FrameTime", samples["counterName"], "plot sample counter name");
+			AssertEqual(2, samples["sampleCount"], "plot sample count");
+			IDictionary sampleRange = samples["range"] as IDictionary;
+			AssertEqual(0, sampleRange["startFrame"], "plot sample range start frame");
+			AssertEqual(1, sampleRange["endFrame"], "plot sample range end frame");
 			AssertHasItems(samples["samples"], "plot samples");
 			IDictionary secondSample = ((IList)samples["samples"])[1] as IDictionary;
 			AssertEqual(20.0, secondSample["value"], "plot second sample value");
@@ -878,6 +882,20 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary kept = keptResult["structuredContent"] as IDictionary;
 			string sessionId = Convert.ToString(kept["sessionId"]);
 
+			Dictionary<string, object> defaultSamplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["counter_name"] = "FrameTime",
+				["max_samples"] = 10
+			});
+			AssertEqual(false, defaultSamplesResult["isError"], "plot default range query_counter isError");
+			IDictionary defaultSamples = defaultSamplesResult["structuredContent"] as IDictionary;
+			AssertEqual(3, defaultSamples["sampleCount"], "plot default range sample count");
+			AssertEqual(3, defaultSamples["availableSampleCount"], "plot default range available sample count");
+			IDictionary defaultRange = defaultSamples["range"] as IDictionary;
+			AssertEqual(0, defaultRange["startFrame"], "plot default range start frame");
+			AssertEqual(1, defaultRange["endFrame"], "plot default range end frame");
+
 			Dictionary<string, object> samplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId,
@@ -894,6 +912,24 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertHasItems(sampleRows, "plot range samples");
 			IDictionary firstSample = sampleRows[0] as IDictionary;
 			AssertEqual(20.0, firstSample["value"], "plot range sample value");
+
+			Dictionary<string, object> openEndedSamplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["counter_name"] = "FrameTime",
+				["start_frame"] = 1,
+				["max_samples"] = 10
+			});
+			AssertEqual(false, openEndedSamplesResult["isError"], "plot open-ended range query_counter isError");
+			IDictionary openEndedSamples = openEndedSamplesResult["structuredContent"] as IDictionary;
+			AssertEqual(1, openEndedSamples["sampleCount"], "plot open-ended range sample count");
+			IDictionary openEndedRange = openEndedSamples["range"] as IDictionary;
+			AssertEqual(1, openEndedRange["startFrame"], "plot open-ended range start frame");
+			AssertEqual(1, openEndedRange["endFrame"], "plot open-ended range end frame");
+			IList openEndedRows = openEndedSamples["samples"] as IList;
+			AssertHasItems(openEndedRows, "plot open-ended range samples");
+			IDictionary openEndedFirstSample = openEndedRows[0] as IDictionary;
+			AssertEqual(20.0, openEndedFirstSample["value"], "plot open-ended range sample value");
 
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
@@ -1352,13 +1388,15 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteUInt32(inner, 0);                      // color
 		WriteUInt64(inner, 0x2000);                 // name pointer
 		WriteDouble(inner, 10.0);                   // min
-		WriteDouble(inner, 20.0);                   // max
-		WriteDouble(inner, 30.0);                   // sum
-		WriteUInt64(inner, 2);                      // sample count
+		WriteDouble(inner, 30.0);                   // max
+		WriteDouble(inner, 60.0);                   // sum
+		WriteUInt64(inner, 3);                      // sample count
 		WriteInt64(inner, 500_000);                 // sample 0 absolute time 500000
 		WriteDouble(inner, 10.0);
 		WriteInt64(inner, 1_500_000);               // sample 1 absolute time 2000000
 		WriteDouble(inner, 20.0);
+		WriteInt64(inner, 6_000_000);               // sample 2 absolute time 8000000
+		WriteDouble(inner, 30.0);
 		WriteTracyDump(path, inner.ToArray());
 	}
 

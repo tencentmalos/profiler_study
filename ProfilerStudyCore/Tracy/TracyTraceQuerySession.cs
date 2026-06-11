@@ -467,7 +467,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			yield break;
 		}
 
-		if (!HasMetadataFrames() || startFrame < 0 || endFrame < 0)
+		if (!HasExplicitFrameRange(startFrame, endFrame) ||
+			!TryResolveMetadataFrameRange(startFrame, endFrame, out List<TracyFrameSummary> frames, out int first, out int last))
 		{
 			foreach (TracyCpuZoneSummary zone in m_EventStream.CpuZones)
 			{
@@ -476,13 +477,6 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			yield break;
 		}
 
-		List<TracyFrameSummary> frames = GetMetadataFrames().ToList();
-		if (frames.Count == 0)
-		{
-			yield break;
-		}
-		int first = Math.Max(0, Math.Min(startFrame, frames.Count - 1));
-		int last = Math.Max(first, Math.Min(endFrame, frames.Count - 1));
 		long rangeStart = frames[first].Start;
 		long rangeEnd = frames[last].End;
 		foreach (TracyCpuZoneSummary zone in m_EventStream.CpuZones)
@@ -501,7 +495,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			yield break;
 		}
 
-		if (!HasMetadataFrames() || startFrame < 0 || endFrame < 0)
+		if (!HasExplicitFrameRange(startFrame, endFrame) ||
+			!TryResolveMetadataFrameRange(startFrame, endFrame, out List<TracyFrameSummary> frames, out int first, out int last))
 		{
 			foreach (TracyPlotSample sample in plot.Samples)
 			{
@@ -510,13 +505,6 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			yield break;
 		}
 
-		List<TracyFrameSummary> frames = GetMetadataFrames().ToList();
-		if (frames.Count == 0)
-		{
-			yield break;
-		}
-		int first = Math.Max(0, Math.Min(startFrame, frames.Count - 1));
-		int last = Math.Max(first, Math.Min(endFrame, frames.Count - 1));
 		long rangeStart = frames[first].Start;
 		long rangeEnd = frames[last].End;
 		foreach (TracyPlotSample sample in plot.Samples)
@@ -689,11 +677,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	private Dictionary<string, object> BuildFrameRange(int startFrame, int endFrame)
 	{
-		if (HasMetadataFrames())
+		if (TryResolveMetadataFrameRange(startFrame, endFrame, out _, out int first, out int last))
 		{
-			int frameCount = GetMetadataFrameCount();
-			int first = Math.Max(0, Math.Min(startFrame, frameCount - 1));
-			int last = Math.Max(first, Math.Min(endFrame, frameCount - 1));
 			return new Dictionary<string, object>
 			{
 				["startFrame"] = first,
@@ -710,6 +695,26 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["framesUnavailable"] = true,
 			["frameSource"] = "none"
 		};
+	}
+
+	private bool TryResolveMetadataFrameRange(int startFrame, int endFrame, out List<TracyFrameSummary> frames, out int first, out int last)
+	{
+		frames = GetMetadataFrames().ToList();
+		if (frames.Count == 0)
+		{
+			first = 0;
+			last = 0;
+			return false;
+		}
+
+		first = startFrame < 0 ? 0 : Math.Max(0, Math.Min(startFrame, frames.Count - 1));
+		last = endFrame < 0 ? frames.Count - 1 : Math.Max(first, Math.Min(endFrame, frames.Count - 1));
+		return true;
+	}
+
+	private static bool HasExplicitFrameRange(int startFrame, int endFrame)
+	{
+		return startFrame >= 0 || endFrame >= 0;
 	}
 
 	private static double Round(double value)
