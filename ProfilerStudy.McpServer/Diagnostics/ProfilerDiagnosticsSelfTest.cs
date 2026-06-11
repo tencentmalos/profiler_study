@@ -125,6 +125,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string zonePath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-zone.tracy");
 		string plotPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-plot.tracy");
 		string gpuPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-gpu.tracy");
+		string unsupportedEventsPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported-events.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -176,6 +177,14 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertDiagnosticCode(gpuStream.Diagnostics, "TracyGpuZonesUnsupported", "tracy gpu unsupported diagnostics");
 			AssertLoadTraceFileDiagnostics(gpuPath, "TracyGpuZonesUnsupported");
 
+			WriteTracyDumpWithUnsupportedEvents(unsupportedEventsPath);
+			TracyEventStream unsupportedEventsStream = Tracy010FileReader.Read(unsupportedEventsPath);
+			AssertEqual(true, unsupportedEventsStream.HasMetadata, "tracy unsupported events metadata present");
+			AssertDiagnosticCode(unsupportedEventsStream.Diagnostics, "TracyLocksUnsupported", "tracy locks unsupported diagnostics");
+			AssertDiagnosticCode(unsupportedEventsStream.Diagnostics, "TracyMessagesUnsupported", "tracy messages unsupported diagnostics");
+			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyLocksUnsupported");
+			AssertLoadTraceFileDiagnostics(unsupportedEventsPath, "TracyMessagesUnsupported");
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 		}
@@ -204,6 +213,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(gpuPath))
 			{
 				File.Delete(gpuPath);
+			}
+			if (File.Exists(unsupportedEventsPath))
+			{
+				File.Delete(unsupportedEventsPath);
 			}
 		}
 	}
@@ -639,6 +652,11 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(false, keptResult["isError"], "diagnostic load_trace_file isError");
 			IDictionary kept = keptResult["structuredContent"] as IDictionary;
 			string sessionId = Convert.ToString(kept["sessionId"]);
+			string artifactId = Convert.ToString(kept["artifactId"]);
+			if (string.IsNullOrWhiteSpace(artifactId))
+			{
+				throw new InvalidOperationException("diagnostic load_trace_file must return artifactId.");
+			}
 			Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId
@@ -646,9 +664,39 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(false, diagnosticsResult["isError"], "diagnostic get_import_diagnostics isError");
 			IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
 			AssertDiagnosticCode(diagnostics["diagnostics"], expectedCode, "load trace diagnostics");
+			Dictionary<string, object> artifactDiagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+			{
+				["artifact_id"] = artifactId
+			});
+			AssertEqual(false, artifactDiagnosticsResult["isError"], "artifact diagnostic get_import_diagnostics isError");
+			IDictionary artifactDiagnostics = artifactDiagnosticsResult["structuredContent"] as IDictionary;
+			AssertDiagnosticCode(artifactDiagnostics["diagnostics"], expectedCode, "artifact diagnostics");
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId
+			});
+			Dictionary<string, object> reloadResult = tools.CallTool("load_trace_artifact", new Dictionary<string, object>
+			{
+				["artifact_id"] = artifactId,
+				["keep_session"] = true
+			});
+			AssertEqual(false, reloadResult["isError"], "diagnostic load_trace_artifact isError");
+			IDictionary reloaded = reloadResult["structuredContent"] as IDictionary;
+			string reloadedSessionId = Convert.ToString(reloaded["sessionId"]);
+			if (string.IsNullOrWhiteSpace(reloadedSessionId))
+			{
+				throw new InvalidOperationException("diagnostic load_trace_artifact must return sessionId.");
+			}
+			Dictionary<string, object> reloadedDiagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+			{
+				["session_id"] = reloadedSessionId
+			});
+			AssertEqual(false, reloadedDiagnosticsResult["isError"], "reloaded diagnostic get_import_diagnostics isError");
+			IDictionary reloadedDiagnostics = reloadedDiagnosticsResult["structuredContent"] as IDictionary;
+			AssertDiagnosticCode(reloadedDiagnostics["diagnostics"], expectedCode, "reloaded artifact diagnostics");
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = reloadedSessionId
 			});
 		}
 		finally
@@ -953,6 +1001,42 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteUInt32(inner, 0);                      // name StringIdx
 		WriteUInt64(inner, 0);                      // overflow
 		WriteUInt64(inner, 0);                      // context threadData count
+		WriteUInt64(inner, 0);                      // plot count
+		WriteTracyDump(path, inner.ToArray());
+	}
+
+	private static void WriteTracyDumpWithUnsupportedEvents(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: false);
+		WriteUInt64(inner, 0);                      // localThreadCompress size
+		WriteUInt64(inner, 0);                      // externalThreadCompress size
+		WriteUInt64(inner, 0);                      // sourceLocation map count
+		WriteUInt64(inner, 0);                      // sourceLocationExpand count
+		WriteUInt64(inner, 0);                      // sourceLocationPayload count
+		WriteUInt64(inner, 0);                      // sourceLocationZones count
+		WriteUInt64(inner, 0);                      // gpuSourceLocationZones count
+		WriteUInt64(inner, 1);                      // lockMap count
+		WriteUInt32(inner, 1);                      // lock id
+		inner.Write(new byte[3], 0, 3);             // customName Int24
+		WriteInt16(inner, -1);                      // srcloc
+		inner.WriteByte(0);                         // LockType
+		inner.WriteByte(1);                         // valid
+		WriteInt64(inner, 1_000);                   // timeAnnounce
+		WriteInt64(inner, 2_000);                   // timeTerminate
+		WriteUInt64(inner, 1);                      // thread list count
+		WriteUInt64(inner, 123);                    // thread id
+		WriteUInt64(inner, 1);                      // lock timeline event count
+		inner.Write(new byte[12], 0, 12);           // lock timeline event
+		WriteUInt64(inner, 1);                      // messages count
+		inner.Write(new byte[32], 0, 32);           // global message
+		WriteUInt64(inner, 0);                      // zoneExtra count
+		WriteUInt64(inner, 0);                      // total CPU zone count
+		WriteUInt64(inner, 0);                      // zoneChildren count
+		WriteUInt64(inner, 0);                      // thread count
+		WriteUInt64(inner, 0);                      // total GPU zone count
+		WriteUInt64(inner, 0);                      // gpuChildren count
+		WriteUInt64(inner, 0);                      // gpuData count
 		WriteUInt64(inner, 0);                      // plot count
 		WriteTracyDump(path, inner.ToArray());
 	}

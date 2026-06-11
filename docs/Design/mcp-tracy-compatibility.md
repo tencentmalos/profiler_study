@@ -174,6 +174,7 @@ TracyVersionRegistry
 - Plot 第一阶段按 Tracy `0.10.0` 保存格式中的 plot section 解码，生成 `TracyPlotSummary(name, type, format, min, max, sum, samples)`；`list_counters` 和 `query_counter` 使用该数据返回 Tracy counters。
 - 解码 Tracy `0.10.0` 保存格式中的 CPU zones、thread names、frame marks、plots 和基础 metadata。thread names 应合并保存格式的 `threadNames` map 与 CPU zone thread ids；MCP summary 的 `threads` 和 normalized `threads.ndjson` 必须保留 thread id/name，artifact reload 后不能丢失。
 - 对第一版不导出的事件累计 unsupported counts。GPU zones、GPU contexts、locks、messages、allocations 和 callstacks 即使存在，也必须进入 diagnostics 或 unsupported counts；除非文件结构本身损坏，否则不能因为这些事件尚未导出到 normalized schema 而让整个 `.tracy` 文件导入失败。
+- Locks/messages 第一阶段不导出查询模型，但 reader 必须在跳过保存格式 section 时记录 `TracyLocksUnsupported` 和 `TracyMessagesUnsupported`；diagnostic 需要包含 lock/message 数量，lock diagnostic 还要包含 lock timeline event 数量，并通过 `get_import_diagnostics` 与 normalized artifact reload 后的 diagnostics 持续可见。
 - 输出 `TracyEventStream`，供 normalizer 使用。
 
 输入：

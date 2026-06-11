@@ -230,8 +230,29 @@ public static class Tracy010FileReader
 		}
 
 		List<string> sourceLocationNames = ReadSourceLocationsAndSkipToLocks(reader, pointerMap, stringData);
-		SkipLocks(reader);
-		SkipMessages(reader);
+		ulong lockCount = SkipLocks(reader, out ulong lockTimelineEventCount);
+		if (lockCount > 0 || lockTimelineEventCount > 0)
+		{
+			readerDiagnostics.Add(new Dictionary<string, object>
+			{
+				["severity"] = "warning",
+				["code"] = "TracyLocksUnsupported",
+				["message"] = "Locks are present but are not exported by the initial Tracy normalized schema.",
+				["lockCount"] = lockCount,
+				["lockTimelineEventCount"] = lockTimelineEventCount
+			});
+		}
+		ulong messageCount = SkipMessages(reader);
+		if (messageCount > 0)
+		{
+			readerDiagnostics.Add(new Dictionary<string, object>
+			{
+				["severity"] = "warning",
+				["code"] = "TracyMessagesUnsupported",
+				["message"] = "Messages are present but are not exported by the initial Tracy normalized schema.",
+				["messageCount"] = messageCount
+			});
+		}
 		SkipZoneExtra(reader);
 		cpuZones = ReadCpuZones(reader, sourceLocationNames, out threadCount);
 		threads = BuildThreads(threadNameMap, cpuZones);
@@ -373,24 +394,27 @@ public static class Tracy010FileReader
 		reader.Skip(checked((long)count * 10L));
 	}
 
-	private static void SkipLocks(DecodedBlockReader reader)
+	private static ulong SkipLocks(DecodedBlockReader reader, out ulong timelineEventCount)
 	{
 		ulong count = reader.ReadUInt64();
 		if (count > 1_000_000)
 		{
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy lock section is too large.");
 		}
+		timelineEventCount = 0;
 		for (ulong i = 0; i < count; i++)
 		{
 			reader.Skip(4 + 3 + 2 + 1 + 1 + 8 + 8);
 			ulong threadCount = reader.ReadUInt64();
 			reader.Skip(checked((long)threadCount * 8L));
 			ulong eventCount = reader.ReadUInt64();
+			timelineEventCount = checked(timelineEventCount + eventCount);
 			reader.Skip(checked((long)eventCount * 12L));
 		}
+		return count;
 	}
 
-	private static void SkipMessages(DecodedBlockReader reader)
+	private static ulong SkipMessages(DecodedBlockReader reader)
 	{
 		ulong count = reader.ReadUInt64();
 		if (count > 10_000_000)
@@ -398,6 +422,7 @@ public static class Tracy010FileReader
 			throw new TracyFileFormatException("TracyFileFormatInvalid", "Tracy message section is too large.");
 		}
 		reader.Skip(checked((long)count * 32L));
+		return count;
 	}
 
 	private static void SkipZoneExtra(DecodedBlockReader reader)
