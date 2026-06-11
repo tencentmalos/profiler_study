@@ -9,13 +9,15 @@ namespace ProfilerStudy.Tracy;
 public sealed class TracyTraceQuerySession : ITraceQuerySession
 {
 	private readonly TracyFileHeader m_Header;
+	private readonly TracyEventStream m_EventStream;
 	private readonly ArrayList m_Diagnostics;
 
-	public TracyTraceQuerySession(string sourcePath, TracyFileHeader header, ArrayList diagnostics)
+	public TracyTraceQuerySession(string sourcePath, TracyEventStream eventStream, ArrayList diagnostics)
 	{
 		SourcePath = sourcePath;
 		DisplayName = Path.GetFileName(sourcePath);
-		m_Header = header;
+		m_EventStream = eventStream;
+		m_Header = eventStream.Header;
 		m_Diagnostics = diagnostics;
 	}
 
@@ -42,6 +44,10 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["frameCount"] = 0,
 				["zoneCount"] = 0,
 				["plotCount"] = 0,
+				["compressedBlockCount"] = m_EventStream.CompressedBlockCount,
+				["compressedByteCount"] = m_EventStream.CompressedByteCount,
+				["decodedByteCount"] = m_EventStream.DecodedByteCount,
+				["payloadByteCount"] = m_EventStream.PayloadByteCount,
 				["eventsDecoded"] = false,
 				["framesUnavailable"] = true,
 				["frameSource"] = "none",

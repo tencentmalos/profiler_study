@@ -123,6 +123,12 @@ internal static class ProfilerDiagnosticsSelfTest
 			TracyFileHeader header = Tracy010FileReader.ReadHeader(path);
 			AssertEqual("0.10.0", header.Version, "tracy file header version");
 			AssertEqual("lz4", header.Compression, "tracy file compression");
+			TracyEventStream eventStream = Tracy010FileReader.Read(path);
+			AssertEqual("0.10.0", eventStream.Version, "tracy event stream version");
+			AssertEqual("lz4", eventStream.Compression, "tracy event stream compression");
+			AssertEqual(1, eventStream.CompressedBlockCount, "tracy compressed block count");
+			AssertEqual(8L, eventStream.DecodedByteCount, "tracy decoded byte count");
+			AssertEqual(0L, eventStream.PayloadByteCount, "tracy payload byte count");
 			AssertLoadTraceFileTool(path);
 
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);

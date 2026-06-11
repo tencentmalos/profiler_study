@@ -16,14 +16,18 @@ public static class TracyTraceImporter
 		}
 
 		string fullPath = Path.GetFullPath(path);
-		TracyFileHeader header = Tracy010FileReader.ReadHeader(fullPath);
+		TracyEventStream eventStream = Tracy010FileReader.Read(fullPath);
 		ArrayList diagnostics = new ArrayList
 		{
 			new Dictionary<string, object>
 			{
 				["severity"] = "info",
 				["code"] = "TracyHeaderLoaded",
-				["message"] = "Tracy 0.10.0 LZ4 container header was validated."
+				["message"] = "Tracy 0.10.0 LZ4 container header was validated.",
+				["compressedBlockCount"] = eventStream.CompressedBlockCount,
+				["compressedByteCount"] = eventStream.CompressedByteCount,
+				["decodedByteCount"] = eventStream.DecodedByteCount,
+				["payloadByteCount"] = eventStream.PayloadByteCount
 			},
 			new Dictionary<string, object>
 			{
@@ -32,7 +36,7 @@ public static class TracyTraceImporter
 				["message"] = "CPU zones, frame marks, plots, and metadata decoding are not enabled in this implementation slice."
 			}
 		};
-		TracyTraceQuerySession querySession = new TracyTraceQuerySession(fullPath, header, diagnostics);
+		TracyTraceQuerySession querySession = new TracyTraceQuerySession(fullPath, eventStream, diagnostics);
 		return new TraceDocument(
 			Guid.NewGuid().ToString("N"),
 			fullPath,
