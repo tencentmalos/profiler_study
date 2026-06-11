@@ -148,20 +148,27 @@ public static class Tracy010FileReader
 			}
 
 			long refTime = 0;
-			long firstStart = 0;
-			long lastEnd = 0;
+			List<long> starts = new List<long>();
+			List<long> ends = new List<long>();
 			for (ulong frameIndex = 0; frameIndex < frameCount; frameIndex++)
 			{
 				long start = ReadTimeOffset(reader, ref refTime);
 				long end = continuous ? -1 : ReadTimeOffset(reader, ref refTime);
 				reader.Skip(4); // frameImage
-				if (frameIndex == 0)
-				{
-					firstStart = start;
-				}
-				lastEnd = end;
+				starts.Add(start);
+				ends.Add(end);
 			}
-			frameSets.Add(new TracyFrameSetSummary(name, continuous, checked((int)frameCount), firstStart, lastEnd));
+			List<TracyFrameSummary> frames = new List<TracyFrameSummary>();
+			for (int frameIndex = 0; frameIndex < starts.Count; frameIndex++)
+			{
+				long end = ends[frameIndex];
+				if (continuous && frameIndex + 1 < starts.Count)
+				{
+					end = starts[frameIndex + 1];
+				}
+				frames.Add(new TracyFrameSummary(frameIndex, starts[frameIndex], end));
+			}
+			frameSets.Add(new TracyFrameSetSummary(name, continuous, frames));
 		}
 
 		Dictionary<ulong, string> pointerMap = new Dictionary<ulong, string>();

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ProfilerStudy.Trace;
 
 namespace ProfilerStudy.Tracy;
@@ -41,7 +42,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["tracyVersion"] = m_Header.Version,
 				["compression"] = m_Header.Compression,
 				["threadCount"] = 0,
-				["frameCount"] = 0,
+				["frameCount"] = GetMetadataFrameCount(),
 				["zoneCount"] = 0,
 				["plotCount"] = 0,
 				["compressedBlockCount"] = m_EventStream.CompressedBlockCount,
@@ -57,8 +58,8 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["lastTime"] = m_EventStream.Metadata == null ? 0L : m_EventStream.Metadata.LastTime,
 				["frameSetCount"] = m_EventStream.Metadata == null ? 0 : m_EventStream.Metadata.FrameSetCount,
 				["eventsDecoded"] = false,
-				["framesUnavailable"] = true,
-				["frameSource"] = "none",
+				["framesUnavailable"] = !HasMetadataFrames(),
+				["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none",
 				["status"] = "header-loaded"
 			},
 			["threads"] = new ArrayList(),
@@ -82,6 +83,34 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public Dictionary<string, object> FindSlowFrames(int top, double thresholdMs)
 	{
+		if (HasMetadataFrames())
+		{
+			double resolvedThresholdMs = Math.Max(0.0, thresholdMs);
+			List<Dictionary<string, object>> frames = GetMetadataFrames()
+				.Select(frame => FrameToDictionary(frame))
+				.Where(frame => resolvedThresholdMs <= 0.0 || Convert.ToDouble(frame["durationMs"]) >= resolvedThresholdMs)
+				.OrderByDescending(frame => Convert.ToDouble(frame["durationMs"]))
+				.ThenBy(frame => Convert.ToInt32(frame["frameIndex"]))
+				.Take(Math.Max(1, top))
+				.ToList();
+			return new Dictionary<string, object>
+			{
+				["sourceFormat"] = SourceFormat,
+				["thresholdMs"] = Round(resolvedThresholdMs),
+				["framesUnavailable"] = false,
+				["frameSource"] = "tracy-frame-set-metadata",
+				["eventsDecoded"] = false,
+				["slowFrames"] = ToArrayList(frames),
+				["slowFramePattern"] = new Dictionary<string, object>
+				{
+					["hasPeriodicSlowFrames"] = false,
+					["reason"] = "Tracy event timeline decoding is pending; cadence analysis uses frame set metadata only."
+				},
+				["diagnostics"] = Diagnostics("TracyFrameSetMetadata", "Slow frame results are based on saved Tracy frame set metadata; full frame mark decoding is pending."),
+				["top"] = Math.Max(1, top)
+			};
+		}
+
 		return new Dictionary<string, object>
 		{
 			["sourceFormat"] = SourceFormat,
@@ -208,6 +237,54 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["message"] = message
 		});
 		return diagnostics;
+	}
+
+	private bool HasMetadataFrames()
+	{
+		return GetMetadataFrameCount() > 0;
+	}
+
+	private int GetMetadataFrameCount()
+	{
+		return m_EventStream.Metadata == null ? 0 : m_EventStream.Metadata.FrameCount;
+	}
+
+	private IEnumerable<TracyFrameSummary> GetMetadataFrames()
+	{
+		if (m_EventStream.Metadata == null)
+		{
+			yield break;
+		}
+		int globalFrameIndex = 0;
+		foreach (TracyFrameSetSummary frameSet in m_EventStream.Metadata.FrameSets)
+		{
+			foreach (TracyFrameSummary frame in frameSet.Frames)
+			{
+				yield return new TracyFrameSummary(globalFrameIndex++, frame.Start, frame.End);
+			}
+		}
+	}
+
+	private static Dictionary<string, object> FrameToDictionary(TracyFrameSummary frame)
+	{
+		return new Dictionary<string, object>
+		{
+			["frameIndex"] = frame.FrameIndex,
+			["startTime"] = frame.Start,
+			["endTime"] = frame.End,
+			["durationNs"] = frame.Duration,
+			["durationMs"] = Round(frame.Duration / 1_000_000.0)
+		};
+	}
+
+	private static ArrayList ToArrayList(IEnumerable<Dictionary<string, object>> values)
+	{
+		ArrayList list = new ArrayList();
+		foreach (Dictionary<string, object> value in values)
+		{
+			list.Add(value);
+		}
+		return list;
 	}
 
 	private static Dictionary<string, object> BuildFrameRange(int startFrame, int endFrame)

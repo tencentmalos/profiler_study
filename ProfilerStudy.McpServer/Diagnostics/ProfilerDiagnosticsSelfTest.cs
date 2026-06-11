@@ -142,6 +142,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(16_666_667L, metadataStream.Metadata.LastTime, "tracy metadata last time");
 			AssertEqual(1, metadataStream.Metadata.FrameSetCount, "tracy metadata frame set count");
 			AssertEqual(2, metadataStream.Metadata.FrameCount, "tracy metadata frame count");
+			AssertTracyMetadataQueryTools(metadataPath);
 
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
@@ -289,6 +290,43 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(false, overhead["supported"], "tracy overhead supported");
 	}
 
+	private static void AssertTracyMetadataQueryTools(string path)
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+		{
+			["path"] = path,
+			["format"] = "auto",
+			["keep_session"] = true
+		});
+		AssertEqual(false, keptResult["isError"], "metadata load_trace_file isError");
+		IDictionary kept = keptResult["structuredContent"] as IDictionary;
+		string sessionId = Convert.ToString(kept["sessionId"]);
+		IDictionary summary = kept["summary"] as IDictionary;
+		AssertEqual(true, summary["metadataDecoded"], "metadata summary decoded");
+		AssertEqual(2, summary["frameCount"], "metadata summary frame count");
+		AssertEqual(false, summary["framesUnavailable"], "metadata summary frames unavailable");
+
+		Dictionary<string, object> slowFramesResult = tools.CallTool("find_slow_frames", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId,
+			["top"] = 5
+		});
+		AssertEqual(false, slowFramesResult["isError"], "metadata tracy find_slow_frames isError");
+		IDictionary slowFrames = slowFramesResult["structuredContent"] as IDictionary;
+		AssertEqual("tracy", slowFrames["sourceFormat"], "metadata slow frames source format");
+		AssertEqual(false, slowFrames["framesUnavailable"], "metadata slow frames unavailable");
+		AssertHasItems(slowFrames["slowFrames"], "metadata slow frames");
+		IDictionary firstFrame = ((IList)slowFrames["slowFrames"])[0] as IDictionary;
+		AssertEqual(1, firstFrame["frameIndex"], "metadata slow frame index");
+		AssertEqual(9.0, firstFrame["durationMs"], "metadata slow frame duration");
+
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+	}
+
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)
 	{
 		byte[] innerHeader = new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', major, minor, patch };
@@ -328,7 +366,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteInt64(inner, 8_333_333);               // frame 0 end offset
 		WriteInt32(inner, -1);                      // frame 0 image
 		WriteInt64(inner, 1);                       // frame 1 start offset
-		WriteInt64(inner, 8_333_333);               // frame 1 end offset
+		WriteInt64(inner, 9_000_000);               // frame 1 end offset
 		WriteInt32(inner, -1);                      // frame 1 image
 		WriteUInt64(inner, 0);                      // stringData count
 		WriteUInt64(inner, 0);                      // strings count
