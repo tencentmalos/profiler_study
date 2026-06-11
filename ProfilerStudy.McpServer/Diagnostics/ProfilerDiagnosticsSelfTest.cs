@@ -355,6 +355,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(true, summaryBlock["framesUnavailable"], "tracy summary frames unavailable");
 			AssertEqual(false, summaryBlock["eventsDecoded"], "tracy summary events decoded");
 			AssertTracyQueryToolContracts(tools, sessionId);
+			AssertOpenFileToolWithTracy(tools, path);
 			AssertTracySaveSessionFileTool(tools, path, sessionId);
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
@@ -2188,6 +2189,8 @@ internal static class ProfilerDiagnosticsSelfTest
 	private static void AssertStudySaveSessionFile(ProfilerAnalysisService service, string sessionId, Session sourceSession)
 	{
 		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-save.profiler");
+		string wrongExtensionPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-save-corrected.wrong");
+		string correctedWrongExtensionPath = Path.ChangeExtension(Path.GetFullPath(wrongExtensionPath), ".profiler");
 		try
 		{
 			Dictionary<string, object> saved = service.SaveSessionFile(sessionId, path, overwrite: false);
@@ -2195,6 +2198,7 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual("study", saved["sourceFormat"], "study save source format");
 			AssertEqual(Path.GetFullPath(path), saved["path"], "study save path");
 			AssertEqual(true, saved["saved"], "study save saved");
+			AssertEqual(false, saved["extensionCorrected"], "study save extension corrected");
 			if (!File.Exists(path))
 			{
 				throw new InvalidOperationException("study save file was not created.");
@@ -2215,6 +2219,15 @@ internal static class ProfilerDiagnosticsSelfTest
 			{
 				loaded.Close();
 			}
+
+			Dictionary<string, object> corrected = service.SaveSessionFile(sessionId, wrongExtensionPath, overwrite: false);
+			AssertEqual(correctedWrongExtensionPath, corrected["path"], "study corrected save path");
+			AssertEqual(true, corrected["extensionCorrected"], "study wrong suffix corrected");
+			if (!File.Exists(correctedWrongExtensionPath))
+			{
+				throw new InvalidOperationException("study corrected save file was not created.");
+			}
+			AssertOpenFileToolWithStudy(path, sourceSession.FrameCount, sourceSession.ThreadCount);
 		}
 		finally
 		{
@@ -2222,7 +2235,86 @@ internal static class ProfilerDiagnosticsSelfTest
 			{
 				File.Delete(path);
 			}
+			if (File.Exists(correctedWrongExtensionPath))
+			{
+				File.Delete(correctedWrongExtensionPath);
+			}
 		}
+	}
+
+	private static void AssertOpenFileToolWithStudy(string path, int expectedFrameCount, int expectedThreadCount)
+	{
+		ProfilerMcpTools tools = new ProfilerMcpTools();
+		AssertOpenFileToolSchema(tools);
+		Dictionary<string, object> result = tools.CallTool("open_file", new Dictionary<string, object>
+		{
+			["path"] = path,
+			["format"] = "auto",
+			["top"] = 5
+		});
+		AssertEqual(false, result["isError"], "study open_file isError");
+		IDictionary structured = result["structuredContent"] as IDictionary;
+		AssertEqual("study", structured["sourceFormat"], "study open_file source format");
+		AssertEqual("open_file", structured["openedBy"], "study open_file marker");
+		AssertEqual(true, structured["isLatestSession"], "study open_file latest session");
+		string sessionId = Convert.ToString(structured["sessionId"]);
+		if (string.IsNullOrWhiteSpace(sessionId))
+		{
+			throw new InvalidOperationException("study open_file must return sessionId.");
+		}
+		AssertEqual(expectedFrameCount, structured["frameCount"], "study open_file frame count");
+		AssertEqual(expectedThreadCount, structured["threadCount"], "study open_file thread count");
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+	}
+
+	private static void AssertOpenFileToolWithTracy(ProfilerMcpTools tools, string path)
+	{
+		AssertOpenFileToolSchema(tools);
+		Dictionary<string, object> result = tools.CallTool("open_file", new Dictionary<string, object>
+		{
+			["path"] = path,
+			["format"] = "auto",
+			["top"] = 5
+		});
+		AssertEqual(false, result["isError"], "tracy open_file isError");
+		IDictionary structured = result["structuredContent"] as IDictionary;
+		AssertEqual("tracy", structured["sourceFormat"], "tracy open_file source format");
+		AssertEqual("open_file", structured["openedBy"], "tracy open_file marker");
+		AssertEqual(true, structured["isLatestSession"], "tracy open_file latest session");
+		string sessionId = Convert.ToString(structured["sessionId"]);
+		if (string.IsNullOrWhiteSpace(sessionId))
+		{
+			throw new InvalidOperationException("tracy open_file must return sessionId.");
+		}
+		tools.CallTool("close_session", new Dictionary<string, object>
+		{
+			["session_id"] = sessionId
+		});
+	}
+
+	private static void AssertOpenFileToolSchema(ProfilerMcpTools tools)
+	{
+		foreach (object toolObject in tools.ListTools())
+		{
+			IDictionary tool = toolObject as IDictionary;
+			if (tool != null && Convert.ToString(tool["name"]) == "open_file")
+			{
+				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+				IList required = inputSchema["required"] as IList;
+				if (required == null || !required.Contains("path"))
+				{
+					throw new InvalidOperationException("open_file must require path.");
+				}
+				IDictionary properties = inputSchema["properties"] as IDictionary;
+				IDictionary format = properties["format"] as IDictionary;
+				AssertEqual("auto", format["default"], "open_file format default");
+				return;
+			}
+		}
+		throw new InvalidOperationException("open_file tool is missing.");
 	}
 
 	private static void AssertTracySaveSessionFileTool(ProfilerMcpTools tools, string sourcePath, string sessionId)
@@ -2248,20 +2340,23 @@ internal static class ProfilerDiagnosticsSelfTest
 			throw new InvalidOperationException("save_session_file tool is missing.");
 		}
 
-		string path = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-save.tracy");
+		string requestedPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-save.profiler");
+		string path = Path.ChangeExtension(Path.GetFullPath(requestedPath), ".tracy");
 		try
 		{
 			Dictionary<string, object> result = tools.CallTool("save_session_file", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId,
-				["path"] = path
+				["path"] = requestedPath
 			});
 			AssertEqual(false, result["isError"], "tracy save_session_file isError");
 			IDictionary structured = result["structuredContent"] as IDictionary;
 			AssertEqual(sessionId, structured["sessionId"], "tracy save session id");
 			AssertEqual("tracy", structured["sourceFormat"], "tracy save source format");
 			AssertEqual("source-artifact-copy", structured["saveMode"], "tracy save mode");
-			AssertEqual(Path.GetFullPath(path), structured["path"], "tracy save path");
+			AssertEqual(path, structured["path"], "tracy save path");
+			AssertEqual(Path.GetFullPath(requestedPath), structured["requestedPath"], "tracy save requested path");
+			AssertEqual(true, structured["extensionCorrected"], "tracy wrong suffix corrected");
 			if (!File.Exists(path))
 			{
 				throw new InvalidOperationException("tracy save file was not created.");

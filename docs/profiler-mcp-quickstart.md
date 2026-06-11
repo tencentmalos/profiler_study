@@ -123,14 +123,24 @@ Android 示例：
 - `path`: 文件路径
 - `top`: 初始摘要返回条数，默认 `10`
 
+### `open_file`
+
+统一从文件打开 session，并保留为 MCP server 内最新 session，返回 `sessionId`。`format=auto` 时按后缀识别：`.profiler` / `.profiler_recording` / `.profiler_dump` 作为 `study`，`.tracy` 作为 `tracy`。
+
+参数：
+
+- `path`: 文件路径
+- `format`: `auto`、`study`、`tracy` 或预留的 `perfetto`，默认 `auto`
+- `top`: 初始摘要返回条数，默认 `10`
+
 ### `save_session_file`
 
-把 MCP server 内存中保留的 session 保存到文件。`study` session 保存为 `.profiler`；`tracy` session 仅在来源仍有原始 `.tracy` 文件时复制保存为 `.tracy`。当前 live Tracy capture artifact 如果只有 normalized cache，会返回不支持保存为 `.tracy` 的明确错误。
+把 MCP server 内存中保留的 session 保存到文件。输出后缀按 session 实际协议自动修正：`study` session 保存为 `.profiler`；`tracy` session 保存为 `.tracy`，且仅在来源仍有原始 `.tracy` 文件时复制保存。当前 live Tracy capture artifact 如果只有 normalized cache，会返回不支持保存为 `.tracy` 的明确错误。
 
 参数：
 
 - `session_id`: session id
-- `path`: 输出路径。无后缀时按 session 格式补 `.profiler` 或 `.tracy`
+- `path`: 输出路径。无后缀或错误后缀会按 session 格式修正为 `.profiler` 或 `.tracy`
 - `overwrite`: 是否覆盖已有文件，默认 `false`
 
 ### `list_sessions`

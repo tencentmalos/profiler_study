@@ -8,7 +8,8 @@
 | `capture_android_profile` | Compatibility wrapper for fixed Android debug/release sockets. Prefer `capture_profile` for new live captures. |
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |
-| `save_session_file` | Save a retained session to disk. `study` sessions write `.profiler`; `tracy` sessions copy an original `.tracy` source when available. |
+| `open_file` | Open a supported file into the newest retained session. `format=auto` maps `.profiler` / `.profiler_recording` / `.profiler_dump` to `study` and `.tracy` to `tracy`. |
+| `save_session_file` | Save a retained session to disk. The output suffix is corrected from the session's actual protocol: `study` writes `.profiler`; file-backed `tracy` copies an original `.tracy` source when available. |
 | `load_trace_file` | Load a trace file through the unified trace path. Current direct trace import supports `.tracy` / `format=tracy`, returns `artifactId`, and can return `sessionId` with `keep_session=true`. |
 | `load_trace_artifact` | Reopen a registered trace artifact from the artifact store by `artifact_id`; use `keep_session=true` for follow-up analysis. |
 | `list_trace_artifacts` | List registered artifacts from the ProfilerStudy artifact store. Use `format=tracy` for Tracy imports/live captures, `format=all` for every registered format, and optional `since=<ISO-8601 UTC>` to return only newer artifacts. |
@@ -78,7 +79,13 @@ Load trace file /captures/run.tracy with keep_session=false, then use the return
 Save retained session:
 
 ```text
-For session s1, call save_session_file with path=/captures/export.profiler. For Tracy file-backed sessions use a .tracy output path; live normalized-only Tracy artifacts cannot be exported as viewer-compatible .tracy files yet.
+For session s1, call save_session_file with path=/captures/export.anything. The server will correct the suffix to .profiler for study or .tracy for Tracy. Live normalized-only Tracy artifacts cannot be exported as viewer-compatible .tracy files yet.
+```
+
+Unified file open:
+
+```text
+Call open_file with path=/captures/run.tracy and format=auto, then use the returned sessionId for get_session_summary, analyze_time_range, and list_counters.
 ```
 
 Recent Tracy artifacts:

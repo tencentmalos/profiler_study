@@ -106,7 +106,11 @@ Connection/ReceiveStream
 
 MCP 需要把 server 内存中保留的 session 落盘时，Core 应提供显式目标路径的 `.profiler` 写入入口。该入口只负责 ProfilerStudy legacy `Session` 的原生保存格式；调用方若没有 UI 状态，应传入空的 `SessionViewSaveData`，避免 Core 反向依赖 WinForms/Avalonia。
 
+MCP 保存文件时以后端 session 的实际协议为准修正输出后缀，而不是相信用户传入路径后缀：`study` 保存为 `.profiler`，`tracy` 保存为 `.tracy`。无后缀路径自动补后缀，错误后缀自动替换为协议对应后缀，并在结果中返回最终 `path` 与 `extensionCorrected`。
+
 外部 trace session 不应通过 `Session.Write(...)` 伪装成 `.profiler`。Tracy session 保存为 `.tracy` 时必须保留原始 Tracy dump 语义：如果 session/artifact 来源是已有 `.tracy` 文件，则通过校验后的源文件复制完成；如果 live Tracy artifact 当前只有 normalized cache 而没有原始 dump，则应返回明确 unsupported 结果，不能用归一化 JSON 或部分解码结果重新编码一个可能无法被 Tracy viewer 打开的伪 `.tracy`。
+
+MCP 的统一打开入口应按文件实际格式创建最新 retained session：`.profiler` / `.profiler_recording` / `.profiler_dump` 进入 legacy `Session`，`.tracy` 进入 trace document/query 层并注册 artifact。旧的 `load_session_file` 和 `load_trace_file` 保留给显式路径；新入口只做格式识别和保留 session，不改变 Core 的格式边界。
 
 ### 选区复制
 

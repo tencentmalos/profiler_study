@@ -307,6 +307,33 @@ internal sealed class ProfilerAnalysisService
 		return analysis;
 	}
 
+	public Dictionary<string, object> OpenFile(string path, string format, int top)
+	{
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			throw new ArgumentException("path is required.");
+		}
+		string resolvedFormat = ResolveOpenFormat(path, format);
+		Dictionary<string, object> result;
+		if (resolvedFormat == "study")
+		{
+			result = LoadSessionFile(path, top);
+		}
+		else if (resolvedFormat == "tracy")
+		{
+			result = LoadTraceFile(path, "tracy", top, keepSession: true);
+		}
+		else if (resolvedFormat == "perfetto")
+		{
+			throw new InvalidOperationException("Perfetto file open is reserved for a future implementation.");
+		}
+		else
+		{
+			throw new InvalidOperationException("Unsupported file format: " + resolvedFormat + ".");
+		}
+		return AddOpenFileMetadata(result, format, resolvedFormat);
+	}
+
 	public Dictionary<string, object> SaveSessionFile(string sessionId, string path, bool overwrite)
 	{
 		if (string.IsNullOrWhiteSpace(sessionId))
@@ -319,7 +346,8 @@ internal sealed class ProfilerAnalysisService
 		}
 
 		LoadedSession loaded = GetLoadedSession(sessionId);
-		string fullPath = ResolveSavePath(loaded, path);
+		string requestedPath = Path.GetFullPath(path);
+		string fullPath = ResolveSavePath(loaded, requestedPath, out bool extensionCorrected);
 		ValidatePathAllowed(fullPath);
 		if (File.Exists(fullPath) && !overwrite)
 		{
@@ -333,11 +361,11 @@ internal sealed class ProfilerAnalysisService
 
 		if (loaded.Session != null)
 		{
-			return SaveProfilerStudySession(loaded, fullPath, overwrite);
+			return SaveProfilerStudySession(loaded, requestedPath, fullPath, extensionCorrected, overwrite);
 		}
 		if (string.Equals(loaded.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase))
 		{
-			return SaveTracySession(loaded, fullPath, overwrite);
+			return SaveTracySession(loaded, requestedPath, fullPath, extensionCorrected, overwrite);
 		}
 		throw new InvalidOperationException("save_session_file is not supported for sourceFormat=" + loaded.SourceFormat + ".");
 	}
@@ -1560,38 +1588,78 @@ internal sealed class ProfilerAnalysisService
 		}
 	}
 
-	private static string ResolveSavePath(LoadedSession loaded, string path)
+	private static string ResolveOpenFormat(string path, string format)
 	{
-		string fullPath = Path.GetFullPath(path);
-		string extension = Path.GetExtension(fullPath);
-		if (loaded.Session != null)
+		string requestedFormat = string.IsNullOrWhiteSpace(format) ? "auto" : format.Trim().ToLowerInvariant();
+		if (requestedFormat != "auto")
 		{
-			if (string.IsNullOrWhiteSpace(extension))
-			{
-				return fullPath + ".profiler";
-			}
-			if (!string.Equals(extension, ".profiler", StringComparison.OrdinalIgnoreCase))
-			{
-				throw new InvalidOperationException("study sessions can only be saved as .profiler files.");
-			}
-			return fullPath;
+			return requestedFormat;
 		}
-		if (string.Equals(loaded.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase))
+
+		string extension = Path.GetExtension(path);
+		if (string.Equals(extension, ".tracy", StringComparison.OrdinalIgnoreCase))
 		{
-			if (string.IsNullOrWhiteSpace(extension))
-			{
-				return fullPath + ".tracy";
-			}
-			if (!string.Equals(extension, ".tracy", StringComparison.OrdinalIgnoreCase))
-			{
-				throw new InvalidOperationException("Tracy sessions can only be saved as .tracy files.");
-			}
-			return fullPath;
+			return "tracy";
 		}
-		return fullPath;
+		if (string.Equals(extension, ".profiler", StringComparison.OrdinalIgnoreCase) ||
+			string.Equals(extension, ".profiler_recording", StringComparison.OrdinalIgnoreCase) ||
+			string.Equals(extension, ".profiler_dump", StringComparison.OrdinalIgnoreCase))
+		{
+			return "study";
+		}
+		throw new InvalidOperationException("Could not infer file format from extension: " + extension + ".");
 	}
 
-	private static Dictionary<string, object> SaveProfilerStudySession(LoadedSession loaded, string fullPath, bool overwrite)
+	private Dictionary<string, object> AddOpenFileMetadata(Dictionary<string, object> result, string requestedFormat, string resolvedFormat)
+	{
+		result["openedBy"] = "open_file";
+		result["requestedFormat"] = string.IsNullOrWhiteSpace(requestedFormat) ? "auto" : requestedFormat;
+		result["resolvedFormat"] = resolvedFormat;
+		result["sourceFormat"] = resolvedFormat;
+		result["isLatestSession"] = true;
+		if (result.TryGetValue("sessionId", out object sessionIdObject))
+		{
+			string sessionId = Convert.ToString(sessionIdObject);
+			if (!string.IsNullOrWhiteSpace(sessionId))
+			{
+				Dictionary<string, int> counts = GetLoadedSessionCounts(GetLoadedSession(sessionId));
+				result["latestSessionId"] = sessionId;
+				result["frameCount"] = counts["frameCount"];
+				result["threadCount"] = counts["threadCount"];
+			}
+		}
+		return result;
+	}
+
+	private static string ResolveSavePath(LoadedSession loaded, string requestedPath, out bool extensionCorrected)
+	{
+		string fullPath = Path.GetFullPath(requestedPath);
+		string extension = Path.GetExtension(fullPath);
+		string expectedExtension;
+		if (loaded.Session != null)
+		{
+			expectedExtension = ".profiler";
+		}
+		else if (string.Equals(loaded.SourceFormat, "tracy", StringComparison.OrdinalIgnoreCase))
+		{
+			expectedExtension = ".tracy";
+		}
+		else
+		{
+			extensionCorrected = false;
+			return fullPath;
+		}
+
+		if (string.Equals(extension, expectedExtension, StringComparison.OrdinalIgnoreCase))
+		{
+			extensionCorrected = false;
+			return fullPath;
+		}
+		extensionCorrected = true;
+		return Path.ChangeExtension(fullPath, expectedExtension);
+	}
+
+	private static Dictionary<string, object> SaveProfilerStudySession(LoadedSession loaded, string requestedPath, string fullPath, bool extensionCorrected, bool overwrite)
 	{
 		string error = string.Empty;
 		ThreadJobContext context = new ThreadJobContext();
@@ -1606,7 +1674,9 @@ internal sealed class ProfilerAnalysisService
 		{
 			["sessionId"] = loaded.Id,
 			["sourceFormat"] = loaded.SourceFormat,
+			["requestedPath"] = requestedPath,
 			["path"] = fullPath,
+			["extensionCorrected"] = extensionCorrected,
 			["saved"] = true,
 			["overwrite"] = overwrite,
 			["saveMode"] = "profiler-write",
@@ -1616,13 +1686,13 @@ internal sealed class ProfilerAnalysisService
 		};
 	}
 
-	private static Dictionary<string, object> SaveTracySession(LoadedSession loaded, string fullPath, bool overwrite)
+	private static Dictionary<string, object> SaveTracySession(LoadedSession loaded, string requestedPath, string fullPath, bool extensionCorrected, bool overwrite)
 	{
 		long byteCount;
 		string artifactId = loaded.TraceDocument == null ? string.Empty : loaded.TraceDocument.ArtifactId;
 		if (!string.IsNullOrWhiteSpace(artifactId) && TraceArtifactStore.TryCopySourceArtifact(artifactId, fullPath, overwrite, out byteCount))
 		{
-			return BuildTraceSaveResult(loaded, fullPath, overwrite, "source-artifact-copy", byteCount);
+			return BuildTraceSaveResult(loaded, requestedPath, fullPath, extensionCorrected, overwrite, "source-artifact-copy", byteCount);
 		}
 
 		string sourcePath = loaded.TraceDocument == null ? loaded.Source : loaded.TraceDocument.SourcePath;
@@ -1634,13 +1704,13 @@ internal sealed class ProfilerAnalysisService
 			ValidatePathAllowed(fullSourcePath);
 			File.Copy(fullSourcePath, fullPath, overwrite);
 			byteCount = new FileInfo(fullPath).Length;
-			return BuildTraceSaveResult(loaded, fullPath, overwrite, "source-copy", byteCount);
+			return BuildTraceSaveResult(loaded, requestedPath, fullPath, extensionCorrected, overwrite, "source-copy", byteCount);
 		}
 
 		throw new InvalidOperationException("This Tracy session has no original .tracy source file to copy. Live normalized-only Tracy artifacts cannot be exported as viewer-compatible .tracy files yet.");
 	}
 
-	private static Dictionary<string, object> BuildTraceSaveResult(LoadedSession loaded, string fullPath, bool overwrite, string saveMode, long byteCount)
+	private static Dictionary<string, object> BuildTraceSaveResult(LoadedSession loaded, string requestedPath, string fullPath, bool extensionCorrected, bool overwrite, string saveMode, long byteCount)
 	{
 		loaded.Source = fullPath;
 		loaded.LastAccessUtc = DateTime.UtcNow;
@@ -1649,7 +1719,9 @@ internal sealed class ProfilerAnalysisService
 		{
 			["sessionId"] = loaded.Id,
 			["sourceFormat"] = loaded.SourceFormat,
+			["requestedPath"] = requestedPath,
 			["path"] = fullPath,
+			["extensionCorrected"] = extensionCorrected,
 			["saved"] = true,
 			["overwrite"] = overwrite,
 			["saveMode"] = saveMode,

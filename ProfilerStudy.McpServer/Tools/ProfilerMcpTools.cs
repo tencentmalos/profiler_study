@@ -162,8 +162,14 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "open_file",
+				["description"] = "Open a supported profiler file into the newest retained session. format=auto maps .profiler, .profiler_recording, and .profiler_dump to study, and .tracy to tracy.",
+				["inputSchema"] = OpenFileSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "save_session_file",
-				["description"] = "Save a retained session to disk. study sessions write .profiler files; file-backed Tracy sessions copy the original .tracy source when available.",
+				["description"] = "Save a retained session to disk. The output suffix is corrected from the session's actual protocol: study writes .profiler; file-backed Tracy copies the original .tracy source when available.",
 				["inputSchema"] = SaveSessionFileSchema()
 			},
 			new Dictionary<string, object>
@@ -293,6 +299,12 @@ internal sealed class ProfilerMcpTools
 				case "load_session_file":
 					structured = m_AnalysisService.LoadSessionFile(
 						GetString(arguments, "path", string.Empty),
+						GetInt(arguments, "top", 10, 1, 50));
+					break;
+				case "open_file":
+					structured = m_AnalysisService.OpenFile(
+						GetString(arguments, "path", string.Empty),
+						GetString(arguments, "format", "auto"),
 						GetInt(arguments, "top", 10, 1, 50));
 					break;
 				case "save_session_file":
@@ -541,6 +553,33 @@ internal sealed class ProfilerMcpTools
 			["properties"] = new Dictionary<string, object>
 			{
 				["session_id"] = new Dictionary<string, object> { ["type"] = "string" }
+			}
+		};
+	}
+
+	private static Dictionary<string, object> OpenFileSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["required"] = new ArrayList { "path" },
+			["properties"] = new Dictionary<string, object>
+			{
+				["path"] = new Dictionary<string, object> { ["type"] = "string" },
+				["format"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["enum"] = new ArrayList { "auto", "study", "tracy", "perfetto" },
+					["default"] = "auto",
+					["description"] = "File format. auto infers from extension."
+				},
+				["top"] = new Dictionary<string, object>
+				{
+					["type"] = "integer",
+					["minimum"] = 1,
+					["maximum"] = 50,
+					["default"] = 10
+				}
 			}
 		};
 	}
