@@ -62,16 +62,17 @@ public GitHub plugin 安装会使用 `.agents/plugins/plugins/profiler-study/ski
 
 ### `capture_profile`
 
-通过 URL 连接 FramePro target，抓取一段时间并返回摘要分析。
+通过 URL 连接 profiler target，抓取一段时间并返回摘要分析。未传 `protocol` 时默认使用 `study`；Tracy target 需要显式传 `protocol=tracy`。
 
 支持的 URL：
 
-- `android://{forward_name}`：执行 `adb forward tcp:<local_port> <endpoint>`，再连接本地转发端口。默认把普通路径解析为 `localfilesystem:{forward_name}`，也支持显式 `localfilesystem:<path>`、`localabstract:<name>`、`tcp:<port>`，裸数字端口会解析为 `tcp:<port>`。例如 `android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro`、`android://localabstract:azahar-framepro`、`android://tcp:8428`。
+- `android://{forward_name}`：执行 `adb forward tcp:<local_port> <endpoint>`，再连接本地转发端口。默认把普通路径解析为 `localfilesystem:{forward_name}`，也支持显式 `localfilesystem:<path>`、`localabstract:<name>`、`tcp:<port>`，裸数字端口会解析为 `tcp:<port>`。例如 `android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro`、`android://localabstract:azahar-framepro`、`android://localabstract:azahar-tracy`、`android://tcp:8428`。
 - `pc://{ip}:{port}`：直接通过 TCP 连接 PC target。例如 `pc://127.0.0.1:8428`。
 
 参数：
 
 - `url`: target URL
+- `protocol`: `study`、`tracy` 或预留的 `perfetto`，默认 `study`
 - `duration_seconds`: 抓取秒数，默认 `60`
 - `top`: 返回慢帧和热点条数，默认 `10`
 - `keep_session`: 是否把本次采集保留在 MCP server 内存中并返回 `sessionId`，默认 `false`
@@ -86,6 +87,12 @@ Android 示例：
 
 ```text
 请调用 profiler-study 的 capture_profile，url=android:///data/user_de/0/org.azahar_emu.azahar.debug/files/framepro，duration_seconds=60，然后分析慢帧和热点 scope。
+```
+
+Android Tracy 示例：
+
+```text
+请调用 profiler-study 的 capture_profile，url=android://localabstract:azahar-tracy，protocol=tracy，duration_seconds=10，keep_session=true，然后调用 list_gpu_zones 查看 GPU zone。
 ```
 
 如果要继续追问某个慢帧，使用 `keep_session=true`：

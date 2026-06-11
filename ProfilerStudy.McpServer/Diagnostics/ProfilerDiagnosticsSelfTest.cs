@@ -1195,6 +1195,34 @@ internal static class ProfilerDiagnosticsSelfTest
 			});
 			server.AssertHandshakeReceived();
 
+			using FakeTracyServer androidServer = new FakeTracyServer();
+			androidServer.Start();
+			FakeProfilerTcpForwarder forwarder = new FakeProfilerTcpForwarder(androidServer.Port);
+			ProfilerMcpTools androidTools = new ProfilerMcpTools(new ProfilerAnalysisService(forwarder));
+			Dictionary<string, object> androidResult = androidTools.CallTool("capture_profile", new Dictionary<string, object>
+			{
+				["url"] = "android://localabstract:azahar-tracy",
+				["protocol"] = "tracy",
+				["duration_seconds"] = 1,
+				["top"] = 5,
+				["keep_session"] = false
+			});
+			if (object.Equals(true, androidResult["isError"]))
+			{
+				throw new InvalidOperationException("android tracy live capture returned error: " + JsonSerializer.Serialize(androidResult["structuredContent"]));
+			}
+			AssertEqual(false, androidResult["isError"], "android tracy live capture isError");
+			IDictionary androidStructured = androidResult["structuredContent"] as IDictionary;
+			IDictionary androidCapture = androidStructured["capture"] as IDictionary;
+			AssertEqual("tracy", androidCapture["protocol"], "android tracy capture protocol");
+			AssertEqual("AndroidForward", androidCapture["kind"], "android tracy capture kind");
+			AssertEqual("localabstract:azahar-tracy", androidCapture["endpoint"], "android tracy endpoint");
+			AssertEqual("127.0.0.1", androidCapture["connectHost"], "android tracy connect host");
+			AssertEqual(androidServer.Port, androidCapture["connectPort"], "android tracy connect port");
+			AssertEqual("localabstract:azahar-tracy", forwarder.ForwardedEndpoint, "android tracy forwarded endpoint");
+			AssertEqual(true, forwarder.Disposed, "android tracy forward disposed");
+			androidServer.AssertHandshakeReceived();
+
 			int refusedPort = ReserveClosedTcpPort();
 			Dictionary<string, object> connectFailedResult = tools.CallTool("capture_profile", new Dictionary<string, object>
 			{
@@ -1277,8 +1305,28 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual(7, Convert.ToInt32(zone["queryId"]), "gpu zone query id");
 		AssertEqual("SelfTestGpuContext", zone["contextName"], "gpu context name");
 			AssertEqual("gpu-time", zone["timeSource"], "gpu zone time source");
-			AssertEqual(8.0, zone["durationMs"], "gpu zone duration");
+		AssertEqual(8.0, zone["durationMs"], "gpu zone duration");
+	}
+
+	private sealed class FakeProfilerTcpForwarder : IProfilerTcpForwarder
+	{
+		private readonly int m_Port;
+
+		public FakeProfilerTcpForwarder(int port)
+		{
+			m_Port = port;
 		}
+
+		public string ForwardedEndpoint { get; private set; }
+
+		public bool Disposed { get; private set; }
+
+		public ProfilerForwardedTarget Forward(ProfilerCaptureTarget target)
+		{
+			ForwardedEndpoint = target.Endpoint;
+			return new ProfilerForwardedTarget("127.0.0.1", m_Port, target.Endpoint, () => Disposed = true);
+		}
+	}
 
 	private static int ReserveClosedTcpPort()
 	{

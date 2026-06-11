@@ -4,7 +4,7 @@
 
 | Tool | Use |
 | --- | --- |
-| `capture_profile` | Capture data from a profiler target. Default `protocol=study` captures ProfilerStudy data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Explicit `protocol=tracy` captures a Tracy 0.10.0 TCP target from `pc://{ip}:{port}` and registers a trace artifact. `protocol=perfetto` is reserved. Use `keep_session=true` for follow-ups. |
+| `capture_profile` | Capture data from a profiler target. Default `protocol=study` captures ProfilerStudy data from `android://{forward_name}` via adb forward or `pc://{ip}:{port}` via direct TCP. Explicit `protocol=tracy` captures a Tracy 0.10.0 target from `pc://{ip}:{port}` or Android `android://localabstract:<name>` / `android://localfilesystem:<path>` / `android://tcp:<port>` and registers a trace artifact. `protocol=perfetto` is reserved. Use `keep_session=true` for follow-ups. |
 | `capture_android_profile` | Compatibility wrapper for fixed Android debug/release sockets. Prefer `capture_profile` for new live captures. |
 | `analyze_session_file` | Load a `.profiler`, `.profiler_recording`, or `.profiler_dump` for a one-shot summary. |
 | `load_session_file` | Load a profiler file and keep it in memory, returning `sessionId`. |
@@ -63,6 +63,12 @@ Tracy live capture:
 
 ```text
 Capture url=pc://127.0.0.1:8086 protocol=tracy for 10 seconds with keep_session=true, then call get_import_diagnostics and list_counters.
+```
+
+Android Tracy live capture:
+
+```text
+Capture url=android://localabstract:azahar-tracy protocol=tracy for 10 seconds with keep_session=true, then call list_gpu_zones with time_source=any.
 ```
 
 Tracy GPU profiler:

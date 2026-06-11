@@ -7,7 +7,17 @@ namespace ProfilerStudy.McpServer;
 
 internal sealed class ProfilerMcpTools
 {
-	private readonly ProfilerAnalysisService m_AnalysisService = new ProfilerAnalysisService();
+	private readonly ProfilerAnalysisService m_AnalysisService;
+
+	public ProfilerMcpTools()
+		: this(new ProfilerAnalysisService())
+	{
+	}
+
+	internal ProfilerMcpTools(ProfilerAnalysisService analysisService)
+	{
+		m_AnalysisService = analysisService ?? throw new ArgumentNullException(nameof(analysisService));
+	}
 
 	public ArrayList ListTools()
 	{
@@ -16,7 +26,7 @@ internal sealed class ProfilerMcpTools
 			new Dictionary<string, object>
 			{
 				["name"] = "capture_profile",
-				["description"] = "Connect to a profiler target by URL, capture for a duration, then return a compact performance analysis. Use android://{forward_name} for adb forward to a device localfilesystem, localabstract, or tcp endpoint, or pc://{ip}:{port} for direct TCP.",
+				["description"] = "Connect to a profiler target by URL, capture for a duration, then return a compact performance analysis. Use android://{forward_name} for adb forward to a device localfilesystem, localabstract, or tcp endpoint, or pc://{ip}:{port} for direct TCP. protocol=tracy supports both pc:// and android:// targets.",
 				["inputSchema"] = new Dictionary<string, object>
 				{
 					["type"] = "object",
@@ -26,14 +36,14 @@ internal sealed class ProfilerMcpTools
 						["url"] = new Dictionary<string, object>
 						{
 							["type"] = "string",
-							["description"] = "Capture target URL, for example android:///data/local/tmp/framepro, android://localabstract:azahar-framepro, android://tcp:8428, or pc://127.0.0.1:8428."
+							["description"] = "Capture target URL, for example android:///data/local/tmp/framepro, android://localabstract:azahar-framepro, android://localabstract:azahar-tracy, android://tcp:8428, or pc://127.0.0.1:8428."
 						},
 						["protocol"] = new Dictionary<string, object>
 						{
 							["type"] = "string",
 							["enum"] = new ArrayList { "study", "tracy", "perfetto" },
 							["default"] = "study",
-							["description"] = "Capture protocol. study is the existing ProfilerStudy transport; tracy and perfetto are explicit external trace protocols."
+							["description"] = "Capture protocol. study is the existing ProfilerStudy transport; tracy captures Tracy 0.10.0 from pc:// or android:// targets; perfetto is reserved."
 						},
 						["duration_seconds"] = new Dictionary<string, object>
 						{

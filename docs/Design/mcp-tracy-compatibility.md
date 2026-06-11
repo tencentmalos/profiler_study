@@ -212,6 +212,7 @@ TracyEventStream
 - 第一版 live decoder 覆盖 Tracy `0.10.0` 的 `ThreadContext`、`ZoneBegin` / `ZoneEnd`、`FrameMarkMsg*`、`PlotData*`、`PlotConfig`、`SourceLocation`、`StringData`、`ThreadName`、`PlotName` 和 `FrameName`。它必须发送必要的 `ServerQuery*` 请求补齐 source location、字符串、thread name、plot name 和 frame name。
 - locks、messages、allocations、callstacks、symbol/source-code transfer 和硬件采样第一版不导出查询模型，但 live decoder 必须跳过对应 queue item 并累计 unsupported counts；除非 wire stream 损坏，否则不能因为这些事件存在而让整个 live capture 失败。
 - GPU live event 第一阶段解码 `GpuNewContext`、`GpuContextName`、`GpuZoneBegin*`、`GpuZoneEnd*`、`GpuTime` 和 `GpuCalibration`，输出 context、zone、聚合热点和 diagnostics。已收到 `GpuTime` 回填的 zone 使用 `timeSource=gpu-time`；capture 窗口内尚未收到 GPU timestamp 的 zone 仍以 `timeSource=cpu-submit-time` 暴露，并在 summary/diagnostics 中报告 fallback 数量。
+- MCP `capture_profile(protocol=tracy)` 支持 `pc://host:port` 直连，也支持 `android://localabstract:<name>`、`android://localfilesystem:<path>` 和 `android://tcp:<port>`。Android Tracy target 由 MCP 自动创建 `adb forward tcp:<localPort> <endpoint>`，采集结束或失败后清理 forward；用户不需要手工 forward 到本机 TCP。
 - live capture 必须有 bounded read timeout 和 cancellation 行为。duration 到达后发送 `ServerQueryTerminate`，即使 target 没有继续发送数据，MCP tool 也必须在有限时间内返回，不能阻塞 Codex 调用。
 
 输入：
@@ -434,7 +435,7 @@ default = study
 
 - 未传 `protocol` 时完全走现有 ProfilerStudy path。
 - `protocol=study` 时不初始化或探测 Tracy reader。
-- `protocol=tracy` 只支持 TCP host/port；Android Tracy target 需要用户先建立 adb forward，再传 `pc://127.0.0.1:<forwarded-port>`。后续可扩展 `android://tcp:<port>`。
+- `protocol=tracy` 支持 `pc://host:port` 和 `android://...`。Android endpoint 复用 `study` 的 adb forward 解析规则，但连接到本机临时 TCP 后走 Tracy handshake/live decoder。
 - `protocol=perfetto` 是后续 Perfetto live/import 接入的保留名称；当前 Tracy 阶段只定义命名，不实现 Perfetto live capture。
 
 新增通用 trace tools：

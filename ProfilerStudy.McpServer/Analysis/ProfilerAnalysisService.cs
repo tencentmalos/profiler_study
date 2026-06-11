@@ -29,7 +29,18 @@ internal sealed class ProfilerAnalysisService
 
 	private readonly Dictionary<string, LoadedSession> m_Sessions = new Dictionary<string, LoadedSession>();
 	private readonly object m_SessionsLock = new object();
+	private readonly IProfilerTcpForwarder m_TcpForwarder;
 	private int m_NextSessionId;
+
+	public ProfilerAnalysisService()
+		: this(new AdbProfilerTcpForwarder())
+	{
+	}
+
+	internal ProfilerAnalysisService(IProfilerTcpForwarder tcpForwarder)
+	{
+		m_TcpForwarder = tcpForwarder ?? throw new ArgumentNullException(nameof(tcpForwarder));
+	}
 
 	public Dictionary<string, object> CaptureAndroidProfile(string target, int durationSeconds, int top, bool keepSession)
 	{
@@ -52,10 +63,6 @@ internal sealed class ProfilerAnalysisService
 		if (normalizedProtocol == "tracy")
 		{
 			ProfilerCaptureTarget target = ProfilerCaptureTarget.Parse(url);
-			if (target.Kind != ProfilerCaptureTargetKind.Tcp)
-			{
-				throw new InvalidOperationException("Tracy live capture currently requires a pc://host:port TCP target. Use adb forward first for Android Tracy targets.");
-			}
 			return CaptureTracyProfile(target, durationSeconds, top, keepSession);
 		}
 		if (normalizedProtocol == "perfetto")
@@ -68,7 +75,8 @@ internal sealed class ProfilerAnalysisService
 	private Dictionary<string, object> CaptureTracyProfile(ProfilerCaptureTarget target, int durationSeconds, int top, bool keepSession)
 	{
 		Stopwatch stopwatch = Stopwatch.StartNew();
-		TracyLiveCaptureResult capture = Tracy010LiveCaptureClient.Capture(target.ConnectHost, target.ConnectPort, durationSeconds);
+		using ProfilerForwardedTarget forwardedTarget = m_TcpForwarder.Forward(target);
+		TracyLiveCaptureResult capture = Tracy010LiveCaptureClient.Capture(forwardedTarget.Host, forwardedTarget.Port, durationSeconds);
 		TracyTraceQuerySession querySession = new TracyTraceQuerySession(target.Url, capture.EventStream, capture.Diagnostics);
 		TraceDocument traceDocument = new TraceDocument(
 			Guid.NewGuid().ToString("N"),
@@ -85,8 +93,10 @@ internal sealed class ProfilerAnalysisService
 			capture.Diagnostics,
 			new Dictionary<string, object>
 			{
-				["host"] = target.ConnectHost,
-				["port"] = target.ConnectPort,
+				["host"] = forwardedTarget.Host,
+				["port"] = forwardedTarget.Port,
+				["endpoint"] = target.Endpoint,
+				["targetKind"] = target.Kind.ToString(),
 				["durationSeconds"] = durationSeconds
 			});
 		Dictionary<string, object> analysis = querySession.GetSummary(top);
@@ -98,8 +108,8 @@ internal sealed class ProfilerAnalysisService
 			["url"] = target.Url,
 			["kind"] = target.Kind.ToString(),
 			["endpoint"] = target.Endpoint,
-			["connectHost"] = target.ConnectHost,
-			["connectPort"] = target.ConnectPort,
+			["connectHost"] = forwardedTarget.Host,
+			["connectPort"] = forwardedTarget.Port,
 			["durationSeconds"] = durationSeconds,
 			["keepSession"] = keepSession
 		};
