@@ -486,6 +486,12 @@ internal static class AvaloniaSmokeTest
 			Assert(document.FrameSamples.Length == 2, "tracy frame samples");
 			Assert(Math.Abs(document.FrameSamples[1].DurationMs - 9.0) < 0.0001, "tracy frame duration");
 			Assert(document.Viewport.FrameCount == 2, "tracy viewport frame count");
+
+			WriteTracyOnDemandMetadataDump(path);
+			SessionDocument onDemandDocument = loader.LoadFileAsync(path, CancellationToken.None).GetAwaiter().GetResult();
+			Assert(onDemandDocument.Summary.FrameCount == 2, "tracy on-demand frame count");
+			Assert(onDemandDocument.FrameSamples.Length == 2, "tracy on-demand frame samples");
+			Assert(onDemandDocument.FrameSamples[0].DurationMs < 20.0, "tracy on-demand first user frame duration");
 		}
 		finally
 		{
@@ -544,6 +550,15 @@ internal static class AvaloniaSmokeTest
 		Assert(counters[0].GraphName == "tracy", "tracy ui counter graph");
 		Assert(counters[0].Name == "UIFrameTime", "tracy ui counter name");
 		Assert(Math.Abs(counters[0].Value - 16.0) < 0.0001, "tracy ui counter value");
+
+		SessionDocument onDemandDocument = CreateTracyOnDemandUiAnalyzerDocument();
+		Assert(onDemandDocument.Summary.FrameCount == 2, "tracy on-demand ui frame count");
+		IReadOnlyList<ScopeFrameDetailRow> onDemandFrameScopes = ScopeFrameDetailAnalyzer.Build(onDemandDocument, 0);
+		Assert(onDemandFrameScopes.Count == 1, "tracy on-demand ui frame scopes");
+		Assert(onDemandFrameScopes[0].Name == "OnDemandUserZone", "tracy on-demand ui frame scope name");
+		IReadOnlyList<SelectedFrameCounterRow> onDemandCounters = SelectedFrameCounterAnalyzer.Build(onDemandDocument, 0);
+		Assert(onDemandCounters.Count == 1, "tracy on-demand ui selected counters");
+		Assert(onDemandCounters[0].Name == "OnDemandFrameTime", "tracy on-demand ui counter name");
 	}
 
 	private static SessionDocument CreateTracyUiAnalyzerDocument()
@@ -604,6 +619,68 @@ internal static class AvaloniaSmokeTest
 			querySession,
 			new ArrayList());
 		return SessionLoader.CreateTraceDocument(traceDocument, "memory://tracy-ui-analyzer");
+	}
+
+	private static SessionDocument CreateTracyOnDemandUiAnalyzerDocument()
+	{
+		TracyTraceMetadata metadata = new TracyTraceMetadata(
+			0,
+			1_000_000_000,
+			1.0,
+			33_000_000,
+			1,
+			1001,
+			0,
+			2,
+			0,
+			"SelfTestCpu",
+			true,
+			"OnDemandUiAnalyzerCapture",
+			"OnDemandUiAnalyzerProgram",
+			0,
+			0,
+			"OnDemandUiAnalyzerHost",
+			new[]
+			{
+				new TracyFrameSetSummary(0, true, new[]
+				{
+					new TracyFrameSummary(0, 0, 1_000),
+					new TracyFrameSummary(1, 1_000, 999_999_000),
+					new TracyFrameSummary(2, 999_999_000, 1_016_000_000),
+					new TracyFrameSummary(3, 1_016_000_000, 1_033_000_000)
+				})
+			},
+			0,
+			0);
+		TracyEventStream eventStream = new TracyEventStream(
+			new TracyFileHeader("0.10.0", "memory"),
+			0,
+			0,
+			0,
+			0,
+			metadata,
+			new[] { new TracyCpuZoneSummary(7, 0, "OnDemandUserZone", 1_000_000_000, 1_003_000_000) },
+			new[]
+			{
+				new TracyPlotSummary("OnDemandFrameTime", 0, 0, 16.0, 17.0, 33.0, new[]
+				{
+					new TracyPlotSample(1_008_000_000, 16.0),
+					new TracyPlotSample(1_024_000_000, 17.0)
+				})
+			},
+			new[] { new TracyThreadSummary(7, "Thread 7") },
+			1,
+			new ArrayList());
+		TracyTraceQuerySession querySession = new TracyTraceQuerySession("memory://tracy-on-demand-ui-analyzer", eventStream, new ArrayList());
+		TraceDocument traceDocument = new TraceDocument(
+			Guid.NewGuid().ToString("N"),
+			"memory://tracy-on-demand-ui-analyzer",
+			"tracy",
+			"tracy-on-demand-ui-analyzer",
+			DateTime.UtcNow,
+			querySession,
+			new ArrayList());
+		return SessionLoader.CreateTraceDocument(traceDocument, "memory://tracy-on-demand-ui-analyzer");
 	}
 
 	private static CurveUiPlotBridgeItem CreateSmokeCurveBridge(ProfilerCustomStatTimelineInfo statInfo)
@@ -704,6 +781,50 @@ internal static class AvaloniaSmokeTest
 		WriteInt32(inner, -1);
 		WriteInt64(inner, 1);
 		WriteInt64(inner, 9_000_000);
+		WriteInt32(inner, -1);
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteTracyDump(path, inner.ToArray());
+	}
+
+	private static void WriteTracyOnDemandMetadataDump(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
+		WriteInt64(inner, 0);
+		WriteInt64(inner, 1_000_000_000);
+		WriteDouble(inner, 1.0);
+		WriteInt64(inner, 16_666_667);
+		WriteInt64(inner, 1);
+		WriteUInt64(inner, 4242);
+		WriteInt64(inner, 0);
+		inner.WriteByte(2);
+		WriteUInt32(inner, 0x12345678);
+		WriteFixedAscii(inner, "SelfTestCpu", 12);
+		inner.WriteByte(1);
+		WriteSizedString(inner, "AvaloniaOnDemandTrace");
+		WriteSizedString(inner, "AvaloniaSmoke");
+		WriteInt64(inner, 1_700_000_000);
+		WriteInt64(inner, 1_699_999_000);
+		WriteSizedString(inner, "AvaloniaHost");
+		WriteUInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteInt64(inner, 0);
+		WriteUInt64(inner, 0);
+		WriteUInt32(inner, 0);
+		WriteUInt64(inner, 1);
+		WriteUInt64(inner, 0);
+		inner.WriteByte(1);
+		WriteUInt64(inner, 4);
+		WriteInt64(inner, 0);
+		WriteInt32(inner, -1);
+		WriteInt64(inner, 1_000);
+		WriteInt32(inner, -1);
+		WriteInt64(inner, 999_999_000);
+		WriteInt32(inner, -1);
+		WriteInt64(inner, 16_000_000);
 		WriteInt32(inner, -1);
 		WriteUInt64(inner, 0);
 		WriteUInt64(inner, 0);

@@ -32,6 +32,11 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	public ArrayList ImportDiagnostics => m_Diagnostics;
 
+	public IReadOnlyList<TracyFrameSummary> GetVisibleFrames()
+	{
+		return GetMetadataFrames().ToArray();
+	}
+
 	public Dictionary<string, object> GetSummary(int top)
 	{
 		ArrayList threads = ToArrayList(m_EventStream.Threads

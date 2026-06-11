@@ -95,17 +95,12 @@ internal static class SelectedFrameCounterAnalyzer
 
 	private static bool TryGetTracyFrame(TracyTraceQuerySession querySession, int frameIndex, out TracyFrameSummary frame)
 	{
-		int currentIndex = 0;
-		foreach (TracyFrameSetSummary frameSet in querySession.EventStream.Metadata.FrameSets)
+		foreach (TracyFrameSummary candidate in querySession.GetVisibleFrames())
 		{
-			foreach (TracyFrameSummary candidate in frameSet.Frames)
+			if (candidate.FrameIndex == frameIndex)
 			{
-				if (currentIndex == frameIndex)
-				{
-					frame = new TracyFrameSummary(currentIndex, candidate.Start, candidate.End);
-					return true;
-				}
-				currentIndex++;
+				frame = candidate;
+				return true;
 			}
 		}
 		frame = null;

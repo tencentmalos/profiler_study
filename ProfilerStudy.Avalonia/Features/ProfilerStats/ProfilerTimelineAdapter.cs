@@ -377,16 +377,12 @@ internal sealed class ProfilerTimelineAdapter
 
 	private bool TryGetTracyFrameIndex(long time, out int frameIndex)
 	{
-		frameIndex = 0;
-		foreach (TracyFrameSetSummary frameSet in m_TracyQuerySession.EventStream.Metadata.FrameSets)
+		foreach (TracyFrameSummary frame in m_TracyQuerySession.GetVisibleFrames())
 		{
-			foreach (TracyFrameSummary frame in frameSet.Frames)
+			if (time >= frame.Start && time <= frame.End)
 			{
-				if (time >= frame.Start && time <= frame.End)
-				{
-					return true;
-				}
-				frameIndex++;
+				frameIndex = frame.FrameIndex;
+				return true;
 			}
 		}
 		frameIndex = -1;

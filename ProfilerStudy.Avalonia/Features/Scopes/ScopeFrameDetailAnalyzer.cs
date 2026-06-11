@@ -94,17 +94,11 @@ internal static class ScopeFrameDetailAnalyzer
 
 	private static TracyFrameSummary FindFrame(TracyTraceQuerySession querySession, int frameIndex)
 	{
-		int globalFrameIndex = 0;
-		foreach (TracyFrameSetSummary frameSet in querySession.EventStream.Metadata.FrameSets)
+		foreach (TracyFrameSummary frame in querySession.GetVisibleFrames())
 		{
-			foreach (TracyFrameSummary frame in frameSet.Frames)
+			if (frame.FrameIndex == frameIndex)
 			{
-				if (globalFrameIndex == frameIndex)
-				{
-					return new TracyFrameSummary(globalFrameIndex, frame.Start, frame.End);
-				}
-
-				globalFrameIndex++;
+				return frame;
 			}
 		}
 

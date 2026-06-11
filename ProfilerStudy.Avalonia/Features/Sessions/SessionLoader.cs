@@ -99,14 +99,10 @@ internal sealed class SessionLoader
 			return Array.Empty<FrameSample>();
 		}
 
-		int frameIndex = 0;
 		var samples = new System.Collections.Generic.List<FrameSample>();
-		foreach (TracyFrameSetSummary frameSet in tracyQuerySession.EventStream.Metadata.FrameSets)
+		foreach (TracyFrameSummary frame in tracyQuerySession.GetVisibleFrames())
 		{
-			foreach (TracyFrameSummary frame in frameSet.Frames)
-			{
-				samples.Add(new FrameSample(frameIndex++, frame.Duration / 1_000_000.0));
-			}
+			samples.Add(new FrameSample(frame.FrameIndex, frame.Duration / 1_000_000.0));
 		}
 		return samples.ToArray();
 	}
