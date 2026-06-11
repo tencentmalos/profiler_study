@@ -777,6 +777,18 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary secondSample = ((IList)samples["samples"])[1] as IDictionary;
 			AssertEqual(20.0, secondSample["value"], "plot second sample value");
 
+			Dictionary<string, object> missingSamplesResult = tools.CallTool("query_counter", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["counter_name"] = "MissingCounter",
+				["max_samples"] = 10
+			});
+			AssertEqual(false, missingSamplesResult["isError"], "plot missing query_counter isError");
+			IDictionary missingSamples = missingSamplesResult["structuredContent"] as IDictionary;
+			AssertEqual(true, missingSamples["eventsDecoded"], "plot missing counter events decoded");
+			AssertEqual(0, missingSamples["sampleCount"], "plot missing counter sample count");
+			AssertDiagnosticCode(missingSamples["diagnostics"], "TracyCounterNotFound", "plot missing counter diagnostics");
+
 			tools.CallTool("close_session", new Dictionary<string, object>
 			{
 				["session_id"] = sessionId

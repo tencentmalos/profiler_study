@@ -250,14 +250,17 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 			["sourceFormat"] = SourceFormat,
 			["counterName"] = counterName,
 			["counter"] = new Dictionary<string, object>(),
+			["availableCounters"] = ToArrayList(m_EventStream.Plots.Select(PlotToCounterDictionary)),
 			["range"] = BuildFrameRange(startFrame, endFrame),
 			["accumulated"] = accumulated,
 			["sampleCount"] = 0,
 			["availableSampleCount"] = 0,
 			["truncated"] = false,
 			["samples"] = new ArrayList(),
-			["eventsDecoded"] = false,
-			["diagnostics"] = Diagnostics("TracyPlotsPending", "Plot decoding is required before Tracy counter samples can return data."),
+			["eventsDecoded"] = m_EventStream.Plots.Count > 0,
+			["diagnostics"] = Diagnostics(
+				m_EventStream.Plots.Count > 0 ? "TracyCounterNotFound" : "TracyPlotsPending",
+				m_EventStream.Plots.Count > 0 ? "Requested Tracy counter was not found in decoded plot data." : "Plot decoding is required before Tracy counter samples can return data."),
 			["maxSamples"] = Math.Max(1, maxSamples)
 		};
 	}
