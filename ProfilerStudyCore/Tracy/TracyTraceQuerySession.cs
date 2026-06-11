@@ -448,7 +448,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 
 	private int GetMetadataFrameCount()
 	{
-		return m_EventStream.Metadata == null ? 0 : m_EventStream.Metadata.FrameCount;
+		return GetMetadataFrames().Count();
 	}
 
 	private IEnumerable<TracyCpuZoneSummary> FilterZonesByFrameRange(int startFrame, int endFrame)
@@ -535,11 +535,21 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 		int globalFrameIndex = 0;
 		foreach (TracyFrameSetSummary frameSet in m_EventStream.Metadata.FrameSets)
 		{
-			foreach (TracyFrameSummary frame in frameSet.Frames)
+			int skipFrames = GetSystemFrameSkipCount(frameSet);
+			foreach (TracyFrameSummary frame in frameSet.Frames.Skip(skipFrames))
 			{
 				yield return new TracyFrameSummary(globalFrameIndex++, frame.Start, frame.End);
 			}
 		}
+	}
+
+	private int GetSystemFrameSkipCount(TracyFrameSetSummary frameSet)
+	{
+		if (frameSet == null || frameSet.Name != 0 || m_EventStream.Metadata == null || !m_EventStream.Metadata.OnDemand)
+		{
+			return 0;
+		}
+		return Math.Min(2, frameSet.Frames.Count);
 	}
 
 	private static Dictionary<string, object> FrameToDictionary(TracyFrameSummary frame)

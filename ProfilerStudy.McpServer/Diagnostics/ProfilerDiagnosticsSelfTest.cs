@@ -128,6 +128,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string unsupportedEventsPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-unsupported-events.tracy");
 		string oversizedLockPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-oversized-lock.tracy");
 		string dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-lz4-dictionary.tracy");
+		string onDemandPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-on-demand.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -198,6 +199,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			TracyFileHeader dictionaryHeader = Tracy010FileReader.ReadHeader(dictionaryPath);
 			AssertEqual("0.10.0", dictionaryHeader.Version, "dictionary tracy header version");
 
+			WriteTracyDumpWithOnDemandFrames(onDemandPath);
+			AssertOnDemandSystemFramesSkipped(onDemandPath);
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 			AssertUnsupportedTracyFileVersionTool(unsupportedPath);
@@ -239,6 +243,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(dictionaryPath))
 			{
 				File.Delete(dictionaryPath);
+			}
+			if (File.Exists(onDemandPath))
+			{
+				File.Delete(onDemandPath);
 			}
 		}
 	}
@@ -450,6 +458,44 @@ internal static class ProfilerDiagnosticsSelfTest
 			IDictionary structured = result["structuredContent"] as IDictionary;
 			AssertEqual("TracyFileFormatInvalid", structured["errorCode"], "invalid tracy error code");
 			AssertDiagnosticCode(structured["diagnostics"], "TracyFileFormatInvalid", "invalid tracy diagnostics");
+		}
+		finally
+		{
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
+	}
+
+	private static void AssertOnDemandSystemFramesSkipped(string path)
+	{
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
+		{
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> result = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "tracy",
+				["keep_session"] = true
+			});
+			AssertEqual(false, result["isError"], "on-demand tracy load_trace_file isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			string sessionId = Convert.ToString(structured["sessionId"]);
+			Dictionary<string, object> slowFramesResult = tools.CallTool("find_slow_frames", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId,
+				["top"] = 1
+			});
+			AssertEqual(false, slowFramesResult["isError"], "on-demand tracy find_slow_frames isError");
+			IDictionary slowFrames = slowFramesResult["structuredContent"] as IDictionary;
+			IList frames = slowFrames["slowFrames"] as IList;
+			AssertHasItems(frames, "on-demand slow frames");
+			IDictionary firstFrame = frames[0] as IDictionary;
+			AssertEqual(0, firstFrame["frameIndex"], "on-demand visible frame index");
+			AssertEqual(16.0, firstFrame["durationMs"], "on-demand visible frame duration");
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
 		}
 		finally
 		{
@@ -1297,6 +1343,13 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteCompressedBlock(stream, new byte[] { 0x00, 0x01, 0x00 });
 	}
 
+	private static void WriteTracyDumpWithOnDemandFrames(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: false, includePlotString: false, includeThreadName: false, onDemand: true, continuousFrameSet: true);
+		WriteTracyDump(path, inner.ToArray());
+	}
+
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString)
 	{
 		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString: false, includeThreadName: false);
@@ -1309,18 +1362,23 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString, bool includePlotString, bool includeThreadName)
 	{
+		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString, includeThreadName, onDemand: false, continuousFrameSet: false);
+	}
+
+	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString, bool includePlotString, bool includeThreadName, bool onDemand, bool continuousFrameSet)
+	{
 		inner.Write(new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', 0, 10, 0 });
 		WriteInt64(inner, 0);                       // m_delay
 		WriteInt64(inner, 1_000_000_000);           // m_resolution
 		WriteDouble(inner, 1.0);                    // m_timerMul
 		WriteInt64(inner, 16_666_667);              // lastTime
-		WriteInt64(inner, 0);                       // frameOffset
+		WriteInt64(inner, onDemand ? 1 : 0);        // frameOffset
 		WriteUInt64(inner, 4242);                   // pid
 		WriteInt64(inner, 0);                       // samplingPeriod
 		inner.WriteByte(2);                         // CpuArchX64
 		WriteUInt32(inner, 0x12345678);             // cpuId
 		WriteFixedAscii(inner, "SelfTestCpu", 12);  // cpuManufacturer
-		inner.WriteByte(0);                         // onDemand
+		inner.WriteByte(onDemand ? (byte)1 : (byte)0); // onDemand
 		WriteSizedString(inner, "SelfTestCapture");
 		WriteSizedString(inner, "SelfTestProgram");
 		WriteInt64(inner, 1_700_000_000);           // captureTime
@@ -1333,14 +1391,29 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteUInt32(inner, 0);                      // crashEvent.callstack
 		WriteUInt64(inner, 1);                      // frame set count
 		WriteUInt64(inner, 0);                      // frame name
-		inner.WriteByte(0);                         // non-continuous frame set
-		WriteUInt64(inner, 2);                      // frame count
-		WriteInt64(inner, 0);                       // frame 0 start offset
-		WriteInt64(inner, 8_333_333);               // frame 0 end offset
-		WriteInt32(inner, -1);                      // frame 0 image
-		WriteInt64(inner, 1);                       // frame 1 start offset
-		WriteInt64(inner, 9_000_000);               // frame 1 end offset
-		WriteInt32(inner, -1);                      // frame 1 image
+		inner.WriteByte(continuousFrameSet ? (byte)1 : (byte)0);
+		if (continuousFrameSet)
+		{
+			WriteUInt64(inner, 4);                  // frame count
+			WriteInt64(inner, 0);                  // Tracy init
+			WriteInt32(inner, -1);
+			WriteInt64(inner, 1_000);              // missed frames marker
+			WriteInt32(inner, -1);
+			WriteInt64(inner, 999_999_000);        // first user frame start
+			WriteInt32(inner, -1);
+			WriteInt64(inner, 16_000_000);         // second user frame start
+			WriteInt32(inner, -1);
+		}
+		else
+		{
+			WriteUInt64(inner, 2);                  // frame count
+			WriteInt64(inner, 0);                  // frame 0 start offset
+			WriteInt64(inner, 8_333_333);          // frame 0 end offset
+			WriteInt32(inner, -1);                 // frame 0 image
+			WriteInt64(inner, 1);                  // frame 1 start offset
+			WriteInt64(inner, 9_000_000);          // frame 1 end offset
+			WriteInt32(inner, -1);                 // frame 1 image
+		}
 		ulong stringCount = (includeZoneString ? 1UL : 0UL) + (includePlotString ? 1UL : 0UL) + (includeThreadName ? 1UL : 0UL);
 		WriteUInt64(inner, stringCount);            // stringData count
 		if (includeZoneString)
