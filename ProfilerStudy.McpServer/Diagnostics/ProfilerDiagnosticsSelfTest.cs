@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
+using System.Text;
 using ProfilerStudy;
 using ProfilerStudy.Tracy;
 
@@ -99,7 +101,50 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual("0.10.0", status.LockedVersion, "tracy locked version");
 		AssertEqual(false, string.IsNullOrWhiteSpace(status.SourceReferencePath), "tracy source reference path");
 		AssertHasItems(status.SupportedVersions, "tracy supported versions");
+		AssertTracyFileHeaderReader();
 		AssertTracyStatusTool();
+	}
+
+	private static void AssertTracyFileHeaderReader()
+	{
+		string path = Path.Combine(Path.GetTempPath(), "profiler-study-self-test.tracy");
+		string unsupportedPath = Path.Combine(Path.GetTempPath(), "profiler-study-self-test-unsupported.tracy");
+		try
+		{
+			WriteMinimalTracyDump(path, 0, 10, 0);
+			TracyFileHeader header = Tracy010FileReader.ReadHeader(path);
+			AssertEqual("0.10.0", header.Version, "tracy file header version");
+			AssertEqual("lz4", header.Compression, "tracy file compression");
+
+			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
+			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
+		}
+		finally
+		{
+			if (File.Exists(path))
+			{
+				File.Delete(path);
+			}
+			if (File.Exists(unsupportedPath))
+			{
+				File.Delete(unsupportedPath);
+			}
+		}
+	}
+
+	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)
+	{
+		byte[] innerHeader = new byte[] { (byte)'t', (byte)'r', (byte)'a', (byte)'c', (byte)'y', major, minor, patch };
+		byte[] compressed = new byte[1 + innerHeader.Length];
+		compressed[0] = (byte)(innerHeader.Length << 4);
+		Buffer.BlockCopy(innerHeader, 0, compressed, 1, innerHeader.Length);
+
+		using FileStream stream = File.Create(path);
+		byte[] outerHeader = Encoding.ASCII.GetBytes("tlZ4");
+		stream.Write(outerHeader, 0, outerHeader.Length);
+		byte[] blockSize = BitConverter.GetBytes((uint)compressed.Length);
+		stream.Write(blockSize, 0, blockSize.Length);
+		stream.Write(compressed, 0, compressed.Length);
 	}
 
 	private static void AssertTracyStatusTool()
