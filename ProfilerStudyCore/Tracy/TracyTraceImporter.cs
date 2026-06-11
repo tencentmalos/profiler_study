@@ -37,6 +37,10 @@ public static class TracyTraceImporter
 				["message"] = "CPU zones, frame set metadata, and plots are decoded when present; GPU zones, locks, allocations, callstacks, and messages remain pending."
 			}
 		};
+		foreach (object diagnostic in eventStream.Diagnostics)
+		{
+			diagnostics.Add(diagnostic);
+		}
 		TracyTraceQuerySession querySession = new TracyTraceQuerySession(fullPath, eventStream, diagnostics);
 		return new TraceDocument(
 			Guid.NewGuid().ToString("N"),

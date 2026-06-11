@@ -124,6 +124,7 @@ internal static class ProfilerDiagnosticsSelfTest
 		string metadataPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-metadata.tracy");
 		string zonePath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-zone.tracy");
 		string plotPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-plot.tracy");
+		string gpuPath = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-gpu.tracy");
 		try
 		{
 			WriteMinimalTracyDump(path, 0, 10, 0);
@@ -165,6 +166,13 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertEqual(2, plotStream.Plots[0].Samples.Count, "tracy plot sample count");
 			AssertTracyPlotQueryTools(plotPath);
 
+			WriteTracyDumpWithGpuContext(gpuPath);
+			TracyEventStream gpuStream = Tracy010FileReader.Read(gpuPath);
+			AssertEqual(true, gpuStream.HasMetadata, "tracy gpu metadata present");
+			AssertEqual(0, gpuStream.CpuZones.Count, "tracy gpu cpu zone count");
+			AssertDiagnosticCode(gpuStream.Diagnostics, "TracyGpuZonesUnsupported", "tracy gpu unsupported diagnostics");
+			AssertLoadTraceFileDiagnostics(gpuPath, "TracyGpuZonesUnsupported");
+
 			WriteMinimalTracyDump(unsupportedPath, 0, 11, 0);
 			AssertThrows(() => Tracy010FileReader.ReadHeader(unsupportedPath), "unsupported tracy file version");
 		}
@@ -189,6 +197,10 @@ internal static class ProfilerDiagnosticsSelfTest
 			if (File.Exists(plotPath))
 			{
 				File.Delete(plotPath);
+			}
+			if (File.Exists(gpuPath))
+			{
+				File.Delete(gpuPath);
 			}
 		}
 	}
@@ -605,6 +617,39 @@ internal static class ProfilerDiagnosticsSelfTest
 		}
 	}
 
+	private static void AssertLoadTraceFileDiagnostics(string path, string expectedCode)
+	{
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
+		{
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "auto",
+				["keep_session"] = true
+			});
+			AssertEqual(false, keptResult["isError"], "diagnostic load_trace_file isError");
+			IDictionary kept = keptResult["structuredContent"] as IDictionary;
+			string sessionId = Convert.ToString(kept["sessionId"]);
+			Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+			AssertEqual(false, diagnosticsResult["isError"], "diagnostic get_import_diagnostics isError");
+			IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
+			AssertDiagnosticCode(diagnostics["diagnostics"], expectedCode, "load trace diagnostics");
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+		}
+		finally
+		{
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
+	}
+
 	private static void AssertTracyLiveCaptureTool()
 	{
 		string artifactRoot = ResetSelfTestArtifactRoot();
@@ -869,6 +914,38 @@ internal static class ProfilerDiagnosticsSelfTest
 		WriteTracyDump(path, inner.ToArray());
 	}
 
+	private static void WriteTracyDumpWithGpuContext(string path)
+	{
+		using MemoryStream inner = new MemoryStream();
+		WriteTracyMetadataPrefix(inner, includeZoneString: false);
+		WriteUInt64(inner, 0);                      // localThreadCompress size
+		WriteUInt64(inner, 0);                      // externalThreadCompress size
+		WriteUInt64(inner, 0);                      // sourceLocation map count
+		WriteUInt64(inner, 0);                      // sourceLocationExpand count
+		WriteUInt64(inner, 0);                      // sourceLocationPayload count
+		WriteUInt64(inner, 0);                      // sourceLocationZones count
+		WriteUInt64(inner, 0);                      // gpuSourceLocationZones count
+		WriteUInt64(inner, 0);                      // lockMap count
+		WriteUInt64(inner, 0);                      // messages count
+		WriteUInt64(inner, 0);                      // zoneExtra count
+		WriteUInt64(inner, 0);                      // total CPU zone count
+		WriteUInt64(inner, 0);                      // zoneChildren count
+		WriteUInt64(inner, 0);                      // thread count
+		WriteUInt64(inner, 3);                      // total GPU zone count
+		WriteUInt64(inner, 0);                      // gpuChildren count
+		WriteUInt64(inner, 1);                      // gpuData count
+		WriteUInt64(inner, 456);                    // GPU context thread
+		inner.WriteByte(0);                         // hasCalibration
+		WriteUInt64(inner, 3);                      // context zone count
+		WriteSingle(inner, 1.0f);                   // period
+		inner.WriteByte(0);                         // GpuContextType.OpenGL
+		WriteUInt32(inner, 0);                      // name StringIdx
+		WriteUInt64(inner, 0);                      // overflow
+		WriteUInt64(inner, 0);                      // context threadData count
+		WriteUInt64(inner, 0);                      // plot count
+		WriteTracyDump(path, inner.ToArray());
+	}
+
 	private static void WriteTracyMetadataPrefix(MemoryStream inner, bool includeZoneString)
 	{
 		WriteTracyMetadataPrefix(inner, includeZoneString, includePlotString: false);
@@ -1026,6 +1103,12 @@ internal static class ProfilerDiagnosticsSelfTest
 	}
 
 	private static void WriteDouble(Stream stream, double value)
+	{
+		byte[] bytes = BitConverter.GetBytes(value);
+		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private static void WriteSingle(Stream stream, float value)
 	{
 		byte[] bytes = BitConverter.GetBytes(value);
 		stream.Write(bytes, 0, bytes.Length);
@@ -1360,6 +1443,26 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			throw new InvalidOperationException(name + " expected at least one item.");
 		}
+	}
+
+	private static void AssertDiagnosticCode(object actual, string expectedCode, string name)
+	{
+		IEnumerable diagnostics = actual as IEnumerable;
+		if (diagnostics == null)
+		{
+			throw new InvalidOperationException(name + " expected diagnostics.");
+		}
+
+		foreach (object item in diagnostics)
+		{
+			IDictionary diagnostic = item as IDictionary;
+			if (diagnostic != null && string.Equals(Convert.ToString(diagnostic["code"]), expectedCode, StringComparison.Ordinal))
+			{
+				return;
+			}
+		}
+
+		throw new InvalidOperationException(name + " expected diagnostic code " + expectedCode + ".");
 	}
 
 	private static void AssertThrows(Action action, string name)
