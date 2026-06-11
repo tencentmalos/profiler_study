@@ -16,6 +16,42 @@ public static class TracyVersionRegistry
 
 	public static IReadOnlyList<string> SupportedVersions => Adapters.Select(adapter => adapter.Version).ToArray();
 
+	public static ITracyVersionAdapter ResolveFileAdapter(string version)
+	{
+		foreach (ITracyVersionAdapter adapter in Adapters)
+		{
+			if (adapter.CanReadFile(version))
+			{
+				return adapter;
+			}
+		}
+
+		throw new TracyFileFormatException(
+			"TracyUnsupportedFileVersion",
+			"Unsupported Tracy file version " + version + ". Supported version is " + LockedVersion + ".",
+			version,
+			SupportedVersions,
+			LockedVersion);
+	}
+
+	public static ITracyVersionAdapter ResolveLiveAdapter(uint protocolVersion)
+	{
+		foreach (ITracyVersionAdapter adapter in Adapters)
+		{
+			if (adapter.CanConnect(protocolVersion))
+			{
+				return adapter;
+			}
+		}
+
+		throw new TracyFileFormatException(
+			"TracyProtocolMismatch",
+			"Unsupported Tracy live protocol version " + protocolVersion + ". Supported protocol version is " + Tracy010VersionAdapter.SupportedProtocolVersion + ".",
+			"protocol:" + protocolVersion,
+			SupportedVersions,
+			LockedVersion);
+	}
+
 	public static TracyStatus GetStatus()
 	{
 		string referencePath = ResolveSourceReferencePath();

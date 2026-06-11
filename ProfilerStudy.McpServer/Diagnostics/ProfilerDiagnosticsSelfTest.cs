@@ -114,6 +114,16 @@ internal static class ProfilerDiagnosticsSelfTest
 		AssertEqual("0.10.0", status.LockedVersion, "tracy locked version");
 		AssertEqual(false, string.IsNullOrWhiteSpace(status.SourceReferencePath), "tracy source reference path");
 		AssertHasItems(status.SupportedVersions, "tracy supported versions");
+		ITracyVersionAdapter fileAdapter = TracyVersionRegistry.ResolveFileAdapter("0.10.0");
+		AssertEqual("0.10.0", fileAdapter.Version, "tracy file adapter version");
+		ITracyVersionAdapter liveAdapter = TracyVersionRegistry.ResolveLiveAdapter(Tracy010LiveCaptureClient.ProtocolVersion);
+		AssertEqual("0.10.0", liveAdapter.Version, "tracy live adapter version");
+		AssertThrows(
+			() => TracyVersionRegistry.ResolveFileAdapter("0.11.0"),
+			"unsupported tracy file adapter");
+		AssertThrows(
+			() => TracyVersionRegistry.ResolveLiveAdapter(0),
+			"unsupported tracy live adapter");
 		AssertTracyFileHeaderReader();
 		AssertTracyLiveCaptureTool();
 		AssertTracyStatusTool();

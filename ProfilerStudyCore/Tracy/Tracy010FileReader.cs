@@ -101,15 +101,7 @@ public static class Tracy010FileReader
 		}
 
 		string version = firstBlock[5] + "." + firstBlock[6] + "." + firstBlock[7];
-		if (version != TracyVersionRegistry.LockedVersion)
-		{
-			throw new TracyFileFormatException(
-				"TracyUnsupportedFileVersion",
-				"Unsupported Tracy file version " + version + ". Supported version is " + TracyVersionRegistry.LockedVersion + ".",
-				version,
-				TracyVersionRegistry.SupportedVersions,
-				TracyVersionRegistry.LockedVersion);
-		}
+		TracyVersionRegistry.ResolveFileAdapter(version);
 		TracyFileHeader header = new TracyFileHeader(version, "lz4");
 		long payloadByteCount = Math.Max(0, decodedByteCount - 8L);
 		cancellationToken.ThrowIfCancellationRequested();

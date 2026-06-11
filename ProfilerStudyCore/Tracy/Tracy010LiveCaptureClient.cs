@@ -58,6 +58,7 @@ public static class Tracy010LiveCaptureClient
 		client.ReceiveTimeout = 5000;
 		client.SendTimeout = 5000;
 		cancellationToken.ThrowIfCancellationRequested();
+		TracyVersionRegistry.ResolveLiveAdapter(ProtocolVersion);
 
 		using NetworkStream stream = client.GetStream();
 		stream.Write(HandshakeShibboleth, 0, HandshakeShibboleth.Length);
