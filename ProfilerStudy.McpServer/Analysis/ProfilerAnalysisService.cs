@@ -78,8 +78,20 @@ internal sealed class ProfilerAnalysisService
 			DateTime.UtcNow,
 			querySession,
 			capture.Diagnostics);
+		TraceArtifactManifest artifact = TraceArtifactStore.Register(
+			traceDocument,
+			"live-capture",
+			TracyVersionRegistry.LockedVersion,
+			capture.Diagnostics,
+			new Dictionary<string, object>
+			{
+				["host"] = target.ConnectHost,
+				["port"] = target.ConnectPort,
+				["durationSeconds"] = durationSeconds
+			});
 		Dictionary<string, object> analysis = querySession.GetSummary(top);
 		analysis["sourceFormat"] = "tracy";
+		analysis["artifactId"] = artifact.ArtifactId;
 		analysis["capture"] = new Dictionary<string, object>
 		{
 			["protocol"] = "tracy",
@@ -236,9 +248,16 @@ internal sealed class ProfilerAnalysisService
 		}
 
 		TraceDocument traceDocument = TracyTraceImporter.Load(fullPath);
+		TraceArtifactManifest artifact = TraceArtifactStore.Register(
+			traceDocument,
+			"file-import",
+			TracyVersionRegistry.LockedVersion,
+			traceDocument.ImportDiagnostics,
+			null);
 		Dictionary<string, object> result = traceDocument.QuerySession.GetSummary(top);
 		result["sourceFile"] = traceDocument.SourcePath;
 		result["sourceFormat"] = traceDocument.SourceFormat;
+		result["artifactId"] = artifact.ArtifactId;
 		result["top"] = top;
 		result["keepSession"] = keepSession;
 		if (keepSession)
@@ -246,6 +265,17 @@ internal sealed class ProfilerAnalysisService
 			result["sessionId"] = AddTraceDocument(traceDocument);
 		}
 		return result;
+	}
+
+	public Dictionary<string, object> ListTraceArtifacts(string format, int limit)
+	{
+		string normalizedFormat = string.IsNullOrWhiteSpace(format) ? "all" : format.Trim().ToLowerInvariant();
+		return new Dictionary<string, object>
+		{
+			["root"] = TraceArtifactStore.RootPath,
+			["format"] = normalizedFormat,
+			["artifacts"] = TraceArtifactStore.List(normalizedFormat, limit)
+		};
 	}
 
 	public Dictionary<string, object> LoadSessionFile(string path, int top)

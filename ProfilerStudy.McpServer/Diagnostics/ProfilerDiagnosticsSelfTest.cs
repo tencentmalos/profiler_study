@@ -195,68 +195,82 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void AssertLoadTraceFileTool(string path)
 	{
-		ProfilerMcpTools tools = new ProfilerMcpTools();
-		bool found = false;
-		foreach (object toolObject in tools.ListTools())
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
 		{
-			IDictionary tool = toolObject as IDictionary;
-			if (tool != null && Convert.ToString(tool["name"]) == "load_trace_file")
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			bool found = false;
+			foreach (object toolObject in tools.ListTools())
 			{
-				IDictionary inputSchema = tool["inputSchema"] as IDictionary;
-				IDictionary properties = inputSchema["properties"] as IDictionary;
-				IDictionary keepSession = properties["keep_session"] as IDictionary;
-				AssertEqual(false, keepSession["default"], "load_trace_file keep_session default");
-				found = true;
-				break;
+				IDictionary tool = toolObject as IDictionary;
+				if (tool != null && Convert.ToString(tool["name"]) == "load_trace_file")
+				{
+					IDictionary inputSchema = tool["inputSchema"] as IDictionary;
+					IDictionary properties = inputSchema["properties"] as IDictionary;
+					IDictionary keepSession = properties["keep_session"] as IDictionary;
+					AssertEqual(false, keepSession["default"], "load_trace_file keep_session default");
+					found = true;
+					break;
+				}
 			}
-		}
-		if (!found)
-		{
-			throw new InvalidOperationException("load_trace_file tool is missing.");
-		}
+			if (!found)
+			{
+				throw new InvalidOperationException("load_trace_file tool is missing.");
+			}
 
-		Dictionary<string, object> result = tools.CallTool("load_trace_file", new Dictionary<string, object>
-		{
-			["path"] = path,
-			["format"] = "auto"
-		});
-		AssertEqual(false, result["isError"], "load_trace_file isError");
-		IDictionary structured = result["structuredContent"] as IDictionary;
-		AssertEqual("tracy", structured["sourceFormat"], "load trace source format");
-		AssertEqual("0.10.0", structured["tracyVersion"], "load trace tracy version");
+			Dictionary<string, object> result = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "auto"
+			});
+			AssertEqual(false, result["isError"], "load_trace_file isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			AssertEqual("tracy", structured["sourceFormat"], "load trace source format");
+			AssertEqual("0.10.0", structured["tracyVersion"], "load trace tracy version");
+			string artifactId = Convert.ToString(structured["artifactId"]);
+			if (string.IsNullOrWhiteSpace(artifactId))
+			{
+				throw new InvalidOperationException("load_trace_file must return artifactId.");
+			}
+			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "file-import");
 
-		Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
-		{
-			["path"] = path,
-			["format"] = "auto",
-			["keep_session"] = true
-		});
-		AssertEqual(false, keptResult["isError"], "load_trace_file keep_session isError");
-		IDictionary kept = keptResult["structuredContent"] as IDictionary;
-		string sessionId = Convert.ToString(kept["sessionId"]);
-		if (string.IsNullOrWhiteSpace(sessionId))
-		{
-			throw new InvalidOperationException("load_trace_file keep_session=true must return sessionId.");
+			Dictionary<string, object> keptResult = tools.CallTool("load_trace_file", new Dictionary<string, object>
+			{
+				["path"] = path,
+				["format"] = "auto",
+				["keep_session"] = true
+			});
+			AssertEqual(false, keptResult["isError"], "load_trace_file keep_session isError");
+			IDictionary kept = keptResult["structuredContent"] as IDictionary;
+			string sessionId = Convert.ToString(kept["sessionId"]);
+			if (string.IsNullOrWhiteSpace(sessionId))
+			{
+				throw new InvalidOperationException("load_trace_file keep_session=true must return sessionId.");
+			}
+			AssertEqual("tracy", kept["sourceFormat"], "kept load trace source format");
+
+			Dictionary<string, object> summaryResult = tools.CallTool("get_session_summary", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+			AssertEqual(false, summaryResult["isError"], "tracy get_session_summary isError");
+			IDictionary summary = summaryResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", summary["sourceFormat"], "tracy summary source format");
+			AssertEqual(sessionId, summary["sessionId"], "tracy summary session id");
+			IDictionary summaryBlock = summary["summary"] as IDictionary;
+			AssertEqual("tracy", summaryBlock["sourceFormat"], "tracy summary block source format");
+			AssertEqual(true, summaryBlock["framesUnavailable"], "tracy summary frames unavailable");
+			AssertEqual(false, summaryBlock["eventsDecoded"], "tracy summary events decoded");
+			AssertTracyQueryToolContracts(tools, sessionId);
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
 		}
-		AssertEqual("tracy", kept["sourceFormat"], "kept load trace source format");
-
-		Dictionary<string, object> summaryResult = tools.CallTool("get_session_summary", new Dictionary<string, object>
+		finally
 		{
-			["session_id"] = sessionId
-		});
-		AssertEqual(false, summaryResult["isError"], "tracy get_session_summary isError");
-		IDictionary summary = summaryResult["structuredContent"] as IDictionary;
-		AssertEqual("tracy", summary["sourceFormat"], "tracy summary source format");
-		AssertEqual(sessionId, summary["sessionId"], "tracy summary session id");
-		IDictionary summaryBlock = summary["summary"] as IDictionary;
-		AssertEqual("tracy", summaryBlock["sourceFormat"], "tracy summary block source format");
-		AssertEqual(true, summaryBlock["framesUnavailable"], "tracy summary frames unavailable");
-		AssertEqual(false, summaryBlock["eventsDecoded"], "tracy summary events decoded");
-		AssertTracyQueryToolContracts(tools, sessionId);
-		tools.CallTool("close_session", new Dictionary<string, object>
-		{
-			["session_id"] = sessionId
-		});
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
 	}
 
 	private static void AssertTracyQueryToolContracts(ProfilerMcpTools tools, string sessionId)
@@ -454,51 +468,113 @@ internal static class ProfilerDiagnosticsSelfTest
 
 	private static void AssertTracyLiveCaptureTool()
 	{
-		using FakeTracyServer server = new FakeTracyServer();
-		server.Start();
-		ProfilerMcpTools tools = new ProfilerMcpTools();
-		Dictionary<string, object> result = tools.CallTool("capture_profile", new Dictionary<string, object>
+		string artifactRoot = ResetSelfTestArtifactRoot();
+		try
 		{
-			["url"] = "pc://127.0.0.1:" + server.Port,
-			["protocol"] = "tracy",
-			["duration_seconds"] = 1,
-			["top"] = 5,
-			["keep_session"] = true
-		});
-		AssertEqual(false, result["isError"], "tracy live capture isError");
-		IDictionary structured = result["structuredContent"] as IDictionary;
-		AssertEqual("tracy", structured["sourceFormat"], "tracy live source format");
-		AssertEqual("tracy", ((IDictionary)structured["capture"])["protocol"], "tracy live capture protocol");
-		string sessionId = Convert.ToString(structured["sessionId"]);
-		if (string.IsNullOrWhiteSpace(sessionId))
-		{
-			throw new InvalidOperationException("tracy live capture keep_session=true must return sessionId.");
-		}
-		IDictionary summary = structured["summary"] as IDictionary;
-		AssertEqual("FakeTracyProgram", summary["captureProgram"], "tracy live capture program");
-		AssertEqual("FakeTracyHost", summary["hostInfo"], "tracy live host info");
-		AssertEqual(31415UL, summary["processId"], "tracy live pid");
+			using FakeTracyServer server = new FakeTracyServer();
+			server.Start();
+			ProfilerMcpTools tools = new ProfilerMcpTools();
+			Dictionary<string, object> result = tools.CallTool("capture_profile", new Dictionary<string, object>
+			{
+				["url"] = "pc://127.0.0.1:" + server.Port,
+				["protocol"] = "tracy",
+				["duration_seconds"] = 1,
+				["top"] = 5,
+				["keep_session"] = true
+			});
+			AssertEqual(false, result["isError"], "tracy live capture isError");
+			IDictionary structured = result["structuredContent"] as IDictionary;
+			AssertEqual("tracy", structured["sourceFormat"], "tracy live source format");
+			AssertEqual("tracy", ((IDictionary)structured["capture"])["protocol"], "tracy live capture protocol");
+			string artifactId = Convert.ToString(structured["artifactId"]);
+			if (string.IsNullOrWhiteSpace(artifactId))
+			{
+				throw new InvalidOperationException("tracy live capture must return artifactId.");
+			}
+			AssertTraceArtifactListed(tools, artifactRoot, artifactId, "live-capture");
+			string sessionId = Convert.ToString(structured["sessionId"]);
+			if (string.IsNullOrWhiteSpace(sessionId))
+			{
+				throw new InvalidOperationException("tracy live capture keep_session=true must return sessionId.");
+			}
+			IDictionary summary = structured["summary"] as IDictionary;
+			AssertEqual("FakeTracyProgram", summary["captureProgram"], "tracy live capture program");
+			AssertEqual("FakeTracyHost", summary["hostInfo"], "tracy live host info");
+			AssertEqual(31415UL, summary["processId"], "tracy live pid");
 
-		Dictionary<string, object> summaryResult = tools.CallTool("get_session_summary", new Dictionary<string, object>
+			Dictionary<string, object> summaryResult = tools.CallTool("get_session_summary", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+			AssertEqual(false, summaryResult["isError"], "tracy live summary isError");
+			IDictionary loadedSummary = summaryResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", loadedSummary["sourceFormat"], "tracy live loaded source format");
+			Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+			AssertEqual(false, diagnosticsResult["isError"], "tracy live diagnostics isError");
+			IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
+			AssertEqual("tracy", diagnostics["sourceFormat"], "tracy diagnostics source format");
+			AssertHasItems(diagnostics["diagnostics"], "tracy diagnostics");
+			tools.CallTool("close_session", new Dictionary<string, object>
+			{
+				["session_id"] = sessionId
+			});
+			server.AssertHandshakeReceived();
+		}
+		finally
 		{
-			["session_id"] = sessionId
-		});
-		AssertEqual(false, summaryResult["isError"], "tracy live summary isError");
-		IDictionary loadedSummary = summaryResult["structuredContent"] as IDictionary;
-		AssertEqual("tracy", loadedSummary["sourceFormat"], "tracy live loaded source format");
-		Dictionary<string, object> diagnosticsResult = tools.CallTool("get_import_diagnostics", new Dictionary<string, object>
+			CleanupSelfTestArtifactRoot(artifactRoot);
+		}
+	}
+
+	private static string ResetSelfTestArtifactRoot()
+	{
+		string root = Path.Combine(Directory.GetCurrentDirectory(), ".profiler-study-self-test-artifacts");
+		if (Directory.Exists(root))
 		{
-			["session_id"] = sessionId
-		});
-		AssertEqual(false, diagnosticsResult["isError"], "tracy live diagnostics isError");
-		IDictionary diagnostics = diagnosticsResult["structuredContent"] as IDictionary;
-		AssertEqual("tracy", diagnostics["sourceFormat"], "tracy diagnostics source format");
-		AssertHasItems(diagnostics["diagnostics"], "tracy diagnostics");
-		tools.CallTool("close_session", new Dictionary<string, object>
+			Directory.Delete(root, recursive: true);
+		}
+		Environment.SetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT", root);
+		return root;
+	}
+
+	private static void CleanupSelfTestArtifactRoot(string root)
+	{
+		if (Directory.Exists(root))
 		{
-			["session_id"] = sessionId
+			Directory.Delete(root, recursive: true);
+		}
+		Environment.SetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT", null);
+	}
+
+	private static void AssertTraceArtifactListed(ProfilerMcpTools tools, string root, string artifactId, string sourceKind)
+	{
+		Dictionary<string, object> listResult = tools.CallTool("list_trace_artifacts", new Dictionary<string, object>
+		{
+			["format"] = "tracy",
+			["limit"] = 20
 		});
-		server.AssertHandshakeReceived();
+		AssertEqual(false, listResult["isError"], "list_trace_artifacts isError");
+		IDictionary structured = listResult["structuredContent"] as IDictionary;
+		AssertEqual(root, structured["root"], "trace artifact root");
+		AssertHasItems(structured["artifacts"], "trace artifacts");
+		bool found = false;
+		foreach (object item in (IList)structured["artifacts"])
+		{
+			IDictionary artifact = item as IDictionary;
+			if (artifact != null && Convert.ToString(artifact["artifactId"]) == artifactId)
+			{
+				AssertEqual("tracy", artifact["sourceFormat"], "trace artifact source format");
+				AssertEqual(sourceKind, artifact["sourceKind"], "trace artifact source kind");
+				found = true;
+			}
+		}
+		if (!found)
+		{
+			throw new InvalidOperationException("trace artifact was not listed: " + artifactId);
+		}
 	}
 
 	private static void WriteMinimalTracyDump(string path, byte major, byte minor, byte patch)

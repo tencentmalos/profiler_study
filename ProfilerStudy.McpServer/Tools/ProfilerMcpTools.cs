@@ -134,6 +134,12 @@ internal sealed class ProfilerMcpTools
 			},
 			new Dictionary<string, object>
 			{
+				["name"] = "list_trace_artifacts",
+				["description"] = "List trace artifacts registered by unified trace file imports and live captures.",
+				["inputSchema"] = TraceArtifactListSchema()
+			},
+			new Dictionary<string, object>
+			{
 				["name"] = "load_session_file",
 				["description"] = "Load a profiler file into memory and return a session_id for follow-up analysis tools.",
 				["inputSchema"] = new Dictionary<string, object>
@@ -258,6 +264,11 @@ internal sealed class ProfilerMcpTools
 						GetString(arguments, "format", "auto"),
 						GetInt(arguments, "top", 10, 1, 50),
 						GetBool(arguments, "keep_session", false));
+					break;
+				case "list_trace_artifacts":
+					structured = m_AnalysisService.ListTraceArtifacts(
+						GetString(arguments, "format", "all"),
+						GetInt(arguments, "limit", 20, 1, 200));
 					break;
 				case "load_session_file":
 					structured = m_AnalysisService.LoadSessionFile(
@@ -510,6 +521,30 @@ internal sealed class ProfilerMcpTools
 					["type"] = "boolean",
 					["default"] = false,
 					["description"] = "Keep the loaded trace in memory and return a session_id for follow-up queries."
+				}
+			}
+		};
+	}
+
+	private static Dictionary<string, object> TraceArtifactListSchema()
+	{
+		return new Dictionary<string, object>
+		{
+			["type"] = "object",
+			["properties"] = new Dictionary<string, object>
+			{
+				["format"] = new Dictionary<string, object>
+				{
+					["type"] = "string",
+					["enum"] = new ArrayList { "all", "study", "tracy", "perfetto", "systrace" },
+					["default"] = "all"
+				},
+				["limit"] = new Dictionary<string, object>
+				{
+					["type"] = "integer",
+					["minimum"] = 1,
+					["maximum"] = 200,
+					["default"] = 20
 				}
 			}
 		};
