@@ -65,7 +65,7 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 				["resolution"] = m_EventStream.Metadata == null ? 0L : m_EventStream.Metadata.Resolution,
 				["lastTime"] = m_EventStream.Metadata == null ? 0L : m_EventStream.Metadata.LastTime,
 				["frameSetCount"] = m_EventStream.Metadata == null ? 0 : m_EventStream.Metadata.FrameSetCount,
-				["eventsDecoded"] = m_EventStream.CpuZones.Count > 0,
+				["eventsDecoded"] = HasDecodedEventData(),
 				["framesUnavailable"] = !HasMetadataFrames(),
 				["frameSource"] = HasMetadataFrames() ? "tracy-frame-set-metadata" : "none",
 				["status"] = "header-loaded"
@@ -422,6 +422,11 @@ public sealed class TracyTraceQuerySession : ITraceQuerySession
 	private bool HasMetadataFrames()
 	{
 		return GetMetadataFrameCount() > 0;
+	}
+
+	private bool HasDecodedEventData()
+	{
+		return m_EventStream.CpuZones.Count > 0 || m_EventStream.Plots.Count > 0;
 	}
 
 	private bool TryGetMetadataFrame(int frameIndex, out TracyFrameSummary frame)

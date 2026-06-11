@@ -599,6 +599,9 @@ internal static class ProfilerDiagnosticsSelfTest
 			AssertTraceArtifactNormalizedFiles(artifactRoot, artifactId, expectZone: false, expectPlot: true);
 			IDictionary summary = kept["summary"] as IDictionary;
 			AssertEqual(1, summary["plotCount"], "plot summary plot count");
+			AssertEqual(true, summary["eventsDecoded"], "plot summary events decoded");
+			IDictionary capabilities = kept["capabilities"] as IDictionary;
+			AssertEqual(true, capabilities["counters"], "plot summary counters capability");
 
 			Dictionary<string, object> countersResult = tools.CallTool("list_counters", new Dictionary<string, object>
 			{
