@@ -12,6 +12,8 @@ using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ProfilerStudy;
+using ProfilerStudy.Tracy;
+using ProfilerStudy.Trace;
 using SCLCoreCLR;
 
 namespace ProfilerStudy.Avalonia;
@@ -179,8 +181,10 @@ internal sealed class MainWindowViewModel : ObservableObject
 	private string m_AndroidRecordingDuration = "5";
 	private bool m_IsConnectionPanelVisible;
 	private bool m_IsConnecting;
+	private string m_ConnectionProtocol = "study";
 	private string m_ConnectionHost = "localhost";
 	private string m_ConnectionPort = "8428";
+	private string m_ConnectionDurationSeconds = "5";
 	private string m_ConnectionPanelStatusText = "Not connected.";
 	private bool m_IsCallstacksPanelVisible;
 	private string m_CallstacksPanelStatusText = "No callstack capture loaded.";
@@ -1223,6 +1227,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 		private set => SetProperty(ref m_IsConnectionPanelVisible, value);
 	}
 
+	public IReadOnlyList<string> ConnectionProtocols { get; } = new[] { "study", "tracy" };
+
+	public string ConnectionProtocol
+	{
+		get => m_ConnectionProtocol;
+		set => SetProperty(ref m_ConnectionProtocol, string.IsNullOrWhiteSpace(value) ? "study" : value);
+	}
+
 	public string ConnectionHost
 	{
 		get => m_ConnectionHost;
@@ -1267,6 +1279,12 @@ internal sealed class MainWindowViewModel : ObservableObject
 	{
 		get => m_ConnectionPort;
 		set => SetProperty(ref m_ConnectionPort, value ?? string.Empty);
+	}
+
+	public string ConnectionDurationSeconds
+	{
+		get => m_ConnectionDurationSeconds;
+		set => SetProperty(ref m_ConnectionDurationSeconds, value ?? string.Empty);
 	}
 
 	public string ConnectionPanelStatusText
@@ -2099,7 +2117,14 @@ internal sealed class MainWindowViewModel : ObservableObject
 		string actionName = parameter as string;
 		if (string.Equals(actionName, "Connect", StringComparison.Ordinal))
 		{
-			await ConnectToProfilerStudyAsync();
+			if (string.Equals(ConnectionProtocol, "Tracy", StringComparison.OrdinalIgnoreCase))
+			{
+				await ConnectToTracyAsync();
+			}
+			else
+			{
+				await ConnectToProfilerStudyAsync();
+			}
 		}
 		else if (string.Equals(actionName, "Disconnect", StringComparison.Ordinal))
 		{
@@ -2179,6 +2204,83 @@ internal sealed class MainWindowViewModel : ObservableObject
 		}
 
 		session.Disconnect(DisconnectReason.Requested);
+	}
+
+	private async Task ConnectToTracyAsync()
+	{
+		if (m_IsConnecting)
+		{
+			ConnectionPanelStatusText = "Connection attempt is already in progress.";
+			StatusText = ConnectionPanelStatusText;
+			return;
+		}
+
+		string host = (ConnectionHost ?? string.Empty).Trim();
+		if (string.IsNullOrWhiteSpace(host))
+		{
+			ConnectionPanelStatusText = "Connection host is required.";
+			StatusText = ConnectionPanelStatusText;
+			return;
+		}
+
+		if (!int.TryParse((ConnectionPort ?? string.Empty).Trim(), out int port) || port <= 0 || port > 65535)
+		{
+			ConnectionPanelStatusText = "Connection port must be between 1 and 65535.";
+			StatusText = ConnectionPanelStatusText;
+			return;
+		}
+
+		if (!int.TryParse((ConnectionDurationSeconds ?? string.Empty).Trim(), out int durationSeconds) || durationSeconds <= 0 || durationSeconds > 300)
+		{
+			ConnectionPanelStatusText = "Tracy capture duration must be between 1 and 300 seconds.";
+			StatusText = ConnectionPanelStatusText;
+			return;
+		}
+
+		DisconnectFromProfilerStudy(updateStatus: false);
+		m_IsConnecting = true;
+		string source = "pc://" + host + ":" + port;
+		ConnectionPanelStatusText = "Capturing Tracy target " + host + ":" + port + " for " + durationSeconds + " seconds...";
+		StatusText = ConnectionPanelStatusText;
+		try
+		{
+			TracyLiveCaptureResult capture = await Task.Run(() => Tracy010LiveCaptureClient.Capture(host, port, durationSeconds));
+			TracyTraceQuerySession querySession = new TracyTraceQuerySession(source, capture.EventStream, capture.Diagnostics);
+			TraceDocument traceDocument = new TraceDocument(
+				Guid.NewGuid().ToString("N"),
+				source,
+				"tracy",
+				host + ":" + port,
+				DateTime.UtcNow,
+				querySession,
+				capture.Diagnostics);
+			TraceArtifactManifest artifact = TraceArtifactStore.Register(
+				traceDocument,
+				"live-capture",
+				TracyVersionRegistry.LockedVersion,
+				capture.Diagnostics,
+				new Dictionary<string, object>
+				{
+					["host"] = host,
+					["port"] = port,
+					["durationSeconds"] = durationSeconds
+				});
+			SessionDocument document = SessionLoader.CreateTraceDocument(traceDocument, source);
+			ApplyDocument(document);
+			SessionStatusText = "Session: Tracy capture";
+			StatusBarSessionText = "Tracy capture";
+			ConnectionPanelStatusText = "Tracy capture complete: " + host + ":" + port + " (" + artifact.ArtifactId + ").";
+			StatusText = ConnectionPanelStatusText;
+		}
+		catch (Exception ex)
+		{
+			ConnectionPanelStatusText = "Tracy capture failed: " + ex.Message;
+			StatusText = ConnectionPanelStatusText;
+		}
+		finally
+		{
+			m_IsConnecting = false;
+		}
 	}
 
 	private void ApplyLiveConnectionDocument(Session session, string connectionName)

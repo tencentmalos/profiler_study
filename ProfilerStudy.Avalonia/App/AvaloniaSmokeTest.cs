@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using ProfilerStudy.Avalonia.ProfilerStats;
 
@@ -63,6 +66,7 @@ internal static class AvaloniaSmokeTest
 			AssertFrameTimelineNavigationContract();
 			AssertSessionScrollbarFrameStripContract();
 			AssertTracyTraceLoad();
+			AssertTracyConnectionCapture();
 			IReadOnlyList<ScopeHotspotRow> scopeHotspots = ScopeHotspotAnalyzer.Build(document);
 			IReadOnlyList<ScopeFrameDetailRow> selectedFrameScopes = ScopeFrameDetailAnalyzer.Build(document, document.Viewport.StartFrame);
 			IReadOnlyList<SelectedFrameCounterRow> selectedFrameCounters = SelectedFrameCounterAnalyzer.Build(document, document.Viewport.StartFrame);
@@ -486,6 +490,61 @@ internal static class AvaloniaSmokeTest
 		}
 	}
 
+	private static void AssertTracyConnectionCapture()
+	{
+		string artifactRoot = Path.Combine(Path.GetTempPath(), "ProfilerStudy.Avalonia.TracyArtifacts." + Guid.NewGuid().ToString("N"));
+		string previousArtifactRoot = Environment.GetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT");
+		Environment.SetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT", artifactRoot);
+		try
+		{
+			using FakeTracyServer server = new FakeTracyServer();
+			server.Start();
+			SmokeAppSettingsService appSettingsService = new SmokeAppSettingsService();
+			AppThemeService appThemeService = new AppThemeService(appSettingsService.Load(), new SmokeThemeHost(), appSettingsService.Save);
+			MainWindowViewModel viewModel = new MainWindowViewModel(new SmokeSourceViewerLauncher(), appSettingsService, appThemeService);
+			SetProperty(viewModel, "ConnectionProtocol", "tracy");
+			SetProperty(viewModel, "ConnectionHost", "127.0.0.1");
+			SetProperty(viewModel, "ConnectionPort", server.Port.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			SetProperty(viewModel, "ConnectionDurationSeconds", "1");
+			viewModel.ConnectionActionCommand.Execute("Connect");
+			WaitUntil(() => viewModel.CurrentDocument?.TraceDocument != null && viewModel.IsLoading == false, 4000, "tracy connection document");
+			Assert(viewModel.CurrentDocument.Session == null, "tracy connection is trace backed");
+			Assert(viewModel.CurrentDocument.TraceDocument.SourceFormat == "tracy", "tracy connection source format");
+			Assert(viewModel.ConnectionPanelStatusText.Contains("Tracy", StringComparison.Ordinal), "tracy connection status");
+			Assert(viewModel.StatusBarSessionText.Contains("Tracy", StringComparison.Ordinal) || viewModel.SessionStatusText.Contains("Tracy", StringComparison.Ordinal), "tracy connection session status");
+			server.AssertHandshakeReceived();
+		}
+		finally
+		{
+			Environment.SetEnvironmentVariable("PROFILER_STUDY_TRACE_ARTIFACT_ROOT", previousArtifactRoot);
+			if (Directory.Exists(artifactRoot))
+			{
+				Directory.Delete(artifactRoot, true);
+			}
+		}
+	}
+
+	private static void SetProperty(object target, string name, object value)
+	{
+		PropertyInfo property = target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		Assert(property != null, name + " property exists");
+		property.SetValue(target, value);
+	}
+
+	private static void WaitUntil(Func<bool> condition, int timeoutMilliseconds, string name)
+	{
+		DateTime deadline = DateTime.UtcNow.AddMilliseconds(timeoutMilliseconds);
+		while (DateTime.UtcNow < deadline)
+		{
+			if (condition())
+			{
+				return;
+			}
+			Thread.Sleep(25);
+		}
+		throw new InvalidOperationException("Smoke test timed out: " + name);
+	}
+
 	private static void WriteTracyMetadataDump(string path)
 	{
 		using MemoryStream inner = new MemoryStream();
@@ -604,6 +663,104 @@ internal static class AvaloniaSmokeTest
 	{
 		byte[] bytes = BitConverter.GetBytes(value);
 		stream.Write(bytes, 0, bytes.Length);
+	}
+
+	private sealed class FakeTracyServer : IDisposable
+	{
+		private readonly TcpListener m_Listener = new TcpListener(IPAddress.Loopback, 0);
+		private Thread m_Thread;
+		private volatile bool m_HandshakeReceived;
+		private Exception m_Exception;
+
+		public int Port { get; private set; }
+
+		public void Start()
+		{
+			m_Listener.Start();
+			Port = ((IPEndPoint)m_Listener.LocalEndpoint).Port;
+			m_Thread = new Thread(Run) { IsBackground = true };
+			m_Thread.Start();
+		}
+
+		public void AssertHandshakeReceived()
+		{
+			if (m_Exception != null)
+			{
+				throw new InvalidOperationException("fake tracy server failed: " + m_Exception.Message, m_Exception);
+			}
+			Assert(m_HandshakeReceived, "fake tracy handshake");
+		}
+
+		public void Dispose()
+		{
+			m_Listener.Stop();
+			m_Thread?.Join(2000);
+		}
+
+		private void Run()
+		{
+			try
+			{
+				using TcpClient client = m_Listener.AcceptTcpClient();
+				using NetworkStream stream = client.GetStream();
+				byte[] handshake = ReadExactly(stream, 12);
+				string shibboleth = Encoding.ASCII.GetString(handshake, 0, 8);
+				uint protocol = (uint)(handshake[8] | (handshake[9] << 8) | (handshake[10] << 16) | (handshake[11] << 24));
+				if (shibboleth != "TracyPrf" || protocol != 64)
+				{
+					throw new InvalidOperationException("unexpected Tracy handshake.");
+				}
+				m_HandshakeReceived = true;
+				stream.WriteByte(1);
+				WriteWelcomeMessage(stream);
+				Thread.Sleep(250);
+			}
+			catch (SocketException)
+			{
+			}
+			catch (ObjectDisposedException)
+			{
+			}
+			catch (Exception ex)
+			{
+				m_Exception = ex;
+			}
+		}
+
+		private static byte[] ReadExactly(Stream stream, int size)
+		{
+			byte[] bytes = new byte[size];
+			int offset = 0;
+			while (offset < size)
+			{
+				int read = stream.Read(bytes, offset, size - offset);
+				if (read == 0)
+				{
+					throw new EndOfStreamException("fake tracy server reached end of stream.");
+				}
+				offset += read;
+			}
+			return bytes;
+		}
+
+		private static void WriteWelcomeMessage(Stream stream)
+		{
+			WriteDouble(stream, 1.0);
+			WriteInt64(stream, 0);
+			WriteInt64(stream, 5_000_000);
+			WriteUInt64(stream, 0);
+			WriteUInt64(stream, 1_000_000_000);
+			WriteUInt64(stream, 1_700_000_000);
+			WriteUInt64(stream, 1_699_999_000);
+			WriteUInt64(stream, 31415);
+			WriteInt64(stream, 0);
+			stream.WriteByte(0);
+			stream.WriteByte(2);
+			WriteFixedAscii(stream, "FakeCPU", 12);
+			WriteUInt32(stream, 0x01020304);
+			WriteFixedAscii(stream, "FakeTracyProgram", 64);
+			WriteFixedAscii(stream, "FakeTracyHost", 1024);
+		}
 	}
 
 	private sealed class SmokeSourceViewerLauncher : ISourceViewerLauncher

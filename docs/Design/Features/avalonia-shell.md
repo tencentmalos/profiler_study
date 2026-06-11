@@ -103,6 +103,13 @@ SessionLoader
 - Session-only 操作，例如 Save、Create Session from Selection、Android context switch merge、legacy source detail，继续依赖 `CurrentDocument.Session != null` 的现有 can-execute 约束。
 - Tracy zones/plots 的专用 UI 视图后续应通过 `TraceDocument.QuerySession` 或 feature analyzer 接入，而不是在 shell 中直接解析 Tracy 文件。
 
+Connection panel 的外部 trace 接入规则：
+
+- Protocol 使用 `study | tracy` 二选一，默认 `study`，保持现有 ProfilerStudy TCP 行为不变；协议命名与 MCP/trace 入口保持 `study/tracy/perfetto` 的小写规范。
+- `study` 继续使用 host/port 的持续连接和 live refresh timer。
+- `tracy` 使用 host/port/duration seconds 的 fixed-duration capture，调用 Core 的 C# `Tracy010LiveCaptureClient`，capture 完成后生成 trace-backed `SessionDocument`。
+- Tracy live capture 产物不启动 legacy live refresh timer；没有 frame metadata 时仍展示 metadata summary，并在状态栏说明 capture 已完成。
+
 ## 菜单和 Toolbar
 
 Avalonia menu 与 native menu 应保持语义一致：

@@ -84,7 +84,7 @@ internal sealed class SessionLoader
 		return new SessionDocument(sourcePath, session, summary, samples);
 	}
 
-	private static SessionDocument CreateTraceDocument(TraceDocument traceDocument, string sourcePath)
+	internal static SessionDocument CreateTraceDocument(TraceDocument traceDocument, string sourcePath)
 	{
 		FrameSample[] samples = GetTraceFrameSamples(traceDocument);
 		SessionSummary summary = CreateTraceSummary(traceDocument, sourcePath, samples);
