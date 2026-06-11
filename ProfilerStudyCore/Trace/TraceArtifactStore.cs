@@ -59,7 +59,7 @@ public static class TraceArtifactStore
 			NormalizedPath = "normalized",
 			DiagnosticsPath = "import-diagnostics.json",
 			CreatedUtc = DateTime.UtcNow.ToString("o"),
-			Implementation = "ProfilerStudyCore.TraceArtifactStore",
+			Implementation = ResolveImplementation(document.SourceFormat),
 			ReaderVersion = "0.1.0",
 			TracyVersion = tracyVersion,
 			Capture = capture
@@ -265,6 +265,13 @@ public static class TraceArtifactStore
 	{
 		string timestamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
 		return timestamp + "-" + Sanitize(sourceFormat) + "-" + Sanitize(sourceKind) + "-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+	}
+
+	private static string ResolveImplementation(string sourceFormat)
+	{
+		return string.Equals(sourceFormat, "tracy", StringComparison.OrdinalIgnoreCase)
+			? "ProfilerStudyCore.Tracy"
+			: "ProfilerStudyCore.TraceArtifactStore";
 	}
 
 	private static string Sanitize(string value)

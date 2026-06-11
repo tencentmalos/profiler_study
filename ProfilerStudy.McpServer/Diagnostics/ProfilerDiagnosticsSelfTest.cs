@@ -1176,7 +1176,21 @@ internal static class ProfilerDiagnosticsSelfTest
 		{
 			throw new InvalidOperationException("trace artifact was not listed: " + artifactId);
 		}
+		AssertTraceArtifactManifest(root, artifactId, sourceKind);
 		AssertTraceArtifactListAllContainsOnlyRegisteredArtifacts(tools);
+	}
+
+	private static void AssertTraceArtifactManifest(string root, string artifactId, string sourceKind)
+	{
+		string manifestPath = Path.Combine(root, artifactId, "manifest.json");
+		if (!File.Exists(manifestPath))
+		{
+			throw new InvalidOperationException("trace artifact manifest is missing: " + manifestPath);
+		}
+		using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+		AssertEqual("tracy", manifest.RootElement.GetProperty("SourceFormat").GetString(), "trace artifact manifest source format");
+		AssertEqual(sourceKind, manifest.RootElement.GetProperty("SourceKind").GetString(), "trace artifact manifest source kind");
+		AssertEqual("ProfilerStudyCore.Tracy", manifest.RootElement.GetProperty("Implementation").GetString(), "trace artifact manifest implementation");
 	}
 
 	private static void AssertTraceArtifactListAllContainsOnlyRegisteredArtifacts(ProfilerMcpTools tools)
